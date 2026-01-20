@@ -1280,7 +1280,7 @@ JSON만 응답하세요.`;
 // 2. 캐릭터 레퍼런스 이미지 생성
 app.post('/api/generate-character-image', requireAPIKey, async (req, res) => {
   try {
-    const { character, artStyle, settings = {} } = req.body;
+    const { character, artStyle, settings = {}, storybookId = '', storybookTitle = '' } = req.body;
     
     // 설정값 기본값
     const aspectRatio = settings.aspectRatio || '16:9';
@@ -1357,9 +1357,12 @@ ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''
 
     const imageUrl = await generateImage(prompt);
     
-    // R2에 업로드
+    // R2에 업로드 - 통일된 파일명 규칙
     const timestamp = Date.now();
-    const filename = `character-${character.name.replace(/\s+/g, '-')}-${timestamp}.png`;
+    const safeStorybookId = storybookId || 'unknown';
+    const safeStorybookTitle = (storybookTitle || 'untitled').replace(/[^a-zA-Z0-9가-힣]/g, '');
+    const safeCharacterName = character.name.replace(/[^a-zA-Z0-9가-힣]/g, '');
+    const filename = `${safeStorybookId}-${safeStorybookTitle}-character-${safeCharacterName}-${timestamp}.png`;
     const r2Url = await uploadImageToR2(imageUrl, filename);
     
     res.json({
@@ -1381,7 +1384,7 @@ ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''
 // 3. 페이지 삽화 생성 (캐릭터 레퍼런스 이미지 참조)
 app.post('/api/generate-illustration', requireAPIKey, async (req, res) => {
   try {
-    const { page, artStyle, characterReferences, settings = {}, editNote = '', previousPages = [] } = req.body;
+    const { page, artStyle, characterReferences, settings = {}, editNote = '', previousPages = [], storybookId = '', storybookTitle = '' } = req.body;
     
     // 설정값 기본값
     const aspectRatio = settings.aspectRatio || '16:9';
@@ -1673,9 +1676,12 @@ Make the illustration emotionally engaging and visually captivating while mainta
 
     const imageUrl = await generateImage(prompt, referenceImages);
     
-    // R2에 업로드
+    // R2에 업로드 - 통일된 파일명 규칙
     const timestamp = Date.now();
-    const filename = `illustration-page${page.pageNumber}-${timestamp}.png`;
+    const safeStorybookId = storybookId || 'unknown';
+    const safeStorybookTitle = (storybookTitle || 'untitled').replace(/[^a-zA-Z0-9가-힣]/g, '');
+    const pageNum = String(page.pageNumber).padStart(2, '0');
+    const filename = `${safeStorybookId}-${safeStorybookTitle}-illustration-page${pageNum}-${timestamp}.png`;
     const r2Url = await uploadImageToR2(imageUrl, filename);
     
     res.json({
@@ -1852,10 +1858,12 @@ Create a single, clear image that children can easily understand and associate w
         console.log(`Generating vocabulary image for: ${word}${korean ? ` (${korean})` : ''}`);
         const imageUrl = await generateImage(prompt, referenceImages);
         
-        // R2에 업로드
+        // R2에 업로드 - 통일된 파일명 규칙
         const timestamp = Date.now();
-        const safeWord = word.replace(/[^a-zA-Z0-9가-힣]/g, '-');
-        const filename = `vocabulary-${safeWord}-${timestamp}.png`;
+        const safeStorybookId = storybook.id || 'unknown';
+        const safeStorybookTitle = (storybook.title || 'untitled').replace(/[^a-zA-Z0-9가-힣]/g, '');
+        const safeWord = word.replace(/[^a-zA-Z0-9가-힣]/g, '');
+        const filename = `${safeStorybookId}-${safeStorybookTitle}-vocabulary-${safeWord}-${timestamp}.png`;
         const r2Url = await uploadImageToR2(imageUrl, filename);
         
         images.push({
@@ -2502,7 +2510,7 @@ app.get('/api/config', (req, res) => {
 // 5. Key Object 이미지 생성
 app.post('/api/generate-key-object', requireAPIKey, async (req, res) => {
   try {
-    const { keyObject, artStyle, settings = {} } = req.body;
+    const { keyObject, artStyle, settings = {}, storybookId = '', storybookTitle = '' } = req.body;
     
     // 설정값 기본값
     const aspectRatio = settings.aspectRatio || '1:1';
@@ -2569,9 +2577,12 @@ Create a single, clear, professional illustration of this key object.`;
 
     const imageUrl = await generateImage(prompt);
     
-    // R2에 업로드
+    // R2에 업로드 - 통일된 파일명 규칙
     const timestamp = Date.now();
-    const filename = `key-object-${keyObject.name.replace(/\s+/g, '-')}-${timestamp}.png`;
+    const safeStorybookId = storybookId || 'unknown';
+    const safeStorybookTitle = (storybookTitle || 'untitled').replace(/[^a-zA-Z0-9가-힣]/g, '');
+    const safeObjectName = keyObject.name.replace(/[^a-zA-Z0-9가-힣]/g, '');
+    const filename = `${safeStorybookId}-${safeStorybookTitle}-keyobject-${safeObjectName}-${timestamp}.png`;
     const r2Url = await uploadImageToR2(imageUrl, filename);
     
     res.json({
@@ -2593,7 +2604,7 @@ Create a single, clear, professional illustration of this key object.`;
 // 6. 커버 이미지 생성
 app.post('/api/generate-cover', requireAPIKey, async (req, res) => {
   try {
-    const { title, artStyle, characterReferences = [], settings = {}, customPrompt = '' } = req.body;
+    const { title, artStyle, characterReferences = [], settings = {}, customPrompt = '', storybookId = '' } = req.body;
     
     // 설정값 기본값
     const aspectRatio = settings.aspectRatio || '2:3';
@@ -2658,9 +2669,11 @@ Create a professional, captivating cover illustration.`;
 
     const imageUrl = await generateImage(prompt, characterReferences);
     
-    // R2에 업로드
+    // R2에 업로드 - 통일된 파일명 규칙
     const timestamp = Date.now();
-    const filename = `cover-${title.replace(/\s+/g, '-')}-${timestamp}.png`;
+    const safeStorybookId = storybookId || 'unknown';
+    const safeTitle = title.replace(/[^a-zA-Z0-9가-힣]/g, '');
+    const filename = `${safeStorybookId}-${safeTitle}-cover-${timestamp}.png`;
     const r2Url = await uploadImageToR2(imageUrl, filename);
     
     res.json({

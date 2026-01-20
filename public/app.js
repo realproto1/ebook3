@@ -301,7 +301,8 @@ async function generateCoverImage() {
                 aspectRatio: '2:3',
                 enforceNoText: true
             },
-            customPrompt: customPrompt
+            customPrompt: customPrompt,
+            storybookId: currentStorybook.id
         });
         
         if (response.data.success && response.data.imageUrl) {
@@ -2336,7 +2337,9 @@ async function generateAllCharacterReferences() {
                     settings: {
                         aspectRatio: '16:9',
                         enforceNoText: true
-                    }
+                    },
+                    storybookId: currentStorybook.id,
+                    storybookTitle: currentStorybook.title
                 });
                 
                 if (response.data.success && response.data.imageUrl) {
@@ -2453,6 +2456,11 @@ async function generateCharacterReference(charIndex) {
             artStyle: currentStorybook.artStyle || '디즈니 스타일',
             settings: {
                 aspectRatio: '16:9',
+                enforceNoText: true
+            },
+            storybookId: currentStorybook.id,
+            storybookTitle: currentStorybook.title
+        });
                 enforceNoText: true
             }
         });
@@ -4221,7 +4229,9 @@ async function generateSingleKeyObjectImage(objIndex) {
                 aspectRatio: imageSettings.aspectRatio || '1:1',
                 enforceNoText: true,
                 additionalPrompt: imageSettings.additionalPrompt
-            }
+            },
+            storybookId: currentStorybook.id,
+            storybookTitle: currentStorybook.title
         });
         
         if (response.data.success && response.data.imageUrl) {
