@@ -462,6 +462,30 @@ function toggleSection(sectionId) {
     }
 }
 
+// 페이지별 참조 섹션 토글
+function togglePageSection(sectionId) {
+    const content = document.getElementById(sectionId + '-content');
+    const icon = document.getElementById(sectionId + '-icon');
+    
+    // 요소가 없으면 무시
+    if (!content || !icon) {
+        console.warn(`Page section ${sectionId} not found`);
+        return;
+    }
+    
+    if (content.classList.contains('hidden')) {
+        // 섹션 열기
+        content.classList.remove('hidden');
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+    } else {
+        // 섹션 닫기
+        content.classList.add('hidden');
+        icon.classList.remove('fa-chevron-up');
+        icon.classList.add('fa-chevron-down');
+    }
+}
+
 // 이미지 설정 관련 함수
 function loadImageSettings() {
     const saved = localStorage.getItem('imageSettings');
@@ -1740,7 +1764,7 @@ function displayStorybook(storybook) {
                                     삽화
                                 </h5>
                                 
-                                <!-- 장면 설명 (중복 제거) -->
+                                <!-- 장면 설명 -->
                                 <div class="mb-3">
                                     <label class="text-xs md:text-sm font-semibold text-gray-700 block mb-2">
                                         <i class="fas fa-palette mr-1 text-green-600"></i>장면 설명
@@ -1753,53 +1777,6 @@ function displayStorybook(storybook) {
                                         onblur="updateSceneCombined(${idx}, this.value)"
                                     >${page.scene_description || ''}</textarea>
                                     <p class="text-[10px] text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>장면의 전체적인 모습을 하나의 텍스트로 작성하세요</p>
-                                </div>
-                                
-                                <!-- 캐릭터/배경/분위기 (별도 필드) -->
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
-                                    <div>
-                                        <label class="text-[10px] text-gray-600 block mb-1"><i class="fas fa-user mr-1"></i>캐릭터</label>
-                                        <input 
-                                            id="scene-characters-${idx}" 
-                                            value="${page.scene_structure?.characters || ''}"
-                                            placeholder="예: 토끼, 거북이"
-                                            class="w-full p-1.5 border border-green-200 rounded text-xs focus:border-green-400 focus:outline-none"
-                                            onblur="updateSceneStructure(${idx}, 'characters', this.value)"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label class="text-[10px] text-gray-600 block mb-1"><i class="fas fa-tree mr-1"></i>배경</label>
-                                        <input 
-                                            id="scene-background-${idx}" 
-                                            value="${page.scene_structure?.background || ''}"
-                                            placeholder="예: 햇살 가득한 숲"
-                                            class="w-full p-1.5 border border-green-200 rounded text-xs focus:border-green-400 focus:outline-none"
-                                            onblur="updateSceneStructure(${idx}, 'background', this.value)"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label class="text-[10px] text-gray-600 block mb-1"><i class="fas fa-cloud-sun mr-1"></i>분위기</label>
-                                        <input 
-                                            id="scene-atmosphere-${idx}" 
-                                            value="${page.scene_structure?.atmosphere || ''}"
-                                            placeholder="예: 평화롭고 따뜻함"
-                                            class="w-full p-1.5 border border-green-200 rounded text-xs focus:border-green-400 focus:outline-none"
-                                            onblur="updateSceneStructure(${idx}, 'atmosphere', this.value)"
-                                        />
-                                    </div>
-                                </div>
-                                
-                                <!-- 그림체 -->
-                                <div class="mb-3">
-                                    <label class="text-xs md:text-sm font-semibold text-gray-700 block mb-2">
-                                        <i class="fas fa-brush mr-1 text-green-600"></i>그림체
-                                    </label>
-                                    <input 
-                                        id="artstyle-${idx}" 
-                                        value="${page.artStyle || storybook.artStyle}"
-                                        placeholder="예: 현대 일러스트레이션, 수채화 스타일"
-                                        class="w-full p-2.5 md:p-3 border-2 border-green-300 rounded-lg text-xs md:text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 bg-white"
-                                    />
                                 </div>
                                 
                                 <button 
@@ -1844,99 +1821,119 @@ function displayStorybook(storybook) {
                                 </div>
                                 ` : ''}
                                 
-                                <div class="mt-2">
-                                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                                        <i class="fas fa-images mr-1"></i>참조 이미지 (선택)
-                                    </label>
-                                    <div class="grid grid-cols-3 md:grid-cols-4 gap-1.5 md:gap-2 max-h-28 md:max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-1.5 md:p-2 bg-white">
-                                        ${storybook.pages.map((p, pIdx) => {
-                                            if (pIdx === idx || !p.illustrationImage) return '';
-                                            return `
-                                            <div class="relative cursor-pointer touch-manipulation" onclick="toggleReferenceImage(${idx}, ${pIdx})">
-                                                <img 
-                                                    src="${p.illustrationImage}" 
-                                                    alt="페이지 ${p.pageNumber}"
-                                                    class="w-full h-14 md:h-16 object-cover rounded border-2 border-gray-300 active:border-green-500 transition"
-                                                    id="ref-img-${idx}-${pIdx}"
-                                                />
-                                                <div class="absolute top-0 right-0 bg-green-600 text-white text-[10px] md:text-xs px-1 py-0.5 rounded-bl font-semibold">
-                                                    ${p.pageNumber}
+                                <!-- 참조 이미지 (접기 가능) -->
+                                <div class="mt-3">
+                                    <button 
+                                        onclick="togglePageSection('ref-images-${idx}')"
+                                        class="w-full flex items-center justify-between text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 p-2 rounded-lg transition"
+                                    >
+                                        <span><i class="fas fa-images mr-1"></i>참조 이미지 (선택)</span>
+                                        <i id="ref-images-${idx}-icon" class="fas fa-chevron-down text-xs transition-transform"></i>
+                                    </button>
+                                    <div id="ref-images-${idx}-content" class="hidden mt-2">
+                                        <div class="grid grid-cols-3 md:grid-cols-4 gap-1.5 md:gap-2 max-h-28 md:max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-1.5 md:p-2 bg-white">
+                                            ${storybook.pages.map((p, pIdx) => {
+                                                if (pIdx === idx || !p.illustrationImage) return '';
+                                                return `
+                                                <div class="relative cursor-pointer touch-manipulation" onclick="toggleReferenceImage(${idx}, ${pIdx})">
+                                                    <img 
+                                                        src="${p.illustrationImage}" 
+                                                        alt="페이지 ${p.pageNumber}"
+                                                        class="w-full h-14 md:h-16 object-cover rounded border-2 border-gray-300 active:border-green-500 transition"
+                                                        id="ref-img-${idx}-${pIdx}"
+                                                    />
+                                                    <div class="absolute top-0 right-0 bg-green-600 text-white text-[10px] md:text-xs px-1 py-0.5 rounded-bl font-semibold">
+                                                        ${p.pageNumber}
+                                                    </div>
+                                                    <input 
+                                                        type="checkbox" 
+                                                        id="ref-check-${idx}-${pIdx}"
+                                                        class="absolute top-0.5 left-0.5 w-3.5 h-3.5 md:w-4 md:h-4"
+                                                    />
                                                 </div>
-                                                <input 
-                                                    type="checkbox" 
-                                                    id="ref-check-${idx}-${pIdx}"
-                                                    class="absolute top-0.5 left-0.5 w-3.5 h-3.5 md:w-4 md:h-4"
-                                                />
-                                            </div>
-                                            `;
-                                        }).join('') || '<p class="text-gray-400 text-[10px] md:text-xs col-span-3 md:col-span-4 text-center py-3">아직 다른 페이지에 이미지가 없습니다</p>'}
+                                                `;
+                                            }).join('') || '<p class="text-gray-400 text-[10px] md:text-xs col-span-3 md:col-span-4 text-center py-3">아직 다른 페이지에 이미지가 없습니다</p>'}
+                                        </div>
                                     </div>
                                 </div>
                                 
+                                <!-- Key Objects (접기 가능) -->
                                 ${storybook.key_objects && storybook.key_objects.length > 0 ? `
                                 <div class="mt-2">
-                                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                                        <i class="fas fa-cube mr-1"></i>Key Objects (선택)
-                                    </label>
-                                    <div class="grid grid-cols-3 md:grid-cols-4 gap-1.5 md:gap-2 max-h-28 md:max-h-32 overflow-y-auto border border-orange-300 rounded-lg p-1.5 md:p-2 bg-white">
-                                        ${storybook.key_objects.map((obj, objIdx) => {
-                                            const objImg = storybook.keyObjectImages && storybook.keyObjectImages[objIdx];
-                                            if (!objImg || !objImg.imageUrl) return '';
-                                            return `
-                                            <div class="relative cursor-pointer touch-manipulation" onclick="toggleKeyObjectReference(${idx}, ${objIdx})">
-                                                <img 
-                                                    src="${objImg.imageUrl}" 
-                                                    alt="${obj.korean}"
-                                                    class="w-full h-14 md:h-16 object-cover rounded border-2 border-orange-300 active:border-orange-500 transition"
-                                                    id="ref-keyobj-${idx}-${objIdx}"
-                                                />
-                                                <div class="absolute top-0 right-0 bg-orange-600 text-white text-[10px] md:text-xs px-1 py-0.5 rounded-bl font-semibold">
-                                                    ${obj.korean}
+                                    <button 
+                                        onclick="togglePageSection('ref-keyobj-${idx}')"
+                                        class="w-full flex items-center justify-between text-xs font-semibold text-gray-700 bg-orange-50 hover:bg-orange-100 p-2 rounded-lg transition"
+                                    >
+                                        <span><i class="fas fa-cube mr-1"></i>Key Objects (선택)</span>
+                                        <i id="ref-keyobj-${idx}-icon" class="fas fa-chevron-down text-xs transition-transform"></i>
+                                    </button>
+                                    <div id="ref-keyobj-${idx}-content" class="hidden mt-2">
+                                        <div class="grid grid-cols-3 md:grid-cols-4 gap-1.5 md:gap-2 max-h-28 md:max-h-32 overflow-y-auto border border-orange-300 rounded-lg p-1.5 md:p-2 bg-white">
+                                            ${storybook.key_objects.map((obj, objIdx) => {
+                                                const objImg = storybook.keyObjectImages && storybook.keyObjectImages[objIdx];
+                                                if (!objImg || !objImg.imageUrl) return '';
+                                                return `
+                                                <div class="relative cursor-pointer touch-manipulation" onclick="toggleKeyObjectReference(${idx}, ${objIdx})">
+                                                    <img 
+                                                        src="${objImg.imageUrl}" 
+                                                        alt="${obj.korean}"
+                                                        class="w-full h-14 md:h-16 object-cover rounded border-2 border-orange-300 active:border-orange-500 transition"
+                                                        id="ref-keyobj-${idx}-${objIdx}"
+                                                    />
+                                                    <div class="absolute top-0 right-0 bg-orange-600 text-white text-[10px] md:text-xs px-1 py-0.5 rounded-bl font-semibold">
+                                                        ${obj.korean}
+                                                    </div>
+                                                    <input 
+                                                        type="checkbox" 
+                                                        id="ref-keyobj-check-${idx}-${objIdx}"
+                                                        class="absolute top-0.5 left-0.5 w-3.5 h-3.5 md:w-4 md:h-4"
+                                                    />
                                                 </div>
-                                                <input 
-                                                    type="checkbox" 
-                                                    id="ref-keyobj-check-${idx}-${objIdx}"
-                                                    class="absolute top-0.5 left-0.5 w-3.5 h-3.5 md:w-4 md:h-4"
-                                                />
-                                            </div>
-                                            `;
-                                        }).join('') || '<p class="text-gray-400 text-[10px] md:text-xs col-span-3 md:col-span-4 text-center py-3">아직 Key Object가 없습니다</p>'}
+                                                `;
+                                            }).join('') || '<p class="text-gray-400 text-[10px] md:text-xs col-span-3 md:col-span-4 text-center py-3">아직 Key Object가 없습니다</p>'}
+                                        </div>
                                     </div>
                                 </div>
                                 ` : ''}
                                 
-                                <!-- 캐릭터 레퍼런스 선택 -->
+                                <!-- 캐릭터 레퍼런스 (접기 가능) -->
                                 ${storybook.characters && storybook.characters.length > 0 ? `
-                                <div class="mt-3 bg-purple-50 border-2 border-purple-200 rounded-lg p-3">
-                                    <label class="block text-xs font-semibold text-purple-700 mb-2">
-                                        <i class="fas fa-users mr-1"></i>캐릭터 레퍼런스 (선택)
-                                    </label>
-                                    <p class="text-[10px] text-gray-600 mb-2"><i class="fas fa-info-circle mr-1"></i>삽화 생성 시 참조할 캐릭터를 선택하세요</p>
-                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                        ${storybook.characters.map((char, charIdx) => {
-                                            if (!char.referenceImage) return '';
-                                            return `
-                                            <label class="relative cursor-pointer group">
-                                                <input 
-                                                    type="checkbox" 
-                                                    id="page-char-ref-${idx}-${charIdx}"
-                                                    onchange="togglePageCharacterRef(${idx}, ${charIdx}, this.checked)"
-                                                    class="absolute top-2 left-2 w-4 h-4 z-10"
-                                                    ${page.characterRefs && page.characterRefs.includes(charIdx) ? 'checked' : ''}
-                                                />
-                                                <div class="border-2 rounded-lg overflow-hidden transition ${page.characterRefs && page.characterRefs.includes(charIdx) ? 'border-purple-500 ring-2 ring-purple-300' : 'border-gray-300 group-hover:border-purple-400'}">
-                                                    <img 
-                                                        src="${char.referenceImage}" 
-                                                        alt="${char.name}"
-                                                        class="w-full h-20 object-cover"
+                                <div class="mt-2">
+                                    <button 
+                                        onclick="togglePageSection('ref-chars-${idx}')"
+                                        class="w-full flex items-center justify-between text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 p-2 rounded-lg transition"
+                                    >
+                                        <span><i class="fas fa-users mr-1"></i>캐릭터 레퍼런스 (선택)</span>
+                                        <i id="ref-chars-${idx}-icon" class="fas fa-chevron-down text-xs transition-transform"></i>
+                                    </button>
+                                    <div id="ref-chars-${idx}-content" class="hidden mt-2 bg-purple-50 border-2 border-purple-200 rounded-lg p-3">
+                                        <p class="text-[10px] text-gray-600 mb-2"><i class="fas fa-info-circle mr-1"></i>삽화 생성 시 참조할 캐릭터를 선택하세요</p>
+                                        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                            ${storybook.characters.map((char, charIdx) => {
+                                                if (!char.referenceImage) return '';
+                                                return `
+                                                <label class="relative cursor-pointer group">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        id="page-char-ref-${idx}-${charIdx}"
+                                                        onchange="togglePageCharacterRef(${idx}, ${charIdx}, this.checked)"
+                                                        class="absolute top-2 left-2 w-4 h-4 z-10"
+                                                        ${page.characterRefs && page.characterRefs.includes(charIdx) ? 'checked' : ''}
                                                     />
-                                                    <div class="bg-white px-2 py-1 text-center">
-                                                        <p class="text-[10px] font-semibold text-gray-700 truncate">${char.name}</p>
+                                                    <div class="border-2 rounded-lg overflow-hidden transition ${page.characterRefs && page.characterRefs.includes(charIdx) ? 'border-purple-500 ring-2 ring-purple-300' : 'border-gray-300 group-hover:border-purple-400'}">
+                                                        <img 
+                                                            src="${char.referenceImage}" 
+                                                            alt="${char.name}"
+                                                            class="w-full h-20 object-cover"
+                                                        />
+                                                        <div class="bg-white px-2 py-1 text-center">
+                                                            <p class="text-[10px] font-semibold text-gray-700 truncate">${char.name}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </label>
-                                            `;
-                                        }).join('') || '<p class="text-gray-400 text-[10px] col-span-2 md:col-span-3 text-center py-2">레퍼런스 이미지가 있는 캐릭터가 없습니다</p>'}
+                                                </label>
+                                                `;
+                                            }).join('') || '<p class="text-gray-400 text-[10px] col-span-2 md:col-span-3 text-center py-2">레퍼런스 이미지가 있는 캐릭터가 없습니다</p>'}
+                                        </div>
                                     </div>
                                 </div>
                                 ` : ''}
