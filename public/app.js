@@ -3284,20 +3284,16 @@ function downloadAllImageUrls() {
         return;
     }
     
-    let urlContent = `${currentStorybook.title} - 이미지 URL 목록\n\n`;
-    urlContent += `생성 날짜: ${new Date().toLocaleDateString('ko-KR')}\n`;
-    urlContent += `=`.repeat(80) + '\n\n';
+    let urlContent = '';
     
-    // 페이지별 이미지 URL
+    // 페이지별 이미지 URL (URL만 한 줄씩)
     currentStorybook.pages.forEach((page) => {
         if (page.illustrationImage) {
-            urlContent += `페이지 ${page.pageNumber}: ${page.illustrationImage}\n`;
+            urlContent += `${page.illustrationImage}\n`;
         }
     });
     
-    // 총 개수
     const imageCount = currentStorybook.pages.filter(p => p.illustrationImage).length;
-    urlContent += `\n총 ${imageCount}개의 이미지 URL\n`;
     
     const blob = new Blob([urlContent], { type: 'text/plain;charset=utf-8' });
     const url = window.URL.createObjectURL(blob);
@@ -3310,8 +3306,6 @@ function downloadAllImageUrls() {
     document.body.removeChild(a);
     
     showNotification('success', '다운로드 완료', `${imageCount}개의 이미지 URL을 다운로드했습니다.`);
-    
-    alert('텍스트 파일이 다운로드되었습니다.');
 }
 
 // 전체 텍스트 번역 함수
