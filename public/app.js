@@ -594,10 +594,6 @@ async function loadStorybooks() {
             // R2 데이터를 storybooks에 설정
             storybooks = fullBooks;
             
-            // localStorage에도 저장 (백업용)
-            console.log('💾 localStorage에 백업 저장 중...');
-            saveStorybooks();
-            
             // 화면 업데이트
             console.log('🎨 화면 업데이트 중...');
             renderBookList();
@@ -614,50 +610,9 @@ async function loadStorybooks() {
 }
 
 function saveStorybooks() {
-    try {
-        // 이미지를 제외한 경량 버전 저장 (용량 문제 해결)
-        const lightweightBooks = storybooks.map(book => {
-            const lightBook = { ...book };
-            
-            // 캐릭터 레퍼런스 이미지 제외
-            if (lightBook.characters) {
-                lightBook.characters = lightBook.characters.map(char => ({
-                    ...char,
-                    referenceImage: null // 이미지 제외
-                }));
-            }
-            
-            // 페이지 삽화 이미지 제외
-            if (lightBook.pages) {
-                lightBook.pages = lightBook.pages.map(page => ({
-                    ...page,
-                    illustrationImage: null // 이미지 제외
-                }));
-            }
-            
-            // 단어 이미지 제외
-            if (lightBook.vocabularyImages) {
-                lightBook.vocabularyImages = lightBook.vocabularyImages.map(vocab => ({
-                    ...vocab,
-                    imageUrl: null // 이미지 제외
-                }));
-            }
-            
-            return lightBook;
-        });
-        
-        localStorage.setItem('storybooks', JSON.stringify(lightweightBooks));
-    } catch (error) {
-        console.error('LocalStorage save error:', error);
-        // 용량 초과 시 가장 오래된 동화책 삭제
-        if (error.name === 'QuotaExceededError' && storybooks.length > 1) {
-            storybooks.shift(); // 첫 번째 항목 제거
-            saveStorybooks(); // 재시도
-            alert('저장 공간이 부족하여 가장 오래된 동화책이 삭제되었습니다.');
-        } else {
-            alert('저장 공간이 부족합니다. 브라우저 개발자 도구(F12)에서 localStorage.clear()를 실행하세요.');
-        }
-    }
+    // ❌ localStorage 완전 비활성화
+    // R2만 사용하므로 localStorage 저장 불필요
+    console.log('ℹ️ localStorage 저장 비활성화됨 (R2만 사용)');
 }
 
 function renderBookList() {
@@ -3110,10 +3065,13 @@ function saveCurrentStorybook() {
     } else {
         storybooks.push(currentStorybook);
     }
-    saveStorybooks();
+    
+    // ❌ localStorage 저장 제거
+    // saveStorybooks(); // 더 이상 호출하지 않음
+    
     renderBookList();
     
-    // 🔥 R2에도 저장 (비동기, 백그라운드)
+    // ✅ R2에만 저장 (비동기, 백그라운드)
     saveToR2(currentStorybook).catch(error => {
         console.error('R2 저장 실패:', error);
     });
