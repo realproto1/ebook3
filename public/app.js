@@ -1639,6 +1639,14 @@ function displayStorybook(storybook) {
                         <i class="fas fa-headphones text-lg"></i>
                         <span>🎧 전체 오디오 다운로드</span>
                     </button>
+                    
+                    <button 
+                        onclick="downloadAllImageUrls()"
+                        class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition shadow-md flex items-center justify-center gap-2 font-medium"
+                    >
+                        <i class="fas fa-link text-lg"></i>
+                        <span>🔗 전체 이미지 URL 다운로드</span>
+                    </button>
                 </div>
 
             <div id="pages-section-content" class="space-y-4 md:space-y-6">
@@ -3265,6 +3273,43 @@ function downloadAllText() {
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
+    
+    showNotification('success', '다운로드 완료', `전체 텍스트를 다운로드했습니다.`);
+}
+
+// 전체 이미지 URL 다운로드
+function downloadAllImageUrls() {
+    if (!currentStorybook || !currentStorybook.pages || currentStorybook.pages.length === 0) {
+        alert('다운로드할 이미지가 없습니다.');
+        return;
+    }
+    
+    let urlContent = `${currentStorybook.title} - 이미지 URL 목록\n\n`;
+    urlContent += `생성 날짜: ${new Date().toLocaleDateString('ko-KR')}\n`;
+    urlContent += `=`.repeat(80) + '\n\n';
+    
+    // 페이지별 이미지 URL
+    currentStorybook.pages.forEach((page) => {
+        if (page.illustrationImage) {
+            urlContent += `페이지 ${page.pageNumber}: ${page.illustrationImage}\n`;
+        }
+    });
+    
+    // 총 개수
+    const imageCount = currentStorybook.pages.filter(p => p.illustrationImage).length;
+    urlContent += `\n총 ${imageCount}개의 이미지 URL\n`;
+    
+    const blob = new Blob([urlContent], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${currentStorybook.title}_이미지_URL.txt`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    
+    showNotification('success', '다운로드 완료', `${imageCount}개의 이미지 URL을 다운로드했습니다.`);
     
     alert('텍스트 파일이 다운로드되었습니다.');
 }
