@@ -274,28 +274,39 @@ async function generateCoverImage() {
     
     try {
         // 참조할 캐릭터 레퍼런스 수집
-        const refImageUrls = [];
+        const characterReferences = [];
         if (currentStorybook.coverCharacterRefs && currentStorybook.coverCharacterRefs.length > 0) {
             currentStorybook.coverCharacterRefs.forEach(charIdx => {
                 const char = currentStorybook.characters[charIdx];
                 if (char && char.referenceImage) {
-                    refImageUrls.push(char.referenceImage);
+                    characterReferences.push(char.referenceImage);
                 }
             });
         }
         
-        console.log(`📚 표지 생성 시작 - 참조 캐릭터: ${refImageUrls.length}개`);
+        console.log(`📚 표지 생성 시작 - 참조 캐릭터: ${characterReferences.length}개`);
         
         // 재생성인 경우 기존 표지 이미지도 참조로 추가
         if (currentStorybook.coverImage) {
             console.log('🔄 재생성 모드: 기존 표지를 레퍼런스로 추가');
-            refImageUrls.push(currentStorybook.coverImage);
+            characterReferences.push(currentStorybook.coverImage);
         }
         
-        const result = await generateImageClient(customPrompt, refImageUrls, 3, imageSettings.coverModel || 'gemini-3-pro-image-preview');
+        // 🔥 서버 API 호출 (R2 업로드 포함)
+        const response = await axios.post('/api/generate-cover', {
+            title: currentStorybook.title,
+            artStyle: currentStorybook.artStyle || '디즈니 스타일',
+            characterReferences: characterReferences,
+            settings: {
+                aspectRatio: '2:3',
+                enforceNoText: true
+            },
+            customPrompt: customPrompt
+        });
         
-        if (result.success && result.imageUrl) {
-            currentStorybook.coverImage = result.imageUrl;
+        if (response.data.success && response.data.imageUrl) {
+            const imageUrl = response.data.imageUrl; // R2 URL
+            currentStorybook.coverImage = imageUrl;
             currentStorybook.coverPrompt = customPrompt;
             saveCurrentStorybook();
             
@@ -303,8 +314,9 @@ async function generateCoverImage() {
             displayStorybook(currentStorybook);
             
             showNotification('success', '표지 생성 완료!', '동화책 표지가 생성되었습니다.');
+            console.log(`✅ 표지 이미지 생성 완료 (R2 업로드 포함)`);
         } else {
-            throw new Error(result.error || '이미지 생성 실패');
+            throw new Error(response.data.error || '이미지 URL을 받지 못했습니다.');
         }
     } catch (error) {
         console.error('표지 생성 오류:', error);
@@ -4173,40 +4185,25 @@ async function generateSingleKeyObjectImage(objIndex) {
     try {
         console.log(`🎨 Generating Key Object image for: ${obj.name} (${obj.korean})`);
         
-        // 프롬프트 생성
-        const sizeGuide = obj.size === 'small' ? 'small handheld object' : 
-                         obj.size === 'large' ? 'large structure or building' : 
-                         'medium-sized object';
+        // 🔥 서버 API 호출 (R2 업로드 포함)
+        const response = await axios.post('/api/generate-key-object', {
+            keyObject: {
+                name: obj.name,
+                description: obj.description,
+                korean: obj.korean,
+                size: obj.size
+            },
+            artStyle: currentStorybook.artStyle || '디즈니 스타일',
+            settings: {
+                aspectRatio: imageSettings.aspectRatio || '1:1',
+                enforceNoText: true,
+                additionalPrompt: imageSettings.additionalPrompt
+            }
+        });
         
-        const prompt = `Create a detailed, clear illustration of a key story object for a children's storybook.
-
-**Object:** ${obj.name} (${obj.korean})
-
-**Size:** ${sizeGuide}
-
-**Visual Description:**
-${obj.description}
-
-**Art Style:** ${currentStorybook.artStyle || 'Disney-style children\'s book illustration'}
-
-**Image Aspect Ratio:** ${imageSettings.aspectRatio}
-
-**Requirements:**
-- Show the object clearly and prominently
-- Clean white or simple background
-- Bright, vibrant colors suitable for children
-- Professional, high-quality illustration
-- Focus on the distinctive features described above
-- Make it recognizable and memorable
-${imageSettings.enforceNoText ? '\n\n**CRITICAL: NO TEXT, NO WORDS, NO LETTERS IN THE IMAGE**' : ''}
-${imageSettings.additionalPrompt ? '\n\n**Additional Requirements:** ' + imageSettings.additionalPrompt : ''}
-
-Create a single, clear, professional illustration of this key object.`;
-
-        // 이미지 생성
-        const result = await generateImageClient(prompt, [], 3, imageSettings.keyObjectModel || 'gemini-3-pro-image-preview'); // Key Object 전용 모델 사용
-        
-        if (result.success && result.imageUrl) {
+        if (response.data.success && response.data.imageUrl) {
+            const imageUrl = response.data.imageUrl; // R2 URL
+            
             // keyObjectImages 배열 초기화
             if (!currentStorybook.keyObjectImages) {
                 currentStorybook.keyObjectImages = [];
@@ -4216,7 +4213,7 @@ Create a single, clear, professional illustration of this key object.`;
             currentStorybook.keyObjectImages[objIndex] = {
                 name: obj.name,
                 korean: obj.korean,
-                imageUrl: result.imageUrl,
+                imageUrl: imageUrl,
                 success: true
             };
             
@@ -4224,9 +4221,9 @@ Create a single, clear, professional illustration of this key object.`;
             saveCurrentStorybook();
             
             // UI 업데이트 - 해당 Key Object 이미지만 업데이트
-            objImgDiv.innerHTML = `<img src="${result.imageUrl}" alt="${obj.name}" class="w-full h-full object-cover rounded-lg"/>`;
+            objImgDiv.innerHTML = `<img src="${imageUrl}" alt="${obj.name}" class="w-full h-full object-cover rounded-lg"/>`;
             
-            console.log(`✅ Key Object image generated successfully for: ${obj.name}`);
+            console.log(`✅ Key Object "${obj.name}" 이미지 생성 완료 (R2 업로드 포함)`);
             
             // ⭐ 모든 페이지의 참조 이미지 섹션 새로고침
             refreshAllPageReferenceImages();
@@ -4234,10 +4231,10 @@ Create a single, clear, professional illustration of this key object.`;
             return {
                 index: objIndex,
                 success: true,
-                imageUrl: result.imageUrl
+                imageUrl: imageUrl
             };
         } else {
-            throw new Error(result.error || '이미지 생성 실패');
+            throw new Error(response.data.error || '이미지 URL을 받지 못했습니다.');
         }
     } catch (error) {
         console.error(`Key Object 이미지 생성 오류 (${obj.name}):`, error);

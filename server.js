@@ -2499,6 +2499,186 @@ app.get('/api/config', (req, res) => {
   });
 });
 
+// 5. Key Object 이미지 생성
+app.post('/api/generate-key-object', requireAPIKey, async (req, res) => {
+  try {
+    const { keyObject, artStyle, settings = {} } = req.body;
+    
+    // 설정값 기본값
+    const aspectRatio = settings.aspectRatio || '1:1';
+    const enforceNoText = settings.enforceNoText !== false;
+    const additionalPrompt = settings.additionalPrompt || '';
+    
+    // keyObject.description을 영어로 번역 (한글인 경우)
+    let descriptionEn = keyObject.description;
+    if (/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(keyObject.description)) {
+      console.log('Translating key object description to English...');
+      const translateUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+      const translateResponse = await fetch(translateUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ 
+            parts: [{ 
+              text: `Translate the following Korean key object description to English for image generation. Keep it detailed and visual:\n\n${keyObject.description}` 
+            }] 
+          }]
+        })
+      });
+      
+      if (translateResponse.ok) {
+        const translateData = await translateResponse.json();
+        if (translateData.candidates && 
+            translateData.candidates[0] && 
+            translateData.candidates[0].content && 
+            translateData.candidates[0].content.parts && 
+            translateData.candidates[0].content.parts[0]) {
+          descriptionEn = translateData.candidates[0].content.parts[0].text.trim();
+          console.log('Translated key object description:', descriptionEn);
+        }
+      }
+    }
+    
+    // 텍스트 제거 강조
+    const noTextPrompt = enforceNoText ? 
+      '\n\n**CRITICAL: NO TEXT, NO WORDS, NO LETTERS IN THE IMAGE**' : 
+      '\n\n**IMPORTANT:** Do NOT include any text in the image.';
+    
+    const prompt = `Create a professional illustration of a key object for a children's storybook.
+
+**Object Name:** ${keyObject.name}
+
+**Object Description:** ${descriptionEn}
+
+**Art Style:** ${artStyle} style for children's book illustration.
+
+**Image Aspect Ratio:** ${aspectRatio}
+
+**Requirements:**
+- Clean white or simple background
+- Bright, vibrant colors suitable for children
+- Professional, high-quality illustration
+- Focus on the distinctive features described above
+- Make it recognizable and memorable
+${noTextPrompt}
+${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}
+
+Create a single, clear, professional illustration of this key object.`;
+    
+    console.log('Generating key object image with settings:', { aspectRatio, enforceNoText });
+
+    const imageUrl = await generateImage(prompt);
+    
+    // R2에 업로드
+    const timestamp = Date.now();
+    const filename = `key-object-${keyObject.name.replace(/\s+/g, '-')}-${timestamp}.png`;
+    const r2Url = await uploadImageToR2(imageUrl, filename);
+    
+    res.json({
+      success: true,
+      imageUrl: r2Url, // R2 URL 반환
+      originalUrl: imageUrl, // 원본 URL (백업용)
+      prompt
+    });
+
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Key Object 이미지 생성 실패: ' + error.message
+    });
+  }
+});
+
+// 6. 커버 이미지 생성
+app.post('/api/generate-cover', requireAPIKey, async (req, res) => {
+  try {
+    const { title, artStyle, characterReferences = [], settings = {}, customPrompt = '' } = req.body;
+    
+    // 설정값 기본값
+    const aspectRatio = settings.aspectRatio || '2:3';
+    const enforceNoText = settings.enforceNoText !== false;
+    const additionalPrompt = settings.additionalPrompt || '';
+    
+    // customPrompt를 영어로 번역 (한글인 경우)
+    let promptEn = customPrompt;
+    if (customPrompt && /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(customPrompt)) {
+      console.log('Translating cover prompt to English...');
+      const translateUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+      const translateResponse = await fetch(translateUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ 
+            parts: [{ 
+              text: `Translate the following Korean cover image description to English for image generation. Keep it detailed and visual:\n\n${customPrompt}` 
+            }] 
+          }]
+        })
+      });
+      
+      if (translateResponse.ok) {
+        const translateData = await translateResponse.json();
+        if (translateData.candidates && 
+            translateData.candidates[0] && 
+            translateData.candidates[0].content && 
+            translateData.candidates[0].content.parts && 
+            translateData.candidates[0].content.parts[0]) {
+          promptEn = translateData.candidates[0].content.parts[0].text.trim();
+          console.log('Translated cover prompt:', promptEn);
+        }
+      }
+    }
+    
+    // 텍스트 제거 강조
+    const noTextPrompt = enforceNoText ? 
+      '\n\n**CRITICAL - NO TEXT:** Do NOT include the book title, author name, or ANY text, labels, words, letters in the image. Absolutely NO TEXT of any kind. Pure illustration only.' : 
+      '\n\n**IMPORTANT:** Do NOT include the book title or any text in the image.';
+    
+    const prompt = promptEn || `Create a captivating children's storybook cover illustration.
+
+**Book Title (for context only, DO NOT display in image):** ${title}
+
+**Art Style:** ${artStyle} style for children's book cover.
+
+**Image Aspect Ratio:** ${aspectRatio}
+
+**Requirements:**
+- Eye-catching and attractive cover design
+- Vibrant colors that appeal to children
+- Professional children's book cover quality
+- Create an engaging scene that represents the story
+- Leave space for title text overlay (but do not include the title in the image)
+${noTextPrompt}
+${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}
+
+Create a professional, captivating cover illustration.`;
+    
+    console.log('Generating cover image with settings:', { aspectRatio, enforceNoText, characterReferences: characterReferences.length });
+
+    const imageUrl = await generateImage(prompt, characterReferences);
+    
+    // R2에 업로드
+    const timestamp = Date.now();
+    const filename = `cover-${title.replace(/\s+/g, '-')}-${timestamp}.png`;
+    const r2Url = await uploadImageToR2(imageUrl, filename);
+    
+    res.json({
+      success: true,
+      imageUrl: r2Url, // R2 URL 반환
+      originalUrl: imageUrl, // 원본 URL (백업용)
+      prompt
+    });
+
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: '커버 이미지 생성 실패: ' + error.message
+    });
+  }
+});
+
 // 메인 페이지
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
