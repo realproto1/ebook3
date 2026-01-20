@@ -342,3 +342,4 @@ MIT License
 **상태**: ✅ Active
 # Trigger Railway redeploy
 # Force redeploy Tue Jan 20 09:10:02 UTC 2026
+# Force redeploy Tue Jan 20 10:54:36 UTC 2026
