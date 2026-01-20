@@ -2871,24 +2871,100 @@ app.delete('/api/storybooks/:id', async (req, res) => {
     
     console.log(`🗑️ Deleting storybook: ID ${id}`);
     
-    // R2에서 JSON 파일 삭제
-    const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
+    const { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command } = await import('@aws-sdk/client-s3');
+    
+    // 1️⃣ 먼저 JSON 파일을 읽어서 관련 이미지 URL 추출
     const filename = `storybook-${id}.json`;
+    let imageFiles = [];
     
-    const deleteCommand = new DeleteObjectCommand({
-      Bucket: R2_BUCKET_NAME,
-      Key: filename
-    });
+    try {
+      console.log(`📖 Reading storybook JSON to find images...`);
+      const getCommand = new GetObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: filename
+      });
+      
+      const response = await r2Client.send(getCommand);
+      const content = await response.Body.transformToString();
+      const storybook = JSON.parse(content);
+      
+      console.log(`✅ Storybook loaded: ${storybook.title}`);
+      
+      // 동화책 ID와 제목으로 시작하는 모든 이미지 파일 찾기
+      const storybookIdPrefix = `${id}-`;
+      const titleSafe = storybook.title?.replace(/[^a-zA-Z0-9가-힣]/g, '') || '';
+      const titlePrefix = titleSafe ? `${id}-${titleSafe}-` : storybookIdPrefix;
+      
+      console.log(`🔍 Searching for images with prefix: ${titlePrefix}`);
+      
+      // R2에서 해당 동화책의 모든 이미지 파일 찾기
+      const listCommand = new ListObjectsV2Command({
+        Bucket: R2_BUCKET_NAME,
+        Prefix: titlePrefix,
+        MaxKeys: 1000
+      });
+      
+      const listResult = await r2Client.send(listCommand);
+      
+      if (listResult.Contents && listResult.Contents.length > 0) {
+        imageFiles = listResult.Contents
+          .filter(obj => obj.Key.endsWith('.png') || obj.Key.endsWith('.jpg') || obj.Key.endsWith('.jpeg'))
+          .map(obj => obj.Key);
+        
+        console.log(`📸 Found ${imageFiles.length} image files:`, imageFiles);
+      } else {
+        console.log(`ℹ️ No image files found with prefix: ${titlePrefix}`);
+      }
+      
+    } catch (error) {
+      console.warn(`⚠️ Failed to read storybook JSON or list images:`, error.message);
+      // JSON이 없어도 계속 진행 (이미 삭제되었을 수 있음)
+    }
     
-    await r2Client.send(deleteCommand);
-    console.log(`✅ Deleted from R2: ${filename}`);
+    // 2️⃣ 이미지 파일들 삭제
+    if (imageFiles.length > 0) {
+      console.log(`🗑️ Deleting ${imageFiles.length} image files...`);
+      let deletedCount = 0;
+      let failedCount = 0;
+      
+      for (const imageKey of imageFiles) {
+        try {
+          const deleteImageCommand = new DeleteObjectCommand({
+            Bucket: R2_BUCKET_NAME,
+            Key: imageKey
+          });
+          await r2Client.send(deleteImageCommand);
+          deletedCount++;
+          console.log(`  ✅ Deleted: ${imageKey}`);
+        } catch (error) {
+          failedCount++;
+          console.error(`  ❌ Failed to delete ${imageKey}:`, error.message);
+        }
+      }
+      
+      console.log(`✅ Image deletion complete: ${deletedCount} deleted, ${failedCount} failed`);
+    }
     
-    // 인덱스에서도 제거
+    // 3️⃣ JSON 파일 삭제
+    try {
+      const deleteCommand = new DeleteObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: filename
+      });
+      
+      await r2Client.send(deleteCommand);
+      console.log(`✅ Deleted JSON from R2: ${filename}`);
+    } catch (error) {
+      console.warn(`⚠️ Failed to delete JSON file:`, error.message);
+    }
+    
+    // 4️⃣ 인덱스에서도 제거
     await removeFromStorybooksIndex(id);
     
     res.json({
       success: true,
-      message: '동화책이 삭제되었습니다.'
+      message: '동화책이 삭제되었습니다.',
+      deletedImages: imageFiles.length
     });
     
   } catch (error) {
