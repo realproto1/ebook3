@@ -2350,7 +2350,47 @@ ${text}`
 app.get('/api/storybooks', async (req, res) => {
   console.log('📚 [API] GET /api/storybooks - R2 동화책 목록 조회 시작');
   try {
-    // R2에서 storybook-*.json 파일 목록 조회
+    // 1️⃣ 먼저 인덱스 파일 시도
+    const { GetObjectCommand, PutObjectCommand } = await import('@aws-sdk/client-s3');
+    let indexExists = false;
+    let index = { storybooks: [] };
+    
+    try {
+      const getCommand = new GetObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: 'storybooks-index.json'
+      });
+      const response = await r2Client.send(getCommand);
+      const content = await response.Body.transformToString();
+      index = JSON.parse(content);
+      indexExists = true;
+      console.log('✅ [R2] 인덱스 파일 로드 성공:', index.storybooks.length, '권');
+    } catch (error) {
+      console.log('📝 [R2] 인덱스 파일 없음 - 새로 생성합니다');
+      
+      // 빈 인덱스 파일 생성
+      const putCommand = new PutObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: 'storybooks-index.json',
+        Body: JSON.stringify(index, null, 2),
+        ContentType: 'application/json'
+      });
+      
+      await r2Client.send(putCommand);
+      console.log('✅ [R2] 빈 인덱스 파일 생성 완료');
+      indexExists = true;
+    }
+    
+    // 2️⃣ 인덱스 파일이 있으면 반환
+    if (indexExists && index.storybooks.length > 0) {
+      console.log('📋 [R2] 동화책 목록:', index.storybooks.map(b => b.title).join(', '));
+      return res.json({
+        success: true,
+        storybooks: index.storybooks
+      });
+    }
+    
+    // 3️⃣ 인덱스가 비어있으면 전체 스캔 (폴백)
     const { ListObjectsV2Command } = await import('@aws-sdk/client-s3');
     
     console.log('🔍 [R2] Bucket:', R2_BUCKET_NAME, 'Prefix: storybook-');
@@ -2373,12 +2413,11 @@ app.get('/api/storybooks', async (req, res) => {
     }
     
     // JSON 파일만 필터링
-    const jsonFiles = listResult.Contents.filter(obj => obj.Key.endsWith('.json'));
+    const jsonFiles = listResult.Contents.filter(obj => obj.Key.endsWith('.json') && obj.Key !== 'storybooks-index.json');
     console.log('📄 [R2] JSON 파일:', jsonFiles.length, '개');
     console.log('📋 [R2] 파일 목록:', jsonFiles.map(f => f.Key).join(', '));
     
     // 각 JSON 파일 다운로드하여 메타데이터 추출
-    const { GetObjectCommand } = await import('@aws-sdk/client-s3');
     const storybooks = [];
     for (const file of jsonFiles.slice(0, 20)) { // 최대 20개만
       try {
