@@ -2338,19 +2338,24 @@ ${text}`
 
 // 동화책 목록 조회 (R2에서)
 app.get('/api/storybooks', async (req, res) => {
+  console.log('📚 [API] GET /api/storybooks - R2 동화책 목록 조회 시작');
   try {
     // R2에서 storybook-*.json 파일 목록 조회
     const { ListObjectsV2Command } = await import('@aws-sdk/client-s3');
     
+    console.log('🔍 [R2] Bucket:', R2_BUCKET_NAME, 'Prefix: storybook-');
     const listCommand = new ListObjectsV2Command({
       Bucket: R2_BUCKET_NAME,
       Prefix: 'storybook-',
       MaxKeys: 100
     });
     
+    console.log('📡 [R2] ListObjectsV2Command 실행 중...');
     const listResult = await r2Client.send(listCommand);
+    console.log('✅ [R2] ListObjectsV2 결과:', listResult.Contents ? listResult.Contents.length : 0, '개 파일');
     
     if (!listResult.Contents || listResult.Contents.length === 0) {
+      console.log('ℹ️ [R2] 동화책 없음');
       return res.json({
         success: true,
         storybooks: []
@@ -2359,13 +2364,21 @@ app.get('/api/storybooks', async (req, res) => {
     
     // JSON 파일만 필터링
     const jsonFiles = listResult.Contents.filter(obj => obj.Key.endsWith('.json'));
+    console.log('📄 [R2] JSON 파일:', jsonFiles.length, '개');
+    console.log('📋 [R2] 파일 목록:', jsonFiles.map(f => f.Key).join(', '));
     
     // 각 JSON 파일 다운로드하여 메타데이터 추출
     const storybooks = [];
     for (const file of jsonFiles.slice(0, 20)) { // 최대 20개만
       try {
+        console.log(`📥 [R2] ${file.Key} 다운로드 중...`);
         const response = await fetch(`${R2_PUBLIC_URL}/${file.Key}`);
+        if (!response.ok) {
+          console.error(`❌ [R2] ${file.Key} 다운로드 실패: ${response.status}`);
+          continue;
+        }
         const data = await response.json();
+        console.log(`✅ [R2] ${file.Key} 파싱 성공:`, data.title);
         
         // 메타데이터만 추출 (전체 페이지 내용은 제외)
         storybooks.push({
@@ -2379,20 +2392,23 @@ app.get('/api/storybooks', async (req, res) => {
           r2JsonUrl: `${R2_PUBLIC_URL}/${file.Key}`
         });
       } catch (error) {
-        console.error(`Failed to load ${file.Key}:`, error);
+        console.error(`❌ [R2] ${file.Key} 로드 실패:`, error.message);
       }
     }
+    
+    console.log(`📚 [R2] 총 ${storybooks.length}권의 동화책 로드 완료`);
     
     // 최신순 정렬
     storybooks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     
+    console.log('✅ [API] 응답 전송:', storybooks.map(b => b.title).join(', '));
     res.json({
       success: true,
       storybooks
     });
     
   } catch (error) {
-    console.error('Failed to list storybooks:', error);
+    console.error('❌ [API] 동화책 목록 조회 실패:', error);
     res.status(500).json({
       success: false,
       error: '동화책 목록 조회 실패: ' + error.message
@@ -2402,21 +2418,38 @@ app.get('/api/storybooks', async (req, res) => {
 
 // 특정 동화책 상세 조회 (R2에서)
 app.get('/api/storybooks/:id', async (req, res) => {
+  const { id } = req.params;
+  console.log(`📖 [API] GET /api/storybooks/${id} - 동화책 상세 조회 시작`);
   try {
-    const { id } = req.params;
     const filename = `storybook-${id}.json`;
+    const url = `${R2_PUBLIC_URL}/${filename}`;
     
+    console.log(`📥 [R2] ${filename} 다운로드 시도:`, url);
     // R2에서 JSON 다운로드
-    const response = await fetch(`${R2_PUBLIC_URL}/${filename}`);
+    const response = await fetch(url);
     
     if (!response.ok) {
+      console.error(`❌ [R2] ${filename} 다운로드 실패: ${response.status} ${response.statusText}`);
       return res.status(404).json({
         success: false,
         error: '동화책을 찾을 수 없습니다.'
       });
     }
     
+    console.log(`✅ [R2] ${filename} 다운로드 성공, 파싱 중...`);
     const storybook = await response.json();
+    console.log(`✅ [API] 동화책 로드 완료:`, storybook.title, `(페이지: ${storybook.pages?.length || 0}, 캐릭터: ${storybook.characters?.length || 0})`);
+    
+    res.json(storybook);
+    
+  } catch (error) {
+    console.error(`❌ [API] 동화책 ${id} 조회 실패:`, error);
+    res.status(500).json({
+      success: false,
+      error: '동화책 조회 실패: ' + error.message
+    });
+  }
+});
     
     res.json({
       success: true,
