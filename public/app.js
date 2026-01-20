@@ -325,9 +325,9 @@ async function generateCoverImage() {
 }
 
 // 페이지 로드 시 초기화
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     loadImageSettings();
-    loadStorybooks();
+    await loadStorybooks(); // R2에서 불러올 때까지 대기
     renderBookList();
 });
 
@@ -473,10 +473,50 @@ function resetSettings() {
 }
 
 // 스토리북 관리
-function loadStorybooks() {
+async function loadStorybooks() {
+    // 1. localStorage에서 먼저 로드 (빠른 초기 표시)
     const saved = localStorage.getItem('storybooks');
     if (saved) {
         storybooks = JSON.parse(saved);
+        renderBookList(); // 즉시 표시
+    }
+    
+    // 2. R2에서 최신 목록 가져오기
+    try {
+        console.log('📚 R2에서 동화책 목록 불러오는 중...');
+        const response = await axios.get('/api/storybooks');
+        
+        if (response.data.success && response.data.storybooks) {
+            const r2Books = response.data.storybooks;
+            console.log(`✅ R2에서 ${r2Books.length}권의 동화책을 찾았습니다`);
+            
+            // 3. 각 동화책의 전체 JSON을 불러오기
+            const fullBooks = [];
+            for (const meta of r2Books) {
+                try {
+                    const detailResponse = await axios.get(`/api/storybooks/${meta.id}`);
+                    if (detailResponse.data) {
+                        fullBooks.push(detailResponse.data);
+                    }
+                } catch (error) {
+                    console.warn(`동화책 ${meta.id} 로드 실패:`, error.message);
+                }
+            }
+            
+            // 4. localStorage의 동화책과 병합 (중복 제거)
+            const localIds = new Set(storybooks.map(book => book.id));
+            const newBooks = fullBooks.filter(book => !localIds.has(book.id));
+            
+            if (newBooks.length > 0) {
+                console.log(`📥 ${newBooks.length}권의 새 동화책 추가`);
+                storybooks = [...storybooks, ...newBooks];
+                saveStorybooks(); // localStorage에도 저장
+                renderBookList(); // 업데이트된 목록 표시
+            }
+        }
+    } catch (error) {
+        console.error('R2 동화책 로드 실패:', error);
+        // localStorage 데이터로 계속 진행
     }
 }
 
