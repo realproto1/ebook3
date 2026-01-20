@@ -1518,6 +1518,16 @@ app.post('/api/generate-illustration', requireAPIKey, async (req, res) => {
     const referenceImages = [];
     let characterInfo = '';
     
+    console.log(`📸 Received ${characterReferences ? characterReferences.length : 0} character references`);
+    if (characterReferences && characterReferences.length > 0) {
+      console.log(`🔍 First reference type: ${typeof characterReferences[0]}`);
+      if (typeof characterReferences[0] === 'string') {
+        console.log(`📝 Reference is URL array`);
+      } else {
+        console.log(`📝 Reference is character object array`);
+      }
+    }
+    
     if (characterReferences && characterReferences.length > 0) {
       const consistencyLevel = enforceCharacterConsistency ? 
         '\n\n**🎯 Character Consistency - ABSOLUTE CRITICAL REQUIREMENT 🎯:**\nThe characters in this scene MUST match EXACTLY the appearance shown in the reference images with PIXEL-PERFECT accuracy.\nThis is NOT optional - this is MANDATORY.\n\n' :
@@ -1525,11 +1535,16 @@ app.post('/api/generate-illustration', requireAPIKey, async (req, res) => {
       
       characterInfo = consistencyLevel;
       
-      characterReferences.forEach((char, index) => {
-        if (char.referenceImage) {
-          referenceImages.push(char.referenceImage);
+      characterReferences.forEach((charOrUrl, index) => {
+        // URL 배열 또는 캐릭터 객체 배열 모두 처리
+        const imageUrl = typeof charOrUrl === 'string' ? charOrUrl : charOrUrl.referenceImage;
+        const charName = typeof charOrUrl === 'string' ? `Character ${index + 1}` : charOrUrl.name;
+        const charDesc = typeof charOrUrl === 'string' ? '' : charOrUrl.description;
+        
+        if (imageUrl) {
+          referenceImages.push(imageUrl);
           if (enforceCharacterConsistency) {
-            characterInfo += `**Reference Image ${index + 1} - ${char.name}:**
+            characterInfo += `**Reference Image ${index + 1} - ${charName}:**
 COPY THIS CHARACTER WITH PIXEL-PERFECT ACCURACY:
 - Face: EXACT same facial features, eye shape, eye color, nose, mouth
 - Hair: EXACT same hairstyle, hair color, hair length
@@ -1544,8 +1559,8 @@ If the reference shows a blue dress, it MUST be blue in ALL pages.
 If the reference shows a red cape, it MUST be red in ALL pages.
 Keep the EXACT SAME clothing throughout the story.\n\n`;
           } else {
-            characterInfo += `**Reference Image ${index + 1} - ${char.name}:**
-Match this character's appearance: ${char.description}
+            characterInfo += `**Reference Image ${index + 1} - ${charName}:**
+Match this character's appearance: ${charDesc}
 **IMPORTANT:** Keep the same clothing/outfit in all scenes.\n\n`;
           }
         }
