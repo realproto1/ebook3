@@ -2364,16 +2364,28 @@ async function generateCharacterReference(charIndex) {
         }
         
         console.log(`🎨 캐릭터 "${character.name}" 이미지 생성 ${isRegeneration ? '(재생성 모드 - 사용자 수정사항 반영)' : '(초기 생성)'}`);
-        console.log('🤖 사용 모델:', imageSettings.characterModel || 'nano-banana-pro');
+        console.log('🤖 사용 모델:', imageSettings.characterModel || 'gemini-3-pro-image-preview');
         console.log('📝 프롬프트:', customPrompt.substring(0, 100) + '...');
         if (refImageUrls.length > 0) {
             console.log('🖼️ 참조 이미지:', refImageUrls.length, '개');
         }
         
-        const result = await generateImageClient(prompt, refImageUrls, 3, imageSettings.characterModel || 'gemini-3-pro-image-preview'); // 캐릭터 전용 모델 사용
-
-        if (result.success && result.imageUrl) {
-            const imageUrl = result.imageUrl;
+        // 🔥 서버 API 호출 (R2 업로드 포함)
+        const response = await axios.post('/api/generate-character-image', {
+            character: {
+                name: character.name,
+                description: customPrompt,
+                age: character.age
+            },
+            artStyle: currentStorybook.artStyle || '디즈니 스타일',
+            settings: {
+                aspectRatio: '16:9',
+                enforceNoText: true
+            }
+        });
+        
+        if (response.data.success && response.data.imageUrl) {
+            const imageUrl = response.data.imageUrl; // R2 URL
             currentStorybook.characters[charIndex].referenceImage = imageUrl;
             saveCurrentStorybook();
             
@@ -2396,7 +2408,7 @@ async function generateCharacterReference(charIndex) {
                 }
             }
         } else {
-            throw new Error(result.error || '이미지 URL을 받지 못했습니다.');
+            throw new Error(response.data.error || '이미지 URL을 받지 못했습니다.');
         }
 
     } catch (error) {
@@ -2587,9 +2599,16 @@ async function generateAllIllustrationsParallel() {
                     // 레퍼런스 이미지 수집: 등장 캐릭터만 (병렬이므로 전 페이지 참조 없음)
                     const refImageUrls = filteredCharacterRefs.map(char => char.referenceImage);
                     
-                    const result = await generateImageClient(prompt, refImageUrls, 3, imageSettings.illustrationModel || 'gemini-3-pro-image-preview'); // 페이지 삽화 전용 모델 사용
+                    // 🔥 서버 API 호출 (R2 업로드 포함)
+                    const response = await axios.post('/api/generate-illustration', {
+                        page: pageData,
+                        artStyle: artStyle,
+                        characterReferences: filteredCharacterRefs,
+                        settings: imageSettings
+                    });
                     
-                    if (result.success && result.imageUrl) {
+                    if (response.data.success && response.data.imageUrl) {
+                        const result = response.data; // R2 URL 포함
                         currentStorybook.pages[pageIndex].illustrationImage = result.imageUrl;
                         currentStorybook.pages[pageIndex].scene_description = sceneDesc;
                         currentStorybook.pages[pageIndex].scene_structure = sceneStructure;
@@ -2746,17 +2765,26 @@ async function generateAllIllustrationsSequential() {
                 const refImageUrls = filteredCharacterRefs.map(char => char.referenceImage);
                 
                 // ⭐ 바로 전 페이지의 이미지를 자동으로 참조 (연속성 향상)
+                let previousPages = [];
                 if (i > 0) {
                     const previousPage = currentStorybook.pages[i - 1];
                     if (previousPage && previousPage.illustrationImage) {
                         console.log(`📖 페이지 ${page.pageNumber}: 바로 전 페이지(${previousPage.pageNumber})의 이미지를 자동 참조`);
-                        refImageUrls.push(previousPage.illustrationImage);
+                        previousPages = [previousPage];
                     }
                 }
                 
-                const result = await generateImageClient(prompt, refImageUrls, 3, imageSettings.illustrationModel || 'gemini-3-pro-image-preview'); // 페이지 삽화 전용 모델 사용
+                // 🔥 서버 API 호출 (R2 업로드 포함)
+                const response = await axios.post('/api/generate-illustration', {
+                    page: pageData,
+                    artStyle: artStyle,
+                    characterReferences: filteredCharacterRefs,
+                    settings: imageSettings,
+                    previousPages: previousPages
+                });
                 
-                if (result.success && result.imageUrl) {
+                if (response.data.success && response.data.imageUrl) {
+                    const result = response.data; // R2 URL 포함
                     currentStorybook.pages[i].illustrationImage = result.imageUrl;
                     currentStorybook.pages[i].scene_description = sceneDesc;
                     currentStorybook.pages[i].scene_structure = sceneStructure;
@@ -2939,10 +2967,18 @@ async function generateIllustration(pageIndex) {
         
         console.log(`📊 최종 레퍼런스 이미지 개수: ${refImageUrls.length}`);
 
-        
-        const result = await generateImageClient(prompt, refImageUrls, 3, imageSettings.illustrationModel || 'gemini-3-pro-image-preview'); // 페이지 삽화 전용 모델 사용
+        // 🔥 서버 API 호출 (R2 업로드 포함)
+        const response = await axios.post('/api/generate-illustration', {
+            page: pageData,
+            artStyle: artStyle,
+            characterReferences: characterReferences,
+            settings: imageSettings,
+            editNote: editNote,
+            previousPages: pageIndex > 0 ? [currentStorybook.pages[pageIndex - 1]] : []
+        });
 
-        if (result.success && result.imageUrl) {
+        if (response.data.success && response.data.imageUrl) {
+            const result = response.data; // R2 URL 포함
             const imageUrl = result.imageUrl;
             currentStorybook.pages[pageIndex].illustrationImage = imageUrl;
             currentStorybook.pages[pageIndex].scene_description = sceneDesc;
