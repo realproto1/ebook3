@@ -2761,7 +2761,9 @@ app.post('/api/storybooks', async (req, res) => {
     console.log(`✅ Storybook saved to R2: ${filename}`);
     
     // 동화책 목록 인덱스 업데이트
+    console.log(`📝 [INDEX] Starting index update for: ${storybook.title}`);
     await updateStorybooksIndex(storybook);
+    console.log(`✅ [INDEX] Index update completed`);
     
     res.json({
       success: true,
@@ -2782,12 +2784,14 @@ app.post('/api/storybooks', async (req, res) => {
 // 동화책 목록 인덱스 업데이트 (메타데이터만)
 async function updateStorybooksIndex(storybook) {
   try {
+    console.log(`🔍 [INDEX] updateStorybooksIndex called for: ${storybook.title} (ID: ${storybook.id})`);
     const indexFilename = 'storybooks-index.json';
     
     // 기존 인덱스 파일 읽기
     let index = { storybooks: [] };
     
     try {
+      console.log(`📖 [INDEX] Reading existing index file...`);
       const getCommand = new GetObjectCommand({
         Bucket: R2_BUCKET_NAME,
         Key: indexFilename
@@ -2796,12 +2800,14 @@ async function updateStorybooksIndex(storybook) {
       const response = await r2Client.send(getCommand);
       const body = await response.Body.transformToString();
       index = JSON.parse(body);
+      console.log(`✅ [INDEX] Existing index loaded: ${index.storybooks.length} storybooks`);
     } catch (error) {
       // 파일이 없으면 새로 생성
-      console.log('📝 Creating new storybooks index');
+      console.log('📝 [INDEX] No existing index, creating new one');
     }
     
     // 메타데이터만 추출
+    console.log(`📋 [INDEX] Creating metadata...`);
     const metadata = {
       id: storybook.id,
       title: storybook.title,
@@ -2814,6 +2820,7 @@ async function updateStorybooksIndex(storybook) {
       hasCover: !!storybook.coverImage,
       r2JsonUrl: `${R2_PUBLIC_URL}/storybook-${storybook.id}.json`
     };
+    console.log(`✅ [INDEX] Metadata created:`, JSON.stringify(metadata, null, 2));
     
     // 기존 항목 찾기
     const existingIndex = index.storybooks.findIndex(item => item.id === storybook.id);
@@ -2832,6 +2839,7 @@ async function updateStorybooksIndex(storybook) {
     index.storybooks.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
     
     // 인덱스 파일 저장
+    console.log(`💾 [INDEX] Saving index file...`);
     const putCommand = new PutObjectCommand({
       Bucket: R2_BUCKET_NAME,
       Key: indexFilename,
@@ -2844,7 +2852,8 @@ async function updateStorybooksIndex(storybook) {
     console.log(`✅ Index updated: ${index.storybooks.length} storybooks`);
     
   } catch (error) {
-    console.error('인덱스 업데이트 오류:', error);
+    console.error('❌ [INDEX] 인덱스 업데이트 오류:', error);
+    console.error('❌ [INDEX] Error stack:', error.stack);
     // 인덱스 업데이트 실패해도 동화책 저장은 성공으로 처리
   }
 }
