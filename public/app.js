@@ -2656,7 +2656,9 @@ async function generateAllIllustrationsParallel() {
                         page: pageData,
                         artStyle: artStyle,
                         characterReferences: refImageUrls, // URL 배열 전달
-                        settings: imageSettings
+                        settings: imageSettings,
+                        storybookId: currentStorybook.id,
+                        storybookTitle: currentStorybook.title
                     });
                     
                     if (response.data.success && response.data.imageUrl) {
@@ -2836,7 +2838,9 @@ async function generateAllIllustrationsSequential() {
                     artStyle: artStyle,
                     characterReferences: refImageUrls, // URL 배열 전달
                     settings: imageSettings,
-                    previousPages: previousPages
+                    previousPages: previousPages,
+                    storybookId: currentStorybook.id,
+                    storybookTitle: currentStorybook.title
                 });
                 
                 if (response.data.success && response.data.imageUrl) {
@@ -3040,7 +3044,9 @@ async function generateIllustration(pageIndex) {
             characterReferences: refImageUrls, // URL 배열 전달
             settings: imageSettings,
             editNote: editNote,
-            previousPages: pageIndex > 0 ? [currentStorybook.pages[pageIndex - 1]] : []
+            previousPages: pageIndex > 0 ? [currentStorybook.pages[pageIndex - 1]] : [],
+            storybookId: currentStorybook.id,
+            storybookTitle: currentStorybook.title
         });
 
         if (response.data.success && response.data.imageUrl) {
