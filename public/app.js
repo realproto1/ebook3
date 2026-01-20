@@ -403,6 +403,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         closeRegenerateModalBtn.addEventListener('click', closeRegenerateModal);
     }
     
+    // 삽화 업로드 모달 이벤트
+    const uploadIllustrationBtn = document.getElementById('uploadIllustrationBtn');
+    if (uploadIllustrationBtn) {
+        uploadIllustrationBtn.addEventListener('click', uploadIllustration);
+    }
+    
+    const closeIllustrationUploadModalBtn = document.getElementById('closeIllustrationUploadModalBtn');
+    if (closeIllustrationUploadModalBtn) {
+        closeIllustrationUploadModalBtn.addEventListener('click', closeIllustrationUploadModal);
+    }
+    
     // 모달 배경 클릭 시 닫기
     const settingsModal = document.getElementById('settingsModal');
     if (settingsModal) {
@@ -418,6 +429,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         regenerateModal.addEventListener('click', (event) => {
             if (event.target === regenerateModal) {
                 closeRegenerateModal();
+            }
+        });
+    }
+    
+    const illustrationUploadModal = document.getElementById('illustrationUploadModal');
+    if (illustrationUploadModal) {
+        illustrationUploadModal.addEventListener('click', (event) => {
+            if (event.target === illustrationUploadModal) {
+                closeIllustrationUploadModal();
             }
         });
     }
@@ -1779,12 +1799,21 @@ function displayStorybook(storybook) {
                                     <p class="text-[10px] text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>장면의 전체적인 모습을 하나의 텍스트로 작성하세요</p>
                                 </div>
                                 
-                                <button 
-                                    onclick="generateIllustration(${idx})"
-                                    class="w-full bg-green-600 text-white py-2.5 md:py-3 rounded-lg font-semibold hover:bg-green-700 active:bg-green-800 transition text-sm md:text-base shadow-md mb-3"
-                                >
-                                    <i class="fas fa-paint-brush mr-2"></i>${page.illustrationImage ? '삽화 재생성' : '삽화 생성'}
-                                </button>
+                                <!-- 삽화 생성 및 업로드 버튼 -->
+                                <div class="grid grid-cols-2 gap-2 mb-3">
+                                    <button 
+                                        onclick="generateIllustration(${idx})"
+                                        class="bg-green-600 text-white py-2.5 md:py-3 rounded-lg font-semibold hover:bg-green-700 active:bg-green-800 transition text-sm md:text-base shadow-md"
+                                    >
+                                        <i class="fas fa-paint-brush mr-2"></i>${page.illustrationImage ? '삽화 재생성' : '삽화 생성'}
+                                    </button>
+                                    <button 
+                                        onclick="openIllustrationUploadModal(${idx})"
+                                        class="bg-blue-600 text-white py-2.5 md:py-3 rounded-lg font-semibold hover:bg-blue-700 active:bg-blue-800 transition text-sm md:text-base shadow-md"
+                                    >
+                                        <i class="fas fa-upload mr-2"></i>이미지 업로드
+                                    </button>
+                                </div>
                                 
                                 <div id="illustration-${idx}" class="bg-white rounded-lg overflow-hidden shadow-sm border-2 border-gray-200">
                                     ${page.illustrationImage ?
@@ -2326,6 +2355,147 @@ function updateVocabularyPrompt(value) {
     currentStorybook.vocabularyPrompt = value.trim();
     saveCurrentStorybook();
     console.log('✅ 학습 단어 프롬프트 업데이트:', value);
+}
+
+// 삽화 업로드 모달 관련 변수
+let currentUploadPageIndex = null;
+let currentUploadTab = 'file';
+
+// 삽화 업로드 모달 열기
+function openIllustrationUploadModal(pageIndex) {
+    currentUploadPageIndex = pageIndex;
+    const modal = document.getElementById('illustrationUploadModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // 기본 탭으로 설정
+    switchUploadTab('file');
+}
+
+// 삽화 업로드 모달 닫기
+function closeIllustrationUploadModal() {
+    const modal = document.getElementById('illustrationUploadModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    
+    // 입력 초기화
+    document.getElementById('illustrationFileInput').value = '';
+    document.getElementById('illustrationUrlInput').value = '';
+    currentUploadPageIndex = null;
+}
+
+// 업로드 탭 전환
+function switchUploadTab(tab) {
+    currentUploadTab = tab;
+    
+    const fileTab = document.getElementById('uploadTabFile');
+    const urlTab = document.getElementById('uploadTabUrl');
+    const fileContent = document.getElementById('uploadContentFile');
+    const urlContent = document.getElementById('uploadContentUrl');
+    
+    if (tab === 'file') {
+        fileTab.classList.add('border-blue-600', 'text-blue-600');
+        fileTab.classList.remove('text-gray-600');
+        urlTab.classList.remove('border-blue-600', 'text-blue-600');
+        urlTab.classList.add('text-gray-600');
+        
+        fileContent.classList.remove('hidden');
+        urlContent.classList.add('hidden');
+    } else {
+        urlTab.classList.add('border-blue-600', 'text-blue-600');
+        urlTab.classList.remove('text-gray-600');
+        fileTab.classList.remove('border-blue-600', 'text-blue-600');
+        fileTab.classList.add('text-gray-600');
+        
+        urlContent.classList.remove('hidden');
+        fileContent.classList.add('hidden');
+    }
+}
+
+// 삽화 업로드 실행
+async function uploadIllustration() {
+    if (currentUploadPageIndex === null) {
+        alert('페이지가 선택되지 않았습니다.');
+        return;
+    }
+    
+    const uploadBtn = document.getElementById('uploadIllustrationBtn');
+    const originalText = uploadBtn.innerHTML;
+    
+    try {
+        uploadBtn.disabled = true;
+        uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>업로드 중...';
+        
+        let imageUrl = null;
+        
+        if (currentUploadTab === 'file') {
+            // 파일 업로드
+            const fileInput = document.getElementById('illustrationFileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('파일을 선택해주세요.');
+                return;
+            }
+            
+            // 이미지를 R2에 업로드
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('storybookId', currentStorybook.id);
+            formData.append('type', 'illustration');
+            formData.append('pageNumber', currentStorybook.pages[currentUploadPageIndex].pageNumber);
+            
+            const response = await axios.post('/api/upload-image', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
+            if (response.data.success) {
+                imageUrl = response.data.imageUrl;
+            } else {
+                throw new Error(response.data.error || '이미지 업로드 실패');
+            }
+        } else {
+            // URL 입력
+            const urlInput = document.getElementById('illustrationUrlInput');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                alert('URL을 입력해주세요.');
+                return;
+            }
+            
+            // URL 유효성 검사
+            try {
+                new URL(url);
+            } catch (e) {
+                alert('올바른 URL을 입력해주세요.');
+                return;
+            }
+            
+            imageUrl = url;
+        }
+        
+        // 페이지에 이미지 적용
+        currentStorybook.pages[currentUploadPageIndex].illustrationImage = imageUrl;
+        saveCurrentStorybook();
+        
+        // UI 업데이트
+        displayStorybook(currentStorybook);
+        
+        // 모달 닫기
+        closeIllustrationUploadModal();
+        
+        showNotification('success', '업로드 완료', '삽화 이미지가 업로드되었습니다.');
+        
+    } catch (error) {
+        console.error('업로드 오류:', error);
+        alert('업로드 실패: ' + error.message);
+    } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = originalText;
+    }
 }
 
 // 오디오 다운로드

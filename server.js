@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import multer from 'multer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -136,6 +137,54 @@ async function uploadBase64ToR2(base64Data, filename) {
     return publicUrl;
   } catch (error) {
     console.error('❌ R2 Base64 upload failed:', error);
+    throw error;
+  }
+}
+
+// Multer 설정 (메모리 스토리지 사용)
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB 제한
+  },
+  fileFilter: (req, file, cb) => {
+    // 이미지 파일만 허용
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('이미지 파일만 업로드 가능합니다.'));
+    }
+  }
+});
+
+/**
+ * Buffer를 Cloudflare R2에 업로드
+ * @param {Buffer} buffer - 이미지 버퍼
+ * @param {string} filename - 저장할 파일명
+ * @param {string} contentType - 파일 MIME 타입
+ * @returns {string} R2 공개 URL
+ */
+async function uploadBufferToR2(buffer, filename, contentType) {
+  try {
+    console.log(`📤 Uploading Buffer to R2: ${filename}`);
+    
+    // R2에 업로드
+    const command = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: filename,
+      Body: buffer,
+      ContentType: contentType,
+    });
+    
+    await r2Client.send(command);
+    
+    const publicUrl = `${R2_PUBLIC_URL}/${filename}`;
+    console.log(`✅ Uploaded Buffer to R2: ${publicUrl}`);
+    
+    return publicUrl;
+  } catch (error) {
+    console.error('❌ R2 Buffer upload failed:', error);
     throw error;
   }
 }
@@ -313,6 +362,41 @@ app.get('/api/debug/env', (req, res) => {
     message: hasKey ? '✅ API 키가 설정되어 있습니다' : '❌ API 키가 설정되지 않았습니다',
     allEnvKeys: Object.keys(process.env).filter(k => k.includes('GEMINI') || k.includes('API'))
   });
+});
+
+// 이미지 업로드 API
+app.post('/api/upload-image', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: '이미지 파일이 없습니다.' });
+    }
+    
+    const { storybookId, type, pageNumber } = req.body;
+    
+    // 파일명 생성
+    const timestamp = Date.now();
+    const ext = req.file.originalname.split('.').pop();
+    const filename = `${storybookId}-${type}-${pageNumber || 'cover'}-${timestamp}.${ext}`;
+    
+    // R2에 업로드
+    const imageUrl = await uploadBufferToR2(
+      req.file.buffer,
+      filename,
+      req.file.mimetype
+    );
+    
+    res.json({
+      success: true,
+      imageUrl: imageUrl
+    });
+    
+  } catch (error) {
+    console.error('이미지 업로드 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
 });
 
 // 1. 동화책 스토리 생성 API

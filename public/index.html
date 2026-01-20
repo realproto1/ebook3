@@ -587,8 +587,87 @@
         </div>
     </div>
 
+    <!-- 삽화 업로드 모달 -->
+    <div id="illustrationUploadModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 md:p-8">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-upload mr-3 text-blue-600"></i>
+                삽화 이미지 업로드
+            </h2>
+            
+            <div class="space-y-6">
+                <!-- 탭 선택 -->
+                <div class="flex gap-2 border-b border-gray-200">
+                    <button 
+                        id="uploadTabFile"
+                        onclick="switchUploadTab('file')"
+                        class="flex-1 py-3 font-semibold text-gray-600 border-b-2 border-transparent hover:text-blue-600 transition"
+                    >
+                        <i class="fas fa-file-image mr-2"></i>파일 업로드
+                    </button>
+                    <button 
+                        id="uploadTabUrl"
+                        onclick="switchUploadTab('url')"
+                        class="flex-1 py-3 font-semibold text-gray-600 border-b-2 border-transparent hover:text-blue-600 transition"
+                    >
+                        <i class="fas fa-link mr-2"></i>URL 입력
+                    </button>
+                </div>
+                
+                <!-- 파일 업로드 탭 -->
+                <div id="uploadContentFile" class="hidden">
+                    <label class="block text-gray-700 font-semibold mb-3">
+                        <i class="fas fa-file-image mr-2"></i>이미지 파일 선택
+                    </label>
+                    <input 
+                        type="file" 
+                        id="illustrationFileInput"
+                        accept="image/*"
+                        class="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    />
+                    <p class="text-sm text-gray-500 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        JPG, PNG, GIF 등의 이미지 파일을 선택하세요.
+                    </p>
+                </div>
+                
+                <!-- URL 입력 탭 -->
+                <div id="uploadContentUrl" class="hidden">
+                    <label class="block text-gray-700 font-semibold mb-3">
+                        <i class="fas fa-link mr-2"></i>이미지 URL
+                    </label>
+                    <input 
+                        type="text" 
+                        id="illustrationUrlInput"
+                        placeholder="https://example.com/image.jpg"
+                        class="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    />
+                    <p class="text-sm text-gray-500 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        공개적으로 접근 가능한 이미지 URL을 입력하세요.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex gap-4 mt-8">
+                <button 
+                    id="uploadIllustrationBtn"
+                    class="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-lg font-bold hover:from-blue-600 hover:to-blue-700 transition shadow-lg"
+                >
+                    <i class="fas fa-upload mr-2"></i>업로드
+                </button>
+                <button 
+                    id="closeIllustrationUploadModalBtn"
+                    class="flex-1 bg-gray-500 text-white py-3 rounded-lg font-bold hover:bg-gray-600 transition"
+                >
+                    <i class="fas fa-times mr-2"></i>취소
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script src="/gemini-client.js?v=20250120-26"></script>
-    <script src="/app.js?v=20250120-43"></script>
+    <script src="/app.js?v=20250120-44"></script>
 </body>
 </html>
