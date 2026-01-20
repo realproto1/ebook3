@@ -2811,6 +2811,90 @@ async function updateStorybooksIndex(storybook) {
 }
 
 // 메인 페이지
+// 8. 동화책 삭제 API
+app.delete('/api/storybooks/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    console.log(`🗑️ Deleting storybook: ID ${id}`);
+    
+    // R2에서 JSON 파일 삭제
+    const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
+    const filename = `storybook-${id}.json`;
+    
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: filename
+    });
+    
+    await r2Client.send(deleteCommand);
+    console.log(`✅ Deleted from R2: ${filename}`);
+    
+    // 인덱스에서도 제거
+    await removeFromStorybooksIndex(id);
+    
+    res.json({
+      success: true,
+      message: '동화책이 삭제되었습니다.'
+    });
+    
+  } catch (error) {
+    console.error('❌ 동화책 삭제 실패:', error);
+    res.status(500).json({ 
+      success: false,
+      error: '동화책 삭제 실패: ' + error.message
+    });
+  }
+});
+
+// 인덱스에서 동화책 제거
+async function removeFromStorybooksIndex(storybookId) {
+  try {
+    const { GetObjectCommand, PutObjectCommand } = await import('@aws-sdk/client-s3');
+    
+    // 기존 인덱스 읽기
+    let index = { storybooks: [] };
+    try {
+      const getCommand = new GetObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: 'storybooks-index.json'
+      });
+      const response = await r2Client.send(getCommand);
+      const content = await response.Body.transformToString();
+      index = JSON.parse(content);
+    } catch (error) {
+      console.log('📝 Index file not found, nothing to remove');
+      return;
+    }
+    
+    // 해당 동화책 제거
+    const beforeCount = index.storybooks.length;
+    index.storybooks = index.storybooks.filter(book => book.id !== storybookId);
+    const afterCount = index.storybooks.length;
+    
+    if (beforeCount === afterCount) {
+      console.log(`⚠️ Storybook ${storybookId} not found in index`);
+      return;
+    }
+    
+    // 인덱스 업데이트
+    const putCommand = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: 'storybooks-index.json',
+      Body: JSON.stringify(index, null, 2),
+      ContentType: 'application/json'
+    });
+    
+    await r2Client.send(putCommand);
+    console.log(`📝 Removed from index: ${storybookId}`);
+    console.log(`✅ Index updated: ${afterCount} storybooks remaining`);
+    
+  } catch (error) {
+    console.error('❌ Failed to remove from index:', error);
+    throw error;
+  }
+}
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

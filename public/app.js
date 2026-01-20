@@ -759,22 +759,40 @@ function selectStorybook(id) {
     }
 }
 
-function deleteStorybook(id) {
+async function deleteStorybook(id) {
     if (confirm('이 동화책을 삭제하시겠습니까?')) {
-        storybooks = storybooks.filter(b => b.id !== id);
-        saveStorybooks();
-        renderBookList();
-        
-        if (currentStorybook && currentStorybook.id === id) {
-            currentStorybook = null;
-            document.getElementById('storybookResult').classList.add('hidden');
-            document.getElementById('createForm').style.display = 'block';
+        try {
+            // R2에서 삭제
+            console.log(`🗑️ R2에서 삭제 시작: ID ${id}`);
+            const response = await axios.delete(`/api/storybooks/${id}`);
+            
+            if (response.data.success) {
+                console.log(`✅ R2 삭제 완료`);
+                
+                // localStorage에서도 삭제
+                storybooks = storybooks.filter(b => b.id !== id);
+                saveStorybooks();
+                renderBookList();
+                
+                if (currentStorybook && currentStorybook.id === id) {
+                    currentStorybook = null;
+                    document.getElementById('storybookResult').classList.add('hidden');
+                    document.getElementById('createForm').style.display = 'block';
+                }
+                
+                showNotification('success', '동화책이 삭제되었습니다.');
+            } else {
+                throw new Error(response.data.error || '삭제 실패');
+            }
+        } catch (error) {
+            console.error('❌ 삭제 오류:', error);
+            showNotification('error', '동화책 삭제에 실패했습니다.');
         }
     }
 }
 
 // 동화책 제목 업데이트 (사이드바)
-function updateBookTitleInList(id, newTitle) {
+async function updateBookTitleInList(id, newTitle) {
     if (!newTitle.trim()) {
         showNotification('warning', '제목을 입력해주세요.');
         renderBookList();
@@ -794,6 +812,15 @@ function updateBookTitleInList(id, newTitle) {
     }
     
     saveStorybooks();
+    
+    // R2에도 업데이트
+    try {
+        console.log(`💾 R2에 제목 변경 저장: "${oldTitle}" → "${newTitle.trim()}"`);
+        await saveToR2(book);
+        console.log(`✅ R2 저장 완료`);
+    } catch (error) {
+        console.error('❌ R2 저장 오류:', error);
+    }
     
     console.log(`✅ 제목 변경: "${oldTitle}" → "${newTitle.trim()}"`);
     showNotification('success', '제목이 저장되었습니다!');
