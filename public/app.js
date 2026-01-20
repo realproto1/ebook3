@@ -93,15 +93,17 @@ function createTTSModelSelect(currentModel, pageIndex) {
     const description = currentModelInfo ? currentModelInfo.description : '';
     
     return `
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1.5">
             <select 
                 id="tts-model-select-${pageIndex}"
-                onchange="updatePageTTSModel(${pageIndex}, this.value)"
-                class="text-xs border border-gray-300 rounded px-2 py-1 bg-white"
+                onchange="updatePageTTSModelDescription(${pageIndex}, this.value)"
+                class="text-xs md:text-sm border border-gray-300 rounded px-2 py-1.5 bg-white"
             >
                 ${modelOptions}
             </select>
-            ${description ? `<p class="text-[10px] text-gray-500 italic"><i class="fas fa-info-circle mr-1"></i>${description}</p>` : ''}
+            <p id="tts-model-desc-${pageIndex}" class="text-[10px] md:text-xs text-gray-600 italic">
+                <i class="fas fa-info-circle mr-1 text-blue-500"></i>${description}
+            </p>
         </div>
     `;
 }
@@ -2323,14 +2325,23 @@ function updateTTSConfig(pageIndex, config) {
     console.log(`✅ 페이지 ${pageIndex + 1} TTS 설정 업데이트: ${config}`);
 }
 
-// 페이지별 TTS 모델 업데이트
-function updatePageTTSModel(pageIndex, value) {
+// 페이지별 TTS 모델 업데이트 (설명 동적 업데이트)
+function updatePageTTSModelDescription(pageIndex, value) {
     currentStorybook.pages[pageIndex].ttsModel = value;
     saveCurrentStorybook();
     console.log(`✅ 페이지 ${pageIndex + 1} TTS 모델 변경:`, value);
     
-    // 선택한 모델의 설명을 UI에 반영 (리렌더링 필요 시)
-    displayStorybook(currentStorybook);
+    // 선택한 모델의 설명을 동적으로 업데이트 (전체 리렌더링 안 함)
+    const modelInfo = TTS_MODELS.find(m => m.value === value);
+    const descElement = document.getElementById(`tts-model-desc-${pageIndex}`);
+    if (descElement && modelInfo) {
+        descElement.innerHTML = `<i class="fas fa-info-circle mr-1 text-blue-500"></i>${modelInfo.description}`;
+    }
+}
+
+// 기존 함수명 유지 (호환성)
+function updatePageTTSModel(pageIndex, value) {
+    updatePageTTSModelDescription(pageIndex, value);
 }
 
 // 학습 단어 프롬프트 업데이트
