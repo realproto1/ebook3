@@ -2311,22 +2311,29 @@ async function generateAllCharacterReferences() {
                 const promptTextarea = document.getElementById(`char-prompt-${i}`);
                 const customPrompt = promptTextarea ? promptTextarea.value.trim() : char.description;
                 
-                // 재생성 여부 판단
-                const isRegeneration = !!char.referenceImage;
+                console.log(`🎨 캐릭터 "${char.name}" 이미지 생성 시작 (배치 생성)`);
                 
-                // 클라이언트에서 직접 Gemini API 호출
-                const prompt = buildCharacterPrompt(customPrompt, currentStorybook.artStyle, imageSettings, isRegeneration);
+                // 🔥 서버 API 호출 (R2 업로드 포함)
+                const response = await axios.post('/api/generate-character-image', {
+                    character: {
+                        name: char.name,
+                        description: customPrompt,
+                        age: char.age
+                    },
+                    artStyle: currentStorybook.artStyle || '디즈니 스타일',
+                    settings: {
+                        aspectRatio: '16:9',
+                        enforceNoText: true
+                    }
+                });
                 
-                // 재생성인 경우 기존 이미지를 레퍼런스로 추가
-                const refImageUrls = isRegeneration ? [char.referenceImage] : [];
-                
-                const result = await generateImageClient(prompt, refImageUrls, 3, imageSettings.characterModel || 'gemini-3-pro-image-preview'); // 캐릭터 레퍼런스 전용 모델 사용
-                
-                if (result.success && result.imageUrl) {
-                    currentStorybook.characters[i].referenceImage = result.imageUrl;
-                    return { index: i, success: true, imageUrl: result.imageUrl };
+                if (response.data.success && response.data.imageUrl) {
+                    const imageUrl = response.data.imageUrl; // R2 URL
+                    currentStorybook.characters[i].referenceImage = imageUrl;
+                    console.log(`✅ 캐릭터 "${char.name}" 이미지 생성 완료 (R2 업로드 포함)`);
+                    return { index: i, success: true, imageUrl: imageUrl };
                 } else {
-                    throw new Error(result.error || '이미지 생성 실패');
+                    throw new Error(response.data.error || '이미지 URL을 받지 못했습니다.');
                 }
             } catch (error) {
                 console.error(`Error generating character ${i}:`, error);
