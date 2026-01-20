@@ -1256,6 +1256,11 @@ JSON만 응답하세요.`;
       const r2JsonUrl = await uploadJSONToR2(storybook, jsonFilename);
       storybook.r2JsonUrl = r2JsonUrl;
       console.log(`✅ Storybook JSON saved to R2: ${r2JsonUrl}`);
+      
+      // 인덱스 업데이트
+      console.log(`📝 [INDEX] Updating index after storybook generation`);
+      await updateStorybooksIndex(storybook);
+      console.log(`✅ [INDEX] Index update completed after generation`);
     } catch (error) {
       console.error('⚠️ Failed to save storybook JSON to R2:', error);
       // JSON 저장 실패해도 계속 진행 (이미지는 저장됨)
