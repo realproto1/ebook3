@@ -138,6 +138,40 @@ async function uploadBase64ToR2(base64Data, filename) {
   }
 }
 
+/**
+ * JSON 데이터를 Cloudflare R2에 업로드
+ * @param {Object} jsonData - 저장할 JSON 객체
+ * @param {string} filename - 저장할 파일명
+ * @returns {string} R2 공개 URL
+ */
+async function uploadJSONToR2(jsonData, filename) {
+  try {
+    console.log(`📤 Uploading JSON to R2: ${filename}`);
+    
+    // JSON을 문자열로 변환
+    const jsonString = JSON.stringify(jsonData, null, 2);
+    const buffer = Buffer.from(jsonString, 'utf-8');
+    
+    // R2에 업로드
+    const command = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: filename,
+      Body: buffer,
+      ContentType: 'application/json',
+    });
+    
+    await r2Client.send(command);
+    
+    const publicUrl = `${R2_PUBLIC_URL}/${filename}`;
+    console.log(`✅ Uploaded JSON to R2: ${publicUrl}`);
+    
+    return publicUrl;
+  } catch (error) {
+    console.error('❌ R2 JSON upload failed:', error);
+    throw error;
+  }
+}
+
 
 // Gemini 이미지 생성 함수 (Nano Banana Pro) - 멀티모달 지원 + 자동 재시도
 async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRetries = 3) {
@@ -1214,6 +1248,17 @@ JSON만 응답하세요.`;
     storybook.artStyle = artStyle;
     storybook.createdAt = new Date().toISOString();
     
+    // R2에 동화책 JSON 저장
+    try {
+      const jsonFilename = `storybook-${storybook.id}.json`;
+      const r2JsonUrl = await uploadJSONToR2(storybook, jsonFilename);
+      storybook.r2JsonUrl = r2JsonUrl;
+      console.log(`✅ Storybook JSON saved to R2: ${r2JsonUrl}`);
+    } catch (error) {
+      console.error('⚠️ Failed to save storybook JSON to R2:', error);
+      // JSON 저장 실패해도 계속 진행 (이미지는 저장됨)
+    }
+    
     res.json({
       success: true,
       storybook
@@ -2285,6 +2330,104 @@ ${text}`
     res.status(500).json({
       success: false,
       error: 'TTS 생성 실패: ' + error.message
+    });
+  }
+});
+
+// ===== 동화책 관리 API (R2 저장소) =====
+
+// 동화책 목록 조회 (R2에서)
+app.get('/api/storybooks', async (req, res) => {
+  try {
+    // R2에서 storybook-*.json 파일 목록 조회
+    const { ListObjectsV2Command } = await import('@aws-sdk/client-s3');
+    
+    const listCommand = new ListObjectsV2Command({
+      Bucket: R2_BUCKET_NAME,
+      Prefix: 'storybook-',
+      MaxKeys: 100
+    });
+    
+    const listResult = await r2Client.send(listCommand);
+    
+    if (!listResult.Contents || listResult.Contents.length === 0) {
+      return res.json({
+        success: true,
+        storybooks: []
+      });
+    }
+    
+    // JSON 파일만 필터링
+    const jsonFiles = listResult.Contents.filter(obj => obj.Key.endsWith('.json'));
+    
+    // 각 JSON 파일 다운로드하여 메타데이터 추출
+    const storybooks = [];
+    for (const file of jsonFiles.slice(0, 20)) { // 최대 20개만
+      try {
+        const response = await fetch(`${R2_PUBLIC_URL}/${file.Key}`);
+        const data = await response.json();
+        
+        // 메타데이터만 추출 (전체 페이지 내용은 제외)
+        storybooks.push({
+          id: data.id,
+          title: data.title,
+          targetAge: data.targetAge,
+          artStyle: data.artStyle,
+          createdAt: data.createdAt,
+          pageCount: data.pages ? data.pages.length : 0,
+          characterCount: data.characters ? data.characters.length : 0,
+          r2JsonUrl: `${R2_PUBLIC_URL}/${file.Key}`
+        });
+      } catch (error) {
+        console.error(`Failed to load ${file.Key}:`, error);
+      }
+    }
+    
+    // 최신순 정렬
+    storybooks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    res.json({
+      success: true,
+      storybooks
+    });
+    
+  } catch (error) {
+    console.error('Failed to list storybooks:', error);
+    res.status(500).json({
+      success: false,
+      error: '동화책 목록 조회 실패: ' + error.message
+    });
+  }
+});
+
+// 특정 동화책 상세 조회 (R2에서)
+app.get('/api/storybooks/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const filename = `storybook-${id}.json`;
+    
+    // R2에서 JSON 다운로드
+    const response = await fetch(`${R2_PUBLIC_URL}/${filename}`);
+    
+    if (!response.ok) {
+      return res.status(404).json({
+        success: false,
+        error: '동화책을 찾을 수 없습니다.'
+      });
+    }
+    
+    const storybook = await response.json();
+    
+    res.json({
+      success: true,
+      storybook
+    });
+    
+  } catch (error) {
+    console.error('Failed to load storybook:', error);
+    res.status(500).json({
+      success: false,
+      error: '동화책 조회 실패: ' + error.message
     });
   }
 });
