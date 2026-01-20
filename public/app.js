@@ -1135,12 +1135,20 @@ function displayStorybook(storybook) {
                         좌측 사이드바에서 제목 수정, 복사, 순서 변경이 가능합니다
                     </p>
                 </div>
-                <button 
-                    onclick="openRegenerateModal()"
-                    class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 md:px-5 py-2 md:py-3 rounded-lg font-bold hover:from-orange-600 hover:to-red-600 transition-all shadow-lg text-sm md:text-base whitespace-nowrap"
-                >
-                    <i class="fas fa-redo mr-1 md:mr-2"></i><span class="hidden sm:inline">다시 만들기</span><span class="sm:hidden">재생성</span>
-                </button>
+                <div class="flex gap-2">
+                    <button 
+                        onclick="openPreview()"
+                        class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-3 md:px-5 py-2 md:py-3 rounded-lg font-bold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg text-sm md:text-base whitespace-nowrap"
+                    >
+                        <i class="fas fa-book-open mr-1 md:mr-2"></i><span class="hidden sm:inline">미리보기</span><span class="sm:hidden">보기</span>
+                    </button>
+                    <button 
+                        onclick="openRegenerateModal()"
+                        class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 md:px-5 py-2 md:py-3 rounded-lg font-bold hover:from-orange-600 hover:to-red-600 transition-all shadow-lg text-sm md:text-base whitespace-nowrap"
+                    >
+                        <i class="fas fa-redo mr-1 md:mr-2"></i><span class="hidden sm:inline">다시 만들기</span><span class="sm:hidden">재생성</span>
+                    </button>
+                </div>
             </div>
             <div class="bg-purple-50 p-4 md:p-6 rounded-lg mt-4 md:mt-6">
                 <h3 class="text-lg md:text-xl font-bold text-purple-600 mb-2">
@@ -3107,6 +3115,37 @@ async function saveToR2(storybook) {
         console.error('R2 저장 오류:', error);
         // 에러가 발생해도 로컬 저장은 완료되었으므로 사용자에게 알리지 않음
     }
+}
+
+// 미리보기 함수
+function openPreview() {
+    if (!currentStorybook) {
+        alert('동화책이 없습니다.');
+        return;
+    }
+    
+    // 삽화가 있는 페이지만 필터링
+    const pagesWithImages = currentStorybook.pages.filter(page => page.illustrationImage);
+    
+    if (pagesWithImages.length === 0) {
+        alert('먼저 삽화를 생성해주세요!');
+        return;
+    }
+    
+    // 미리보기 데이터를 localStorage에 임시 저장
+    const previewData = {
+        title: currentStorybook.title,
+        pages: pagesWithImages.map(page => ({
+            pageNumber: page.pageNumber,
+            text: page.text || '',
+            illustrationImage: page.illustrationImage
+        }))
+    };
+    
+    localStorage.setItem('preview_data', JSON.stringify(previewData));
+    
+    // 새 창으로 미리보기 열기
+    window.open('/preview.html', '_blank', 'width=1200,height=800');
 }
 
 // 다운로드 함수들
