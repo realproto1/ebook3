@@ -298,7 +298,7 @@ async function generateCoverImage() {
             artStyle: currentStorybook.artStyle || '디즈니 스타일',
             characterReferences: characterReferences,
             settings: {
-                aspectRatio: '2:3',
+                aspectRatio: '16:9',  // 표지 기본 비율: 16:9 (가로로 넓은 형태)
                 enforceNoText: true
             },
             customPrompt: customPrompt,

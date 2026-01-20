@@ -2705,7 +2705,7 @@ app.post('/api/generate-cover', requireAPIKey, async (req, res) => {
     const { title, artStyle, characterReferences = [], settings = {}, customPrompt = '', storybookId = '' } = req.body;
     
     // 설정값 기본값
-    const aspectRatio = settings.aspectRatio || '2:3';
+    const aspectRatio = settings.aspectRatio || '16:9';  // 표지 기본 비율: 16:9
     const enforceNoText = settings.enforceNoText !== false;
     const additionalPrompt = settings.additionalPrompt || '';
     
@@ -2763,7 +2763,13 @@ ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''
 
 Create a professional, captivating cover illustration.`;
     
-    console.log('Generating cover image with settings:', { aspectRatio, enforceNoText, characterReferences: characterReferences.length });
+    console.log('Generating cover image with settings:', { 
+      aspectRatio, 
+      enforceNoText, 
+      characterReferences: characterReferences.length,
+      customPromptProvided: !!customPrompt,
+      promptLength: prompt.length
+    });
 
     const imageUrl = await generateImage(prompt, characterReferences);
     
