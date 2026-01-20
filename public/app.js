@@ -2184,89 +2184,11 @@ function updateTTSConfig(pageIndex, config) {
     console.log(`✅ 페이지 ${pageIndex + 1} TTS 설정 업데이트: ${config}`);
 }
 
-// TTS 모델 업데이트
-function updateTTSModel(value) {
-    imageSettings.ttsModel = value;
-    saveImageSettings();
-    console.log('✅ TTS 모델 변경:', value);
-}
-
 // 페이지별 TTS 모델 업데이트
 function updatePageTTSModel(pageIndex, value) {
     currentStorybook.pages[pageIndex].ttsModel = value;
     saveCurrentStorybook();
     console.log(`✅ 페이지 ${pageIndex + 1} TTS 모델 변경:`, value);
-}
-
-// 페이지 TTS 생성
-async function generatePageTTS(pageIndex) {
-    const page = currentStorybook.pages[pageIndex];
-    const btnId = `tts-btn-${pageIndex}`;
-    const btn = document.getElementById(btnId);
-    
-    if (!page.text || !page.text.trim()) {
-        alert('텍스트가 없습니다. 먼저 텍스트를 입력해주세요.');
-        return;
-    }
-    
-    // 버튼 비활성화 및 로딩 표시
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>TTS 생성 중...';
-    
-    try {
-        const ttsConfig = page.ttsConfig || imageSettings.ttsVoiceConfig;
-        const ttsModel = page.ttsModel || imageSettings.ttsModel;
-        
-        console.log(`🎙️ TTS 생성 시작 - 페이지 ${pageIndex + 1}:`, {
-            text: page.text,
-            config: ttsConfig,
-            model: ttsModel
-        });
-        
-        // API 호출
-        const response = await fetch('/api/generate-tts', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': localStorage.getItem('API_KEY') || ''
-            },
-            body: JSON.stringify({
-                text: page.text,
-                voiceConfig: ttsConfig,
-                model: ttsModel
-            })
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'TTS 생성 실패');
-        }
-        
-        const data = await response.json();
-        
-        if (data.success && data.audioUrl) {
-            // 페이지에 오디오 URL 저장
-            currentStorybook.pages[pageIndex].audioUrl = data.audioUrl;
-            currentStorybook.pages[pageIndex].ttsConfig = ttsConfig;
-            currentStorybook.pages[pageIndex].ttsModel = ttsModel;
-            saveCurrentStorybook();
-            
-            // UI 업데이트
-            displayStorybook(currentStorybook);
-            
-            showNotification('success', 'TTS 생성 완료!', `페이지 ${pageIndex + 1}의 음성이 생성되었습니다.`);
-        } else {
-            throw new Error(data.error || 'TTS URL을 받지 못했습니다.');
-        }
-        
-    } catch (error) {
-        console.error('TTS 생성 오류:', error);
-        alert('TTS 생성 실패: ' + error.message);
-        
-        // 버튼 복구
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fas fa-microphone mr-2"></i>${page.audioUrl ? 'TTS 재생성' : 'TTS 생성'}`;
-    }
 }
 
 // 오디오 다운로드
