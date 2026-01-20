@@ -2289,6 +2289,19 @@ ${text}`
   }
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development',
+    port: PORT,
+    r2_configured: !!R2_ACCESS_KEY_ID,
+    gemini_configured: !!GEMINI_API_KEY
+  });
+});
+
 // API 키 제공 엔드포인트 (클라이언트에서 직접 Gemini API 호출용)
 app.get('/api/config', (req, res) => {
   if (!GEMINI_API_KEY) {
