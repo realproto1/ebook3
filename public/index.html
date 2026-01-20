@@ -747,6 +747,166 @@
         </div>
     </div>
 
+    <!-- 캐릭터 레퍼런스 업로드 모달 -->
+    <div id="characterUploadModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 md:p-8">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-upload mr-3 text-purple-600"></i>
+                캐릭터 레퍼런스 업로드
+            </h2>
+            
+            <div class="space-y-6">
+                <!-- 탭 선택 -->
+                <div class="flex gap-2 border-b border-gray-200">
+                    <button 
+                        id="characterFileTab"
+                        onclick="switchCharacterUploadTab('file')"
+                        class="flex-1 py-3 font-semibold text-gray-600 border-b-2 border-transparent hover:text-purple-600 transition"
+                    >
+                        <i class="fas fa-file-image mr-2"></i>파일 업로드
+                    </button>
+                    <button 
+                        id="characterUrlTab"
+                        onclick="switchCharacterUploadTab('url')"
+                        class="flex-1 py-3 font-semibold text-gray-600 border-b-2 border-transparent hover:text-purple-600 transition"
+                    >
+                        <i class="fas fa-link mr-2"></i>URL 입력
+                    </button>
+                </div>
+                
+                <!-- 파일 업로드 탭 -->
+                <div id="characterFileUploadArea" class="hidden">
+                    <label class="block text-gray-700 font-semibold mb-3">
+                        <i class="fas fa-file-image mr-2"></i>이미지 파일 선택
+                    </label>
+                    <input 
+                        type="file" 
+                        id="characterFileInput"
+                        accept="image/*"
+                        class="w-full px-4 py-3 border-2 border-purple-300 rounded-lg focus:outline-none focus:border-purple-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                    />
+                    <p class="text-sm text-gray-500 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        JPG, PNG, GIF 등의 이미지 파일을 선택하세요.
+                    </p>
+                </div>
+                
+                <!-- URL 입력 탭 -->
+                <div id="characterUrlUploadArea" class="hidden">
+                    <label class="block text-gray-700 font-semibold mb-3">
+                        <i class="fas fa-link mr-2"></i>이미지 URL
+                    </label>
+                    <input 
+                        type="url" 
+                        id="characterUrlInput"
+                        placeholder="https://example.com/character.png"
+                        class="w-full px-4 py-3 border-2 border-purple-300 rounded-lg focus:outline-none focus:border-purple-500"
+                    />
+                    <p class="text-sm text-gray-500 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        공개적으로 접근 가능한 이미지 URL을 입력하세요.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex gap-4 mt-8">
+                <button 
+                    id="characterUploadBtn"
+                    onclick="uploadCharacter()"
+                    class="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 rounded-lg font-bold hover:from-purple-600 hover:to-purple-700 transition shadow-lg"
+                >
+                    <i class="fas fa-upload mr-2"></i>업로드
+                </button>
+                <button 
+                    onclick="closeCharacterUploadModal()"
+                    class="flex-1 bg-gray-500 text-white py-3 rounded-lg font-bold hover:bg-gray-600 transition"
+                >
+                    <i class="fas fa-times mr-2"></i>취소
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 표지 이미지 업로드 모달 -->
+    <div id="coverUploadModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 md:p-8">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-upload mr-3 text-indigo-600"></i>
+                표지 이미지 업로드
+            </h2>
+            
+            <div class="space-y-6">
+                <!-- 탭 선택 -->
+                <div class="flex gap-2 border-b border-gray-200">
+                    <button 
+                        id="coverFileTab"
+                        onclick="switchCoverUploadTab('file')"
+                        class="flex-1 py-3 font-semibold text-gray-600 border-b-2 border-transparent hover:text-indigo-600 transition"
+                    >
+                        <i class="fas fa-file-image mr-2"></i>파일 업로드
+                    </button>
+                    <button 
+                        id="coverUrlTab"
+                        onclick="switchCoverUploadTab('url')"
+                        class="flex-1 py-3 font-semibold text-gray-600 border-b-2 border-transparent hover:text-indigo-600 transition"
+                    >
+                        <i class="fas fa-link mr-2"></i>URL 입력
+                    </button>
+                </div>
+                
+                <!-- 파일 업로드 탭 -->
+                <div id="coverFileUploadArea" class="hidden">
+                    <label class="block text-gray-700 font-semibold mb-3">
+                        <i class="fas fa-file-image mr-2"></i>이미지 파일 선택
+                    </label>
+                    <input 
+                        type="file" 
+                        id="coverFileInput"
+                        accept="image/*"
+                        class="w-full px-4 py-3 border-2 border-indigo-300 rounded-lg focus:outline-none focus:border-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                    />
+                    <p class="text-sm text-gray-500 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        JPG, PNG, GIF 등의 이미지 파일을 선택하세요.
+                    </p>
+                </div>
+                
+                <!-- URL 입력 탭 -->
+                <div id="coverUrlUploadArea" class="hidden">
+                    <label class="block text-gray-700 font-semibold mb-3">
+                        <i class="fas fa-link mr-2"></i>이미지 URL
+                    </label>
+                    <input 
+                        type="url" 
+                        id="coverUrlInput"
+                        placeholder="https://example.com/cover.png"
+                        class="w-full px-4 py-3 border-2 border-indigo-300 rounded-lg focus:outline-none focus:border-indigo-500"
+                    />
+                    <p class="text-sm text-gray-500 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        공개적으로 접근 가능한 이미지 URL을 입력하세요.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex gap-4 mt-8">
+                <button 
+                    id="coverUploadBtn"
+                    onclick="uploadCover()"
+                    class="flex-1 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white py-3 rounded-lg font-bold hover:from-indigo-600 hover:to-indigo-700 transition shadow-lg"
+                >
+                    <i class="fas fa-upload mr-2"></i>업로드
+                </button>
+                <button 
+                    onclick="closeCoverUploadModal()"
+                    class="flex-1 bg-gray-500 text-white py-3 rounded-lg font-bold hover:bg-gray-600 transition"
+                >
+                    <i class="fas fa-times mr-2"></i>취소
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 삽화 업로드 모달 -->
     <div id="illustrationUploadModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 md:p-8">
