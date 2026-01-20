@@ -2450,20 +2450,6 @@ app.get('/api/storybooks/:id', async (req, res) => {
     });
   }
 });
-    
-    res.json({
-      success: true,
-      storybook
-    });
-    
-  } catch (error) {
-    console.error('Failed to load storybook:', error);
-    res.status(500).json({
-      success: false,
-      error: '동화책 조회 실패: ' + error.message
-    });
-  }
-});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
