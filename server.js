@@ -2679,6 +2679,124 @@ Create a professional, captivating cover illustration.`;
   }
 });
 
+// 7. 동화책 저장/업데이트 API
+app.post('/api/storybooks', async (req, res) => {
+  try {
+    const storybook = req.body;
+    
+    if (!storybook.id) {
+      return res.status(400).json({ 
+        success: false, 
+        error: '동화책 ID가 필요합니다.' 
+      });
+    }
+    
+    console.log(`💾 Saving storybook: ${storybook.title} (ID: ${storybook.id})`);
+    
+    // R2에 JSON 파일로 저장
+    const filename = `storybook-${storybook.id}.json`;
+    const jsonContent = JSON.stringify(storybook, null, 2);
+    
+    const command = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: filename,
+      Body: Buffer.from(jsonContent, 'utf-8'),
+      ContentType: 'application/json',
+    });
+    
+    await r2Client.send(command);
+    
+    console.log(`✅ Storybook saved to R2: ${filename}`);
+    
+    // 동화책 목록 인덱스 업데이트
+    await updateStorybooksIndex(storybook);
+    
+    res.json({
+      success: true,
+      id: storybook.id,
+      message: '동화책이 저장되었습니다.',
+      r2Url: `${R2_PUBLIC_URL}/${filename}`
+    });
+    
+  } catch (error) {
+    console.error('동화책 저장 오류:', error);
+    res.status(500).json({ 
+      success: false,
+      error: '동화책 저장 실패: ' + error.message
+    });
+  }
+});
+
+// 동화책 목록 인덱스 업데이트 (메타데이터만)
+async function updateStorybooksIndex(storybook) {
+  try {
+    const indexFilename = 'storybooks-index.json';
+    
+    // 기존 인덱스 파일 읽기
+    let index = { storybooks: [] };
+    
+    try {
+      const getCommand = new GetObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: indexFilename
+      });
+      
+      const response = await r2Client.send(getCommand);
+      const body = await response.Body.transformToString();
+      index = JSON.parse(body);
+    } catch (error) {
+      // 파일이 없으면 새로 생성
+      console.log('📝 Creating new storybooks index');
+    }
+    
+    // 메타데이터만 추출
+    const metadata = {
+      id: storybook.id,
+      title: storybook.title,
+      targetAge: storybook.targetAge,
+      artStyle: storybook.artStyle,
+      createdAt: storybook.createdAt,
+      updatedAt: new Date().toISOString(),
+      pageCount: storybook.pages ? storybook.pages.length : 0,
+      characterCount: storybook.characters ? storybook.characters.length : 0,
+      hasCover: !!storybook.coverImage,
+      r2JsonUrl: `${R2_PUBLIC_URL}/storybook-${storybook.id}.json`
+    };
+    
+    // 기존 항목 찾기
+    const existingIndex = index.storybooks.findIndex(item => item.id === storybook.id);
+    
+    if (existingIndex >= 0) {
+      // 업데이트
+      index.storybooks[existingIndex] = metadata;
+      console.log(`📝 Updated index for: ${storybook.title}`);
+    } else {
+      // 새로 추가
+      index.storybooks.push(metadata);
+      console.log(`📝 Added to index: ${storybook.title}`);
+    }
+    
+    // 최신순 정렬
+    index.storybooks.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    
+    // 인덱스 파일 저장
+    const putCommand = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: indexFilename,
+      Body: Buffer.from(JSON.stringify(index, null, 2), 'utf-8'),
+      ContentType: 'application/json',
+    });
+    
+    await r2Client.send(putCommand);
+    
+    console.log(`✅ Index updated: ${index.storybooks.length} storybooks`);
+    
+  } catch (error) {
+    console.error('인덱스 업데이트 오류:', error);
+    // 인덱스 업데이트 실패해도 동화책 저장은 성공으로 처리
+  }
+}
+
 // 메인 페이지
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

@@ -3092,6 +3092,29 @@ function saveCurrentStorybook() {
     }
     saveStorybooks();
     renderBookList();
+    
+    // 🔥 R2에도 저장 (비동기, 백그라운드)
+    saveToR2(currentStorybook).catch(error => {
+        console.error('R2 저장 실패:', error);
+    });
+}
+
+// R2에 동화책 저장 (서버 API 호출)
+async function saveToR2(storybook) {
+    try {
+        console.log(`💾 R2 저장 시작: ${storybook.title}`);
+        
+        const response = await axios.post('/api/storybooks', storybook);
+        
+        if (response.data.success) {
+            console.log(`✅ R2 저장 완료: ${storybook.title}`);
+        } else {
+            console.error('R2 저장 실패:', response.data.error);
+        }
+    } catch (error) {
+        console.error('R2 저장 오류:', error);
+        // 에러가 발생해도 로컬 저장은 완료되었으므로 사용자에게 알리지 않음
+    }
 }
 
 // 다운로드 함수들
