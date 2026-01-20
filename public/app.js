@@ -1246,20 +1246,19 @@ function displayStorybook(storybook) {
                             </button>
                         </div>
                         <p class="text-white text-xs md:text-sm mb-3 md:mb-4 opacity-90">${char.description.substring(0, 80)}...</p>
-                        <div id="char-ref-${idx}" class="mb-3 md:mb-4 min-h-[150px] md:min-h-[200px] bg-white bg-opacity-20 rounded-lg flex items-center justify-center overflow-hidden">
+                        <div id="char-ref-${idx}" class="mb-3 md:mb-4 min-h-[150px] md:min-h-[200px] bg-white bg-opacity-20 rounded-lg flex items-center justify-center overflow-hidden relative group">
                             ${char.referenceImage ? 
-                                `<img src="${char.referenceImage}" alt="${char.name}" class="w-full h-full object-cover rounded-lg"/>` :
+                                `<img src="${char.referenceImage}" alt="${char.name}" class="w-full h-full object-cover rounded-lg"/>
+                                <button 
+                                    onclick="downloadImage('${char.referenceImage}', '캐릭터_${char.name}.png')"
+                                    class="absolute top-2 right-2 bg-white bg-opacity-90 text-purple-600 w-10 h-10 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                                    title="다운로드"
+                                >
+                                    <i class="fas fa-download"></i>
+                                </button>` :
                                 '<p class="text-white text-xs md:text-sm text-center p-4">이미지 생성 대기중</p>'
                             }
                         </div>
-                        ${char.referenceImage ? 
-                            `<button 
-                                onclick="downloadImage('${char.referenceImage}', '캐릭터_${char.name}.png')"
-                                class="w-full bg-green-500 text-white py-2 rounded-lg font-semibold hover:bg-green-600 transition mb-2"
-                            >
-                                <i class="fas fa-download mr-2"></i>이미지 다운로드
-                            </button>` : ''
-                        }
                         <textarea 
                             id="char-prompt-${idx}" 
                             class="w-full p-2 border border-white rounded-lg text-sm mb-2 bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70"
@@ -1279,14 +1278,6 @@ function displayStorybook(storybook) {
                             >
                                 <i class="fas fa-upload mr-2"></i>업로드
                             </button>
-                            ${char.referenceImage ? 
-                                `<button 
-                                    onclick="downloadImage('${char.referenceImage}', '${char.name}_레퍼런스.png')"
-                                    class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
-                                >
-                                    <i class="fas fa-download"></i>
-                                </button>` : ''
-                            }
                         </div>
                         <input 
                             type="file" 
@@ -1323,14 +1314,6 @@ function displayStorybook(storybook) {
                     >
                         <i class="fas fa-image mr-1 md:mr-2"></i><span class="hidden sm:inline">${storybook.coverImage ? '표지 재생성' : '표지 생성'}</span><span class="sm:hidden">${storybook.coverImage ? '재생성' : '생성'}</span>
                     </button>
-                    ${storybook.coverImage ? `
-                    <button 
-                        onclick="downloadImage('${storybook.coverImage}', '${storybook.title}_표지.png')"
-                        class="bg-green-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-green-700 transition whitespace-nowrap text-sm md:text-base"
-                    >
-                        <i class="fas fa-download mr-1 md:mr-2"></i><span class="hidden sm:inline">다운로드</span><span class="sm:hidden">다운</span>
-                    </button>
-                    ` : ''}
                 </div>
             </div>
             <div id="cover-section-content" class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 hidden">
@@ -1339,9 +1322,16 @@ function displayStorybook(storybook) {
                     <h4 class="text-lg md:text-xl font-bold text-white mb-3 md:mb-4">
                         <i class="fas fa-image mr-2"></i>표지 이미지
                     </h4>
-                    <div id="cover-image-display" class="mb-3 md:mb-4 min-h-[300px] md:min-h-[400px] bg-white bg-opacity-20 rounded-lg flex items-center justify-center overflow-hidden">
+                    <div id="cover-image-display" class="mb-3 md:mb-4 min-h-[300px] md:min-h-[400px] bg-white bg-opacity-20 rounded-lg flex items-center justify-center overflow-hidden relative group">
                         ${storybook.coverImage ? 
-                            `<img src="${storybook.coverImage}" alt="표지" class="w-full h-full object-cover rounded-lg"/>` :
+                            `<img src="${storybook.coverImage}" alt="표지" class="w-full h-full object-cover rounded-lg"/>
+                            <button 
+                                onclick="downloadImage('${storybook.coverImage}', '${storybook.title}_표지.png')"
+                                class="absolute top-3 right-3 bg-white bg-opacity-90 text-indigo-600 w-12 h-12 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                                title="다운로드"
+                            >
+                                <i class="fas fa-download text-lg"></i>
+                            </button>` :
                             '<div class="text-center p-6"><i class="fas fa-book-open text-6xl text-white opacity-50 mb-4"></i><p class="text-white text-sm">표지 이미지 생성 대기중</p></div>'
                         }
                     </div>
@@ -1821,13 +1811,14 @@ function displayStorybook(storybook) {
                                 
                                 <div id="illustration-${idx}" class="bg-white rounded-lg overflow-hidden shadow-sm border-2 border-gray-200">
                                     ${page.illustrationImage ?
-                                        `<div class="relative">
+                                        `<div class="relative group">
                                             <img src="${page.illustrationImage}" alt="Page ${page.pageNumber}" class="w-full h-auto"/>
                                             <button 
                                                 onclick="downloadImage('${page.illustrationImage}', '${storybook.title}_페이지_${page.pageNumber}.png')"
-                                                class="absolute top-2 right-2 bg-green-600 text-white px-2 md:px-3 py-1.5 rounded-lg hover:bg-green-700 active:bg-green-800 transition text-xs shadow-lg"
+                                                class="absolute top-3 right-3 bg-white bg-opacity-90 text-green-600 w-11 h-11 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                                                title="다운로드"
                                             >
-                                                <i class="fas fa-download mr-1"></i>저장
+                                                <i class="fas fa-download text-base"></i>
                                             </button>
                                         </div>` :
                                         `<div class="min-h-[150px] md:min-h-[200px] flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
@@ -2096,19 +2087,17 @@ function displayStorybook(storybook) {
                                             />
                                         </div>` : ''}
                                     </div>
+                                </div>
+                                <div id="vocab-img-${idx}" class="bg-gray-100 rounded-lg mb-2 min-h-[180px] flex items-center justify-center overflow-hidden relative group">
                                     ${vocabImg && vocabImg.imageUrl ? 
-                                        `<button 
+                                        `<img src="${vocabImg.imageUrl}" alt="${word}" class="w-full h-full object-cover rounded-lg"/>
+                                        <button 
                                             onclick="downloadImage('${vocabImg.imageUrl}', '단어_${word}.png')"
-                                            class="text-green-600 hover:text-green-800 ml-2"
+                                            class="absolute top-2 right-2 bg-white bg-opacity-90 text-blue-600 w-9 h-9 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
                                             title="다운로드"
                                         >
-                                            <i class="fas fa-download"></i>
-                                        </button>` : ''
-                                    }
-                                </div>
-                                <div id="vocab-img-${idx}" class="bg-gray-100 rounded-lg mb-2 min-h-[180px] flex items-center justify-center overflow-hidden">
-                                    ${vocabImg && vocabImg.imageUrl ? 
-                                        `<img src="${vocabImg.imageUrl}" alt="${word}" class="w-full h-full object-cover rounded-lg"/>` :
+                                            <i class="fas fa-download text-sm"></i>
+                                        </button>` :
                                         `<p class="text-gray-400 text-sm text-center p-4">
                                             <i class="fas fa-image text-3xl mb-2"></i><br>
                                             이미지 대기중
@@ -2122,15 +2111,6 @@ function displayStorybook(storybook) {
                                     >
                                         <i class="fas fa-magic mr-1"></i>${vocabImg && vocabImg.imageUrl ? '재생성' : '생성'}
                                     </button>
-                                    ${vocabImg && vocabImg.imageUrl ? 
-                                        `<button 
-                                            onclick="downloadImage('${vocabImg.imageUrl}', '단어_${word}.png')"
-                                            class="bg-green-500 text-white px-3 py-1 rounded text-xs hover:bg-green-600 transition"
-                                            title="다운로드"
-                                        >
-                                            <i class="fas fa-download"></i>
-                                        </button>` : ''
-                                    }
                                 </div>
                             </div>
                             `;
