@@ -2185,10 +2185,11 @@ function updatePageTTSModel(pageIndex, value) {
 // 오디오 다운로드
 async function downloadAudio(audioUrl, filename) {
     try {
+        const downloadUrl = `/api/download-image?url=${encodeURIComponent(audioUrl)}&filename=${encodeURIComponent(filename)}`;
+        
         const a = document.createElement('a');
-        a.href = audioUrl;
+        a.href = downloadUrl;
         a.download = filename;
-        a.target = '_blank';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -3156,10 +3157,12 @@ async function downloadAllCharacterReferences() {
     
     for (const char of characters) {
         try {
+            const filename = `캐릭터_${char.name}.png`;
+            const downloadUrl = `/api/download-image?url=${encodeURIComponent(char.referenceImage)}&filename=${encodeURIComponent(filename)}`;
+            
             const a = document.createElement('a');
-            a.href = char.referenceImage;
-            a.download = `캐릭터_${char.name}.png`;
-            a.target = '_blank';
+            a.href = downloadUrl;
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -3190,10 +3193,11 @@ async function downloadAllIllustrations() {
     
     for (const img of images) {
         try {
+            const downloadUrl = `/api/download-image?url=${encodeURIComponent(img.url)}&filename=${encodeURIComponent(img.filename)}`;
+            
             const a = document.createElement('a');
-            a.href = img.url;
+            a.href = downloadUrl;
             a.download = img.filename;
-            a.target = '_blank';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -3342,11 +3346,11 @@ async function translateAllText() {
 
 async function downloadImage(imageUrl, filename) {
     try {
-        // CORS 이슈 해결: fetch 대신 직접 다운로드 링크 사용
+        const downloadUrl = `/api/download-image?url=${encodeURIComponent(imageUrl)}&filename=${encodeURIComponent(filename)}`;
+        
         const a = document.createElement('a');
-        a.href = imageUrl;
+        a.href = downloadUrl;
         a.download = filename;
-        a.target = '_blank'; // 새 탭에서 열기 (다운로드 실패 시 대비)
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -3652,10 +3656,11 @@ async function downloadAllVocabularyImages() {
     
     for (const img of images) {
         try {
+            const downloadUrl = `/api/download-image?url=${encodeURIComponent(img.url)}&filename=${encodeURIComponent(img.filename)}`;
+            
             const a = document.createElement('a');
-            a.href = img.url;
+            a.href = downloadUrl;
             a.download = img.filename;
-            a.target = '_blank';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);

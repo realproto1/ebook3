@@ -3078,6 +3078,40 @@ async function removeFromStorybooksIndex(storybookId) {
   }
 }
 
+// 이미지 다운로드 프록시 API (CORS 우회)
+app.get('/api/download-image', async (req, res) => {
+  try {
+    const { url, filename } = req.query;
+    
+    if (!url) {
+      return res.status(400).json({ error: 'URL is required' });
+    }
+    
+    console.log(`📥 Downloading image for user: ${url.substring(0, 80)}...`);
+    
+    // URL에서 이미지 다운로드
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.status}`);
+    }
+    
+    const buffer = await response.arrayBuffer();
+    
+    // 파일명 설정
+    const downloadFilename = filename || 'image.png';
+    
+    // Content-Disposition 헤더로 다운로드 강제
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(downloadFilename)}"`);
+    res.setHeader('Content-Type', response.headers.get('content-type') || 'image/png');
+    res.send(Buffer.from(buffer));
+    
+    console.log(`✅ Image downloaded: ${downloadFilename}`);
+  } catch (error) {
+    console.error('Download proxy error:', error);
+    res.status(500).json({ error: 'Download failed: ' + error.message });
+  }
+});
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
