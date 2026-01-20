@@ -263,6 +263,127 @@ function toggleCoverCharacterRef(charIndex, checked) {
     console.log('✅ 표지 캐릭터 참조 업데이트:', currentStorybook.coverCharacterRefs);
 }
 
+// 표지 업로드 모달
+let currentCoverUploadTab = 'file';
+
+function openCoverUploadModal() {
+    currentCoverUploadTab = 'file';
+    document.getElementById('coverUploadModal').classList.remove('hidden');
+    switchCoverUploadTab('file');
+}
+
+function closeCoverUploadModal() {
+    document.getElementById('coverUploadModal').classList.add('hidden');
+    document.getElementById('coverFileInput').value = '';
+    document.getElementById('coverUrlInput').value = '';
+}
+
+function switchCoverUploadTab(tab) {
+    currentCoverUploadTab = tab;
+    
+    // 탭 버튼 스타일
+    const fileTab = document.getElementById('coverFileTab');
+    const urlTab = document.getElementById('coverUrlTab');
+    
+    if (tab === 'file') {
+        fileTab.classList.add('border-indigo-600', 'text-indigo-600');
+        fileTab.classList.remove('border-transparent', 'text-gray-500');
+        urlTab.classList.remove('border-indigo-600', 'text-indigo-600');
+        urlTab.classList.add('border-transparent', 'text-gray-500');
+        
+        document.getElementById('coverFileUploadArea').classList.remove('hidden');
+        document.getElementById('coverUrlUploadArea').classList.add('hidden');
+    } else {
+        urlTab.classList.add('border-indigo-600', 'text-indigo-600');
+        urlTab.classList.remove('border-transparent', 'text-gray-500');
+        fileTab.classList.remove('border-indigo-600', 'text-indigo-600');
+        fileTab.classList.add('border-transparent', 'text-gray-500');
+        
+        document.getElementById('coverUrlUploadArea').classList.remove('hidden');
+        document.getElementById('coverFileUploadArea').classList.add('hidden');
+    }
+}
+
+async function uploadCover() {
+    if (!currentStorybook) return;
+    
+    const uploadBtn = document.getElementById('coverUploadBtn');
+    
+    try {
+        let imageUrl = '';
+        
+        if (currentCoverUploadTab === 'file') {
+            // 파일 업로드
+            const fileInput = document.getElementById('coverFileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('파일을 선택해주세요.');
+                return;
+            }
+            
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>업로드 중...';
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('storybookId', currentStorybook.id);
+            formData.append('type', 'cover');
+            
+            const response = await axios.post('/api/upload-image', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
+            if (response.data.success) {
+                imageUrl = response.data.imageUrl;
+            } else {
+                throw new Error(response.data.error || '이미지 업로드 실패');
+            }
+        } else {
+            // URL 입력
+            const urlInput = document.getElementById('coverUrlInput');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                alert('URL을 입력해주세요.');
+                return;
+            }
+            
+            // URL 유효성 검사
+            try {
+                new URL(url);
+            } catch (e) {
+                alert('올바른 URL을 입력해주세요.');
+                return;
+            }
+            
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>업로드 중...';
+            
+            imageUrl = url;
+        }
+        
+        // 표지 이미지 저장
+        currentStorybook.coverImage = imageUrl;
+        await saveCurrentStorybook();
+        
+        // UI 업데이트
+        displayStorybook(currentStorybook);
+        
+        closeCoverUploadModal();
+        
+        showNotification('✅ 표지 이미지가 업로드되었습니다.', 'success');
+    } catch (error) {
+        console.error('Cover upload error:', error);
+        alert('이미지 업로드 중 오류가 발생했습니다: ' + (error.message || '알 수 없는 오류'));
+    } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = '<i class="fas fa-upload mr-2"></i>업로드';
+    }
+}
+
 // 표지 이미지 생성
 async function generateCoverImage() {
     if (!currentStorybook) {
@@ -1317,19 +1438,12 @@ function displayStorybook(storybook) {
                                 <i class="fas fa-image mr-2"></i>생성
                             </button>
                             <button 
-                                onclick="document.getElementById('upload-char-${idx}').click()"
+                                onclick="openCharacterUploadModal(${idx})"
                                 class="flex-1 bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition"
                             >
                                 <i class="fas fa-upload mr-2"></i>업로드
                             </button>
                         </div>
-                        <input 
-                            type="file" 
-                            id="upload-char-${idx}" 
-                            accept="image/*" 
-                            class="hidden" 
-                            onchange="uploadCharacterImage(${idx}, this)"
-                        />
                     </div>
                 `).join('')}
             </div>
@@ -1357,6 +1471,12 @@ function displayStorybook(storybook) {
                         class="bg-indigo-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-indigo-700 transition whitespace-nowrap text-sm md:text-base"
                     >
                         <i class="fas fa-image mr-1 md:mr-2"></i><span class="hidden sm:inline">${storybook.coverImage ? '표지 재생성' : '표지 생성'}</span><span class="sm:hidden">${storybook.coverImage ? '재생성' : '생성'}</span>
+                    </button>
+                    <button 
+                        onclick="openCoverUploadModal()"
+                        class="bg-blue-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-blue-700 transition whitespace-nowrap text-sm md:text-base"
+                    >
+                        <i class="fas fa-upload mr-1 md:mr-2"></i><span class="hidden sm:inline">이미지 업로드</span><span class="sm:hidden">업로드</span>
                     </button>
                 </div>
             </div>
@@ -2359,12 +2479,48 @@ function updateVocabularyPrompt(value) {
 
 // 삽화 업로드 모달 관련 변수
 let currentUploadPageIndex = null;
+let currentUploadCharIndex = null;
+let currentUploadType = 'illustration'; // 'illustration', 'character', 'cover'
 let currentUploadTab = 'file';
 
 // 삽화 업로드 모달 열기
 function openIllustrationUploadModal(pageIndex) {
     currentUploadPageIndex = pageIndex;
+    currentUploadCharIndex = null;
+    currentUploadType = 'illustration';
     const modal = document.getElementById('illustrationUploadModal');
+    const title = modal.querySelector('h2');
+    title.innerHTML = '<i class="fas fa-upload mr-3 text-blue-600"></i>삽화 이미지 업로드';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // 기본 탭으로 설정
+    switchUploadTab('file');
+}
+
+// 캐릭터 레퍼런스 업로드 모달 열기
+function openCharacterUploadModal(charIndex) {
+    currentUploadPageIndex = null;
+    currentUploadCharIndex = charIndex;
+    currentUploadType = 'character';
+    const modal = document.getElementById('illustrationUploadModal');
+    const title = modal.querySelector('h2');
+    title.innerHTML = '<i class="fas fa-upload mr-3 text-purple-600"></i>캐릭터 레퍼런스 업로드';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // 기본 탭으로 설정
+    switchUploadTab('file');
+}
+
+// 표지 업로드 모달 열기
+function openCoverUploadModal() {
+    currentUploadPageIndex = null;
+    currentUploadCharIndex = null;
+    currentUploadType = 'cover';
+    const modal = document.getElementById('illustrationUploadModal');
+    const title = modal.querySelector('h2');
+    title.innerHTML = '<i class="fas fa-upload mr-3 text-indigo-600"></i>표지 이미지 업로드';
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     
@@ -2382,6 +2538,8 @@ function closeIllustrationUploadModal() {
     document.getElementById('illustrationFileInput').value = '';
     document.getElementById('illustrationUrlInput').value = '';
     currentUploadPageIndex = null;
+    currentUploadCharIndex = null;
+    currentUploadType = 'illustration';
 }
 
 // 업로드 탭 전환
@@ -2412,13 +2570,8 @@ function switchUploadTab(tab) {
     }
 }
 
-// 삽화 업로드 실행
+// 삽화/캐릭터/표지 업로드 실행
 async function uploadIllustration() {
-    if (currentUploadPageIndex === null) {
-        alert('페이지가 선택되지 않았습니다.');
-        return;
-    }
-    
     const uploadBtn = document.getElementById('uploadIllustrationBtn');
     const originalText = uploadBtn.innerHTML;
     
@@ -2442,8 +2595,16 @@ async function uploadIllustration() {
             const formData = new FormData();
             formData.append('image', file);
             formData.append('storybookId', currentStorybook.id);
-            formData.append('type', 'illustration');
-            formData.append('pageNumber', currentStorybook.pages[currentUploadPageIndex].pageNumber);
+            formData.append('type', currentUploadType);
+            
+            if (currentUploadType === 'illustration' && currentUploadPageIndex !== null) {
+                formData.append('pageNumber', currentStorybook.pages[currentUploadPageIndex].pageNumber);
+            } else if (currentUploadType === 'character' && currentUploadCharIndex !== null) {
+                formData.append('charIndex', currentUploadCharIndex);
+                formData.append('charName', currentStorybook.characters[currentUploadCharIndex].name);
+            } else if (currentUploadType === 'cover') {
+                formData.append('pageNumber', 'cover');
+            }
             
             const response = await axios.post('/api/upload-image', formData, {
                 headers: {
@@ -2477,8 +2638,18 @@ async function uploadIllustration() {
             imageUrl = url;
         }
         
-        // 페이지에 이미지 적용
-        currentStorybook.pages[currentUploadPageIndex].illustrationImage = imageUrl;
+        // 타입별로 이미지 적용
+        if (currentUploadType === 'illustration' && currentUploadPageIndex !== null) {
+            // 페이지 삽화
+            currentStorybook.pages[currentUploadPageIndex].illustrationImage = imageUrl;
+        } else if (currentUploadType === 'character' && currentUploadCharIndex !== null) {
+            // 캐릭터 레퍼런스
+            currentStorybook.characters[currentUploadCharIndex].referenceImage = imageUrl;
+        } else if (currentUploadType === 'cover') {
+            // 표지
+            currentStorybook.coverImage = imageUrl;
+        }
+        
         saveCurrentStorybook();
         
         // UI 업데이트
@@ -2487,7 +2658,9 @@ async function uploadIllustration() {
         // 모달 닫기
         closeIllustrationUploadModal();
         
-        showNotification('success', '업로드 완료', '삽화 이미지가 업로드되었습니다.');
+        const uploadTypeText = currentUploadType === 'illustration' ? '삽화' : 
+                               currentUploadType === 'character' ? '캐릭터 레퍼런스' : '표지';
+        showNotification('success', '업로드 완료', `${uploadTypeText} 이미지가 업로드되었습니다.`);
         
     } catch (error) {
         console.error('업로드 오류:', error);
@@ -4299,7 +4472,133 @@ ${noTextPrompt}`;
 }
 
 // ===== 캐릭터 이미지 업로드 =====
-async function uploadCharacterImage(charIndex, inputElement) {
+// 캐릭터 레퍼런스 업로드 모달
+let currentCharacterUploadIndex = null;
+let currentCharacterUploadTab = 'file';
+
+function openCharacterUploadModal(charIndex) {
+    currentCharacterUploadIndex = charIndex;
+    currentCharacterUploadTab = 'file';
+    document.getElementById('characterUploadModal').classList.remove('hidden');
+    switchCharacterUploadTab('file');
+}
+
+function closeCharacterUploadModal() {
+    document.getElementById('characterUploadModal').classList.add('hidden');
+    document.getElementById('characterFileInput').value = '';
+    document.getElementById('characterUrlInput').value = '';
+    currentCharacterUploadIndex = null;
+}
+
+function switchCharacterUploadTab(tab) {
+    currentCharacterUploadTab = tab;
+    
+    // 탭 버튼 스타일
+    const fileTab = document.getElementById('characterFileTab');
+    const urlTab = document.getElementById('characterUrlTab');
+    
+    if (tab === 'file') {
+        fileTab.classList.add('border-purple-600', 'text-purple-600');
+        fileTab.classList.remove('border-transparent', 'text-gray-500');
+        urlTab.classList.remove('border-purple-600', 'text-purple-600');
+        urlTab.classList.add('border-transparent', 'text-gray-500');
+        
+        document.getElementById('characterFileUploadArea').classList.remove('hidden');
+        document.getElementById('characterUrlUploadArea').classList.add('hidden');
+    } else {
+        urlTab.classList.add('border-purple-600', 'text-purple-600');
+        urlTab.classList.remove('border-transparent', 'text-gray-500');
+        fileTab.classList.remove('border-purple-600', 'text-purple-600');
+        fileTab.classList.add('border-transparent', 'text-gray-500');
+        
+        document.getElementById('characterUrlUploadArea').classList.remove('hidden');
+        document.getElementById('characterFileUploadArea').classList.add('hidden');
+    }
+}
+
+async function uploadCharacter() {
+    if (!currentStorybook || currentCharacterUploadIndex === null) return;
+    
+    const uploadBtn = document.getElementById('characterUploadBtn');
+    
+    try {
+        let imageUrl = '';
+        
+        if (currentCharacterUploadTab === 'file') {
+            // 파일 업로드
+            const fileInput = document.getElementById('characterFileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('파일을 선택해주세요.');
+                return;
+            }
+            
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>업로드 중...';
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('storybookId', currentStorybook.id);
+            formData.append('type', 'character');
+            formData.append('characterIndex', currentCharacterUploadIndex);
+            
+            const response = await axios.post('/api/upload-image', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
+            if (response.data.success) {
+                imageUrl = response.data.imageUrl;
+            } else {
+                throw new Error(response.data.error || '이미지 업로드 실패');
+            }
+        } else {
+            // URL 입력
+            const urlInput = document.getElementById('characterUrlInput');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                alert('URL을 입력해주세요.');
+                return;
+            }
+            
+            // URL 유효성 검사
+            try {
+                new URL(url);
+            } catch (e) {
+                alert('올바른 URL을 입력해주세요.');
+                return;
+            }
+            
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>업로드 중...';
+            
+            imageUrl = url;
+        }
+        
+        // 캐릭터 레퍼런스 이미지 저장
+        currentStorybook.characters[currentCharacterUploadIndex].referenceImage = imageUrl;
+        await saveCurrentStorybook();
+        
+        // UI 업데이트
+        displayStorybook(currentStorybook);
+        
+        closeCharacterUploadModal();
+        
+        showNotification('✅ 이미지가 업로드되었습니다.', 'success');
+    } catch (error) {
+        console.error('Character upload error:', error);
+        alert('이미지 업로드 중 오류가 발생했습니다: ' + (error.message || '알 수 없는 오류'));
+    } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = '<i class="fas fa-upload mr-2"></i>업로드';
+    }
+}
+
+// 기존 uploadCharacterImage 함수 (사용하지 않음)
+async function uploadCharacterImage_old(charIndex, inputElement) {
     const file = inputElement.files[0];
     if (!file) return;
     
