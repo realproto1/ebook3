@@ -185,20 +185,59 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
     // parts 배열 구성 (프롬프트 + 레퍼런스 이미지들)
     const parts = [{ text: prompt }];
     
-    // 레퍼런스 이미지 추가 (base64 데이터)
+    // 레퍼런스 이미지 추가
     for (const imageUrl of referenceImages) {
-      if (imageUrl && imageUrl.startsWith('data:image/')) {
-        const base64Data = imageUrl.split(',')[1];
-        const mimeType = imageUrl.split(';')[0].split(':')[1];
+      if (!imageUrl) continue;
+      
+      try {
+        let base64Data, mimeType;
         
+        // 1️⃣ Base64 데이터 (이미 변환된 경우)
+        if (imageUrl.startsWith('data:image/')) {
+          base64Data = imageUrl.split(',')[1];
+          mimeType = imageUrl.split(';')[0].split(':')[1];
+          console.log(`  📎 Adding base64 reference image (${mimeType})`);
+        }
+        // 2️⃣ HTTP URL (R2 또는 외부 URL)
+        else if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+          console.log(`  📥 Downloading reference image from URL: ${imageUrl.substring(0, 80)}...`);
+          
+          // URL에서 이미지 다운로드
+          const imageResponse = await fetch(imageUrl);
+          if (!imageResponse.ok) {
+            console.warn(`  ⚠️ Failed to download image: ${imageResponse.status}`);
+            continue;
+          }
+          
+          // Buffer로 변환
+          const arrayBuffer = await imageResponse.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
+          base64Data = buffer.toString('base64');
+          
+          // MIME type 추출 (Content-Type 헤더 또는 URL 확장자)
+          mimeType = imageResponse.headers.get('content-type') || 'image/png';
+          console.log(`  ✅ Downloaded and converted to base64 (${mimeType}, ${Math.round(buffer.length / 1024)}KB)`);
+        }
+        else {
+          console.warn(`  ⚠️ Unknown image URL format: ${imageUrl.substring(0, 50)}`);
+          continue;
+        }
+        
+        // Gemini API에 추가
         parts.push({
           inlineData: {
             mimeType: mimeType,
             data: base64Data
           }
         });
+        
+      } catch (error) {
+        console.error(`  ❌ Failed to process reference image: ${error.message}`);
+        // 한 이미지 실패해도 계속 진행
       }
     }
+    
+    console.log(`📊 Total parts: 1 text + ${parts.length - 1} images`);
     
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
