@@ -2185,16 +2185,12 @@ function updatePageTTSModel(pageIndex, value) {
 // 오디오 다운로드
 async function downloadAudio(audioUrl, filename) {
     try {
-        const response = await fetch(audioUrl);
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        
         const a = document.createElement('a');
-        a.href = url;
+        a.href = audioUrl;
         a.download = filename;
+        a.target = '_blank';
         document.body.appendChild(a);
         a.click();
-        window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
         
         showNotification('success', '다운로드 완료', filename + '이 다운로드되었습니다.');
@@ -3160,25 +3156,23 @@ async function downloadAllCharacterReferences() {
     
     for (const char of characters) {
         try {
-            const response = await fetch(char.referenceImage);
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
+            a.href = char.referenceImage;
             a.download = `캐릭터_${char.name}.png`;
+            a.target = '_blank';
             document.body.appendChild(a);
             a.click();
-            window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
             
             // 다운로드 간 짧은 지연
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 300));
         } catch (error) {
             console.error(`Download error for ${char.name}:`, error);
         }
     }
     
-    alert(`${characters.length}개의 캐릭터 레퍼런스를 다운로드했습니다.`);
+    showNotification('success', '다운로드 완료', `${characters.length}개의 캐릭터 레퍼런스를 다운로드했습니다.`);
+}
 }
 
 async function downloadAllIllustrations() {
@@ -3196,24 +3190,22 @@ async function downloadAllIllustrations() {
     
     for (const img of images) {
         try {
-            const response = await fetch(img.url);
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
+            a.href = img.url;
             a.download = img.filename;
+            a.target = '_blank';
             document.body.appendChild(a);
             a.click();
-            window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
             
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 300));
         } catch (error) {
             console.error('Download error:', error);
         }
     }
     
-    alert(`${images.length}개의 삽화를 다운로드했습니다.`);
+    showNotification('success', '다운로드 완료', `${images.length}개의 삽화를 다운로드했습니다.`);
+}
 }
 
 function downloadAllText() {
@@ -3350,15 +3342,13 @@ async function translateAllText() {
 
 async function downloadImage(imageUrl, filename) {
     try {
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
+        // CORS 이슈 해결: fetch 대신 직접 다운로드 링크 사용
         const a = document.createElement('a');
-        a.href = url;
+        a.href = imageUrl;
         a.download = filename;
+        a.target = '_blank'; // 새 탭에서 열기 (다운로드 실패 시 대비)
         document.body.appendChild(a);
         a.click();
-        window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
     } catch (error) {
         console.error('Download error:', error);
@@ -3662,24 +3652,21 @@ async function downloadAllVocabularyImages() {
     
     for (const img of images) {
         try {
-            const response = await fetch(img.url);
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
+            a.href = img.url;
             a.download = img.filename;
+            a.target = '_blank';
             document.body.appendChild(a);
             a.click();
-            window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
             
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 300));
         } catch (error) {
             console.error('Download error:', error);
         }
     }
     
-    alert(`${images.length}개의 단어 이미지를 다운로드했습니다.`);
+    showNotification('success', '다운로드 완료', `${images.length}개의 단어 이미지를 다운로드했습니다.`);
 }
 
 // 기존 함수 (호환성 유지)
