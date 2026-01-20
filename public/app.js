@@ -82,20 +82,27 @@ function updateVocabularyModel(value) {
     console.log('✅ 8단어 학습 모델 변경:', value);
 }
 
-// TTS 모델 선택 HTML 생성
+// TTS 모델 선택 HTML 생성 (설명 포함)
 function createTTSModelSelect(currentModel, pageIndex) {
     const modelOptions = TTS_MODELS.map(model => 
         `<option value="${model.value}" ${currentModel === model.value ? 'selected' : ''}>${model.label}</option>`
     ).join('');
     
+    // 현재 선택된 모델의 설명 찾기
+    const currentModelInfo = TTS_MODELS.find(m => m.value === currentModel);
+    const description = currentModelInfo ? currentModelInfo.description : '';
+    
     return `
-        <select 
-            id="tts-model-select-${pageIndex}"
-            onchange="updatePageTTSModel(${pageIndex}, this.value)"
-            class="text-xs border border-gray-300 rounded px-2 py-1 bg-white"
-        >
-            ${modelOptions}
-        </select>
+        <div class="flex flex-col gap-1">
+            <select 
+                id="tts-model-select-${pageIndex}"
+                onchange="updatePageTTSModel(${pageIndex}, this.value)"
+                class="text-xs border border-gray-300 rounded px-2 py-1 bg-white"
+            >
+                ${modelOptions}
+            </select>
+            ${description ? `<p class="text-[10px] text-gray-500 italic"><i class="fas fa-info-circle mr-1"></i>${description}</p>` : ''}
+        </div>
     `;
 }
 
@@ -1741,7 +1748,7 @@ function displayStorybook(storybook) {
                                     삽화
                                 </h5>
                                 
-                                <!-- 장면 설명 -->
+                                <!-- 장면 설명 (중복 제거) -->
                                 <div class="mb-3">
                                     <label class="text-xs md:text-sm font-semibold text-gray-700 block mb-2">
                                         <i class="fas fa-palette mr-1 text-green-600"></i>장면 설명
@@ -1752,7 +1759,42 @@ function displayStorybook(storybook) {
                                         rows="3"
                                         placeholder="장면, 캐릭터, 배경, 분위기를 자세히 설명하세요..."
                                         onblur="updateSceneCombined(${idx}, this.value)"
-                                    >${page.scene_description || ''}${page.scene_structure ? '\n\n캐릭터: ' + (page.scene_structure.characters || '') + '\n배경: ' + (page.scene_structure.background || '') + '\n분위기: ' + (page.scene_structure.atmosphere || '') : ''}</textarea>
+                                    >${page.scene_description || ''}</textarea>
+                                    <p class="text-[10px] text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>장면의 전체적인 모습을 하나의 텍스트로 작성하세요</p>
+                                </div>
+                                
+                                <!-- 캐릭터/배경/분위기 (별도 필드) -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
+                                    <div>
+                                        <label class="text-[10px] text-gray-600 block mb-1"><i class="fas fa-user mr-1"></i>캐릭터</label>
+                                        <input 
+                                            id="scene-characters-${idx}" 
+                                            value="${page.scene_structure?.characters || ''}"
+                                            placeholder="예: 토끼, 거북이"
+                                            class="w-full p-1.5 border border-green-200 rounded text-xs focus:border-green-400 focus:outline-none"
+                                            onblur="updateSceneStructure(${idx}, 'characters', this.value)"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-gray-600 block mb-1"><i class="fas fa-tree mr-1"></i>배경</label>
+                                        <input 
+                                            id="scene-background-${idx}" 
+                                            value="${page.scene_structure?.background || ''}"
+                                            placeholder="예: 햇살 가득한 숲"
+                                            class="w-full p-1.5 border border-green-200 rounded text-xs focus:border-green-400 focus:outline-none"
+                                            onblur="updateSceneStructure(${idx}, 'background', this.value)"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-gray-600 block mb-1"><i class="fas fa-cloud-sun mr-1"></i>분위기</label>
+                                        <input 
+                                            id="scene-atmosphere-${idx}" 
+                                            value="${page.scene_structure?.atmosphere || ''}"
+                                            placeholder="예: 평화롭고 따뜻함"
+                                            class="w-full p-1.5 border border-green-200 rounded text-xs focus:border-green-400 focus:outline-none"
+                                            onblur="updateSceneStructure(${idx}, 'atmosphere', this.value)"
+                                        />
+                                    </div>
                                 </div>
                                 
                                 <!-- 그림체 -->
@@ -1869,6 +1911,42 @@ function displayStorybook(storybook) {
                                     </div>
                                 </div>
                                 ` : ''}
+                                
+                                <!-- 캐릭터 레퍼런스 선택 -->
+                                ${storybook.characters && storybook.characters.length > 0 ? `
+                                <div class="mt-3 bg-purple-50 border-2 border-purple-200 rounded-lg p-3">
+                                    <label class="block text-xs font-semibold text-purple-700 mb-2">
+                                        <i class="fas fa-users mr-1"></i>캐릭터 레퍼런스 (선택)
+                                    </label>
+                                    <p class="text-[10px] text-gray-600 mb-2"><i class="fas fa-info-circle mr-1"></i>삽화 생성 시 참조할 캐릭터를 선택하세요</p>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                        ${storybook.characters.map((char, charIdx) => {
+                                            if (!char.referenceImage) return '';
+                                            return `
+                                            <label class="relative cursor-pointer group">
+                                                <input 
+                                                    type="checkbox" 
+                                                    id="page-char-ref-${idx}-${charIdx}"
+                                                    onchange="togglePageCharacterRef(${idx}, ${charIdx}, this.checked)"
+                                                    class="absolute top-2 left-2 w-4 h-4 z-10"
+                                                    ${page.characterRefs && page.characterRefs.includes(charIdx) ? 'checked' : ''}
+                                                />
+                                                <div class="border-2 rounded-lg overflow-hidden transition ${page.characterRefs && page.characterRefs.includes(charIdx) ? 'border-purple-500 ring-2 ring-purple-300' : 'border-gray-300 group-hover:border-purple-400'}">
+                                                    <img 
+                                                        src="${char.referenceImage}" 
+                                                        alt="${char.name}"
+                                                        class="w-full h-20 object-cover"
+                                                    />
+                                                    <div class="bg-white px-2 py-1 text-center">
+                                                        <p class="text-[10px] font-semibold text-gray-700 truncate">${char.name}</p>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                            `;
+                                        }).join('') || '<p class="text-gray-400 text-[10px] col-span-2 md:col-span-3 text-center py-2">레퍼런스 이미지가 있는 캐릭터가 없습니다</p>'}
+                                    </div>
+                                </div>
+                                ` : ''}
                             </div>
                         </div>
                     </div>
@@ -1931,6 +2009,36 @@ function displayStorybook(storybook) {
                                 <i class="fas fa-file-alt mr-1"></i>TXT 다운로드
                             </button>
                         </div>
+                    </div>
+                    
+                    <!-- 학습 단어 선정 가이드 -->
+                    <div class="bg-amber-50 border-2 border-amber-300 rounded-lg p-4 mb-4">
+                        <h5 class="text-sm font-bold text-amber-800 mb-2">
+                            <i class="fas fa-lightbulb mr-1"></i>학습 단어 선정 가이드
+                        </h5>
+                        <ul class="text-xs text-gray-700 space-y-1">
+                            <li><i class="fas fa-check text-green-600 mr-1"></i><strong>추천:</strong> 그림으로 표현하기 쉬운 <strong>동물</strong>(rabbit, cat, bird 등)과 <strong>사물</strong>(apple, house, ball 등)</li>
+                            <li><i class="fas fa-times text-red-600 mr-1"></i><strong>비추천:</strong> 추상적이거나 그림 그리기 어려운 단어(아빠, 형제, 가족, 숲, 자연 등)</li>
+                            <li><i class="fas fa-star text-yellow-600 mr-1"></i><strong>팁:</strong> 명확한 형태가 있고, 어린이가 쉽게 알아볼 수 있는 대상을 선택하세요</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 학습 단어 프롬프트 -->
+                    <div class="bg-white border-2 border-blue-300 rounded-lg p-4 mb-4">
+                        <h5 class="text-sm font-bold text-blue-700 mb-2">
+                            <i class="fas fa-edit mr-1"></i>학습 단어 생성 프롬프트 (재생성 시 참조됨)
+                        </h5>
+                        <textarea 
+                            id="vocabulary-prompt"
+                            class="w-full p-3 border-2 border-blue-200 rounded-lg text-xs focus:border-blue-400 focus:ring-2 focus:ring-blue-200 bg-white"
+                            rows="3"
+                            placeholder="학습 단어 8개에 대한 추가 요구사항을 입력하세요. 예: '밝은 색상으로', '귀여운 스타일로' 등"
+                            onblur="updateVocabularyPrompt(this.value)"
+                        >${storybook.vocabularyPrompt || ''}</textarea>
+                        <p class="text-[10px] text-gray-500 mt-1">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            이 프롬프트는 학습 단어 이미지를 생성하거나 재생성할 때 참조됩니다.
+                        </p>
                     </div>
                     
                     <div class="grid md:grid-cols-4 gap-4">
@@ -2174,6 +2282,38 @@ function updateSceneCombined(pageIndex, combinedText) {
     console.log(`✅ 페이지 ${pageIndex + 1} 장면 설명 업데이트됨`);
 }
 
+// 장면 구조 필드 업데이트 (캐릭터/배경/분위기)
+function updateSceneStructure(pageIndex, field, value) {
+    if (!currentStorybook.pages[pageIndex].scene_structure) {
+        currentStorybook.pages[pageIndex].scene_structure = {};
+    }
+    currentStorybook.pages[pageIndex].scene_structure[field] = value.trim();
+    saveCurrentStorybook();
+    console.log(`✅ 페이지 ${pageIndex + 1} ${field} 업데이트: ${value}`);
+}
+
+// 페이지별 캐릭터 레퍼런스 토글
+function togglePageCharacterRef(pageIndex, charIndex, checked) {
+    if (!currentStorybook.pages[pageIndex].characterRefs) {
+        currentStorybook.pages[pageIndex].characterRefs = [];
+    }
+    
+    const refs = currentStorybook.pages[pageIndex].characterRefs;
+    if (checked) {
+        if (!refs.includes(charIndex)) {
+            refs.push(charIndex);
+        }
+    } else {
+        const idx = refs.indexOf(charIndex);
+        if (idx > -1) {
+            refs.splice(idx, 1);
+        }
+    }
+    
+    saveCurrentStorybook();
+    console.log(`✅ 페이지 ${pageIndex + 1} 캐릭터 레퍼런스 업데이트:`, refs);
+}
+
 // TTS 설정 업데이트
 function updateTTSConfig(pageIndex, config) {
     if (!config || !config.trim()) return;
@@ -2188,6 +2328,16 @@ function updatePageTTSModel(pageIndex, value) {
     currentStorybook.pages[pageIndex].ttsModel = value;
     saveCurrentStorybook();
     console.log(`✅ 페이지 ${pageIndex + 1} TTS 모델 변경:`, value);
+    
+    // 선택한 모델의 설명을 UI에 반영 (리렌더링 필요 시)
+    displayStorybook(currentStorybook);
+}
+
+// 학습 단어 프롬프트 업데이트
+function updateVocabularyPrompt(value) {
+    currentStorybook.vocabularyPrompt = value.trim();
+    saveCurrentStorybook();
+    console.log('✅ 학습 단어 프롬프트 업데이트:', value);
 }
 
 // 오디오 다운로드
@@ -3575,6 +3725,9 @@ Create a single, clear object illustration that matches the storybook's visual s
         else {
             console.log(`📝 General word: "${word}" (${korean})`);
             
+            // vocabularyPrompt 참조
+            const customPrompt = currentStorybook.vocabularyPrompt ? `\n\n**Additional Requirements:**\n${currentStorybook.vocabularyPrompt}` : '';
+            
             prompt = `Create a simple, clear educational illustration of: ${word}${korean ? ` (${korean})` : ''}
 
 Requirements:
@@ -3583,7 +3736,7 @@ Requirements:
 - High contrast and vibrant colors
 - Professional, educational style
 - Suitable for children ages 4-8
-- Art style: ${currentStorybook.artStyle}
+- Art style: ${currentStorybook.artStyle}${customPrompt}
 
 **CRITICAL - NO TEXT:** Do NOT include ANY text, labels, words, letters, or captions in the image. Show ONLY the visual representation of the word.
 
