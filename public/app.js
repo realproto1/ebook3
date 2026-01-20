@@ -474,50 +474,72 @@ function resetSettings() {
 
 // 스토리북 관리
 async function loadStorybooks() {
+    console.log('🔧 loadStorybooks() 시작');
+    
     // 1. localStorage에서 먼저 로드 (빠른 초기 표시)
     const saved = localStorage.getItem('storybooks');
+    console.log('📦 localStorage에서 동화책 확인:', saved ? `${JSON.parse(saved).length}권 발견` : '없음');
     if (saved) {
         storybooks = JSON.parse(saved);
+        console.log('✅ localStorage 동화책 로드 완료:', storybooks.length, '권');
         renderBookList(); // 즉시 표시
     }
     
     // 2. R2에서 최신 목록 가져오기
     try {
-        console.log('📚 R2에서 동화책 목록 불러오는 중...');
+        console.log('📚 R2 API 호출 시작: GET /api/storybooks');
         const response = await axios.get('/api/storybooks');
+        console.log('📡 R2 API 응답:', response.data);
         
         if (response.data.success && response.data.storybooks) {
             const r2Books = response.data.storybooks;
             console.log(`✅ R2에서 ${r2Books.length}권의 동화책을 찾았습니다`);
+            console.log('📋 R2 동화책 목록:', r2Books.map(b => `${b.title} (ID: ${b.id})`).join(', '));
             
             // 3. 각 동화책의 전체 JSON을 불러오기
             const fullBooks = [];
             for (const meta of r2Books) {
                 try {
+                    console.log(`📥 동화책 상세 정보 로드 중: ${meta.title} (ID: ${meta.id})`);
                     const detailResponse = await axios.get(`/api/storybooks/${meta.id}`);
+                    console.log(`✅ ${meta.title} 로드 성공`, detailResponse.data);
                     if (detailResponse.data) {
                         fullBooks.push(detailResponse.data);
                     }
                 } catch (error) {
-                    console.warn(`동화책 ${meta.id} 로드 실패:`, error.message);
+                    console.error(`❌ 동화책 ${meta.id} 로드 실패:`, error);
                 }
             }
             
+            console.log(`📚 총 ${fullBooks.length}권의 동화책 로드 완료`);
+            
             // 4. localStorage의 동화책과 병합 (중복 제거)
             const localIds = new Set(storybooks.map(book => book.id));
+            console.log('🔍 기존 localStorage ID:', Array.from(localIds));
             const newBooks = fullBooks.filter(book => !localIds.has(book.id));
+            console.log(`🆕 새로운 동화책: ${newBooks.length}권`);
             
             if (newBooks.length > 0) {
-                console.log(`📥 ${newBooks.length}권의 새 동화책 추가`);
+                console.log(`📥 ${newBooks.length}권의 새 동화책 추가:`, newBooks.map(b => b.title).join(', '));
                 storybooks = [...storybooks, ...newBooks];
+                console.log('💾 localStorage에 저장 중...');
                 saveStorybooks(); // localStorage에도 저장
+                console.log('🎨 화면 업데이트 중...');
                 renderBookList(); // 업데이트된 목록 표시
+                console.log('✅ 화면 업데이트 완료');
+            } else {
+                console.log('ℹ️ 새 동화책 없음 (모두 이미 로드됨)');
             }
+        } else {
+            console.warn('⚠️ R2 응답 형식 오류:', response.data);
         }
     } catch (error) {
-        console.error('R2 동화책 로드 실패:', error);
+        console.error('❌ R2 동화책 로드 실패:', error);
+        console.error('상세 에러:', error.response ? error.response.data : error.message);
         // localStorage 데이터로 계속 진행
     }
+    
+    console.log('🏁 loadStorybooks() 완료. 총 동화책:', storybooks.length, '권');
 }
 
 function saveStorybooks() {
