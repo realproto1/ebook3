@@ -877,7 +877,14 @@ function selectStorybook(id) {
 }
 
 async function deleteStorybook(id) {
-    if (confirm('이 동화책을 삭제하시겠습니까?')) {
+    // 동화책 정보 가져오기
+    const storybook = storybooks.find(b => b.id === id);
+    const title = storybook ? storybook.title : '이 동화책';
+    
+    // 명확한 확인 메시지
+    const confirmMessage = `⚠️ 정말로 삭제하시겠습니까?\n\n동화책: "${title}"\n\n이 작업은 되돌릴 수 없습니다.\n- 모든 페이지\n- 캐릭터 레퍼런스\n- 표지 이미지\n- 생성된 모든 콘텐츠\n\n위 내용이 영구적으로 삭제됩니다.`;
+    
+    if (confirm(confirmMessage)) {
         try {
             // R2에서 삭제
             console.log(`🗑️ R2에서 삭제 시작: ID ${id}`);
@@ -897,7 +904,7 @@ async function deleteStorybook(id) {
                     document.getElementById('createForm').style.display = 'block';
                 }
                 
-                showNotification('success', '동화책이 삭제되었습니다.');
+                showNotification('success', `"${title}"이(가) 삭제되었습니다.`);
             } else {
                 throw new Error(response.data.error || '삭제 실패');
             }
