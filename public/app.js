@@ -330,10 +330,74 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadStorybooks(); // R2에서 불러올 때까지 대기
     renderBookList();
     
-    // 동화책 생성 버튼 이벤트 리스너 등록
+    // 모든 버튼 이벤트 리스너 등록
     const generateBtn = document.getElementById('generateStorybookBtn');
     if (generateBtn) {
         generateBtn.addEventListener('click', generateStorybook);
+    }
+    
+    const showCreateFormBtn = document.getElementById('showCreateFormBtn');
+    if (showCreateFormBtn) {
+        showCreateFormBtn.addEventListener('click', showCreateForm);
+    }
+    
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', toggleMobileSidebar);
+    }
+    
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    if (mobileOverlay) {
+        mobileOverlay.addEventListener('click', closeMobileSidebar);
+    }
+    
+    const openSettingsBtn = document.getElementById('openSettingsBtn');
+    if (openSettingsBtn) {
+        openSettingsBtn.addEventListener('click', openSettings);
+    }
+    
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    if (closeSettingsBtn) {
+        closeSettingsBtn.addEventListener('click', closeSettings);
+    }
+    
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+    if (saveSettingsBtn) {
+        saveSettingsBtn.addEventListener('click', saveSettings);
+    }
+    
+    const resetSettingsBtn = document.getElementById('resetSettingsBtn');
+    if (resetSettingsBtn) {
+        resetSettingsBtn.addEventListener('click', resetSettings);
+    }
+    
+    const executeRegenerateBtn = document.getElementById('executeRegenerateBtn');
+    if (executeRegenerateBtn) {
+        executeRegenerateBtn.addEventListener('click', executeRegenerate);
+    }
+    
+    const closeRegenerateModalBtn = document.getElementById('closeRegenerateModalBtn');
+    if (closeRegenerateModalBtn) {
+        closeRegenerateModalBtn.addEventListener('click', closeRegenerateModal);
+    }
+    
+    // 모달 배경 클릭 시 닫기
+    const settingsModal = document.getElementById('settingsModal');
+    if (settingsModal) {
+        settingsModal.addEventListener('click', (event) => {
+            if (event.target === settingsModal) {
+                closeSettings();
+            }
+        });
+    }
+    
+    const regenerateModal = document.getElementById('regenerateModal');
+    if (regenerateModal) {
+        regenerateModal.addEventListener('click', (event) => {
+            if (event.target === regenerateModal) {
+                closeRegenerateModal();
+            }
+        });
     }
 });
 
