@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +18,28 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // API 키 (환경 변수 필수)
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+// Cloudflare R2 설정
+const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || 'ad0cc40df8e41b561442058f198278ea';
+const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || '764805a6659844bc5b989f14e1d7408c';
+const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || 'fa1a1d55c9278d758d2f3a4da79cc28584bf0521792d3d2cb249958cb1eeada5';
+const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || 'storybook-images';
+const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || `https://pub-${R2_ACCOUNT_ID}.r2.dev`;
+
+// R2 클라이언트 초기화
+const r2Client = new S3Client({
+  region: 'auto',
+  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: R2_ACCESS_KEY_ID,
+    secretAccessKey: R2_SECRET_ACCESS_KEY,
+  },
+});
+
+console.log('✅ Cloudflare R2 initialized:', {
+  bucket: R2_BUCKET_NAME,
+  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
+});
 
 // API 키 체크 (경고만 표시, 서버는 계속 실행)
 if (!GEMINI_API_KEY) {
@@ -38,6 +61,81 @@ function requireAPIKey(req, res, next) {
     });
   }
   next();
+}
+
+// ===== Cloudflare R2 헬퍼 함수 =====
+
+/**
+ * 이미지 URL을 Cloudflare R2에 업로드
+ * @param {string} imageUrl - Gemini에서 생성된 이미지 URL
+ * @param {string} filename - 저장할 파일명 (예: 'character-123.png')
+ * @returns {string} R2 공개 URL
+ */
+async function uploadImageToR2(imageUrl, filename) {
+  try {
+    console.log(`📤 Uploading to R2: ${filename}`);
+    
+    // 이미지 다운로드
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.statusText}`);
+    }
+    
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    
+    // R2에 업로드
+    const command = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: filename,
+      Body: buffer,
+      ContentType: 'image/png',
+    });
+    
+    await r2Client.send(command);
+    
+    const publicUrl = `${R2_PUBLIC_URL}/${filename}`;
+    console.log(`✅ Uploaded to R2: ${publicUrl}`);
+    
+    return publicUrl;
+  } catch (error) {
+    console.error('❌ R2 upload failed:', error);
+    // R2 업로드 실패 시 원본 URL 반환 (fallback)
+    return imageUrl;
+  }
+}
+
+/**
+ * Base64 이미지를 Cloudflare R2에 업로드
+ * @param {string} base64Data - Base64 인코딩된 이미지 데이터
+ * @param {string} filename - 저장할 파일명
+ * @returns {string} R2 공개 URL
+ */
+async function uploadBase64ToR2(base64Data, filename) {
+  try {
+    console.log(`📤 Uploading Base64 to R2: ${filename}`);
+    
+    // Base64 디코딩
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    // R2에 업로드
+    const command = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: filename,
+      Body: buffer,
+      ContentType: 'image/png',
+    });
+    
+    await r2Client.send(command);
+    
+    const publicUrl = `${R2_PUBLIC_URL}/${filename}`;
+    console.log(`✅ Uploaded Base64 to R2: ${publicUrl}`);
+    
+    return publicUrl;
+  } catch (error) {
+    console.error('❌ R2 Base64 upload failed:', error);
+    throw error;
+  }
 }
 
 
@@ -1212,9 +1310,15 @@ ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''
 
     const imageUrl = await generateImage(prompt);
     
+    // R2에 업로드
+    const timestamp = Date.now();
+    const filename = `character-${character.name.replace(/\s+/g, '-')}-${timestamp}.png`;
+    const r2Url = await uploadImageToR2(imageUrl, filename);
+    
     res.json({
       success: true,
-      imageUrl,
+      imageUrl: r2Url, // R2 URL 반환
+      originalUrl: imageUrl, // 원본 URL (백업용)
       prompt
     });
 
@@ -1522,9 +1626,15 @@ Make the illustration emotionally engaging and visually captivating while mainta
 
     const imageUrl = await generateImage(prompt, referenceImages);
     
+    // R2에 업로드
+    const timestamp = Date.now();
+    const filename = `illustration-page${page.pageNumber}-${timestamp}.png`;
+    const r2Url = await uploadImageToR2(imageUrl, filename);
+    
     res.json({
       success: true,
-      imageUrl,
+      imageUrl: r2Url, // R2 URL 반환
+      originalUrl: imageUrl, // 원본 URL (백업용)
       prompt
     });
 
@@ -1695,10 +1805,17 @@ Create a single, clear image that children can easily understand and associate w
         console.log(`Generating vocabulary image for: ${word}${korean ? ` (${korean})` : ''}`);
         const imageUrl = await generateImage(prompt, referenceImages);
         
+        // R2에 업로드
+        const timestamp = Date.now();
+        const safeWord = word.replace(/[^a-zA-Z0-9가-힣]/g, '-');
+        const filename = `vocabulary-${safeWord}-${timestamp}.png`;
+        const r2Url = await uploadImageToR2(imageUrl, filename);
+        
         images.push({
           word: word,
           korean: korean,
-          imageUrl: imageUrl,
+          imageUrl: r2Url, // R2 URL 사용
+          originalUrl: imageUrl, // 원본 URL 백업
           success: true,
           isCharacter: !!matchingCharacter,
           isKeyObject: isKeyObject
