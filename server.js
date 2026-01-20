@@ -24,7 +24,7 @@ const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || 'ad0cc40df8e41b561442058f1982
 const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || '764805a6659844bc5b989f14e1d7408c';
 const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || 'fa1a1d55c9278d758d2f3a4da79cc28584bf0521792d3d2cb249958cb1eeada5';
 const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || 'storybook-images';
-const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || `https://pub-${R2_ACCOUNT_ID}.r2.dev`;
+const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || `https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev`;
 
 // R2 클라이언트 초기화
 const r2Client = new S3Client({
