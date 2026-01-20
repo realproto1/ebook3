@@ -3209,7 +3209,6 @@ async function downloadAllIllustrations() {
     
     showNotification('success', '다운로드 완료', `${images.length}개의 삽화를 다운로드했습니다.`);
 }
-}
 
 function downloadAllText() {
     if (!currentStorybook || !currentStorybook.pages || currentStorybook.pages.length === 0) {
