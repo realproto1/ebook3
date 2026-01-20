@@ -329,6 +329,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadImageSettings();
     await loadStorybooks(); // R2에서 불러올 때까지 대기
     renderBookList();
+    
+    // 동화책 생성 버튼 이벤트 리스너 등록
+    const generateBtn = document.getElementById('generateStorybookBtn');
+    if (generateBtn) {
+        generateBtn.addEventListener('click', generateStorybook);
+    }
 });
 
 // 모바일 사이드바 토글 함수
