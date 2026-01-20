@@ -3176,7 +3176,6 @@ async function downloadAllCharacterReferences() {
     
     showNotification('success', '다운로드 완료', `${characters.length}개의 캐릭터 레퍼런스를 다운로드했습니다.`);
 }
-}
 
 async function downloadAllIllustrations() {
     const images = currentStorybook.pages
