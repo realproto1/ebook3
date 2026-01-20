@@ -2644,14 +2644,18 @@ async function generateAllIllustrationsParallel() {
                     // 등장하지 않으면 모든 캐릭터 포함 (안전장치)
                     const filteredCharacterRefs = relevantCharacters.length > 0 ? relevantCharacters : characterReferences;
                     
-                    // 레퍼런스 이미지 수집: 등장 캐릭터만 (병렬이므로 전 페이지 참조 없음)
-                    const refImageUrls = filteredCharacterRefs.map(char => char.referenceImage);
+                    // 레퍼런스 이미지 URL만 추출 (R2 URL 사용)
+                    const refImageUrls = filteredCharacterRefs
+                        .map(char => char.referenceImage)
+                        .filter(url => url); // null/undefined 제거
+                    
+                    console.log(`📸 캐릭터 레퍼런스 이미지: ${refImageUrls.length}개`, refImageUrls);
                     
                     // 🔥 서버 API 호출 (R2 업로드 포함)
                     const response = await axios.post('/api/generate-illustration', {
                         page: pageData,
                         artStyle: artStyle,
-                        characterReferences: filteredCharacterRefs,
+                        characterReferences: refImageUrls, // URL 배열 전달
                         settings: imageSettings
                     });
                     
@@ -2809,8 +2813,12 @@ async function generateAllIllustrationsSequential() {
                 // 등장하지 않으면 모든 캐릭터 포함 (안전장치)
                 const filteredCharacterRefs = relevantCharacters.length > 0 ? relevantCharacters : characterReferences;
                 
-                // 레퍼런스 이미지 수집: 등장 캐릭터 + 바로 전 페이지
-                const refImageUrls = filteredCharacterRefs.map(char => char.referenceImage);
+                // 레퍼런스 이미지 URL만 추출 (R2 URL 사용)
+                const refImageUrls = filteredCharacterRefs
+                    .map(char => char.referenceImage)
+                    .filter(url => url); // null/undefined 제거
+                
+                console.log(`📸 페이지 ${page.pageNumber} - 캐릭터 레퍼런스: ${refImageUrls.length}개`, refImageUrls);
                 
                 // ⭐ 바로 전 페이지의 이미지를 자동으로 참조 (연속성 향상)
                 let previousPages = [];
@@ -2826,7 +2834,7 @@ async function generateAllIllustrationsSequential() {
                 const response = await axios.post('/api/generate-illustration', {
                     page: pageData,
                     artStyle: artStyle,
-                    characterReferences: filteredCharacterRefs,
+                    characterReferences: refImageUrls, // URL 배열 전달
                     settings: imageSettings,
                     previousPages: previousPages
                 });
@@ -2953,9 +2961,11 @@ async function generateIllustration(pageIndex) {
         
         let refImageUrls = [];
         
-        // 1. 등장하는 캐릭터 레퍼런스만 포함
-        refImageUrls = filteredCharacterRefs.map(char => char.referenceImage);
-        console.log(`👥 등장 캐릭터 레퍼런스: ${refImageUrls.length}개`);
+        // 1. 등장하는 캐릭터 레퍼런스만 포함 (URL만 추출)
+        refImageUrls = filteredCharacterRefs
+            .map(char => char.referenceImage)
+            .filter(url => url); // null/undefined 제거
+        console.log(`👥 등장 캐릭터 레퍼런스: ${refImageUrls.length}개`, refImageUrls);
         
         // 2. 재생성 + 수정사항 있음 → 전 페이지 + 현재 이미지 (제한 해제)
         if (isRegeneration && hasEditNote) {
@@ -2968,13 +2978,17 @@ async function generateIllustration(pageIndex) {
                 }
             }
             // 현재 이미지
-            refImageUrls.push(page.illustrationImage);
+            if (page.illustrationImage) {
+                refImageUrls.push(page.illustrationImage);
+            }
             // 사용자 선택 참조도 포함
             const selectedRefImages = getSelectedReferenceImages(pageIndex);
             if (selectedRefImages.length > 0) {
                 console.log(`🖼️ ${selectedRefImages.length}개의 참조 이미지 추가`);
                 selectedRefImages.forEach(refImg => {
-                    refImageUrls.push(refImg.imageUrl);
+                    if (refImg.imageUrl) {
+                        refImageUrls.push(refImg.imageUrl);
+                    }
                 });
             }
         }
@@ -2989,7 +3003,9 @@ async function generateIllustration(pageIndex) {
                 }
             }
             // 현재 이미지
-            refImageUrls.push(page.illustrationImage);
+            if (page.illustrationImage) {
+                refImageUrls.push(page.illustrationImage);
+            }
         }
         // 4. 신규 생성 → 전 페이지 + 사용자 선택
         else {
@@ -3008,18 +3024,20 @@ async function generateIllustration(pageIndex) {
             if (selectedRefImages.length > 0) {
                 console.log(`🖼️ ${selectedRefImages.length}개의 참조 이미지 추가`);
                 selectedRefImages.forEach(refImg => {
-                    refImageUrls.push(refImg.imageUrl);
+                    if (refImg.imageUrl) {
+                        refImageUrls.push(refImg.imageUrl);
+                    }
                 });
             }
         }
         
-        console.log(`📊 최종 레퍼런스 이미지 개수: ${refImageUrls.length}`);
+        console.log(`📊 최종 레퍼런스 이미지 개수: ${refImageUrls.length}`, refImageUrls);
 
         // 🔥 서버 API 호출 (R2 업로드 포함)
         const response = await axios.post('/api/generate-illustration', {
             page: pageData,
             artStyle: artStyle,
-            characterReferences: characterReferences,
+            characterReferences: refImageUrls, // URL 배열 전달
             settings: imageSettings,
             editNote: editNote,
             previousPages: pageIndex > 0 ? [currentStorybook.pages[pageIndex - 1]] : []
