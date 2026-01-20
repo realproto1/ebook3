@@ -38,7 +38,8 @@ const r2Client = new S3Client({
 
 console.log('✅ Cloudflare R2 initialized:', {
   bucket: R2_BUCKET_NAME,
-  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
+  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  publicUrl: R2_PUBLIC_URL
 });
 
 // API 키 체크 (경고만 표시, 서버는 계속 실행)
