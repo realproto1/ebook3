@@ -2461,9 +2461,6 @@ async function generateCharacterReference(charIndex) {
             storybookId: currentStorybook.id,
             storybookTitle: currentStorybook.title
         });
-                enforceNoText: true
-            }
-        });
         
         if (response.data.success && response.data.imageUrl) {
             const imageUrl = response.data.imageUrl; // R2 URL
