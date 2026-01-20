@@ -2575,14 +2575,9 @@ async function generateAllIllustrationsParallel() {
         return;
     }
     
-    // 캐릭터 레퍼런스 준비
+    // 캐릭터 레퍼런스 준비 (전체 캐릭터 객체 사용)
     const characterReferences = currentStorybook.characters
-        .filter(char => char.referenceImage)
-        .map(char => ({
-            name: char.name,
-            description: char.description,
-            referenceImage: char.referenceImage
-        }));
+        .filter(char => char.referenceImage);
     
     // 모든 페이지의 로딩 상태 표시
     currentStorybook.pages.forEach((page, i) => {
@@ -2741,14 +2736,9 @@ async function generateAllIllustrationsSequential() {
         return;
     }
     
-    // 캐릭터 레퍼런스 준비
+    // 캐릭터 레퍼런스 준비 (전체 캐릭터 객체 사용)
     const characterReferences = currentStorybook.characters
-        .filter(char => char.referenceImage)
-        .map(char => ({
-            name: char.name,
-            description: char.description,
-            referenceImage: char.referenceImage
-        }));
+        .filter(char => char.referenceImage);
     
     // 모든 페이지의 로딩 상태 표시
     currentStorybook.pages.forEach((page, i) => {
