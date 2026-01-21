@@ -126,7 +126,8 @@ function startGames() {
         return;
     }
     
-    window.location.href = `/games.html?id=${currentBook.id}`;
+    // story 파라미터로 전달 (games.html에서 기대하는 형식)
+    window.location.href = `/games.html?story=${currentBook.id}`;
 }
 
 // 페이지 로드 시 실행
