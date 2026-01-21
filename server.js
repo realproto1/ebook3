@@ -3248,6 +3248,238 @@ async function removeFromStorybooksIndex(storybookId) {
   }
 }
 
+// ========================================
+// 🎬 뷰어 통합 API
+// ========================================
+
+// 1️⃣ 공개 상태 변경 API (작가 도구 전용 - 인증 필요)
+app.put('/api/storybooks/:id/public', requireAPIKey, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isPublic } = req.body;
+    
+    console.log(`🔄 Updating public status for storybook ${id}: ${isPublic}`);
+    
+    // R2에서 동화책 JSON 로드
+    const { GetObjectCommand, PutObjectCommand } = await import('@aws-sdk/client-s3');
+    const filename = `storybook-${id}.json`;
+    
+    const getCommand = new GetObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: filename
+    });
+    
+    const response = await r2Client.send(getCommand);
+    const content = await response.Body.transformToString();
+    const storybook = JSON.parse(content);
+    
+    // 공개 상태 업데이트
+    storybook.isPublic = isPublic;
+    storybook.publishedAt = isPublic ? new Date().toISOString() : null;
+    
+    // R2에 저장
+    const putCommand = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: filename,
+      Body: Buffer.from(JSON.stringify(storybook, null, 2), 'utf-8'),
+      ContentType: 'application/json',
+    });
+    
+    await r2Client.send(putCommand);
+    
+    console.log(`✅ Public status updated for: ${storybook.title}`);
+    
+    // 뷰어 메타데이터 업데이트
+    await updateViewerMetadata();
+    
+    res.json({ 
+      success: true, 
+      isPublic, 
+      publishedAt: storybook.publishedAt,
+      message: isPublic ? '동화책이 뷰어에 공개되었습니다.' : '동화책이 비공개로 전환되었습니다.'
+    });
+    
+  } catch (error) {
+    console.error('❌ 공개 상태 변경 실패:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: '공개 상태 변경 실패: ' + error.message 
+    });
+  }
+});
+
+// 2️⃣ 뷰어용 메타데이터 업데이트 함수
+async function updateViewerMetadata() {
+  try {
+    console.log('🔄 Updating viewer metadata...');
+    
+    const { ListObjectsV2Command, GetObjectCommand, PutObjectCommand } = await import('@aws-sdk/client-s3');
+    
+    // 모든 동화책 파일 찾기
+    const listCommand = new ListObjectsV2Command({
+      Bucket: R2_BUCKET_NAME,
+      Prefix: 'storybook-',
+      MaxKeys: 1000
+    });
+    
+    const listResult = await r2Client.send(listCommand);
+    const publicStorybooks = [];
+    
+    // 공개된 동화책만 필터링
+    for (const obj of (listResult.Contents || [])) {
+      if (obj.Key.startsWith('storybook-') && obj.Key.endsWith('.json')) {
+        try {
+          const getCommand = new GetObjectCommand({
+            Bucket: R2_BUCKET_NAME,
+            Key: obj.Key
+          });
+          
+          const response = await r2Client.send(getCommand);
+          const content = await response.Body.transformToString();
+          const storybook = JSON.parse(content);
+          
+          if (storybook.isPublic) {
+            publicStorybooks.push({
+              id: storybook.id,
+              title: storybook.title,
+              targetAge: storybook.targetAge,
+              artStyle: storybook.artStyle,
+              coverImage: storybook.coverImage,
+              pageCount: storybook.pages?.length || 0,
+              characterCount: storybook.characters?.length || 0,
+              vocabularyCount: storybook.educational_content?.vocabulary?.length || 0,
+              isPublic: true,
+              publishedAt: storybook.publishedAt,
+              r2JsonUrl: `${R2_PUBLIC_URL}/${obj.Key}`
+            });
+          }
+        } catch (error) {
+          console.warn(`⚠️ Failed to read ${obj.Key}:`, error.message);
+        }
+      }
+    }
+    
+    // 최신순 정렬
+    publicStorybooks.sort((a, b) => 
+      new Date(b.publishedAt) - new Date(a.publishedAt)
+    );
+    
+    // 뷰어 메타데이터 파일 저장
+    const putCommand = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: 'viewer-metadata.json',
+      Body: Buffer.from(JSON.stringify({ storybooks: publicStorybooks }, null, 2), 'utf-8'),
+      ContentType: 'application/json',
+    });
+    
+    await r2Client.send(putCommand);
+    
+    console.log(`✅ Viewer metadata updated: ${publicStorybooks.length} public storybooks`);
+    return publicStorybooks;
+    
+  } catch (error) {
+    console.error('❌ 뷰어 메타데이터 업데이트 실패:', error);
+    throw error;
+  }
+}
+
+// 3️⃣ 뷰어용 공개 API - 동화책 목록 (인증 불필요)
+app.get('/api/viewer/storybooks', async (req, res) => {
+  try {
+    console.log('📖 Viewer: Loading public storybooks list');
+    
+    const { GetObjectCommand } = await import('@aws-sdk/client-s3');
+    
+    try {
+      const getCommand = new GetObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: 'viewer-metadata.json'
+      });
+      
+      const response = await r2Client.send(getCommand);
+      const content = await response.Body.transformToString();
+      const data = JSON.parse(content);
+      
+      console.log(`✅ Returned ${data.storybooks.length} public storybooks`);
+      
+      res.json({
+        success: true,
+        storybooks: data.storybooks || []
+      });
+      
+    } catch (error) {
+      // 메타데이터 파일이 없으면 빈 배열 반환
+      console.log('ℹ️ No viewer metadata found, returning empty list');
+      res.json({
+        success: true,
+        storybooks: []
+      });
+    }
+    
+  } catch (error) {
+    console.error('❌ 뷰어 목록 로드 실패:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: '뷰어 목록 로드 실패: ' + error.message 
+    });
+  }
+});
+
+// 4️⃣ 뷰어용 공개 API - 동화책 상세 (인증 불필요)
+app.get('/api/viewer/storybooks/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`📖 Viewer: Loading storybook ${id}`);
+    
+    const { GetObjectCommand } = await import('@aws-sdk/client-s3');
+    const filename = `storybook-${id}.json`;
+    
+    const getCommand = new GetObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: filename
+    });
+    
+    const response = await r2Client.send(getCommand);
+    const content = await response.Body.transformToString();
+    const storybook = JSON.parse(content);
+    
+    // 공개된 동화책만 반환
+    if (!storybook.isPublic) {
+      console.log(`⚠️ Storybook ${id} is not public`);
+      return res.status(403).json({ 
+        success: false, 
+        error: '비공개 동화책입니다.' 
+      });
+    }
+    
+    console.log(`✅ Returned storybook: ${storybook.title}`);
+    
+    res.json({
+      success: true,
+      storybook: storybook
+    });
+    
+  } catch (error) {
+    console.error('❌ 동화책 상세 로드 실패:', error);
+    
+    if (error.name === 'NoSuchKey') {
+      return res.status(404).json({ 
+        success: false, 
+        error: '동화책을 찾을 수 없습니다.' 
+      });
+    }
+    
+    res.status(500).json({ 
+      success: false, 
+      error: '동화책 상세 로드 실패: ' + error.message 
+    });
+  }
+});
+
+// ========================================
+// 🖼️ 기타 유틸리티 API
+// ========================================
+
 // 이미지 다운로드 프록시 API (CORS 우회)
 app.get('/api/download-image', async (req, res) => {
   try {

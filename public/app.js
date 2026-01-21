@@ -906,6 +906,26 @@ function renderBookList() {
                 </div>
             </div>
             
+            <!-- 뷰어 공개 체크박스 -->
+            <div class="flex items-center gap-2 mt-2 px-1 mb-2">
+                <input 
+                    type="checkbox" 
+                    id="public-${book.id}"
+                    ${book.isPublic ? 'checked' : ''}
+                    onchange="togglePublicStatus('${book.id}')"
+                    onclick="event.stopPropagation();"
+                    class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
+                />
+                <label 
+                    for="public-${book.id}" 
+                    class="text-xs text-gray-700 cursor-pointer select-none"
+                    onclick="event.stopPropagation();"
+                >
+                    <i class="fas fa-eye ${book.isPublic ? 'text-green-600' : 'text-gray-400'} mr-1"></i>
+                    뷰어 공개${book.isPublic ? ' ✓' : ''}
+                </label>
+            </div>
+            
             <!-- 버튼 그룹 -->
             <div class="flex gap-1 mt-2 px-1">
                 <button 
@@ -1123,6 +1143,62 @@ function updateStorybookTitle(newTitle) {
     
     // 제목 업데이트 알림
     showNotification('success', '제목이 저장되었습니다!');
+}
+
+// 뷰어 공개 상태 변경
+async function togglePublicStatus(storybookId) {
+    const checkbox = document.getElementById(`public-${storybookId}`);
+    const isPublic = checkbox.checked;
+    
+    try {
+        console.log(`🔄 Toggling public status for ${storybookId}: ${isPublic}`);
+        
+        const response = await axios.put(
+            `/api/storybooks/${storybookId}/public`,
+            { isPublic: isPublic },
+            {
+                headers: {
+                    'X-API-Key': getAPIKey()
+                }
+            }
+        );
+        
+        if (response.data.success) {
+            // storybooks 배열에서도 업데이트
+            const storybook = storybooks.find(b => b.id === storybookId);
+            if (storybook) {
+                storybook.isPublic = isPublic;
+                storybook.publishedAt = response.data.publishedAt;
+            }
+            
+            // currentStorybook도 업데이트
+            if (currentStorybook && currentStorybook.id === storybookId) {
+                currentStorybook.isPublic = isPublic;
+                currentStorybook.publishedAt = response.data.publishedAt;
+            }
+            
+            // 목록 다시 렌더링
+            renderBookList();
+            
+            // 알림 표시
+            showNotification(
+                'success',
+                isPublic 
+                    ? '✅ 동화책이 뷰어에 공개되었습니다!' 
+                    : 'ℹ️ 동화책이 비공개로 전환되었습니다.'
+            );
+        }
+    } catch (error) {
+        console.error('❌ 공개 상태 변경 실패:', error);
+        
+        // 체크박스 원상복구
+        checkbox.checked = !isPublic;
+        
+        showNotification(
+            'error',
+            '❌ 공개 상태 변경에 실패했습니다: ' + (error.response?.data?.error || error.message)
+        );
+    }
 }
 
 // 동화책 복사 (현재 동화책)
