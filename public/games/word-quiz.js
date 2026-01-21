@@ -71,7 +71,16 @@ function generateQuestions() {
 
     for (let i = 0; i < questionCount; i++) {
         const word = shuffled[i];
-        const type = Object.values(QUESTION_TYPES)[i % 3]; // 3가지 유형 균등 분배
+        
+        // 이미지가 있는 단어만 IMAGE 타입 가능
+        let availableTypes = [QUESTION_TYPES.MEANING, QUESTION_TYPES.WORD];
+        if (word.image || word.imageUrl) {
+            availableTypes.push(QUESTION_TYPES.IMAGE);
+        }
+        
+        // 사용 가능한 타입 중 순환 선택
+        const typeIndex = i % availableTypes.length;
+        const type = availableTypes[typeIndex];
         
         const question = createQuestion(word, type);
         questions.push(question);
@@ -108,10 +117,9 @@ function createQuestion(word, type) {
         question.options = generateOptions(word.korean, vocabulary.map(v => v.korean));
 
     } else if (type === QUESTION_TYPES.IMAGE) {
-        // 그림 → 단어 선택
+        // 그림 → 단어 선택 (이미지가 있을 때만 이 타입 사용됨)
         question.text = `그림이 나타내는 단어는?`;
-        // vocabulary 데이터에 image 필드가 있으면 사용, 없으면 placeholder
-        question.imageUrl = word.image || null;
+        question.imageUrl = word.image || word.imageUrl || null;
         question.correctAnswer = word.korean;
         question.options = generateOptions(word.korean, vocabulary.map(v => v.korean));
     }
