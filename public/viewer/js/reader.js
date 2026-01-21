@@ -83,6 +83,10 @@ function getBookId() {
 async function loadBook() {
     const bookId = getBookId();
     
+    console.log('🔍 Debug - bookId:', bookId);
+    console.log('🔍 Debug - axios available:', typeof axios !== 'undefined');
+    console.log('🔍 Debug - URL:', window.location.href);
+    
     if (!bookId) {
         alert('동화책 ID가 없습니다.');
         window.location.href = '/viewer.html';
@@ -92,7 +96,10 @@ async function loadBook() {
     try {
         console.log(`📖 Loading storybook ${bookId} for reading...`);
         
-        const response = await axios.get(`/api/viewer/storybooks/${bookId}`);
+        const apiUrl = `/api/viewer/storybooks/${bookId}`;
+        console.log('🔍 Debug - API URL:', apiUrl);
+        
+        const response = await axios.get(apiUrl);
         
         if (response.data.success) {
             currentBook = response.data.storybook;
@@ -145,16 +152,25 @@ async function loadBook() {
         }
     } catch (error) {
         console.error('❌ Failed to load storybook:', error);
+        console.error('Error details:', {
+            message: error.message,
+            response: error.response,
+            status: error.response?.status,
+            data: error.response?.data
+        });
         
         if (error.response?.status === 403) {
             alert('이 동화책은 비공개입니다.');
         } else if (error.response?.status === 404) {
             alert('동화책을 찾을 수 없습니다.');
         } else {
-            alert('동화책을 불러오는데 실패했습니다.');
+            alert(`동화책을 불러오는데 실패했습니다.\n\n에러: ${error.message}\n상태: ${error.response?.status || 'N/A'}`);
         }
         
-        window.location.href = '/viewer.html';
+        // 디버깅을 위해 즉시 리다이렉트하지 않음
+        setTimeout(() => {
+            window.location.href = '/viewer.html';
+        }, 3000);
     }
 }
 
