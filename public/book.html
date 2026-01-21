@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>동화책 상세 - 탱고북</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .action-btn {
+            transition: all 0.3s ease;
+        }
+        .action-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8">
+        <!-- 뒤로 가기 -->
+        <a href="/viewer.html" class="inline-block text-white hover:text-gray-200 transition mb-6">
+            <i class="fas fa-arrow-left mr-2"></i>
+            목록으로 돌아가기
+        </a>
+
+        <!-- 로딩 -->
+        <div id="loading" class="text-center py-20">
+            <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white"></div>
+            <p class="text-white text-xl mt-4">동화책을 불러오는 중...</p>
+        </div>
+
+        <!-- 메인 콘텐츠 -->
+        <div id="content" class="hidden">
+            <div class="max-w-4xl mx-auto">
+                <!-- 표지 이미지 -->
+                <div class="mb-8 bg-white rounded-3xl shadow-2xl overflow-hidden">
+                    <div id="cover-container" class="w-full h-96 bg-gray-200 flex items-center justify-center">
+                        <!-- JavaScript로 채워짐 -->
+                    </div>
+                </div>
+
+                <!-- 동화책 정보 -->
+                <div class="bg-white rounded-3xl shadow-2xl p-8 mb-8">
+                    <div class="text-center mb-6">
+                        <h1 id="book-title" class="text-4xl font-bold text-gray-800 mb-3"></h1>
+                        <div class="flex items-center justify-center gap-6 text-gray-600">
+                            <span class="flex items-center">
+                                <i class="fas fa-child mr-2 text-purple-500"></i>
+                                <span id="book-age"></span>세 대상
+                            </span>
+                            <span class="flex items-center">
+                                <i class="fas fa-file-alt mr-2 text-blue-500"></i>
+                                <span id="book-pages"></span>페이지
+                            </span>
+                            <span class="flex items-center">
+                                <i class="fas fa-users mr-2 text-green-500"></i>
+                                <span id="book-chars"></span>명의 캐릭터
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 캐릭터 미리보기 -->
+                    <div id="characters-preview" class="mb-6">
+                        <!-- JavaScript로 채워짐 -->
+                    </div>
+
+                    <!-- 액션 버튼 -->
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <button 
+                            onclick="startReading()"
+                            class="action-btn bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-6 rounded-2xl text-xl font-bold shadow-xl pulse-animation"
+                        >
+                            <i class="fas fa-book-open text-3xl mr-3"></i>
+                            <div>
+                                <div class="text-2xl">동화책 보기</div>
+                                <div class="text-sm opacity-80">페이지 넘김 읽기</div>
+                            </div>
+                        </button>
+
+                        <button 
+                            onclick="startGames()"
+                            class="action-btn bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white px-8 py-6 rounded-2xl text-xl font-bold shadow-xl"
+                        >
+                            <i class="fas fa-gamepad text-3xl mr-3"></i>
+                            <div>
+                                <div class="text-2xl">학습 게임</div>
+                                <div class="text-sm opacity-80">재미있게 배우기</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 동화책 미리보기 (첫 페이지) -->
+                <div class="bg-white rounded-3xl shadow-2xl p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-eye mr-2"></i>
+                        미리보기
+                    </h3>
+                    <div id="preview-page" class="bg-gray-50 rounded-xl p-6">
+                        <!-- JavaScript로 채워짐 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <script src="/viewer/js/book.js"></script>
+</body>
+</html>

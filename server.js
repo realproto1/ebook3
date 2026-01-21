@@ -3514,8 +3514,9 @@ app.get('/api/download-image', async (req, res) => {
   }
 });
 
+// 메인 페이지 라우팅
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
