@@ -70,35 +70,6 @@
             transform: scale(0.95);
         }
         
-        /* 모바일 최적화 */
-        @media (max-width: 768px) {
-            header {
-                padding: 0.75rem 1rem;
-            }
-            
-            .nav-button {
-                padding: 0.75rem !important;
-            }
-            
-            .nav-button i {
-                font-size: 1.25rem !important;
-            }
-            
-            #page-content {
-                padding-left: 3rem !important;
-                padding-right: 3rem !important;
-            }
-            
-            #page-text {
-                font-size: 1.125rem !important;
-                padding: 1rem !important;
-            }
-            
-            #page-image-container {
-                margin-bottom: 0.75rem !important;
-            }
-        }
-        
         /* 터치 영역 개선 */
         .nav-button {
             min-width: 48px;
@@ -271,7 +242,7 @@
             </button>
             
             <!-- 페이지 콘텐츠 -->
-            <div id="page-content" class="max-w-5xl w-full">
+            <div id="page-content">
                 <!-- 이미지 -->
                 <div id="page-image-container" class="mb-2 overflow-hidden">
                     <img 
