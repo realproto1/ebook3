@@ -40,7 +40,7 @@
         <!-- 헤더 -->
         <header class="mb-12">
             <div class="flex items-center justify-between">
-                <div>
+                <div class="flex-1">
                     <a href="/home.html" class="text-white hover:text-gray-200 transition mb-2 inline-block">
                         <i class="fas fa-arrow-left mr-2"></i>
                         홈으로
@@ -51,6 +51,21 @@
                     </h1>
                     <p class="text-white text-xl opacity-90">공개된 동화책을 읽어보세요!</p>
                 </div>
+                
+                <!-- 저작 도구 버튼 -->
+                <a 
+                    href="/author.html"
+                    class="bg-white/90 hover:bg-white backdrop-blur-sm text-purple-600 px-6 py-4 rounded-2xl font-bold text-lg shadow-2xl transition transform hover:scale-105 flex items-center gap-3"
+                    title="동화책 만들기"
+                >
+                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-magic text-white text-xl"></i>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-sm text-gray-600">동화책 만들기</div>
+                        <div class="text-purple-600 font-bold">저작 도구</div>
+                    </div>
+                </a>
             </div>
         </header>
 
