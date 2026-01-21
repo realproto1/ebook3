@@ -282,9 +282,9 @@
             window.location.href = `/games/${gameType}.html?story=${storyId}`;
         }
 
-        // 뒤로 가기
+        // 뒤로 가기 - 동화책 페이지로 직접 이동
         function goBack() {
-            window.history.back();
+            window.location.href = `/book.html?id=${storyId}`;
         }
 
         // 페이지 로드 시 초기화
