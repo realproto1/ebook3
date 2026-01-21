@@ -17,6 +17,23 @@ let imageSettings = {
     ttsVoiceConfig: '여성 목소리, 부드럽고 따뜻한 톤, 동화 낭독 스타일, 적당한 속도로 또박또박, 어린이가 이해하기 쉽게'  // TTS 음성 설정
 };
 
+// API 키 가져오기 함수
+function getAPIKey() {
+    // localStorage에서 커스텀 API 키 확인
+    const customApiKey = localStorage.getItem('gemini_api_key');
+    if (customApiKey && customApiKey.trim()) {
+        return customApiKey.trim();
+    }
+    
+    // gemini-client.js의 전역 변수 확인
+    if (typeof GEMINI_API_KEY !== 'undefined' && GEMINI_API_KEY) {
+        return GEMINI_API_KEY;
+    }
+    
+    // 기본값 없음
+    return null;
+}
+
 // 이미지 모델 목록
 const IMAGE_MODELS = [
     { value: 'gemini-3-pro-image-preview', label: 'Nano Banana Pro (Gemini 3 Pro) ⭐', description: '최고 품질, 네이티브 이미지 생성' },
