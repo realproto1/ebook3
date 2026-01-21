@@ -437,6 +437,19 @@ async function generateCoverImage() {
         
         if (response.data.success && response.data.imageUrl) {
             const imageUrl = response.data.imageUrl; // R2 URL
+            
+            // 히스토리에 추가 (최대 10개 유지)
+            if (!currentStorybook.coverImageHistory) {
+                currentStorybook.coverImageHistory = [];
+            }
+            // 현재 표지가 있으면 히스토리에 추가
+            if (currentStorybook.coverImage) {
+                currentStorybook.coverImageHistory.unshift(currentStorybook.coverImage);
+                if (currentStorybook.coverImageHistory.length > 10) {
+                    currentStorybook.coverImageHistory = currentStorybook.coverImageHistory.slice(0, 10);
+                }
+            }
+            
             currentStorybook.coverImage = imageUrl;
             currentStorybook.coverPrompt = customPrompt;
             saveCurrentStorybook();
@@ -465,6 +478,23 @@ async function generateCoverImage() {
             </div>
         `;
     }
+}
+
+// 히스토리에서 표지 이미지 선택
+function selectCoverImageFromHistory(historyIndex) {
+    const selectedImage = currentStorybook.coverImageHistory[historyIndex];
+    
+    // 현재 표지를 히스토리에 추가
+    currentStorybook.coverImageHistory.splice(historyIndex, 1); // 선택된 항목 제거
+    currentStorybook.coverImageHistory.unshift(currentStorybook.coverImage); // 현재 표지를 맨 앞에 추가
+    
+    // 선택한 이미지를 현재 표지로 설정
+    currentStorybook.coverImage = selectedImage;
+    
+    saveCurrentStorybook();
+    displayStorybook(currentStorybook);
+    
+    showNotification('✅ 표지 이미지가 변경되었습니다.', 'success');
 }
 
 // 페이지 로드 시 초기화
@@ -1418,17 +1448,40 @@ function displayStorybook(storybook) {
                             </button>
                         </div>
                         <p class="text-white text-xs md:text-sm mb-3 md:mb-4 opacity-90">${char.description.substring(0, 80)}...</p>
-                        <div id="char-ref-${idx}" class="mb-3 md:mb-4 min-h-[150px] md:min-h-[200px] bg-white bg-opacity-20 rounded-lg flex items-center justify-center overflow-hidden relative group">
+                        <div id="char-ref-${idx}" class="mb-3 md:mb-4 min-h-[150px] md:min-h-[200px] bg-white bg-opacity-20 rounded-lg overflow-hidden">
                             ${char.referenceImage ? 
-                                `<img src="${char.referenceImage}" alt="${char.name}" class="w-full h-full object-cover rounded-lg"/>
-                                <button 
-                                    onclick="downloadImage('${char.referenceImage}', '캐릭터_${char.name}.png')"
-                                    class="absolute top-2 right-2 bg-white bg-opacity-90 text-purple-600 w-10 h-10 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
-                                    title="다운로드"
-                                >
-                                    <i class="fas fa-download"></i>
-                                </button>` :
-                                '<p class="text-white text-xs md:text-sm text-center p-4">이미지 생성 대기중</p>'
+                                (() => {
+                                    const history = char.imageHistory || [];
+                                    return `
+                                        <div class="flex gap-2 h-full">
+                                            <!-- 메인 이미지 -->
+                                            <div class="flex-1 relative group">
+                                                <img src="${char.referenceImage}" alt="${char.name}" class="w-full h-full object-cover rounded-lg"/>
+                                                <button 
+                                                    onclick="downloadImage('${char.referenceImage}', '캐릭터_${char.name}.png')"
+                                                    class="absolute top-2 right-2 bg-white bg-opacity-90 text-purple-600 w-10 h-10 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                                                    title="다운로드"
+                                                >
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                            </div>
+                                            ${history.length > 0 ? `
+                                                <!-- 히스토리 -->
+                                                <div class="w-20 overflow-y-auto space-y-2 p-1" style="scrollbar-width: thin; scrollbar-color: rgba(168, 85, 247, 0.5) rgba(168, 85, 247, 0.1);">
+                                                    ${history.map((url, histIdx) => `
+                                                        <div class="relative group cursor-pointer border-2 border-transparent hover:border-purple-400 rounded transition" onclick="selectCharacterImageFromHistory(${idx}, ${histIdx})" title="이전 버전 ${histIdx + 1}">
+                                                            <img src="${url}" alt="이전 ${histIdx + 1}" class="w-full h-16 object-cover rounded"/>
+                                                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition rounded flex items-center justify-center">
+                                                                <i class="fas fa-check text-white text-xs opacity-0 group-hover:opacity-100 transition"></i>
+                                                            </div>
+                                                        </div>
+                                                    `).join('')}
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    `;
+                                })() :
+                                '<div class="flex items-center justify-center h-full"><p class="text-white text-xs md:text-sm text-center p-4">이미지 생성 대기중</p></div>'
                             }
                         </div>
                         <textarea 
@@ -1493,17 +1546,40 @@ function displayStorybook(storybook) {
                     <h4 class="text-lg md:text-xl font-bold text-white mb-3 md:mb-4">
                         <i class="fas fa-image mr-2"></i>표지 이미지
                     </h4>
-                    <div id="cover-image-display" class="mb-3 md:mb-4 min-h-[300px] md:min-h-[400px] bg-white bg-opacity-20 rounded-lg flex items-center justify-center overflow-hidden relative group">
+                    <div id="cover-image-display" class="mb-3 md:mb-4 min-h-[300px] md:min-h-[400px] bg-white bg-opacity-20 rounded-lg overflow-hidden">
                         ${storybook.coverImage ? 
-                            `<img src="${storybook.coverImage}" alt="표지" class="w-full h-full object-cover rounded-lg"/>
-                            <button 
-                                onclick="downloadImage('${storybook.coverImage}', '${storybook.title}_표지.png')"
-                                class="absolute top-3 right-3 bg-white bg-opacity-90 text-indigo-600 w-12 h-12 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
-                                title="다운로드"
-                            >
-                                <i class="fas fa-download text-lg"></i>
-                            </button>` :
-                            '<div class="text-center p-6"><i class="fas fa-book-open text-6xl text-white opacity-50 mb-4"></i><p class="text-white text-sm">표지 이미지 생성 대기중</p></div>'
+                            (() => {
+                                const history = storybook.coverImageHistory || [];
+                                return `
+                                    <div class="flex gap-2 h-full">
+                                        <!-- 메인 이미지 -->
+                                        <div class="flex-1 relative group">
+                                            <img src="${storybook.coverImage}" alt="표지" class="w-full h-full object-cover rounded-lg"/>
+                                            <button 
+                                                onclick="downloadImage('${storybook.coverImage}', '${storybook.title}_표지.png')"
+                                                class="absolute top-3 right-3 bg-white bg-opacity-90 text-indigo-600 w-12 h-12 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                                                title="다운로드"
+                                            >
+                                                <i class="fas fa-download text-lg"></i>
+                                            </button>
+                                        </div>
+                                        ${history.length > 0 ? `
+                                            <!-- 히스토리 -->
+                                            <div class="w-24 overflow-y-auto space-y-2 p-1" style="scrollbar-width: thin; scrollbar-color: rgba(99, 102, 241, 0.5) rgba(99, 102, 241, 0.1);">
+                                                ${history.map((url, histIdx) => `
+                                                    <div class="relative group cursor-pointer border-2 border-transparent hover:border-indigo-400 rounded transition" onclick="selectCoverImageFromHistory(${histIdx})" title="이전 버전 ${histIdx + 1}">
+                                                        <img src="${url}" alt="이전 ${histIdx + 1}" class="w-full h-20 object-cover rounded"/>
+                                                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition rounded flex items-center justify-center">
+                                                            <i class="fas fa-check text-white opacity-0 group-hover:opacity-100 transition"></i>
+                                                        </div>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `;
+                            })() :
+                            '<div class="flex items-center justify-center h-full"><div class="text-center p-6"><i class="fas fa-book-open text-6xl text-white opacity-50 mb-4"></i><p class="text-white text-sm">표지 이미지 생성 대기중</p></div></div>'
                         }
                     </div>
                 </div>
@@ -2935,27 +3011,25 @@ async function generateCharacterReference(charIndex) {
         
         if (response.data.success && response.data.imageUrl) {
             const imageUrl = response.data.imageUrl; // R2 URL
+            
+            // 히스토리에 추가 (최대 10개 유지)
+            if (!character.imageHistory) {
+                character.imageHistory = [];
+            }
+            // 현재 이미지가 있으면 히스토리에 추가
+            if (character.referenceImage) {
+                character.imageHistory.unshift(character.referenceImage);
+                if (character.imageHistory.length > 10) {
+                    character.imageHistory = character.imageHistory.slice(0, 10);
+                }
+            }
+            
             currentStorybook.characters[charIndex].referenceImage = imageUrl;
             saveCurrentStorybook();
             
-            // 이미지만 업데이트 (UI 전체를 다시 그리지 않음)
-            refDiv.innerHTML = `<img src="${imageUrl}" alt="${character.name}" class="w-full h-full object-cover rounded-lg"/>`;
+            // UI 업데이트 - 히스토리 포함
+            renderCharacterImageWithHistory(charIndex);
             
-            // 다운로드 버튼이 없으면 추가
-            const charCard = refDiv.closest('.character-card');
-            if (charCard) {
-                const existingDownloadBtn = charCard.querySelector('.download-char-btn');
-                if (!existingDownloadBtn) {
-                    const promptTextarea = charCard.querySelector(`#char-prompt-${charIndex}`);
-                    if (promptTextarea) {
-                        const downloadBtn = document.createElement('button');
-                        downloadBtn.className = 'w-full bg-green-500 text-white py-2 rounded-lg font-semibold hover:bg-green-600 transition mb-2 download-char-btn';
-                        downloadBtn.innerHTML = '<i class="fas fa-download mr-2"></i>이미지 다운로드';
-                        downloadBtn.onclick = () => downloadImage(imageUrl, `캐릭터_${character.name}.png`);
-                        promptTextarea.parentNode.insertBefore(downloadBtn, promptTextarea);
-                    }
-                }
-            }
         } else {
             throw new Error(response.data.error || '이미지 URL을 받지 못했습니다.');
         }
@@ -2970,6 +3044,71 @@ async function generateCharacterReference(charIndex) {
             </div>
         `;
     }
+}
+
+// 캐릭터 이미지를 히스토리와 함께 렌더링
+function renderCharacterImageWithHistory(charIndex) {
+    const character = currentStorybook.characters[charIndex];
+    const refDiv = document.getElementById(`char-ref-${charIndex}`);
+    
+    if (!character.referenceImage) {
+        refDiv.innerHTML = '<p class="text-white text-xs md:text-sm text-center p-4">이미지 생성 대기중</p>';
+        return;
+    }
+    
+    const history = character.imageHistory || [];
+    
+    let html = `
+        <div class="flex gap-2 h-full">
+            <!-- 메인 이미지 -->
+            <div class="flex-1 relative group">
+                <img src="${character.referenceImage}" alt="${character.name}" class="w-full h-full object-cover rounded-lg"/>
+                <button 
+                    onclick="downloadImage('${character.referenceImage}', '캐릭터_${character.name}.png')"
+                    class="absolute top-2 right-2 bg-white bg-opacity-90 text-purple-600 w-10 h-10 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                    title="다운로드"
+                >
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
+    `;
+    
+    if (history.length > 0) {
+        html += `
+            <!-- 히스토리 -->
+            <div class="w-20 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-purple-400 scrollbar-track-purple-100">
+                ${history.map((url, idx) => `
+                    <div class="relative group cursor-pointer border-2 border-transparent hover:border-purple-400 rounded transition" onclick="selectCharacterImageFromHistory(${charIndex}, ${idx})">
+                        <img src="${url}" alt="이전 ${idx + 1}" class="w-full h-16 object-cover rounded"/>
+                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition rounded flex items-center justify-center">
+                            <i class="fas fa-check text-white opacity-0 group-hover:opacity-100 transition"></i>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    html += `</div>`;
+    refDiv.innerHTML = html;
+}
+
+// 히스토리에서 이미지 선택
+function selectCharacterImageFromHistory(charIndex, historyIndex) {
+    const character = currentStorybook.characters[charIndex];
+    const selectedImage = character.imageHistory[historyIndex];
+    
+    // 현재 이미지를 히스토리에 추가
+    character.imageHistory.splice(historyIndex, 1); // 선택된 항목 제거
+    character.imageHistory.unshift(character.referenceImage); // 현재 이미지를 맨 앞에 추가
+    
+    // 선택한 이미지를 현재 이미지로 설정
+    character.referenceImage = selectedImage;
+    
+    saveCurrentStorybook();
+    renderCharacterImageWithHistory(charIndex);
+    
+    showNotification('✅ 이미지가 변경되었습니다.', 'success');
 }
 
 // 병렬/순차 생성 모드 설명 표시
