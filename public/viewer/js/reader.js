@@ -70,12 +70,17 @@ function showPage(pageIndex) {
     const imageEl = document.getElementById('page-image');
     const textEl = document.getElementById('page-text');
     
-    // Exit 애니메이션
+    // Exit 애니메이션 시작
     imageEl.classList.add('page-exit');
     textEl.classList.add('page-exit');
     
+    // Exit 애니메이션이 끝나면 내용 변경 후 Enter 애니메이션
     setTimeout(() => {
-        // 이미지 표시
+        // 먼저 클래스 제거
+        imageEl.classList.remove('page-exit');
+        textEl.classList.remove('page-exit');
+        
+        // 내용 변경
         if (page.illustrationImage) {
             imageEl.src = page.illustrationImage;
             imageEl.alt = `Page ${pageIndex + 1}`;
@@ -83,27 +88,26 @@ function showPage(pageIndex) {
             imageEl.src = '';
             imageEl.alt = '이미지 없음';
         }
-        
-        // 텍스트 표시
         textEl.textContent = page.text || '텍스트가 없습니다.';
         
-        // Enter 애니메이션
-        imageEl.classList.remove('page-exit');
-        imageEl.classList.add('page-enter');
-        textEl.classList.remove('page-exit');
-        textEl.classList.add('page-enter');
-        
-        setTimeout(() => {
-            imageEl.classList.remove('page-enter');
-            textEl.classList.remove('page-enter');
-        }, 50);
+        // Enter 애니메이션 (약간의 딜레이 후)
+        requestAnimationFrame(() => {
+            imageEl.classList.add('page-enter');
+            textEl.classList.add('page-enter');
+            
+            // Enter 애니메이션 완료 후 클래스 제거
+            setTimeout(() => {
+                imageEl.classList.remove('page-enter');
+                textEl.classList.remove('page-enter');
+            }, 300);
+        });
         
     }, 300);
     
-    // 진행률 업데이트
+    // 진행률 업데이트 (즉시)
     updateProgress();
     
-    // 버튼 상태 업데이트
+    // 버튼 상태 업데이트 (즉시)
     updateNavigationButtons();
 }
 
