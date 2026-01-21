@@ -4,6 +4,7 @@ let currentPage = 0;
 let isAutoPlaying = false;
 let autoPlayInterval = null;
 let currentAudio = null;
+let isHeaderVisible = false; // 헤더 초기 상태: 숨김
 
 // 모바일 주소창/네비게이션 숨기기
 function hideAddressBar() {
@@ -29,6 +30,29 @@ function hideAddressBar() {
         document.body.style.height = `${window.innerHeight}px`;
         document.documentElement.style.height = `${window.innerHeight}px`;
     }, 200);
+}
+
+// 헤더 토글
+function toggleHeader() {
+    const header = document.querySelector('header');
+    if (!header) return;
+    
+    isHeaderVisible = !isHeaderVisible;
+    
+    if (isHeaderVisible) {
+        header.classList.remove('hidden');
+    } else {
+        header.classList.add('hidden');
+    }
+}
+
+// 헤더 숨기기
+function hideHeader() {
+    const header = document.querySelector('header');
+    if (!header) return;
+    
+    isHeaderVisible = false;
+    header.classList.add('hidden');
 }
 
 // 전체 화면 진입 (클릭 이벤트에서 호출)
@@ -94,6 +118,11 @@ async function loadBook() {
             
             // 주소창 즉시 숨기기
             hideAddressBar();
+            
+            // 헤더 숨기기 (3초 후)
+            setTimeout(() => {
+                hideHeader();
+            }, 3000);
             
             // 첫 페이지 표시
             showPage(0);
@@ -172,6 +201,26 @@ function showPage(pageIndex) {
         });
         
     }, 350); // Exit 애니메이션 완료 대기 (300ms + 50ms 버퍼)
+    
+    // 이미지 클릭 시 헤더 토글
+    const setupImageClickHandler = () => {
+        const imageEl = document.getElementById('page-image');
+        const imageContainer = document.getElementById('page-image-container');
+        
+        // 기존 이벤트 리스너 제거
+        const newImageEl = imageEl.cloneNode(true);
+        imageEl.parentNode.replaceChild(newImageEl, imageEl);
+        
+        const newImageContainer = document.getElementById('page-image-container');
+        
+        // 새 이벤트 리스너 추가
+        newImageContainer.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleHeader();
+        });
+    };
+    
+    setupImageClickHandler();
     
     // 진행률 업데이트 (즉시)
     updateProgress();
