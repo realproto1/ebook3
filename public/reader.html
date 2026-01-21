@@ -141,6 +141,15 @@
             object-position: center;
         }
         
+        /* PC 및 태블릿 - 이미지 화면에 꽉 차게 */
+        @media (min-width: 769px) {
+            #page-image {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+        
         #page-text-container {
             flex-shrink: 0;
             max-height: 25%;

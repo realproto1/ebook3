@@ -139,16 +139,6 @@ async function loadBook() {
             
             // 첫 페이지 표시
             showPage(0);
-            
-            // 첫 번째 사용자 인터랙션 시 전체 화면 진입
-            const tryFullscreen = () => {
-                enterFullscreen();
-                // 한 번만 실행
-                document.removeEventListener('click', tryFullscreen);
-                document.removeEventListener('touchstart', tryFullscreen);
-            };
-            document.addEventListener('click', tryFullscreen, { once: true });
-            document.addEventListener('touchstart', tryFullscreen, { once: true });
         }
     } catch (error) {
         console.error('❌ Failed to load storybook:', error);
