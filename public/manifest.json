@@ -4,7 +4,7 @@
   "description": "AI로 만든 동화책을 읽어보세요",
   "start_url": "/viewer.html",
   "scope": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "orientation": "any",
   "background_color": "#1a1a1a",
   "theme_color": "#667eea",
