@@ -464,11 +464,30 @@ async function generateCoverImage() {
         }
     } catch (error) {
         console.error('표지 생성 오류:', error);
+        
+        let errorMsg = error.message || '알 수 없는 오류';
+        
+        // 서버에서 온 상세 에러 메시지 추출
+        if (error.response && error.response.data && error.response.data.error) {
+            errorMsg = error.response.data.error;
+        }
+        
+        // API 키 관련 에러 처리
+        if (errorMsg.includes('API key') || errorMsg.includes('403') || errorMsg.includes('PERMISSION_DENIED')) {
+            errorMsg = 'API 키 오류: Gemini API 키가 만료되었거나 유효하지 않습니다. 새로운 API 키가 필요합니다.';
+        }
+        
         coverDisplay.innerHTML = `
             <div class="text-center p-6">
                 <i class="fas fa-exclamation-triangle text-6xl text-white opacity-50 mb-4"></i>
-                <p class="text-white text-sm mb-2">⚠️ 생성 실패</p>
-                <p class="text-white text-xs opacity-75">${error.message}</p>
+                <p class="text-white text-sm font-bold mb-2">⚠️ 생성 실패</p>
+                <p class="text-white text-xs opacity-75 mb-1">${errorMsg}</p>
+                ${errorMsg.includes('API 키') ? `
+                    <p class="text-white text-xs opacity-90 mt-3 bg-white bg-opacity-10 p-3 rounded">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        새 API 키 발급: <a href="https://makersuite.google.com/app/apikey" target="_blank" class="underline">Google AI Studio</a>
+                    </p>
+                ` : ''}
                 <button 
                     onclick="generateCoverImage()"
                     class="mt-4 bg-white text-indigo-600 px-4 py-2 rounded-lg font-semibold hover:bg-opacity-90 transition"
@@ -477,6 +496,9 @@ async function generateCoverImage() {
                 </button>
             </div>
         `;
+        
+        // 알림도 표시
+        showNotification('❌ ' + errorMsg, 'error');
     }
 }
 
@@ -3036,13 +3058,32 @@ async function generateCharacterReference(charIndex) {
 
     } catch (error) {
         console.error('Error:', error);
+        
+        let errorMsg = error.message || '알 수 없는 오류';
+        
+        // 서버에서 온 상세 에러 메시지 추출
+        if (error.response && error.response.data && error.response.data.error) {
+            errorMsg = error.response.data.error;
+        }
+        
+        // API 키 관련 에러 처리
+        if (errorMsg.includes('API key') || errorMsg.includes('403') || errorMsg.includes('PERMISSION_DENIED')) {
+            errorMsg = 'API 키 오류: Gemini API 키가 만료되었거나 유효하지 않습니다. 새로운 API 키가 필요합니다.';
+        }
+        
         refDiv.innerHTML = `
             <div class="p-4 text-center">
-                <p class="text-white text-xs mt-2">⚠️ 이미지 생성 실패</p>
-                <p class="text-white text-xs opacity-75 mt-1">${error.message}</p>
-                <button onclick="generateCharacterReference(${charIndex})" class="mt-2 px-3 py-1 bg-white text-purple-600 rounded text-xs">재시도</button>
+                <i class="fas fa-exclamation-triangle text-white text-2xl mb-2"></i>
+                <p class="text-white text-xs font-bold mt-2">⚠️ 이미지 생성 실패</p>
+                <p class="text-white text-xs opacity-75 mt-1">${errorMsg}</p>
+                <button onclick="generateCharacterReference(${charIndex})" class="mt-3 px-4 py-2 bg-white text-purple-600 rounded text-xs font-semibold hover:bg-opacity-90 transition">
+                    <i class="fas fa-redo mr-1"></i>재시도
+                </button>
             </div>
         `;
+        
+        // 알림도 표시
+        showNotification('❌ ' + errorMsg, 'error');
     }
 }
 
