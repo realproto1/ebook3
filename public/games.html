@@ -3,116 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>학습 게임 - 탱고북</title>
+    <title>🎮 독후활동 게임 - 탱고북</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #FFF5F7 0%, #FFE8EE 100%);
             min-height: 100vh;
+            padding: 20px;
         }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.1);
+        }
+
+        .header h1 {
+            font-size: 48px;
+            color: #FF6B9D;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #FF6B9D, #FF8DB4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .story-title {
+            font-size: 24px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #FF6B9D, #FF8DB4);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.3);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
         .game-card {
-            transition: all 0.3s ease;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.1);
         }
+
         .game-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(255, 107, 157, 0.25);
+            border-color: #FF6B9D;
         }
-        .selected {
-            border: 3px solid #3b82f6;
-            background: #dbeafe;
+
+        .game-card .game-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
         }
-        .correct {
-            border: 3px solid #10b981;
-            background: #d1fae5;
+
+        .game-card .game-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #FF6B9D;
+            margin-bottom: 10px;
         }
-        .wrong {
-            border: 3px solid #ef4444;
-            background: #fee2e2;
+
+        .game-card .game-desc {
+            font-size: 14px;
+            color: #999;
+            line-height: 1.6;
         }
-        
-        /* 모바일 최적화 */
+
+        .game-card.memory-match { border-bottom: 5px solid #9C27B0; }
+        .game-card.word-quiz { border-bottom: 5px solid #2196F3; }
+        .game-card.word-builder { border-bottom: 5px solid #4CAF50; }
+        .game-card.word-tracing { border-bottom: 5px solid #FF9800; }
+        .game-card.story-quiz { border-bottom: 5px solid #F44336; }
+
+        .loading {
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            border: 6px solid #FFE8EE;
+            border-top-color: #FF6B9D;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #FF6B9D;
+            font-weight: 600;
+        }
+
         @media (max-width: 768px) {
-            .container {
-                padding-left: 1rem;
-                padding-right: 1rem;
+            .header h1 {
+                font-size: 32px;
             }
-            
-            h1 {
-                font-size: 2rem !important;
+
+            .header .story-title {
+                font-size: 18px;
             }
-            
+
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+
             .game-card {
-                padding: 1rem !important;
-                font-size: 0.875rem !important;
+                padding: 30px;
             }
-            
-            button {
-                padding: 0.75rem 1rem !important;
-                font-size: 0.875rem !important;
+
+            .game-card .game-icon {
+                font-size: 48px;
             }
-        }
-        
-        /* 터치 영역 개선 */
-        .game-card, button {
-            min-height: 44px;
+
+            .game-card .game-title {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container mx-auto px-4 py-8">
-        <!-- 헤더 -->
-        <header class="mb-8">
-            <button onclick="window.history.back()" class="text-white hover:text-gray-200 transition mb-4">
-                <i class="fas fa-arrow-left mr-2"></i>
-                돌아가기
-            </button>
-            <h1 class="text-4xl font-bold text-white mb-2">
-                <i class="fas fa-gamepad mr-3"></i>
-                학습 게임
-            </h1>
-            <p id="book-title" class="text-white text-xl opacity-90"></p>
-        </header>
-
+    <div class="container">
         <!-- 로딩 -->
-        <div id="loading" class="text-center py-20">
-            <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white"></div>
-            <p class="text-white text-xl mt-4">게임을 준비하는 중...</p>
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">🎮 게임을 준비하는 중...</div>
         </div>
 
-        <!-- 게임 컨테이너 -->
-        <div id="game-container" class="hidden">
-            <!-- 게임 선택 탭 -->
-            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">게임 선택</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <button onclick="selectGame('matching')" class="game-tab px-6 py-4 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold hover:from-purple-600 hover:to-pink-600 transition">
-                        <i class="fas fa-puzzle-piece text-2xl mb-2"></i>
-                        <div>단어 매칭</div>
-                    </button>
-                    <button onclick="selectGame('quiz')" class="game-tab px-6 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold hover:from-blue-600 hover:to-cyan-600 transition">
-                        <i class="fas fa-question-circle text-2xl mb-2"></i>
-                        <div>스토리 퀴즈</div>
-                    </button>
-                    <button onclick="selectGame('character')" class="game-tab px-6 py-4 rounded-xl bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold hover:from-green-600 hover:to-teal-600 transition">
-                        <i class="fas fa-users text-2xl mb-2"></i>
-                        <div>캐릭터 맞추기</div>
-                    </button>
-                    <button onclick="selectGame('sequence')" class="game-tab px-6 py-4 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold hover:from-orange-600 hover:to-red-600 transition">
-                        <i class="fas fa-sort-numeric-down text-2xl mb-2"></i>
-                        <div>순서 맞추기</div>
-                    </button>
-                </div>
+        <!-- 메인 컨텐츠 -->
+        <div id="main-content" style="display: none;">
+            <!-- 헤더 -->
+            <div class="header">
+                <button class="back-button" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i>
+                    돌아가기
+                </button>
+                <h1>🎮 독후활동 게임</h1>
+                <div id="story-title" class="story-title">동화책 제목</div>
             </div>
 
-            <!-- 게임 콘텐츠 -->
-            <div id="game-content" class="bg-white rounded-2xl shadow-xl p-8">
-                <!-- JavaScript로 동적 생성 -->
+            <!-- 게임 선택 -->
+            <div class="games-grid">
+                <!-- 1. 단어 카드 매칭 -->
+                <div class="game-card memory-match" onclick="startGame('memory-match')">
+                    <div class="game-icon">🃏</div>
+                    <div class="game-title">단어 카드 매칭</div>
+                    <div class="game-desc">카드를 뒤집어서<br>단어와 그림을 매칭해요!</div>
+                </div>
+
+                <!-- 2. 단어 퀴즈 -->
+                <div class="game-card word-quiz" onclick="startGame('word-quiz')">
+                    <div class="game-icon">❓</div>
+                    <div class="game-title">단어 퀴즈</div>
+                    <div class="game-desc">4지선다 퀴즈로<br>단어를 배워요!</div>
+                </div>
+
+                <!-- 3. 단어 만들기 -->
+                <div class="game-card word-builder" onclick="startGame('word-builder')">
+                    <div class="game-icon">🔤</div>
+                    <div class="game-title">단어 만들기</div>
+                    <div class="game-desc">흩어진 글자를 조합해서<br>단어를 완성해요!</div>
+                </div>
+
+                <!-- 4. 단어 따라쓰기 -->
+                <div class="game-card word-tracing" onclick="startGame('word-tracing')">
+                    <div class="game-icon">✏️</div>
+                    <div class="game-title">단어 따라쓰기</div>
+                    <div class="game-desc">손으로 직접 써보며<br>단어를 익혀요!</div>
+                </div>
+
+                <!-- 5. 동화 스토리 퀴즈 -->
+                <div class="game-card story-quiz" onclick="startGame('story-quiz')">
+                    <div class="game-icon">📖</div>
+                    <div class="game-title">동화 스토리 퀴즈</div>
+                    <div class="game-desc">동화 내용을 얼마나<br>기억하고 있나요?</div>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-    <script src="/viewer/js/games.js"></script>
+    <script>
+        // URL에서 스토리 ID 추출
+        const urlParams = new URLSearchParams(window.location.search);
+        const storyId = urlParams.get('story');
+
+        // 스토리 데이터
+        let storyData = null;
+
+        // 초기화
+        async function init() {
+            if (!storyId) {
+                alert('❌ 스토리 ID가 없습니다.');
+                window.history.back();
+                return;
+            }
+
+            try {
+                // 스토리 데이터 로드
+                const response = await axios.get(`/api/storybooks/${storyId}`);
+                storyData = response.data;
+
+                // 제목 표시
+                document.getElementById('story-title').textContent = storyData.title || '동화책';
+
+                // 학습 단어 확인
+                const vocabulary = storyData.educational_content?.vocabulary || [];
+                if (vocabulary.length === 0) {
+                    alert('❌ 이 동화책에는 학습 단어가 없습니다.');
+                    window.history.back();
+                    return;
+                }
+
+                console.log(`✅ 학습 단어 ${vocabulary.length}개 로드 완료`);
+
+                // 로딩 숨기고 메인 표시
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+
+            } catch (error) {
+                console.error('❌ 스토리 로드 실패:', error);
+                alert('동화책을 불러오는데 실패했습니다.');
+                window.history.back();
+            }
+        }
+
+        // 게임 시작
+        function startGame(gameType) {
+            // 각 게임 페이지로 이동 (storyId 전달)
+            window.location.href = `/games/${gameType}.html?story=${storyId}`;
+        }
+
+        // 뒤로 가기
+        function goBack() {
+            window.history.back();
+        }
+
+        // 페이지 로드 시 초기화
+        init();
+    </script>
 </body>
 </html>
