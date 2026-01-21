@@ -4330,6 +4330,12 @@ async function generateSingleVocabularyImage(wordIndex) {
                     reused: true
                 };
                 
+                // ⭐ vocabulary 객체에도 image 필드 추가 (게임용)
+                if (typeof currentStorybook.educational_content.vocabulary[wordIndex] === 'object') {
+                    currentStorybook.educational_content.vocabulary[wordIndex].image = imageUrl;
+                    console.log(`✅ Added reused image URL to vocabulary[${wordIndex}].image: ${imageUrl}`);
+                }
+                
                 saveCurrentStorybook();
                 
                 const badge = '<span class="absolute top-1 right-1 bg-orange-500 text-white text-xs px-2 py-0.5 rounded">핵심사물</span>';
@@ -4447,6 +4453,12 @@ Example: For "Apple", show only a red apple fruit. No text.`;
                 isCharacter: false,  // 8단어는 캐릭터 매칭 안 함
                 isKeyObject: isKeyObject
             };
+            
+            // ⭐ vocabulary 객체에도 image 필드 추가 (게임용)
+            if (typeof currentStorybook.educational_content.vocabulary[wordIndex] === 'object') {
+                currentStorybook.educational_content.vocabulary[wordIndex].image = imageUrl;
+                console.log(`✅ Added image URL to vocabulary[${wordIndex}].image: ${imageUrl}`);
+            }
             
             saveCurrentStorybook();
             
