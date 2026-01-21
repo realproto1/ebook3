@@ -52,7 +52,7 @@ function renderBook() {
     document.getElementById('book-title').textContent = currentBook.title;
     document.getElementById('book-age').textContent = currentBook.targetAge;
     document.getElementById('book-pages').textContent = currentBook.pages?.length || 0;
-    document.getElementById('book-chars').textContent = currentBook.characters?.length || 0;
+    // book-chars 요소는 숨겨져 있으므로 업데이트하지 않음
 
     // 표지 이미지
     const coverContainer = document.getElementById('cover-container');
