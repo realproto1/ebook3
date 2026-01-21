@@ -2357,7 +2357,7 @@ function displayStorybook(storybook) {
                                     </div>
                                 </div>
                                 <div id="vocab-img-${idx}" class="bg-gray-100 rounded-lg mb-2 min-h-[180px] flex items-center justify-center overflow-hidden relative group">
-                                    ${vocabImg && vocabImg.imageUrl ? 
+                                    ${vocabImg && vocabImg.imageUrl && !vocabImg.imageUrl.startsWith('blob:') ? 
                                         `<img src="${vocabImg.imageUrl}" alt="${word}" class="w-full h-full object-cover rounded-lg"/>
                                         <button 
                                             onclick="downloadImage('${vocabImg.imageUrl}', '단어_${word}.png')"
@@ -2366,6 +2366,12 @@ function displayStorybook(storybook) {
                                         >
                                             <i class="fas fa-download text-sm"></i>
                                         </button>` :
+                                        vocabImg && vocabImg.imageUrl && vocabImg.imageUrl.startsWith('blob:') ?
+                                        `<div class="text-center p-4">
+                                            <i class="fas fa-exclamation-triangle text-yellow-600 text-3xl mb-2"></i>
+                                            <p class="text-gray-600 text-xs mb-2">이미지를 다시 생성해주세요</p>
+                                            <p class="text-gray-400 text-xs">(이전 세션의 임시 이미지)</p>
+                                        </div>` :
                                         `<p class="text-gray-400 text-sm text-center p-4">
                                             <i class="fas fa-image text-3xl mb-2"></i><br>
                                             이미지 대기중
