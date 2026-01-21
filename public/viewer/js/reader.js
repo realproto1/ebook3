@@ -5,6 +5,28 @@ let isAutoPlaying = false;
 let autoPlayInterval = null;
 let currentAudio = null;
 
+// 전체 화면 진입
+function enterFullscreen() {
+    const elem = document.documentElement;
+    
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen().catch(err => {
+            console.log('Fullscreen request failed:', err);
+        });
+    } else if (elem.webkitRequestFullscreen) { /* Safari */
+        elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { /* IE11 */
+        elem.msRequestFullscreen();
+    }
+    
+    // 화면 방향 잠금 시도 (Android Chrome)
+    if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(err => {
+            console.log('Screen orientation lock failed:', err);
+        });
+    }
+}
+
 // URL에서 동화책 ID 가져오기
 function getBookId() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -40,6 +62,9 @@ async function loadBook() {
             // 로딩 숨기고 리더 표시
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('reader').classList.remove('hidden');
+            
+            // 전체 화면 진입
+            enterFullscreen();
             
             // 첫 페이지 표시
             showPage(0);
