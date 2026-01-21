@@ -2078,20 +2078,30 @@ Create a single, clear image that children can easily understand and associate w
       } catch (error) {
         const word = typeof vocabItem === 'object' ? vocabItem.word : vocabItem;
         console.error(`Error generating image for ${word}:`, error);
+        
+        // 429 에러에 대한 명확한 메시지
+        let errorMessage = error.message;
+        if (error.message.includes('429')) {
+          errorMessage = '⚠️ API 할당량 초과. 잠시 후 다시 시도해주세요. (무료 플랜: 50회/일)';
+        } else if (error.message.includes('403')) {
+          errorMessage = '🔐 API 키 문제. 새로운 API 키가 필요합니다.';
+        }
+        
         images.push({
           word: word,
           korean: typeof vocabItem === 'object' ? vocabItem.korean : '',
           imageUrl: null,
           success: false,
-          error: error.message
+          error: errorMessage
         });
       }
     }
     
     res.json({
       success: true,
-      images: images,
-      total: vocabulary.length,
+      results: images,  // 클라이언트가 'results'를 기대함
+      images: images,   // 하위 호환성
+      total: vocabList.length,
       successful: images.filter(img => img.success).length
     });
 
