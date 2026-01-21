@@ -2,7 +2,7 @@
   "name": "탱고북 동화책 뷰어",
   "short_name": "탱고북",
   "description": "AI로 만든 동화책을 읽어보세요",
-  "start_url": "/reader.html",
+  "start_url": "/viewer.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
