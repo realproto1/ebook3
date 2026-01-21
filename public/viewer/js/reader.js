@@ -69,16 +69,18 @@ function showPage(pageIndex) {
     // 페이지 전환 애니메이션
     const imageEl = document.getElementById('page-image');
     const textEl = document.getElementById('page-text');
+    const imageContainer = document.getElementById('page-image-container');
     
-    // Exit 애니메이션 시작
-    imageEl.classList.add('page-exit');
-    textEl.classList.add('page-exit');
+    // 1단계: Exit 애니메이션 시작 (페이드아웃 + 왼쪽 이동)
+    imageEl.style.opacity = '0';
+    imageEl.style.transform = 'translateX(-100px)';
+    textEl.style.opacity = '0';
+    textEl.style.transform = 'translateX(-100px)';
     
-    // Exit 애니메이션이 끝나면 내용 변경 후 Enter 애니메이션
+    // 2단계: 애니메이션 완료 후 내용 변경
     setTimeout(() => {
-        // 먼저 클래스 제거
-        imageEl.classList.remove('page-exit');
-        textEl.classList.remove('page-exit');
+        // 완전히 숨김 (visibility)
+        imageContainer.style.visibility = 'hidden';
         
         // 내용 변경
         if (page.illustrationImage) {
@@ -90,19 +92,22 @@ function showPage(pageIndex) {
         }
         textEl.textContent = page.text || '텍스트가 없습니다.';
         
-        // Enter 애니메이션 (약간의 딜레이 후)
+        // 위치 초기화 (오른쪽에서 시작)
+        imageEl.style.transform = 'translateX(100px)';
+        textEl.style.transform = 'translateX(100px)';
+        
+        // 3단계: 다시 보이기 + Enter 애니메이션
         requestAnimationFrame(() => {
-            imageEl.classList.add('page-enter');
-            textEl.classList.add('page-enter');
+            imageContainer.style.visibility = 'visible';
             
-            // Enter 애니메이션 완료 후 클래스 제거
-            setTimeout(() => {
-                imageEl.classList.remove('page-enter');
-                textEl.classList.remove('page-enter');
-            }, 300);
+            // Enter 애니메이션 (페이드인 + 중앙으로 이동)
+            imageEl.style.opacity = '1';
+            imageEl.style.transform = 'translateX(0)';
+            textEl.style.opacity = '1';
+            textEl.style.transform = 'translateX(0)';
         });
         
-    }, 300);
+    }, 350); // Exit 애니메이션 완료 대기 (300ms + 50ms 버퍼)
     
     // 진행률 업데이트 (즉시)
     updateProgress();
