@@ -819,6 +819,13 @@ function resetSettings() {
 async function loadStorybooks() {
     console.log('🔧 loadStorybooks() 시작');
     
+    // 로딩 인디케이터 표시
+    const loadingEl = document.getElementById('bookListLoading');
+    const bookListEl = document.getElementById('bookList');
+    if (loadingEl) {
+        loadingEl.classList.remove('hidden');
+    }
+    
     // ❌ localStorage 로딩 비활성화 - R2만 사용
     console.log('ℹ️ localStorage 로딩 비활성화됨. R2만 사용합니다.');
     storybooks = []; // 빈 배열로 시작
@@ -826,30 +833,35 @@ async function loadStorybooks() {
     // R2에서 최신 목록 가져오기
     try {
         console.log('📚 R2 API 호출 시작: GET /api/storybooks');
+        const startTime = Date.now();
         const response = await axios.get('/api/storybooks');
-        console.log('📡 R2 API 응답:', response.data);
+        console.log('📡 R2 API 응답:', response.data, `(${Date.now() - startTime}ms)`);
         
         if (response.data.success && response.data.storybooks) {
             const r2Books = response.data.storybooks;
             console.log(`✅ R2에서 ${r2Books.length}권의 동화책을 찾았습니다`);
             console.log('📋 R2 동화책 목록:', r2Books.map(b => `${b.title} (ID: ${b.id})`).join(', '));
             
-            // 각 동화책의 전체 JSON을 불러오기
-            const fullBooks = [];
-            for (const meta of r2Books) {
-                try {
-                    console.log(`📥 동화책 상세 정보 로드 중: ${meta.title} (ID: ${meta.id})`);
-                    const detailResponse = await axios.get(`/api/storybooks/${meta.id}`);
-                    console.log(`✅ ${meta.title} 로드 성공`);
-                    if (detailResponse.data) {
-                        fullBooks.push(detailResponse.data);
-                    }
-                } catch (error) {
-                    console.error(`❌ 동화책 ${meta.id} 로드 실패:`, error);
-                }
-            }
+            // 🚀 병렬로 모든 동화책 상세 정보 로드 (훨씬 빠름!)
+            console.log('⚡ 모든 동화책을 병렬로 로드 시작...');
+            const detailStartTime = Date.now();
             
-            console.log(`📚 총 ${fullBooks.length}권의 동화책 로드 완료`);
+            const detailPromises = r2Books.map(meta => 
+                axios.get(`/api/storybooks/${meta.id}`)
+                    .then(response => {
+                        console.log(`✅ ${meta.title} 로드 성공`);
+                        return response.data;
+                    })
+                    .catch(error => {
+                        console.error(`❌ 동화책 ${meta.id} 로드 실패:`, error);
+                        return null;
+                    })
+            );
+            
+            const fullBooks = (await Promise.all(detailPromises)).filter(book => book !== null);
+            
+            const detailElapsed = Date.now() - detailStartTime;
+            console.log(`📚 총 ${fullBooks.length}권의 동화책 로드 완료 (${detailElapsed}ms, 평균 ${Math.round(detailElapsed / fullBooks.length)}ms/권)`);
             
             // R2 데이터를 storybooks에 설정
             storybooks = fullBooks;
@@ -864,8 +876,14 @@ async function loadStorybooks() {
     } catch (error) {
         console.error('❌ R2 동화책 로드 실패:', error);
         console.error('상세 에러:', error.response ? error.response.data : error.message);
+    } finally {
+        // 로딩 인디케이터 숨기기
+        if (loadingEl) {
+            loadingEl.classList.add('hidden');
+        }
     }
     
+    const totalElapsed = Date.now();
     console.log('🏁 loadStorybooks() 완료. 총 동화책:', storybooks.length, '권');
 }
 
