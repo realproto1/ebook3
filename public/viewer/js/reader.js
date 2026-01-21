@@ -7,13 +7,28 @@ let currentAudio = null;
 
 // 모바일 주소창/네비게이션 숨기기
 function hideAddressBar() {
-    // 스크롤을 강제로 위로 올려서 주소창 숨기기
+    // 1. 즉시 스크롤하여 주소창 숨기기
     window.scrollTo(0, 1);
-    setTimeout(() => window.scrollTo(0, 0), 0);
     
-    // 뷰포트 높이 강제 조정
-    const vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
+    // 2. 다시 위로 올려서 콘텐츠 정상 위치
+    requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+    });
+    
+    // 3. 약간 아래로 스크롤 (주소창 숨김 유지)
+    setTimeout(() => {
+        window.scrollTo(0, 1);
+    }, 100);
+    
+    // 4. 뷰포트 높이 재계산
+    setTimeout(() => {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+        
+        // body 높이 강제 설정
+        document.body.style.height = `${window.innerHeight}px`;
+        document.documentElement.style.height = `${window.innerHeight}px`;
+    }, 200);
 }
 
 // 전체 화면 진입 (클릭 이벤트에서 호출)
@@ -338,3 +353,19 @@ window.addEventListener('orientationchange', () => {
         hideAddressBar();
     }, 100);
 });
+
+// 스크롤 이벤트 감지하여 주소창 숨기기 유지
+let scrollTimeout;
+window.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+        hideAddressBar();
+    }, 100);
+}, { passive: true });
+
+// 터치 끝날 때 주소창 숨기기
+window.addEventListener('touchend', () => {
+    setTimeout(() => {
+        hideAddressBar();
+    }, 300);
+}, { passive: true });
