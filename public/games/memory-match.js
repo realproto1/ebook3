@@ -119,7 +119,7 @@ function generateCards() {
             id: `image-${index}`,
             type: 'image',
             word: word,
-            content: word.imageUrl || word.word, // 이미지 URL 또는 영어 단어
+            content: word.image || word.imageUrl || word.word, // image 또는 imageUrl 또는 영어 단어
             pairId: index
         });
     });

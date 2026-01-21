@@ -110,7 +110,8 @@ function createQuestion(word, type) {
     } else if (type === QUESTION_TYPES.IMAGE) {
         // 그림 → 단어 선택
         question.text = `그림이 나타내는 단어는?`;
-        question.imageUrl = `https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/${storyId}-오즈의마법사-vocabulary-${word.word}-*.png` || word.korean;
+        // vocabulary 데이터에 image 필드가 있으면 사용, 없으면 placeholder
+        question.imageUrl = word.image || null;
         question.correctAnswer = word.korean;
         question.options = generateOptions(word.korean, vocabulary.map(v => v.korean));
     }
@@ -159,9 +160,21 @@ function showQuestion() {
 
     // 이미지 (IMAGE 타입만)
     const imageElement = document.getElementById('question-image');
-    if (question.type === QUESTION_TYPES.IMAGE && question.imageUrl) {
-        imageElement.src = question.imageUrl;
-        imageElement.style.display = 'block';
+    if (question.type === QUESTION_TYPES.IMAGE) {
+        if (question.imageUrl) {
+            // 이미지가 있으면 표시
+            imageElement.src = question.imageUrl;
+            imageElement.style.display = 'block';
+            imageElement.onerror = () => {
+                // 이미지 로드 실패 시 텍스트로 대체
+                imageElement.style.display = 'none';
+                document.getElementById('question-text').textContent = `"${question.word.korean}"은(는) 무엇일까요?`;
+            };
+        } else {
+            // 이미지가 없으면 텍스트로 표시
+            imageElement.style.display = 'none';
+            document.getElementById('question-text').textContent = `"${question.word.korean}"은(는) 무엇일까요?`;
+        }
     } else {
         imageElement.style.display = 'none';
     }

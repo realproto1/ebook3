@@ -84,9 +84,14 @@ function showWord() {
 
     // 이미지 (있으면 표시)
     const imageElement = document.getElementById('hint-image');
-    if (word.imageUrl) {
-        imageElement.src = word.imageUrl;
+    const imageUrl = word.image || word.imageUrl;
+    if (imageUrl) {
+        imageElement.src = imageUrl;
         imageElement.style.display = 'block';
+        imageElement.onerror = () => {
+            // 이미지 로드 실패 시 숨김
+            imageElement.style.display = 'none';
+        };
     } else {
         imageElement.style.display = 'none';
     }
