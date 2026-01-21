@@ -124,6 +124,19 @@ async function loadBook() {
                 hideHeader();
             }, 3000);
             
+            // 이미지 클릭 시 헤더 토글 이벤트 설정 (한 번만)
+            const imageContainer = document.getElementById('page-image-container');
+            if (imageContainer) {
+                imageContainer.addEventListener('click', (e) => {
+                    // 버튼 클릭은 무시
+                    if (e.target.closest('.nav-button')) {
+                        return;
+                    }
+                    e.stopPropagation();
+                    toggleHeader();
+                });
+            }
+            
             // 첫 페이지 표시
             showPage(0);
             
@@ -201,26 +214,6 @@ function showPage(pageIndex) {
         });
         
     }, 350); // Exit 애니메이션 완료 대기 (300ms + 50ms 버퍼)
-    
-    // 이미지 클릭 시 헤더 토글
-    const setupImageClickHandler = () => {
-        const imageEl = document.getElementById('page-image');
-        const imageContainer = document.getElementById('page-image-container');
-        
-        // 기존 이벤트 리스너 제거
-        const newImageEl = imageEl.cloneNode(true);
-        imageEl.parentNode.replaceChild(newImageEl, imageEl);
-        
-        const newImageContainer = document.getElementById('page-image-container');
-        
-        // 새 이벤트 리스너 추가
-        newImageContainer.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleHeader();
-        });
-    };
-    
-    setupImageClickHandler();
     
     // 진행률 업데이트 (즉시)
     updateProgress();
