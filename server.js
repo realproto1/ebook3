@@ -1897,9 +1897,12 @@ Make the illustration emotionally engaging and visually captivating while mainta
 // 4. 단어 학습용 이미지 생성 (캐릭터와 사물 일관성 강화)
 app.post('/api/generate-vocabulary-images', requireAPIKey, async (req, res) => {
   try {
-    const { vocabulary, artStyle, settings = {}, storybook = {} } = req.body;
+    const { vocabulary, vocabularyItems, artStyle, settings = {}, storybook = {} } = req.body;
     
-    if (!vocabulary || vocabulary.length === 0) {
+    // vocabularyItems 또는 vocabulary 사용 (클라이언트 호환성)
+    const vocabList = vocabularyItems || vocabulary;
+    
+    if (!vocabList || vocabList.length === 0) {
       return res.status(400).json({ error: '단어 목록이 필요합니다.' });
     }
     
@@ -1922,7 +1925,7 @@ app.post('/api/generate-vocabulary-images', requireAPIKey, async (req, res) => {
     
     const images = [];
     
-    for (const vocabItem of vocabulary) {
+    for (const vocabItem of vocabList) {
       try {
         // vocabItem이 객체인지 문자열인지 확인
         const word = typeof vocabItem === 'object' ? vocabItem.word : vocabItem;
