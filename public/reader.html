@@ -6,8 +6,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
+    <!-- Android Fullscreen -->
+    <meta name="theme-color" content="#000000">
+    <meta name="color-scheme" content="dark">
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#667eea">
     <title>동화책 읽기 - 탱고북</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
@@ -25,6 +27,8 @@
             overflow: hidden;
             position: fixed;
             -webkit-overflow-scrolling: touch;
+            /* Android 상단 바 숨김 */
+            background: #000000;
         }
         
         body {
@@ -44,6 +48,8 @@
             height: calc(var(--vh, 1vh) * 100);
             min-height: 100vh;
             min-height: calc(var(--vh, 1vh) * 100);
+            /* Android 상단 바 완전 숨김 */
+            background: #000000;
         }
         
         /* 상단 주소창/하단 네비게이션 숨기기 */
