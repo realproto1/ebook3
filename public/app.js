@@ -328,6 +328,7 @@ async function uploadCover() {
             const formData = new FormData();
             formData.append('image', file);
             formData.append('storybookId', currentStorybook.id);
+            formData.append('storybookTitle', currentStorybook.title);
             formData.append('type', 'cover');
             
             const response = await axios.post('/api/upload-image', formData, {
@@ -442,11 +443,27 @@ async function generateCoverImage() {
             if (!currentStorybook.coverImageHistory) {
                 currentStorybook.coverImageHistory = [];
             }
+            
             // 현재 표지가 있으면 히스토리에 추가
             if (currentStorybook.coverImage) {
                 currentStorybook.coverImageHistory.unshift(currentStorybook.coverImage);
+                
+                // 10개 초과 시 가장 오래된 이미지 삭제 요청
                 if (currentStorybook.coverImageHistory.length > 10) {
+                    const oldestImageUrl = currentStorybook.coverImageHistory[10];
+                    
+                    // 서버에 삭제 요청 (비동기, 실패해도 계속 진행)
+                    if (oldestImageUrl && oldestImageUrl.includes('r2.dev')) {
+                        axios.delete('/api/cleanup-image', {
+                            data: { imageUrl: oldestImageUrl }
+                        }).catch(err => {
+                            console.warn('⚠️ 히스토리 이미지 삭제 실패:', err.message);
+                        });
+                    }
+                    
+                    // 배열에서 제거
                     currentStorybook.coverImageHistory = currentStorybook.coverImageHistory.slice(0, 10);
+                    console.log('🗑️ 오래된 히스토리 이미지 정리 완료');
                 }
             }
             
@@ -2700,15 +2717,16 @@ async function uploadIllustration() {
             const formData = new FormData();
             formData.append('image', file);
             formData.append('storybookId', currentStorybook.id);
+            formData.append('storybookTitle', currentStorybook.title);
             formData.append('type', currentUploadType);
             
             if (currentUploadType === 'illustration' && currentUploadPageIndex !== null) {
                 formData.append('pageNumber', currentStorybook.pages[currentUploadPageIndex].pageNumber);
             } else if (currentUploadType === 'character' && currentUploadCharIndex !== null) {
-                formData.append('charIndex', currentUploadCharIndex);
-                formData.append('charName', currentStorybook.characters[currentUploadCharIndex].name);
+                formData.append('characterIndex', currentUploadCharIndex);
+                formData.append('characterName', currentStorybook.characters[currentUploadCharIndex].name);
             } else if (currentUploadType === 'cover') {
-                formData.append('pageNumber', 'cover');
+                // 표지는 pageNumber 불필요
             }
             
             const response = await axios.post('/api/upload-image', formData, {
@@ -3038,11 +3056,27 @@ async function generateCharacterReference(charIndex) {
             if (!character.imageHistory) {
                 character.imageHistory = [];
             }
+            
             // 현재 이미지가 있으면 히스토리에 추가
             if (character.referenceImage) {
                 character.imageHistory.unshift(character.referenceImage);
+                
+                // 10개 초과 시 가장 오래된 이미지 삭제 요청
                 if (character.imageHistory.length > 10) {
+                    const oldestImageUrl = character.imageHistory[10];
+                    
+                    // 서버에 삭제 요청 (비동기, 실패해도 계속 진행)
+                    if (oldestImageUrl && oldestImageUrl.includes('r2.dev')) {
+                        axios.delete('/api/cleanup-image', {
+                            data: { imageUrl: oldestImageUrl }
+                        }).catch(err => {
+                            console.warn('⚠️ 히스토리 이미지 삭제 실패:', err.message);
+                        });
+                    }
+                    
+                    // 배열에서 제거
                     character.imageHistory = character.imageHistory.slice(0, 10);
+                    console.log('🗑️ 오래된 히스토리 이미지 정리 완료');
                 }
             }
             
@@ -4754,8 +4788,10 @@ async function uploadCharacter() {
             const formData = new FormData();
             formData.append('image', file);
             formData.append('storybookId', currentStorybook.id);
+            formData.append('storybookTitle', currentStorybook.title);
             formData.append('type', 'character');
             formData.append('characterIndex', currentCharacterUploadIndex);
+            formData.append('characterName', currentStorybook.characters[currentCharacterUploadIndex]?.name || '');
             
             const response = await axios.post('/api/upload-image', formData, {
                 headers: {

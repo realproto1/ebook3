@@ -190,6 +190,35 @@ async function uploadBufferToR2(buffer, filename, contentType) {
 }
 
 /**
+ * 오래된 히스토리 이미지를 R2에서 삭제
+ * @param {string} imageUrl - 삭제할 이미지 URL
+ */
+async function cleanupOldHistoryImage(imageUrl) {
+  if (!imageUrl || !imageUrl.includes(R2_PUBLIC_URL)) {
+    console.log('⏭️ Skip cleanup: invalid URL or not in R2');
+    return;
+  }
+  
+  try {
+    // URL에서 Key 추출
+    const key = imageUrl.replace(`${R2_PUBLIC_URL}/`, '');
+    
+    const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
+    
+    const command = new DeleteObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: key
+    });
+    
+    await r2Client.send(command);
+    console.log(`🗑️ Cleaned up old history image: ${key}`);
+  } catch (error) {
+    // 이미 삭제되었거나 없는 경우 무시
+    console.warn(`⚠️ Failed to cleanup history image (may already be deleted):`, error.message);
+  }
+}
+
+/**
  * JSON 데이터를 Cloudflare R2에 업로드
  * @param {Object} jsonData - 저장할 JSON 객체
  * @param {string} filename - 저장할 파일명
@@ -371,12 +400,34 @@ app.post('/api/upload-image', upload.single('image'), async (req, res) => {
       return res.status(400).json({ success: false, error: '이미지 파일이 없습니다.' });
     }
     
-    const { storybookId, type, pageNumber } = req.body;
+    const { storybookId, type, pageNumber, characterIndex, characterName, storybookTitle } = req.body;
     
-    // 파일명 생성
+    // 파일명 생성 (다른 API와 일관된 패턴 사용)
     const timestamp = Date.now();
     const ext = req.file.originalname.split('.').pop();
-    const filename = `${storybookId}-${type}-${pageNumber || 'cover'}-${timestamp}.${ext}`;
+    
+    // 안전한 파일명을 위한 문자열 정리
+    const safeTitle = (storybookTitle || '').replace(/[^a-zA-Z0-9가-힣]/g, '');
+    const safeName = (characterName || '').replace(/[^a-zA-Z0-9가-힣]/g, '');
+    
+    let filename;
+    
+    if (type === 'character') {
+      // 캐릭터 이미지: {id}-{title}-character-{name}-{timestamp}.{ext}
+      const nameOrIndex = safeName || characterIndex || 'new';
+      filename = `${storybookId}-${safeTitle}-character-${nameOrIndex}-${timestamp}.${ext}`;
+    } else if (type === 'cover') {
+      // 표지 이미지: {id}-{title}-cover-{timestamp}.{ext}
+      filename = `${storybookId}-${safeTitle}-cover-${timestamp}.${ext}`;
+    } else if (type === 'illustration') {
+      // 삽화 이미지: {id}-{title}-illustration-page{number}-{timestamp}.{ext}
+      filename = `${storybookId}-${safeTitle}-illustration-page${pageNumber || 'unknown'}-${timestamp}.${ext}`;
+    } else {
+      // 기타: 기본 패턴 사용
+      filename = `${storybookId}-${safeTitle}-${type}-${pageNumber || 'unknown'}-${timestamp}.${ext}`;
+    }
+    
+    console.log(`📤 Uploading image: ${filename}`);
     
     // R2에 업로드
     const imageUrl = await uploadBufferToR2(
@@ -2675,6 +2726,24 @@ app.get('/health', (req, res) => {
 });
 
 // API 키 제공 엔드포인트 (클라이언트에서 직접 Gemini API 호출용)
+// 히스토리 이미지 정리 API
+app.delete('/api/cleanup-image', async (req, res) => {
+  try {
+    const { imageUrl } = req.body;
+    
+    if (!imageUrl) {
+      return res.status(400).json({ success: false, error: 'imageUrl이 필요합니다.' });
+    }
+    
+    await cleanupOldHistoryImage(imageUrl);
+    
+    res.json({ success: true, message: '이미지가 삭제되었습니다.' });
+  } catch (error) {
+    console.error('이미지 정리 오류:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ❌ 보안 위험: API 키 노출 엔드포인트 제거
 // 클라이언트에서 직접 Gemini API를 호출하면 API 키가 브라우저에 노출되어
 // Google이 자동으로 키를 차단합니다.
