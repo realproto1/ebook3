@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>탱고북 앱 배포 가이드 - Railway + Android + iOS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        
+        .toc h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        
+        .toc ul {
+            list-style: none;
+        }
+        
+        .toc li {
+            padding: 0.5rem 0;
+        }
+        
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        
+        section {
+            margin-bottom: 3rem;
+        }
+        
+        h2 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        h3 {
+            color: #764ba2;
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        h4 {
+            color: #555;
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+        
+        .warning-box {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+        
+        .success-box {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+        
+        .error-box {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+        
+        code {
+            background: #f5f5f5;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+        
+        pre {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .step {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        
+        ul, ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+        
+        .badge-free {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .badge-paid {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .badge-required {
+            background: #f44336;
+            color: white;
+        }
+        
+        .badge-optional {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .comparison-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 2rem 0;
+        }
+        
+        .platform-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            transition: all 0.3s;
+        }
+        
+        .platform-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .platform-card h4 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #667eea;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+        
+        .back-to-top:hover {
+            background: #764ba2;
+            transform: translateY(-5px);
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .back-to-top {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📱 탱고북 앱 배포 가이드</h1>
+            <p>Railway 배포 + Android APK + iOS App 완벽 가이드</p>
+        </header>
+        
+        <div class="content">
+            <!-- 목차 -->
+            <div class="toc">
+                <h2>📋 목차</h2>
+                <ul>
+                    <li><a href="#overview">1. 개요 및 전체 프로세스</a></li>
+                    <li><a href="#railway">2. Railway 배포</a></li>
+                    <li><a href="#android">3. Android APK 생성</a></li>
+                    <li><a href="#ios">4. iOS App 생성</a></li>
+                    <li><a href="#comparison">5. 플랫폼 비교</a></li>
+                    <li><a href="#costs">6. 비용 분석</a></li>
+                    <li><a href="#troubleshooting">7. 문제 해결</a></li>
+                </ul>
+            </div>
+
+            <!-- 1. 개요 -->
+            <section id="overview">
+                <h2>1. 개요 및 전체 프로세스</h2>
+                
+                <h3>현재 프로젝트 상태</h3>
+                <ul>
+                    <li><strong>프로젝트명:</strong> 탱고북 (동화책 자동 생성기)</li>
+                    <li><strong>기술 스택:</strong> Node.js + Hono + Cloudflare R2</li>
+                    <li><strong>데이터베이스:</strong> Cloudflare R2 (Object Storage)</li>
+                    <li><strong>현재 배포:</strong> Sandbox 환경</li>
+                    <li><strong>목표 배포:</strong> Railway (프로덕션)</li>
+                </ul>
+
+                <h3>전체 배포 프로세스</h3>
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>Railway 배포</strong> - 웹 앱을 Railway에 배포하여 프로덕션 URL 확보
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <strong>Android APK 생성</strong> - PWABuilder 또는 Bubblewrap을 사용하여 APK 생성
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <strong>iOS App 생성</strong> - PWABuilder로 Xcode 프로젝트 생성 (Mac 필요)
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <strong>앱스토어 배포</strong> - Google Play Store 및 Apple App Store 등록
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 핵심 요약:</strong>
+                    <ul>
+                        <li>Railway: 웹 앱 호스팅 (무료 티어 $5 크레딧/월)</li>
+                        <li>Android: PWABuilder 사용 (무료, Google Play $25 평생)</li>
+                        <li>iOS: Mac + Apple Developer 계정 필요 ($99/년)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 2. Railway 배포 -->
+            <section id="railway">
+                <h2>2. Railway 배포</h2>
+                
+                <h3>2.1. Railway 계정 생성</h3>
+                <ol>
+                    <li><a href="https://railway.app" target="_blank">https://railway.app</a> 접속</li>
+                    <li>"Start a New Project" 클릭</li>
+                    <li>GitHub 계정으로 로그인</li>
+                </ol>
+
+                <h3>2.2. 프로젝트 설정</h3>
+                
+                <h4>GitHub 연동</h4>
+                <div class="step">
+                    <span class="step-number">1</span>
+                    Railway에서 "Deploy from GitHub repo" 선택
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <code>realproto1/ebook3</code> 레포지토리 선택
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">3</span>
+                    자동으로 배포 시작
+                </div>
+
+                <h4>환경 변수 설정</h4>
+                <pre><code># Railway Dashboard → Variables 탭
+
+# Cloudflare R2 설정
+R2_ACCOUNT_ID=your_account_id
+R2_ACCESS_KEY_ID=your_access_key
+R2_SECRET_ACCESS_KEY=your_secret_key
+R2_BUCKET_NAME=storybook-images
+R2_PUBLIC_URL=https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev
+
+# Gemini API
+GEMINI_API_KEY=your_gemini_api_key
+
+# 포트 설정
+PORT=3000</code></pre>
+
+                <h4>빌드 설정</h4>
+                <p>Railway는 자동으로 <code>package.json</code>을 감지하여 빌드합니다.</p>
+                
+                <div class="info-box">
+                    <strong>자동 감지되는 설정:</strong>
+                    <ul>
+                        <li>Build Command: <code>npm install</code></li>
+                        <li>Start Command: <code>npm start</code> 또는 <code>node server.js</code></li>
+                    </ul>
+                </div>
+
+                <h3>2.3. 도메인 설정</h3>
+                
+                <h4>Railway 기본 도메인</h4>
+                <pre><code>https://your-app.railway.app</code></pre>
+                
+                <h4>커스텀 도메인 연결 (선택)</h4>
+                <ol>
+                    <li>Settings → Domains 탭</li>
+                    <li>"Custom Domain" 클릭</li>
+                    <li>도메인 입력 (예: tangobook.com)</li>
+                    <li>DNS 레코드 설정:
+                        <pre><code>CNAME    @    your-app.railway.app</code></pre>
+                    </li>
+                </ol>
+
+                <h3>2.4. 배포 확인</h3>
+                <div class="success-box">
+                    <strong>✅ 배포 완료 확인:</strong>
+                    <ol>
+                        <li>Railway URL 접속</li>
+                        <li>동화책 목록 페이지 확인</li>
+                        <li>동화책 생성 테스트</li>
+                        <li>R2 이미지 로딩 확인</li>
+                    </ol>
+                </div>
+
+                <h3>2.5. Railway 비용</h3>
+                <table>
+                    <tr>
+                        <th>플랜</th>
+                        <th>비용</th>
+                        <th>리소스</th>
+                    </tr>
+                    <tr>
+                        <td>Trial</td>
+                        <td><strong>$5 크레딧/월</strong> (무료)</td>
+                        <td>500MB RAM, 1GB Storage</td>
+                    </tr>
+                    <tr>
+                        <td>Developer</td>
+                        <td><strong>$5/월</strong></td>
+                        <td>8GB RAM, 100GB Storage</td>
+                    </tr>
+                    <tr>
+                        <td>Team</td>
+                        <td><strong>$20/월</strong></td>
+                        <td>32GB RAM, 100GB Storage</td>
+                    </tr>
+                </table>
+
+                <div class="info-box">
+                    <strong>💡 추천:</strong> 초기에는 Trial 플랜 사용, 트래픽 증가 시 Developer로 업그레이드
+                </div>
+            </section>
+
+            <!-- 3. Android APK -->
+            <section id="android">
+                <h2>3. Android APK 생성</h2>
+                
+                <h3>3.1. 사전 준비</h3>
+                
+                <h4>필요한 파일</h4>
+                <ul>
+                    <li>✅ <code>manifest.json</code> (이미 있음)</li>
+                    <li>⚠️ PNG 아이콘 (512×512px) - SVG를 PNG로 변환 필요</li>
+                    <li>❌ <code>assetlinks.json</code> - 새로 생성 필요</li>
+                </ul>
+
+                <h4>아이콘 준비</h4>
+                <div class="step">
+                    <span class="step-number">1</span>
+                    512×512px PNG 아이콘 생성
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <code>public/icon-512.png</code>로 저장
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <code>manifest.json</code> 업데이트:
+                    <pre><code>{
+  "icons": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}</code></pre>
+                </div>
+
+                <h3>3.2. PWABuilder 사용 (추천) ⭐</h3>
+                
+                <h4>Step 1: PWABuilder 접속</h4>
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <a href="https://www.pwabuilder.com" target="_blank">https://www.pwabuilder.com</a> 접속
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">2</span>
+                    Railway URL 입력:
+                    <pre><code>https://your-app.railway.app</code></pre>
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">3</span>
+                    "Start" 클릭
+                </div>
+
+                <h4>Step 2: Manifest 확인</h4>
+                <ul>
+                    <li>Name: ✅ 탱고북 동화책 뷰어</li>
+                    <li>Short Name: ✅ 탱고북</li>
+                    <li>Start URL: ✅ /viewer.html</li>
+                    <li>Display: ✅ standalone</li>
+                    <li>Icons: ⚠️ PNG로 교체 필요</li>
+                </ul>
+
+                <h4>Step 3: Android 패키지 설정</h4>
+                <pre><code>Package ID: com.tangobook.app
+App Name: 탱고북
+Launcher Name: 탱고북
+Host: your-app.railway.app
+Start URL: /viewer.html</code></pre>
+
+                <h4>Step 4: assetlinks.json 생성</h4>
+                <pre><code># public/.well-known/assetlinks.json
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.tangobook.app",
+    "sha256_cert_fingerprints": [
+      "SHA256_FINGERPRINT_FROM_PWABUILDER"
+    ]
+  }
+}]</code></pre>
+
+                <h4>Step 5: APK 다운로드</h4>
+                <div class="step">
+                    <span class="step-number">1</span>
+                    "Generate" 클릭
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">2</span>
+                    APK 파일 다운로드:
+                    <ul>
+                        <li><code>app-release-signed.apk</code> - Google Play 배포용</li>
+                        <li><code>app-release-unsigned.apk</code> - 테스트용</li>
+                    </ul>
+                </div>
+
+                <h3>3.3. Google Play Store 등록</h3>
+                
+                <h4>개발자 계정 생성</h4>
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <a href="https://play.google.com/console" target="_blank">Google Play Console</a> 접속
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">2</span>
+                    개발자 계정 등록 ($25 평생)
+                </div>
+
+                <h4>앱 등록</h4>
+                <ol>
+                    <li>"앱 만들기" 클릭</li>
+                    <li>앱 정보 입력:
+                        <ul>
+                            <li>앱 이름: 탱고북</li>
+                            <li>기본 언어: 한국어</li>
+                            <li>앱 카테고리: 교육</li>
+                        </ul>
+                    </li>
+                    <li>앱 콘텐츠 등급 설정</li>
+                    <li>개인정보처리방침 URL 입력</li>
+                    <li>APK 업로드 (프로덕션 트랙)</li>
+                    <li>스토어 등록정보 작성:
+                        <ul>
+                            <li>앱 설명</li>
+                            <li>스크린샷 (최소 2개)</li>
+                            <li>아이콘 (512×512px)</li>
+                        </ul>
+                    </li>
+                    <li>검토 제출</li>
+                </ol>
+
+                <div class="info-box">
+                    <strong>📝 검토 기간:</strong> 일반적으로 1~3일 소요
+                </div>
+
+                <h3>3.4. Bubblewrap CLI (대안)</h3>
+                
+                <pre><code># 설치
+npm install -g @bubblewrap/cli
+
+# 초기화
+bubblewrap init --manifest https://your-app.railway.app/manifest.json
+
+# 빌드
+bubblewrap build
+
+# APK 위치
+./app-release-signed.apk</code></pre>
+
+                <div class="warning-box">
+                    <strong>⚠️ 주의:</strong> Bubblewrap은 Java 8 이상 필요
+                </div>
+            </section>
+
+            <!-- 4. iOS App -->
+            <section id="ios">
+                <h2>4. iOS App 생성</h2>
+                
+                <div class="error-box">
+                    <strong>❌ iOS 필수 요구사항:</strong>
+                    <ul>
+                        <li><strong>Mac 컴퓨터</strong> (Xcode 빌드용)</li>
+                        <li><strong>Apple Developer 계정</strong> ($99/년)</li>
+                        <li><strong>Xcode</strong> (Mac App Store에서 무료)</li>
+                    </ul>
+                </div>
+
+                <h3>4.1. Mac이 있는 경우</h3>
+                
+                <h4>방법 1: PWABuilder (추천)</h4>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    PWABuilder에서 iOS 옵션 선택
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">2</span>
+                    Xcode 프로젝트 다운로드 (<code>TangoBook.zip</code>)
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">3</span>
+                    Mac에서 압축 해제 및 Xcode로 열기
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">4</span>
+                    Apple Developer 계정 연결
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">5</span>
+                    서명 설정 (Signing & Capabilities)
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">6</span>
+                    Archive 빌드 → IPA Export
+                </div>
+
+                <h4>방법 2: Capacitor</h4>
+                
+                <pre><code># 프로젝트에서 실행
+npm install @capacitor/core @capacitor/cli
+npm install @capacitor/ios
+
+# 초기화
+npx cap init
+
+# iOS 플랫폼 추가
+npx cap add ios
+
+# 빌드 및 복사
+npm run build
+npx cap copy
+
+# Xcode 열기
+npx cap open ios</code></pre>
+
+                <h3>4.2. Mac이 없는 경우</h3>
+                
+                <h4>옵션 1: Safari PWA (무료) ⭐ 추천</h4>
+                
+                <div class="success-box">
+                    <strong>✅ 현재 이미 작동 중!</strong>
+                    <ol>
+                        <li>iPhone에서 Safari 열기</li>
+                        <li>Railway URL 접속</li>
+                        <li>공유 버튼 → "홈 화면에 추가"</li>
+                        <li>완료!</li>
+                    </ol>
+                </div>
+
+                <div class="info-box">
+                    <strong>장점:</strong>
+                    <ul>
+                        <li>무료</li>
+                        <li>즉시 사용 가능</li>
+                        <li>App Store 불필요</li>
+                    </ul>
+                    <strong>단점:</strong>
+                    <ul>
+                        <li>일부 네이티브 기능 제한</li>
+                        <li>App Store 앱 아님</li>
+                    </ul>
+                </div>
+
+                <h4>옵션 2: 클라우드 빌드 서비스</h4>
+                
+                <table>
+                    <tr>
+                        <th>서비스</th>
+                        <th>비용</th>
+                        <th>특징</th>
+                    </tr>
+                    <tr>
+                        <td>Codemagic</td>
+                        <td>$40/월</td>
+                        <td>클라우드 Mac, 500분 빌드</td>
+                    </tr>
+                    <tr>
+                        <td>Bitrise</td>
+                        <td>$90/월</td>
+                        <td>무제한 빌드</td>
+                    </tr>
+                    <tr>
+                        <td>AppFlow</td>
+                        <td>$29/월</td>
+                        <td>Capacitor/Cordova 전용</td>
+                    </tr>
+                </table>
+
+                <h3>4.3. App Store 등록</h3>
+                
+                <h4>Apple Developer 계정</h4>
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <a href="https://developer.apple.com" target="_blank">Apple Developer</a> 가입 ($99/년)
+                </div>
+
+                <h4>App Store Connect</h4>
+                <ol>
+                    <li><a href="https://appstoreconnect.apple.com" target="_blank">App Store Connect</a> 접속</li>
+                    <li>"새로운 앱" 생성</li>
+                    <li>앱 정보 입력:
+                        <ul>
+                            <li>이름: 탱고북</li>
+                            <li>Bundle ID: com.tangobook.app</li>
+                            <li>카테고리: 교육</li>
+                        </ul>
+                    </li>
+                    <li>버전 정보 작성</li>
+                    <li>스크린샷 업로드 (각 화면 크기별)</li>
+                    <li>IPA 파일 업로드 (Xcode에서 Upload)</li>
+                    <li>검토 제출</li>
+                </ol>
+
+                <div class="info-box">
+                    <strong>📝 검토 기간:</strong> 일반적으로 1~2일 소요 (Android보다 빠름)
+                </div>
+            </section>
+
+            <!-- 5. 플랫폼 비교 -->
+            <section id="comparison">
+                <h2>5. 플랫폼 비교</h2>
+                
+                <h3>Android vs iOS</h3>
+                
+                <table class="comparison-table">
+                    <tr>
+                        <th>항목</th>
+                        <th>Android</th>
+                        <th>iOS</th>
+                    </tr>
+                    <tr>
+                        <td><strong>개발 환경</strong></td>
+                        <td>✅ Windows, Mac, Linux</td>
+                        <td>❌ Mac만 가능</td>
+                    </tr>
+                    <tr>
+                        <td><strong>개발자 계정</strong></td>
+                        <td>$25 (평생)</td>
+                        <td>$99/년</td>
+                    </tr>
+                    <tr>
+                        <td><strong>도구</strong></td>
+                        <td>PWABuilder, Bubblewrap</td>
+                        <td>Xcode 필수</td>
+                    </tr>
+                    <tr>
+                        <td><strong>APK/IPA 생성</strong></td>
+                        <td>✅ 자동 생성</td>
+                        <td>❌ Mac에서 수동 빌드</td>
+                    </tr>
+                    <tr>
+                        <td><strong>직접 설치</strong></td>
+                        <td>✅ 가능 (APK)</td>
+                        <td>❌ 불가 (App Store만)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>검토 기간</strong></td>
+                        <td>1~3일</td>
+                        <td>1~2일</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PWA 대안</strong></td>
+                        <td>⚠️ 제한적</td>
+                        <td>✅ Safari 좋은 지원</td>
+                    </tr>
+                </table>
+
+                <h3>앱 생성 방법 비교</h3>
+                
+                <div class="platform-card">
+                    <h4>🥇 PWABuilder</h4>
+                    <p><span class="badge badge-free">무료</span> <span class="badge badge-optional">GUI</span></p>
+                    <ul>
+                        <li><strong>난이도:</strong> ⭐ 쉬움</li>
+                        <li><strong>시간:</strong> 10~30분</li>
+                        <li><strong>Android:</strong> ✅ 완전 자동</li>
+                        <li><strong>iOS:</strong> ⚠️ Xcode 프로젝트만</li>
+                    </ul>
+                </div>
+
+                <div class="platform-card">
+                    <h4>🥈 Capacitor</h4>
+                    <p><span class="badge badge-free">무료</span> <span class="badge badge-optional">CLI</span></p>
+                    <ul>
+                        <li><strong>난이도:</strong> ⭐⭐ 중간</li>
+                        <li><strong>시간:</strong> 1시간</li>
+                        <li><strong>Android:</strong> ✅ Android Studio</li>
+                        <li><strong>iOS:</strong> ✅ Xcode (Mac 필요)</li>
+                        <li><strong>장점:</strong> 네이티브 플러그인 사용 가능</li>
+                    </ul>
+                </div>
+
+                <div class="platform-card">
+                    <h4>🥉 Bubblewrap CLI</h4>
+                    <p><span class="badge badge-free">무료</span> <span class="badge badge-required">CLI</span></p>
+                    <ul>
+                        <li><strong>난이도:</strong> ⭐⭐ 중간</li>
+                        <li><strong>시간:</strong> 20분</li>
+                        <li><strong>Android만 지원</strong></li>
+                        <li><strong>장점:</strong> CLI 자동화 가능</li>
+                    </ul>
+                </div>
+
+                <div class="platform-card">
+                    <h4>Safari PWA (iOS 대안)</h4>
+                    <p><span class="badge badge-free">무료</span> <span class="badge badge-optional">브라우저</span></p>
+                    <ul>
+                        <li><strong>난이도:</strong> ⭐ 매우 쉬움</li>
+                        <li><strong>시간:</strong> 즉시</li>
+                        <li><strong>iOS만:</strong> ✅ 현재 작동 중</li>
+                        <li><strong>장점:</strong> 무료, App Store 불필요</li>
+                        <li><strong>단점:</strong> 일부 기능 제한</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 6. 비용 분석 -->
+            <section id="costs">
+                <h2>6. 비용 분석</h2>
+                
+                <h3>시나리오별 비용 (1년 기준)</h3>
+                
+                <table>
+                    <tr>
+                        <th>시나리오</th>
+                        <th>구성</th>
+                        <th>1년차</th>
+                        <th>2년차+</th>
+                    </tr>
+                    <tr>
+                        <td><strong>최소 비용</strong></td>
+                        <td>Railway + iOS PWA</td>
+                        <td>$0 (무료)</td>
+                        <td>$0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Android만</strong></td>
+                        <td>Railway + Android APK</td>
+                        <td>$25</td>
+                        <td>$0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Android + iOS PWA</strong></td>
+                        <td>Railway + APK + PWA</td>
+                        <td>$25</td>
+                        <td>$0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>완전한 네이티브</strong></td>
+                        <td>Railway + Android + iOS</td>
+                        <td>$124</td>
+                        <td>$99</td>
+                    </tr>
+                    <tr>
+                        <td><strong>클라우드 빌드</strong></td>
+                        <td>+ Codemagic (iOS)</td>
+                        <td>$604</td>
+                        <td>$579</td>
+                    </tr>
+                </table>
+
+                <h3>상세 비용 분석</h3>
+                
+                <h4>Railway 호스팅</h4>
+                <ul>
+                    <li><strong>Trial:</strong> $5 크레딧/월 (무료) - 소규모 프로젝트 충분</li>
+                    <li><strong>Developer:</strong> $5/월 - 상용 서비스 권장</li>
+                    <li><strong>1년 비용:</strong> $0 (Trial) 또는 $60 (Developer)</li>
+                </ul>
+
+                <h4>Android</h4>
+                <ul>
+                    <li><strong>개발:</strong> 무료 (PWABuilder)</li>
+                    <li><strong>Google Play 등록:</strong> $25 (평생)</li>
+                    <li><strong>총 비용:</strong> $25 (1회)</li>
+                </ul>
+
+                <h4>iOS (Mac 있는 경우)</h4>
+                <ul>
+                    <li><strong>개발:</strong> 무료 (PWABuilder + Xcode)</li>
+                    <li><strong>Apple Developer:</strong> $99/년</li>
+                    <li><strong>총 비용:</strong> $99/년</li>
+                </ul>
+
+                <h4>iOS (Mac 없는 경우)</h4>
+                <ul>
+                    <li><strong>Safari PWA:</strong> 무료 ✅</li>
+                    <li><strong>클라우드 빌드:</strong> $40~90/월 ❌</li>
+                </ul>
+
+                <div class="success-box">
+                    <strong>💰 추천 시나리오:</strong>
+                    <ul>
+                        <li><strong>예산 최소:</strong> Railway + iOS PWA = <strong>무료</strong></li>
+                        <li><strong>Android 추가:</strong> +$25 = <strong>$25 (평생)</strong></li>
+                        <li><strong>완전한 앱:</strong> +$99/년 = <strong>$124 (첫 해), $99/년 (이후)</strong></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 7. 문제 해결 -->
+            <section id="troubleshooting">
+                <h2>7. 문제 해결</h2>
+                
+                <h3>Railway 배포 문제</h3>
+                
+                <h4>빌드 실패</h4>
+                <div class="error-box">
+                    <strong>증상:</strong> "Build failed" 에러
+                    <br><br>
+                    <strong>해결:</strong>
+                    <ul>
+                        <li>환경 변수 확인 (R2, Gemini API)</li>
+                        <li><code>package.json</code>의 <code>start</code> 스크립트 확인</li>
+                        <li>로그에서 에러 메시지 확인</li>
+                    </ul>
+                </div>
+
+                <h4>환경 변수 인식 안됨</h4>
+                <div class="error-box">
+                    <strong>증상:</strong> "R2_ACCOUNT_ID is not defined"
+                    <br><br>
+                    <strong>해결:</strong>
+                    <ul>
+                        <li>Railway Dashboard → Variables 탭 확인</li>
+                        <li>변수 이름 대소문자 정확히 입력</li>
+                        <li>재배포 (Redeploy)</li>
+                    </ul>
+                </div>
+
+                <h3>Android APK 문제</h3>
+                
+                <h4>assetlinks.json 404</h4>
+                <div class="error-box">
+                    <strong>증상:</strong> TWA 검증 실패
+                    <br><br>
+                    <strong>해결:</strong>
+                    <pre><code># 파일 위치 확인
+public/.well-known/assetlinks.json
+
+# URL 확인
+https://your-app.railway.app/.well-known/assetlinks.json</code></pre>
+                </div>
+
+                <h4>APK 설치 안됨</h4>
+                <div class="error-box">
+                    <strong>증상:</strong> "App not installed"
+                    <br><br>
+                    <strong>해결:</strong>
+                    <ul>
+                        <li>기존 버전 삭제 후 재설치</li>
+                        <li>"출처 불명 앱 설치 허용" 활성화</li>
+                        <li>APK 서명 확인</li>
+                    </ul>
+                </div>
+
+                <h3>iOS 빌드 문제</h3>
+                
+                <h4>Xcode 서명 에러</h4>
+                <div class="error-box">
+                    <strong>증상:</strong> "Code signing is required"
+                    <br><br>
+                    <strong>해결:</strong>
+                    <ul>
+                        <li>Signing & Capabilities → Team 선택</li>
+                        <li>Bundle Identifier 확인</li>
+                        <li>Provisioning Profile 재생성</li>
+                    </ul>
+                </div>
+
+                <h4>Mac 없을 때</h4>
+                <div class="success-box">
+                    <strong>✅ 최선의 대안:</strong>
+                    <ul>
+                        <li>Safari PWA 사용 (무료, 즉시 가능)</li>
+                        <li>사용자에게 "홈 화면에 추가" 안내</li>
+                        <li>App Store 앱과 유사한 경험 제공</li>
+                    </ul>
+                </div>
+
+                <h3>PWA 문제</h3>
+                
+                <h4>manifest.json 인식 안됨</h4>
+                <div class="error-box">
+                    <strong>증상:</strong> PWA 설치 프롬프트 안 뜸
+                    <br><br>
+                    <strong>해결:</strong>
+                    <ul>
+                        <li>HTTPS 확인 (Railway는 기본 제공)</li>
+                        <li>manifest.json 경로 확인</li>
+                        <li>아이콘 최소 192×192px 이상</li>
+                        <li>start_url, scope 확인</li>
+                    </ul>
+                </div>
+
+                <h3>일반 문제</h3>
+                
+                <h4>R2 이미지 로딩 안됨</h4>
+                <div class="error-box">
+                    <strong>증상:</strong> 동화책 이미지가 안 보임
+                    <br><br>
+                    <strong>해결:</strong>
+                    <ul>
+                        <li>R2 Public URL 확인</li>
+                        <li>CORS 설정 확인</li>
+                        <li>브라우저 콘솔에서 에러 확인</li>
+                    </ul>
+                </div>
+
+                <h4>API 요청 실패</h4>
+                <div class="error-box">
+                    <strong>증상:</strong> "Failed to fetch"
+                    <br><br>
+                    <strong>해결:</strong>
+                    <ul>
+                        <li>Railway URL이 올바른지 확인</li>
+                        <li>CORS 설정 확인</li>
+                        <li>API 엔드포인트 경로 확인</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 체크리스트 -->
+            <section>
+                <h2>8. 배포 체크리스트</h2>
+                
+                <h3>Railway 배포</h3>
+                <ul style="list-style: none;">
+                    <li>☐ Railway 계정 생성</li>
+                    <li>☐ GitHub 레포지토리 연결</li>
+                    <li>☐ 환경 변수 설정 (R2, Gemini API)</li>
+                    <li>☐ 배포 확인</li>
+                    <li>☐ 도메인 설정 (선택)</li>
+                </ul>
+
+                <h3>Android APK</h3>
+                <ul style="list-style: none;">
+                    <li>☐ PNG 아이콘 준비 (512×512px)</li>
+                    <li>☐ manifest.json 업데이트</li>
+                    <li>☐ assetlinks.json 생성</li>
+                    <li>☐ PWABuilder에서 APK 생성</li>
+                    <li>☐ APK 테스트</li>
+                    <li>☐ Google Play Console 등록 ($25)</li>
+                    <li>☐ 앱 정보 입력</li>
+                    <li>☐ APK 업로드</li>
+                    <li>☐ 검토 제출</li>
+                </ul>
+
+                <h3>iOS App (Mac 있는 경우)</h3>
+                <ul style="list-style: none;">
+                    <li>☐ Apple Developer 계정 ($99/년)</li>
+                    <li>☐ PWABuilder에서 Xcode 프로젝트 생성</li>
+                    <li>☐ Mac에서 Xcode 빌드</li>
+                    <li>☐ 서명 설정</li>
+                    <li>☐ IPA 생성</li>
+                    <li>☐ App Store Connect 등록</li>
+                    <li>☐ 앱 정보 입력</li>
+                    <li>☐ IPA 업로드</li>
+                    <li>☐ 검토 제출</li>
+                </ul>
+
+                <h3>iOS PWA (Mac 없는 경우)</h3>
+                <ul style="list-style: none;">
+                    <li>☐ manifest.json 확인</li>
+                    <li>☐ PWA 아이콘 확인</li>
+                    <li>☐ Safari에서 테스트</li>
+                    <li>☐ "홈 화면에 추가" 안내 문서 작성</li>
+                </ul>
+            </section>
+
+            <!-- 참고 링크 -->
+            <section>
+                <h2>9. 참고 링크</h2>
+                
+                <h3>배포 플랫폼</h3>
+                <ul>
+                    <li><a href="https://railway.app" target="_blank">Railway</a></li>
+                    <li><a href="https://www.cloudflare.com/products/r2/" target="_blank">Cloudflare R2</a></li>
+                </ul>
+
+                <h3>앱 생성 도구</h3>
+                <ul>
+                    <li><a href="https://www.pwabuilder.com" target="_blank">PWABuilder</a></li>
+                    <li><a href="https://github.com/GoogleChromeLabs/bubblewrap" target="_blank">Bubblewrap</a></li>
+                    <li><a href="https://capacitorjs.com" target="_blank">Capacitor</a></li>
+                </ul>
+
+                <h3>앱 스토어</h3>
+                <ul>
+                    <li><a href="https://play.google.com/console" target="_blank">Google Play Console</a></li>
+                    <li><a href="https://appstoreconnect.apple.com" target="_blank">App Store Connect</a></li>
+                    <li><a href="https://developer.apple.com" target="_blank">Apple Developer</a></li>
+                </ul>
+
+                <h3>문서</h3>
+                <ul>
+                    <li><a href="https://web.dev/progressive-web-apps/" target="_blank">PWA Guide (Google)</a></li>
+                    <li><a href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps" target="_blank">PWA Guide (MDN)</a></li>
+                    <li><a href="https://developer.android.com/guide/webapps/managing-webview" target="_blank">Android WebView</a></li>
+                </ul>
+            </section>
+
+        </div>
+
+        <footer>
+            <p><strong>탱고북 동화책 자동 생성기</strong></p>
+            <p>버전 v13.9.0 | 마지막 업데이트: 2024</p>
+            <p>GitHub: <a href="https://github.com/realproto1/ebook3" target="_blank" style="color: #fff;">realproto1/ebook3</a></p>
+        </footer>
+    </div>
+
+    <a href="#" class="back-to-top">↑</a>
+
+    <script>
+        // 부드러운 스크롤
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Back to top 버튼
+        const backToTop = document.querySelector('.back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTop.style.display = 'flex';
+            } else {
+                backToTop.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
