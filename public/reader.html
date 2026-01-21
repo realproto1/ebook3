@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>동화책 읽기 - 탱고북</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+        .page-transition {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        .page-enter {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+        .page-exit {
+            opacity: 0;
+            transform: translateX(-100px);
+        }
+        .nav-button {
+            transition: all 0.2s;
+        }
+        .nav-button:hover {
+            transform: scale(1.1);
+        }
+        .nav-button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+    <!-- 로딩 -->
+    <div id="loading" class="h-screen flex items-center justify-center">
+        <div class="text-center">
+            <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white"></div>
+            <p class="text-white text-xl mt-4">동화책을 불러오는 중...</p>
+        </div>
+    </div>
+
+    <!-- 메인 리더 -->
+    <div id="reader" class="hidden h-screen flex flex-col">
+        <!-- 헤더 -->
+        <header class="bg-gray-800 text-white px-6 py-4 flex justify-between items-center">
+            <button onclick="exitReader()" class="hover:text-gray-300 transition">
+                <i class="fas fa-arrow-left mr-2"></i>
+                돌아가기
+            </button>
+            
+            <div class="flex items-center gap-4">
+                <span id="progress-text" class="text-sm font-semibold">1 / 20</span>
+                <button onclick="toggleAutoPlay()" class="hover:text-gray-300 transition" title="자동 재생">
+                    <i class="fas fa-play" id="autoplay-icon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="flex-1 flex items-center justify-center relative bg-gray-900">
+            <!-- 이전 버튼 -->
+            <button 
+                id="prev-btn"
+                onclick="previousPage()"
+                class="nav-button absolute left-4 bg-white/90 hover:bg-white p-4 rounded-full shadow-2xl z-10"
+            >
+                <i class="fas fa-chevron-left text-2xl text-gray-800"></i>
+            </button>
+            
+            <!-- 페이지 콘텐츠 -->
+            <div class="max-w-5xl w-full px-20">
+                <!-- 이미지 -->
+                <div id="page-image-container" class="mb-6 rounded-2xl overflow-hidden shadow-2xl bg-white">
+                    <img 
+                        id="page-image" 
+                        src="" 
+                        alt="" 
+                        class="w-full h-auto page-transition"
+                    >
+                </div>
+                
+                <!-- 텍스트 -->
+                <div class="bg-white rounded-2xl p-8 shadow-2xl">
+                    <p id="page-text" class="text-2xl leading-relaxed text-gray-800 mb-6"></p>
+                    
+                    <!-- TTS 재생 버튼 -->
+                    <button 
+                        onclick="playTTS()"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-full font-semibold transition shadow-lg"
+                    >
+                        <i class="fas fa-volume-up mr-2"></i>
+                        <span id="tts-text">읽어주기</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 다음 버튼 -->
+            <button 
+                id="next-btn"
+                onclick="nextPage()"
+                class="nav-button absolute right-4 bg-white/90 hover:bg-white p-4 rounded-full shadow-2xl z-10"
+            >
+                <i class="fas fa-chevron-right text-2xl text-gray-800"></i>
+            </button>
+        </main>
+
+        <!-- 진행바 -->
+        <div class="bg-gray-800 p-2">
+            <div class="bg-gray-700 rounded-full h-2">
+                <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 5%"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <script src="/viewer/js/reader.js"></script>
+</body>
+</html>
