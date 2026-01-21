@@ -12,7 +12,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* 강제 가로 모드 및 전체 화면 */
+        /* 전체 화면 */
         :root {
             --vh: 1vh;
         }
@@ -40,35 +40,20 @@
             position: fixed;
             top: 0;
             left: 0;
-            /* iOS Safari */
             height: 100vh;
             height: calc(var(--vh, 1vh) * 100);
-            /* Android Chrome */
             min-height: 100vh;
             min-height: calc(var(--vh, 1vh) * 100);
         }
         
         /* 상단 주소창/하단 네비게이션 숨기기 */
-        /* 더 이상 필요 없음 - 위에서 처리됨 */
+        /* CSS로 처리됨 */
         
         /* 안전 영역 패딩 무시 */
         #reader {
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
         
-        /* 세로 모드일 때 90도 회전 */
-        @media screen and (orientation: portrait) {
-            html {
-                transform: rotate(90deg);
-                transform-origin: left top;
-                width: 100vh;
-                height: 100vw;
-                overflow-x: hidden;
-                position: absolute;
-                top: 100%;
-                left: 0;
-            }
-        }
         .page-transition {
             transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
         }

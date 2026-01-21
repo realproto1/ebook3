@@ -69,13 +69,6 @@ function enterFullscreen() {
         elem.msRequestFullscreen();
     }
     
-    // 화면 방향 잠금 시도 (Android Chrome)
-    if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(err => {
-            console.log('Screen orientation lock failed:', err);
-        });
-    }
-    
     // 주소창 숨기기
     hideAddressBar();
 }
