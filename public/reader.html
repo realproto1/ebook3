@@ -2,12 +2,19 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>동화책 읽기 - 탱고북</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         /* 강제 가로 모드 및 전체 화면 */
+        :root {
+            --vh: 1vh;
+        }
+        
         html, body {
             margin: 0;
             padding: 0;
@@ -19,6 +26,21 @@
             -webkit-user-select: none;
             user-select: none;
             position: fixed;
+        }
+        
+        /* 상단 주소창/하단 네비게이션 숨기기 */
+        body {
+            /* iOS Safari */
+            height: 100vh;
+            height: calc(var(--vh, 1vh) * 100);
+            /* Android Chrome */
+            min-height: 100vh;
+            min-height: calc(var(--vh, 1vh) * 100);
+        }
+        
+        /* 안전 영역 패딩 무시 */
+        #reader {
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
         
         /* 세로 모드일 때 90도 회전 */
@@ -90,7 +112,13 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            height: calc(var(--vh, 1vh) * 100);
             width: 100vw;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
         
         header {
@@ -146,6 +174,11 @@
             .nav-button {
                 padding: 0.5rem !important;
             }
+        }
+        
+        /* 진행바 숨기기 (더 많은 공간 확보) */
+        #progress-bar-container {
+            display: none;
         }
     </style>
 </head>

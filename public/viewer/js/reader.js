@@ -5,12 +5,23 @@ let isAutoPlaying = false;
 let autoPlayInterval = null;
 let currentAudio = null;
 
-// 전체 화면 진입
+// 모바일 주소창/네비게이션 숨기기
+function hideAddressBar() {
+    // 스크롤을 강제로 위로 올려서 주소창 숨기기
+    window.scrollTo(0, 1);
+    setTimeout(() => window.scrollTo(0, 0), 0);
+    
+    // 뷰포트 높이 강제 조정
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+// 전체 화면 진입 (클릭 이벤트에서 호출)
 function enterFullscreen() {
     const elem = document.documentElement;
     
     if (elem.requestFullscreen) {
-        elem.requestFullscreen().catch(err => {
+        elem.requestFullscreen({ navigationUI: "hide" }).catch(err => {
             console.log('Fullscreen request failed:', err);
         });
     } else if (elem.webkitRequestFullscreen) { /* Safari */
@@ -25,6 +36,9 @@ function enterFullscreen() {
             console.log('Screen orientation lock failed:', err);
         });
     }
+    
+    // 주소창 숨기기
+    hideAddressBar();
 }
 
 // URL에서 동화책 ID 가져오기
@@ -63,11 +77,21 @@ async function loadBook() {
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('reader').classList.remove('hidden');
             
-            // 전체 화면 진입
-            enterFullscreen();
+            // 주소창 즉시 숨기기
+            hideAddressBar();
             
             // 첫 페이지 표시
             showPage(0);
+            
+            // 첫 번째 사용자 인터랙션 시 전체 화면 진입
+            const tryFullscreen = () => {
+                enterFullscreen();
+                // 한 번만 실행
+                document.removeEventListener('click', tryFullscreen);
+                document.removeEventListener('touchstart', tryFullscreen);
+            };
+            document.addEventListener('click', tryFullscreen, { once: true });
+            document.addEventListener('touchstart', tryFullscreen, { once: true });
         }
     } catch (error) {
         console.error('❌ Failed to load storybook:', error);
@@ -296,5 +320,21 @@ document.addEventListener('keydown', (e) => {
 
 // 페이지 로드 시 실행
 window.addEventListener('DOMContentLoaded', () => {
+    // 즉시 주소창 숨기기 시도
+    hideAddressBar();
+    
+    // 동화책 로드
     loadBook();
+});
+
+// 윈도우 리사이즈 시 주소창 숨기기
+window.addEventListener('resize', () => {
+    hideAddressBar();
+});
+
+// 화면 방향 변경 시 주소창 숨기기
+window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+        hideAddressBar();
+    }, 100);
 });
