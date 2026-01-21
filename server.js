@@ -141,6 +141,39 @@ async function uploadBase64ToR2(base64Data, filename) {
   }
 }
 
+/**
+ * 로컬 파일 경로에서 Cloudflare R2에 업로드
+ * @param {string} filePath - 로컬 파일 경로
+ * @param {string} filename - 저장할 파일명
+ * @returns {string} R2 공개 URL
+ */
+async function uploadImageToR2FromPath(filePath, filename) {
+  try {
+    console.log(`📤 Uploading from path to R2: ${filename}`);
+    
+    // 파일 읽기
+    const buffer = await fs.promises.readFile(filePath);
+    
+    // R2에 업로드
+    const command = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: filename,
+      Body: buffer,
+      ContentType: 'image/png',
+    });
+    
+    await r2Client.send(command);
+    
+    const publicUrl = `${R2_PUBLIC_URL}/${filename}`;
+    console.log(`✅ Uploaded from path to R2: ${publicUrl}`);
+    
+    return publicUrl;
+  } catch (error) {
+    console.error('❌ R2 upload from path failed:', error);
+    throw error;
+  }
+}
+
 // Multer 설정 (메모리 스토리지 사용)
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -2110,6 +2143,77 @@ Create a single, clear image that children can easily understand and associate w
     res.status(500).json({ 
       success: false,
       error: '단어 이미지 생성 실패: ' + error.message
+    });
+  }
+});
+
+// 학습 단어 이미지 업로드 API (로컬 파일 또는 URL)
+app.post('/api/upload-vocabulary-image', requireAPIKey, upload.single('image'), async (req, res) => {
+  try {
+    const { word, korean, imageUrl, storybookId, storybookTitle } = req.body;
+    
+    if (!word) {
+      return res.status(400).json({ 
+        success: false, 
+        error: '단어(word)가 필요합니다.' 
+      });
+    }
+    
+    let uploadedUrl;
+    const timestamp = Date.now();
+    const safeStorybookId = storybookId || 'custom';
+    const safeStorybookTitle = (storybookTitle || 'vocabulary').replace(/[^a-zA-Z0-9가-힣]/g, '');
+    const safeWord = word.replace(/[^a-zA-Z0-9가-힣]/g, '');
+    const filename = `${safeStorybookId}-${safeStorybookTitle}-vocabulary-${safeWord}-${timestamp}.png`;
+    
+    // 1. 로컬 파일이 업로드된 경우
+    if (req.file) {
+      console.log(`📤 Uploading local file for vocabulary: ${word}`);
+      
+      // Multer가 처리한 파일을 R2에 업로드
+      const fileBuffer = req.file.buffer;
+      
+      // Buffer를 임시 파일로 저장
+      const tempPath = `/tmp/${filename}`;
+      await fs.promises.writeFile(tempPath, fileBuffer);
+      
+      // R2에 업로드
+      uploadedUrl = await uploadImageToR2FromPath(tempPath, filename);
+      
+      // 임시 파일 삭제
+      await fs.promises.unlink(tempPath);
+      
+      console.log(`✅ Local file uploaded: ${uploadedUrl}`);
+    }
+    // 2. URL이 제공된 경우
+    else if (imageUrl) {
+      console.log(`🔗 Uploading image from URL for vocabulary: ${word}`);
+      
+      // URL에서 이미지 다운로드 후 R2에 업로드
+      uploadedUrl = await uploadImageToR2(imageUrl, filename);
+      
+      console.log(`✅ URL image uploaded: ${uploadedUrl}`);
+    }
+    else {
+      return res.status(400).json({ 
+        success: false, 
+        error: '이미지 파일 또는 URL이 필요합니다.' 
+      });
+    }
+    
+    res.json({
+      success: true,
+      word: word,
+      korean: korean || '',
+      imageUrl: uploadedUrl,
+      message: '이미지가 성공적으로 업로드되었습니다.'
+    });
+    
+  } catch (error) {
+    console.error('Error uploading vocabulary image:', error);
+    res.status(500).json({ 
+      success: false,
+      error: '이미지 업로드 실패: ' + error.message
     });
   }
 });
