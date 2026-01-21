@@ -4261,9 +4261,26 @@ Requirements:
 Example: For "Apple", show only a red apple fruit. No text.`;
         }
 
-        const result = await generateImageClient(prompt, referenceImages, 3, imageSettings.vocabularyModel || 'gemini-3-pro-image-preview'); // 8단어 학습 전용 모델 사용
+        // 서버 API를 통해 이미지 생성 (보안)
+        const response = await axios.post('/api/generate-vocabulary-images', {
+            vocabularyItems: [{
+                word: word,
+                korean: korean,
+                definition: vocabItem.definition || '',
+                example: vocabItem.example || ''
+            }],
+            artStyle: currentStorybook.artStyle || '디즈니 스타일',
+            settings: {
+                aspectRatio: '16:9',
+                enforceNoText: true
+            },
+            customPrompt: prompt,
+            storybookId: currentStorybook.id,
+            storybookTitle: currentStorybook.title
+        });
         
-        if (result.success && result.imageUrl) {
+        if (response.data.success && response.data.results && response.data.results[0] && response.data.results[0].success) {
+            const result = response.data.results[0];
             const imageUrl = result.imageUrl;
             
             // vocabularyImages 배열 초기화
@@ -4288,15 +4305,25 @@ Example: For "Apple", show only a red apple fruit. No text.`;
             
             return { index: wordIndex, success: true, imageUrl: imageUrl };
         } else {
-            throw new Error(result.error || '이미지 생성 실패');
+            const errorMsg = response.data.error || result.error || '이미지 생성 실패';
+            throw new Error(errorMsg);
         }
         
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Vocabulary image generation error:', error);
+        
+        let errorMsg = error.message || '알 수 없는 오류';
+        
+        // 서버 에러 메시지 추출
+        if (error.response && error.response.data && error.response.data.error) {
+            errorMsg = error.response.data.error;
+        }
+        
         vocabImgDiv.innerHTML = `
             <div class="p-4 text-center">
-                <p class="text-red-600 text-xs mb-2">⚠️ 생성 실패</p>
-                <p class="text-gray-500 text-xs">${error.message}</p>
+                <i class="fas fa-exclamation-triangle text-red-600 text-xl mb-2"></i>
+                <p class="text-red-600 text-xs font-bold mb-2">⚠️ 생성 실패</p>
+                <p class="text-gray-500 text-xs mb-3">${errorMsg}</p>
                 <button 
                     onclick="generateSingleVocabularyImage(${wordIndex})"
                     class="mt-2 bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600"
