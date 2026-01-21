@@ -2675,17 +2675,15 @@ app.get('/health', (req, res) => {
 });
 
 // API 키 제공 엔드포인트 (클라이언트에서 직접 Gemini API 호출용)
+// ❌ 보안 위험: API 키 노출 엔드포인트 제거
+// 클라이언트에서 직접 Gemini API를 호출하면 API 키가 브라우저에 노출되어
+// Google이 자동으로 키를 차단합니다.
+// 모든 Gemini API 호출은 서버를 통해서만 이루어져야 합니다.
 app.get('/api/config', (req, res) => {
-  if (!GEMINI_API_KEY) {
-    return res.status(403).json({
-      success: false,
-      error: 'API 키가 설정되지 않았습니다.'
-    });
-  }
-  
+  // API 키를 클라이언트에 절대 전달하지 않음
   res.json({
-    success: true,
-    apiKey: GEMINI_API_KEY
+    success: false,
+    error: 'API 키는 보안상의 이유로 클라이언트에 제공되지 않습니다. 모든 이미지 생성은 서버를 통해 이루어집니다.'
   });
 });
 

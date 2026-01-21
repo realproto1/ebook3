@@ -1,4 +1,18 @@
-// Gemini API 클라이언트 측 호출 유틸리티
+// ⚠️⚠️⚠️ 보안 경고 ⚠️⚠️⚠️
+// 이 파일은 더 이상 사용되지 않습니다!
+// 클라이언트에서 직접 Gemini API를 호출하면 API 키가 브라우저에 노출되어
+// Google이 자동으로 유출된 키로 판단하고 즉시 차단합니다.
+//
+// 모든 이미지 생성은 서버 API를 통해서만 이루어져야 합니다:
+// - /api/generate-character-image
+// - /api/generate-cover
+// - /api/generate-illustration
+// - /api/generate-vocabulary-images
+// 
+// 이 파일은 하위 호환성을 위해 남겨두지만, 실제로는 사용되지 않습니다.
+// ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+
+// Gemini API 클라이언트 측 호출 유틸리티 (deprecated)
 
 // 환경 변수에서 API 키 가져오기 (서버에서 전달받거나 직접 설정)
 let GEMINI_API_KEY = null;
