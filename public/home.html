@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>탱고북 - AI 동화책 플랫폼</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
@@ -40,6 +40,34 @@
         }
         .float-animation {
             animation: float 3s ease-in-out infinite;
+        }
+        
+        /* 모바일 최적화 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem !important;
+            }
+            
+            p.text-2xl {
+                font-size: 1.25rem !important;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+            
+            .icon-wrapper {
+                width: 80px !important;
+                height: 80px !important;
+            }
+            
+            .icon-wrapper i {
+                font-size: 2rem !important;
+            }
+            
+            h2 {
+                font-size: 1.5rem !important;
+            }
         }
     </style>
 </head>

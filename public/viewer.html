@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>탱고북 - 동화책 뷰어</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
@@ -32,6 +32,48 @@
         }
         .fade-in {
             animation: fadeIn 0.5s ease-out;
+        }
+        
+        /* 모바일 최적화 */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            header h1 {
+                font-size: 2rem !important;
+            }
+            
+            header p {
+                font-size: 1rem !important;
+            }
+            
+            .filter-btn {
+                padding: 0.5rem 0.75rem !important;
+                font-size: 0.875rem !important;
+            }
+            
+            .book-card {
+                margin-bottom: 1rem;
+            }
+            
+            /* 저작 도구 버튼 모바일 */
+            header .flex {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 1rem;
+            }
+            
+            header a[href="/author.html"] {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        /* 터치 영역 개선 */
+        .book-card, .filter-btn, button {
+            min-height: 44px;
         }
     </style>
 </head>

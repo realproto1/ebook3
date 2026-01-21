@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>학습 게임 - 탱고북</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
@@ -29,6 +29,33 @@
         .wrong {
             border: 3px solid #ef4444;
             background: #fee2e2;
+        }
+        
+        /* 모바일 최적화 */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem !important;
+            }
+            
+            .game-card {
+                padding: 1rem !important;
+                font-size: 0.875rem !important;
+            }
+            
+            button {
+                padding: 0.75rem 1rem !important;
+                font-size: 0.875rem !important;
+            }
+        }
+        
+        /* 터치 영역 개선 */
+        .game-card, button {
+            min-height: 44px;
         }
     </style>
 </head>
