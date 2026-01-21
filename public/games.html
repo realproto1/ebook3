@@ -236,16 +236,24 @@
         const urlParams = new URLSearchParams(window.location.search);
         const storyId = urlParams.get('story');
 
+        // 디버깅 로그
+        console.log('🎮 Games.html loaded');
+        console.log('📍 Current URL:', window.location.href);
+        console.log('🔑 Story ID from URL:', storyId);
+
         // 스토리 데이터
         let storyData = null;
 
         // 초기화
         async function init() {
             if (!storyId) {
+                console.error('❌ No story ID found in URL');
                 alert('❌ 스토리 ID가 없습니다.');
                 window.history.back();
                 return;
             }
+            
+            console.log('✅ Story ID found:', storyId);
 
             try {
                 // 스토리 데이터 로드

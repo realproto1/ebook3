@@ -118,16 +118,29 @@ function startReading() {
 
 // 학습 게임 시작
 function startGames() {
-    if (!currentBook) return;
+    console.log('🎮 startGames() called');
+    console.log('📚 currentBook:', currentBook);
+    
+    if (!currentBook) {
+        console.error('❌ No currentBook available');
+        return;
+    }
+    
+    console.log('📖 Book ID:', currentBook.id);
+    console.log('📚 Educational content:', currentBook.educational_content);
     
     // 교육 콘텐츠 확인
     if (!currentBook.educational_content || !currentBook.educational_content.vocabulary || currentBook.educational_content.vocabulary.length === 0) {
+        console.warn('⚠️ No vocabulary found');
         alert('이 동화책에는 아직 학습 콘텐츠가 없습니다.');
         return;
     }
     
+    const targetUrl = `/games.html?story=${currentBook.id}`;
+    console.log('✅ Navigating to:', targetUrl);
+    
     // story 파라미터로 전달 (games.html에서 기대하는 형식)
-    window.location.href = `/games.html?story=${currentBook.id}`;
+    window.location.href = targetUrl;
 }
 
 // 페이지 로드 시 실행
