@@ -154,14 +154,7 @@
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             z-index: 10;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        
-        /* 컨트롤 숨김/보임 */
-        #page-text-container.controls-hidden {
-            opacity: 0;
-            transform: translateY(100%);
-            pointer-events: none;
+            /* 텍스트는 항상 표시 - 토글하지 않음 */
         }
         
         #page-text-container::before {
@@ -385,6 +378,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-    <script src="/viewer/js/reader.js?v=20250122-toggle-fix"></script>
+    <script src="/viewer/js/reader.js?v=20250122-text-always-visible"></script>
 </body>
 </html>

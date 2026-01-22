@@ -416,36 +416,33 @@ window.addEventListener('touchend', () => {
     }, 300);
 }, { passive: true });
 
-// 컨트롤 표시/숨김 토글
+// 컨트롤 표시/숨김 토글 (텍스트는 항상 표시)
 let controlsVisible = true;
 let hideControlsTimeout = null;
 
 window.toggleControls = function() {
     const header = document.querySelector('header');
-    const textContainer = document.getElementById('page-text-container');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     
     controlsVisible = !controlsVisible;
     
     if (controlsVisible) {
-        // 컨트롤 표시
+        // 컨트롤 표시 (헤더 + 버튼만)
         header.classList.remove('controls-hidden');
-        textContainer.classList.remove('controls-hidden');
         prevBtn.classList.remove('controls-hidden');
         nextBtn.classList.remove('controls-hidden');
         
-        // 5초 후 자동 숨김
+        // 3초 후 자동 숨김
         clearTimeout(hideControlsTimeout);
         hideControlsTimeout = setTimeout(() => {
             if (controlsVisible) {
                 window.toggleControls();
             }
-        }, 5000);
+        }, 3000);
     } else {
-        // 컨트롤 숨김
+        // 컨트롤 숨김 (헤더 + 버튼만)
         header.classList.add('controls-hidden');
-        textContainer.classList.add('controls-hidden');
         prevBtn.classList.add('controls-hidden');
         nextBtn.classList.add('controls-hidden');
         
@@ -453,9 +450,9 @@ window.toggleControls = function() {
     }
 };
 
-// 초기 상태: 컨트롤 표시, 10초 후 자동 숨김 (처음엔 텍스트 읽을 시간 필요)
+// 초기 상태: 컨트롤 표시, 5초 후 자동 숨김
 setTimeout(() => {
-    if (controlsVisible && document.getElementById('page-text-container')) {
+    if (controlsVisible && document.getElementById('prev-btn')) {
         window.toggleControls();
     }
-}, 10000);
+}, 5000);
