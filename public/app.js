@@ -1296,7 +1296,7 @@ function duplicateStorybook() {
 }
 
 // ID로 동화책 복사 (사이드바에서 호출)
-function duplicateStorybookById(id) {
+async function duplicateStorybookById(id) {
     const book = storybooks.find(b => b.id === id);
     if (!book) {
         alert('동화책을 찾을 수 없습니다.');
@@ -1315,6 +1315,16 @@ function duplicateStorybookById(id) {
     // 동화책 목록에 추가
     storybooks.unshift(duplicate);
     saveStorybooks();
+    
+    // R2에 저장
+    try {
+        console.log(`💾 R2에 복사본 저장: "${duplicate.title}" (ID: ${duplicate.id})`);
+        await saveToR2(duplicate);
+        console.log(`✅ R2 저장 완료`);
+    } catch (error) {
+        console.error('❌ R2 저장 오류:', error);
+        showNotification('error', 'DB 저장 실패', '복사본이 DB에 저장되지 않았습니다.');
+    }
     
     // 복사본 선택
     currentStorybook = duplicate;
