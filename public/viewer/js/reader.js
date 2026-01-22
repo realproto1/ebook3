@@ -1,10 +1,11 @@
 // 전역 변수
 let currentBook = null;
-let currentPage = 0;
+let currentPage = -1; // -1은 표지, 0부터는 본문
 let isAutoPlaying = false;
 let autoPlayInterval = null;
 let currentAudio = null;
 let isHeaderVisible = false; // 헤더 초기 상태: 숨김
+let hasCoverPage = false; // 표지 페이지 존재 여부
 
 // 모바일 주소창/네비게이션 숨기기
 function hideAddressBar() {
@@ -112,6 +113,10 @@ async function loadBook() {
                 return;
             }
             
+            // 표지 페이지 존재 여부 확인
+            hasCoverPage = !!currentBook.coverImage;
+            console.log(`📖 표지 페이지: ${hasCoverPage ? '있음' : '없음'}`);
+            
             // 로딩 숨기고 리더 표시
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('reader').classList.remove('hidden');
@@ -137,8 +142,12 @@ async function loadBook() {
                 });
             }
             
-            // 첫 페이지 표시
-            showPage(0);
+            // 표지 또는 첫 페이지 표시
+            if (hasCoverPage) {
+                showPage(-1); // 표지 표시
+            } else {
+                showPage(0); // 첫 페이지 표시
+            }
         }
     } catch (error) {
         console.error('❌ Failed to load storybook:', error);
@@ -167,6 +176,63 @@ async function loadBook() {
 // 페이지 표시
 function showPage(pageIndex) {
     currentPage = pageIndex;
+    
+    // TTS 버튼 표시/숨김
+    const ttsButton = document.getElementById('tts-button-header');
+    if (ttsButton) {
+        if (pageIndex === -1) {
+            ttsButton.style.display = 'none'; // 표지에서는 숨김
+        } else {
+            ttsButton.style.display = ''; // 본문에서는 표시
+        }
+    }
+    
+    // 표지 페이지 처리
+    if (pageIndex === -1) {
+        console.log('📖 Showing cover page');
+        
+        // 페이지 전환 애니메이션
+        const imageEl = document.getElementById('page-image');
+        const textEl = document.getElementById('page-text');
+        const imageContainer = document.getElementById('page-image-container');
+        
+        // 1단계: Exit 애니메이션
+        imageEl.style.opacity = '0';
+        imageEl.style.transform = 'translateX(-100px)';
+        textEl.style.opacity = '0';
+        textEl.style.transform = 'translateX(-100px)';
+        
+        // 2단계: 표지 표시
+        setTimeout(() => {
+            imageContainer.style.visibility = 'hidden';
+            
+            // 표지 이미지 설정
+            imageEl.src = currentBook.coverImage;
+            imageEl.alt = `${currentBook.title} 표지`;
+            
+            // 표지에는 텍스트 오버레이 숨김
+            textEl.textContent = '';
+            
+            // 위치 초기화
+            imageEl.style.transform = 'translateX(100px)';
+            textEl.style.transform = 'translateX(100px)';
+            
+            // 3단계: Enter 애니메이션
+            requestAnimationFrame(() => {
+                imageContainer.style.visibility = 'visible';
+                imageEl.style.opacity = '1';
+                imageEl.style.transform = 'translateX(0)';
+                textEl.style.opacity = '0'; // 표지에는 텍스트 숨김
+                textEl.style.transform = 'translateX(0)';
+            });
+        }, 350);
+        
+        updateProgress();
+        updateNavigationButtons();
+        return;
+    }
+    
+    // 본문 페이지 처리
     const page = currentBook.pages[pageIndex];
     
     console.log(`📄 Showing page ${pageIndex + 1}/${currentBook.pages.length}`);
@@ -223,10 +289,22 @@ function showPage(pageIndex) {
 
 // 진행률 업데이트
 function updateProgress() {
-    const progress = ((currentPage + 1) / currentBook.pages.length) * 100;
+    let displayPage, totalPages;
+    
+    if (hasCoverPage) {
+        // 표지가 있으면: 표지(-1) + 본문(0~N-1) = 총 N+1페이지
+        displayPage = currentPage + 2; // -1→1, 0→2, 1→3, ...
+        totalPages = currentBook.pages.length + 1;
+    } else {
+        // 표지가 없으면: 본문만
+        displayPage = currentPage + 1;
+        totalPages = currentBook.pages.length;
+    }
+    
+    const progress = (displayPage / totalPages) * 100;
     document.getElementById('progress-bar').style.width = `${progress}%`;
     document.getElementById('progress-text').textContent = 
-        `${currentPage + 1} / ${currentBook.pages.length}`;
+        `${displayPage} / ${totalPages}`;
 }
 
 // 네비게이션 버튼 상태 업데이트
@@ -234,8 +312,11 @@ function updateNavigationButtons() {
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     
+    const firstPage = hasCoverPage ? -1 : 0;
+    const lastPage = currentBook.pages.length - 1;
+    
     // 첫 페이지면 이전 버튼 비활성화
-    if (currentPage === 0) {
+    if (currentPage === firstPage) {
         prevBtn.style.opacity = '0.3';
         prevBtn.style.pointerEvents = 'none';
     } else {
@@ -244,7 +325,7 @@ function updateNavigationButtons() {
     }
     
     // 마지막 페이지면 다음 버튼 비활성화
-    if (currentPage === currentBook.pages.length - 1) {
+    if (currentPage === lastPage) {
         nextBtn.style.opacity = '0.3';
         nextBtn.style.pointerEvents = 'none';
     } else {
@@ -255,7 +336,9 @@ function updateNavigationButtons() {
 
 // 다음 페이지
 function nextPage() {
-    if (currentPage < currentBook.pages.length - 1) {
+    const lastPage = currentBook.pages.length - 1;
+    
+    if (currentPage < lastPage) {
         showPage(currentPage + 1);
     } else {
         // 마지막 페이지면 완독 알림
@@ -267,13 +350,20 @@ function nextPage() {
 
 // 이전 페이지
 function previousPage() {
-    if (currentPage > 0) {
+    const firstPage = hasCoverPage ? -1 : 0;
+    
+    if (currentPage > firstPage) {
         showPage(currentPage - 1);
     }
 }
 
 // TTS 재생
 async function playTTS() {
+    // 표지 페이지에서는 TTS 비활성화
+    if (currentPage === -1) {
+        return;
+    }
+    
     const page = currentBook.pages[currentPage];
     const button = document.getElementById('tts-button-header');
     const buttonText = document.getElementById('tts-text');
