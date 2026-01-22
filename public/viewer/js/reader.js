@@ -428,6 +428,12 @@ window.toggleControls = function() {
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     
+    console.log('🔍 요소 찾기:', {
+        header: !!header,
+        prevBtn: !!prevBtn,
+        nextBtn: !!nextBtn
+    });
+    
     if (!header || !prevBtn || !nextBtn) {
         console.error('❌ 요소를 찾을 수 없음:', { header, prevBtn, nextBtn });
         return;
@@ -443,6 +449,12 @@ window.toggleControls = function() {
         prevBtn.classList.remove('controls-hidden');
         nextBtn.classList.remove('controls-hidden');
         
+        console.log('🎨 클래스 제거 후:', {
+            headerClasses: header.className,
+            prevBtnClasses: prevBtn.className,
+            nextBtnClasses: nextBtn.className
+        });
+        
         // 3초 후 자동 숨김
         clearTimeout(hideControlsTimeout);
         hideControlsTimeout = setTimeout(() => {
@@ -457,6 +469,12 @@ window.toggleControls = function() {
         header.classList.add('controls-hidden');
         prevBtn.classList.add('controls-hidden');
         nextBtn.classList.add('controls-hidden');
+        
+        console.log('🎨 클래스 추가 후:', {
+            headerClasses: header.className,
+            prevBtnClasses: prevBtn.className,
+            nextBtnClasses: nextBtn.className
+        });
         
         clearTimeout(hideControlsTimeout);
     }
