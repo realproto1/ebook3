@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>탱고북 - 완전한 프로젝트 개발 계획서</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .section {
+            scroll-margin-top: 80px;
+        }
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+        }
+        .screen-preview {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .data-structure {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+        }
+        .keyword { color: #569cd6; }
+        .string { color: #ce9178; }
+        .number { color: #b5cea8; }
+        .property { color: #9cdcfe; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 네비게이션 -->
+    <nav class="bg-white/90 py-4 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-book-open text-3xl text-purple-600"></i>
+                    <h1 class="text-2xl font-bold text-gray-800">탱고북 프로젝트 계획서</h1>
+                </div>
+                <div class="flex gap-6 text-sm">
+                    <a href="#overview" class="hover:text-purple-600">개요</a>
+                    <a href="#purpose" class="hover:text-purple-600">목적</a>
+                    <a href="#features" class="hover:text-purple-600">기능</a>
+                    <a href="#screens" class="hover:text-purple-600">화면</a>
+                    <a href="#data" class="hover:text-purple-600">데이터</a>
+                    <a href="#architecture" class="hover:text-purple-600">아키텍처</a>
+                    <a href="#implementation" class="hover:text-purple-600">구현</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- 헤더 -->
+        <div class="gradient-bg text-white rounded-2xl p-12 mb-12 shadow-2xl">
+            <div class="text-center">
+                <div class="mb-6">
+                    <i class="fas fa-book-open text-6xl"></i>
+                </div>
+                <h1 class="text-5xl font-bold mb-4">탱고북 (Tangobook)</h1>
+                <h2 class="text-3xl mb-4">AI 기반 어린이 동화책 생성 플랫폼</h2>
+                <p class="text-xl opacity-90">어린이를 위한 맞춤형 동화책을 AI로 자동 생성하는 웹 애플리케이션</p>
+                <div class="mt-8 flex justify-center gap-6">
+                    <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
+                        <div class="text-sm opacity-75">타겟 사용자</div>
+                        <div class="text-2xl font-bold">4-8세 어린이</div>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
+                        <div class="text-sm opacity-75">플랫폼</div>
+                        <div class="text-2xl font-bold">웹 (모바일/PC)</div>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
+                        <div class="text-sm opacity-75">핵심 기술</div>
+                        <div class="text-2xl font-bold">AI (Gemini)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. 프로젝트 개요 -->
+        <section id="overview" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-info-circle text-blue-600"></i>
+                1. 프로젝트 개요
+            </h2>
+
+            <div class="space-y-6">
+                <div class="bg-blue-50 border-l-4 border-blue-600 p-6 rounded">
+                    <h3 class="text-xl font-bold text-blue-800 mb-3">무엇을 만드는가?</h3>
+                    <p class="text-gray-700 text-lg leading-relaxed">
+                        <strong>탱고북</strong>은 부모나 교사가 <strong>AI의 도움을 받아 어린이를 위한 맞춤형 동화책을 생성</strong>하고,
+                        생성된 동화책을 <strong>어린이가 읽고 학습할 수 있는</strong> 통합 플랫폼입니다.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-lg">
+                        <i class="fas fa-magic text-purple-600 text-3xl mb-3"></i>
+                        <h4 class="text-lg font-bold text-gray-800 mb-2">저작 도구</h4>
+                        <p class="text-gray-600 text-sm">
+                            AI로 동화책을 자동 생성하고 편집하는 도구
+                        </p>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg">
+                        <i class="fas fa-book-reader text-blue-600 text-3xl mb-3"></i>
+                        <h4 class="text-lg font-bold text-gray-800 mb-2">동화책 뷰어</h4>
+                        <p class="text-gray-600 text-sm">
+                            생성된 동화책을 탐색하고 선택하는 도서관
+                        </p>
+                    </div>
+                    <div class="bg-gradient-to-br from-green-50 to-teal-50 p-6 rounded-lg">
+                        <i class="fas fa-mobile-alt text-green-600 text-3xl mb-3"></i>
+                        <h4 class="text-lg font-bold text-gray-800 mb-2">리더 앱</h4>
+                        <p class="text-gray-600 text-sm">
+                            어린이가 동화책을 읽고 학습하는 모바일 뷰어
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded">
+                    <h3 class="text-xl font-bold text-yellow-800 mb-3">왜 만드는가?</h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-yellow-600 mt-1"></i>
+                            <span><strong>교육 효과:</strong> 어린이의 연령과 수준에 맞는 맞춤형 콘텐츠 제공</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-yellow-600 mt-1"></i>
+                            <span><strong>접근성:</strong> 누구나 쉽게 양질의 동화책을 생성하고 활용</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-yellow-600 mt-1"></i>
+                            <span><strong>비용 절감:</strong> 전문 일러스트레이터 없이도 고품질 삽화 생성</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-yellow-600 mt-1"></i>
+                            <span><strong>학습 지원:</strong> TTS, 퀴즈, 어휘 학습 등 다양한 교육 기능 통합</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 핵심 목적 -->
+        <section id="purpose" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-bullseye text-red-600"></i>
+                2. 핵심 목적 및 가치
+            </h2>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- 사용자별 목적 -->
+                <div class="border-2 border-purple-200 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-purple-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-users"></i>
+                        사용자별 가치
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="bg-purple-50 p-4 rounded">
+                            <div class="font-bold text-gray-800 mb-2">👨‍👩‍👧 부모/교사 (제작자)</div>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>• 빠르고 쉽게 동화책 제작</li>
+                                <li>• 자녀/학생 맞춤형 콘텐츠 생성</li>
+                                <li>• 교육 목표에 맞는 이야기 구성</li>
+                            </ul>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded">
+                            <div class="font-bold text-gray-800 mb-2">👶 어린이 (독자)</div>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>• 재미있고 이해하기 쉬운 이야기</li>
+                                <li>• 시각적 삽화로 몰입감 증대</li>
+                                <li>• TTS로 듣는 즐거움</li>
+                                <li>• 게임을 통한 학습</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 비즈니스 목적 -->
+                <div class="border-2 border-green-200 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-green-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-chart-line"></i>
+                        비즈니스 가치
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                                1
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-800">AI 콘텐츠 자동화</div>
+                                <div class="text-sm text-gray-600">사람의 개입 최소화로 확장 가능</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                                2
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-800">교육 시장 진입</div>
+                                <div class="text-sm text-gray-600">유아교육/초등교육 시장 타겟</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                                3
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-800">구독 모델 가능</div>
+                                <div class="text-sm text-gray-600">프리미엄 기능 제공으로 수익화</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                                4
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-800">데이터 축적</div>
+                                <div class="text-sm text-gray-600">사용자 선호도 분석으로 개선</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 핵심 기능 -->
+        <section id="features" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-cogs text-purple-600"></i>
+                3. 핵심 기능 분류
+            </h2>
+
+            <!-- 기능 맵 -->
+            <div class="bg-gradient-to-br from-purple-50 to-blue-50 p-8 rounded-xl mb-8">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800">기능 맵 (Feature Map)</h3>
+                </div>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- 저작 기능 -->
+                    <div class="bg-white rounded-lg p-6 shadow-lg">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-magic text-purple-600 text-4xl"></i>
+                            <h4 class="text-xl font-bold text-gray-800 mt-2">저작 기능</h4>
+                            <div class="text-sm text-gray-500">(Author Tool)</div>
+                        </div>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>동화책 생성:</strong> AI 자동 생성</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>캐릭터 생성:</strong> AI 이미지 생성</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>삽화 생성:</strong> 페이지별 이미지</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>표지 생성:</strong> 커버 이미지</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>TTS 생성:</strong> 음성 자동 생성</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>어휘 관리:</strong> 핵심 단어 정의</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>퀴즈 생성:</strong> 이해도 테스트</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>편집 기능:</strong> 텍스트/이미지 수정</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 뷰어 기능 -->
+                    <div class="bg-white rounded-lg p-6 shadow-lg">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-book-reader text-blue-600 text-4xl"></i>
+                            <h4 class="text-xl font-bold text-gray-800 mt-2">뷰어 기능</h4>
+                            <div class="text-sm text-gray-500">(Viewer)</div>
+                        </div>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>도서 목록:</strong> 전체 동화책 탐색</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>필터링:</strong> 연령별/스타일별</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>정렬:</strong> 최신순/제목순</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>상세 보기:</strong> 동화책 정보</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>공개/비공개:</strong> 권한 관리</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 리더 기능 -->
+                    <div class="bg-white rounded-lg p-6 shadow-lg">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-mobile-alt text-green-600 text-4xl"></i>
+                            <h4 class="text-xl font-bold text-gray-800 mt-2">리더 기능</h4>
+                            <div class="text-sm text-gray-500">(Reader)</div>
+                        </div>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>페이지 전환:</strong> 좌우 스와이프</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>TTS 재생:</strong> 음성 듣기</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>자동 재생:</strong> 연속 재생</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>진행률 표시:</strong> 현재 페이지</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>풀스크린:</strong> 몰입 모드</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                <span><strong>게임:</strong> 5가지 학습 게임</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 상세 기능 명세 -->
+            <div class="space-y-6">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">상세 기능 명세</h3>
+
+                <!-- F1. 동화책 생성 -->
+                <div class="border-l-4 border-purple-500 bg-purple-50 p-6 rounded">
+                    <h4 class="text-xl font-bold text-purple-800 mb-3">
+                        F1. 동화책 자동 생성 (AI Generation)
+                    </h4>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white p-4 rounded">
+                            <div class="font-bold text-gray-800 mb-2">입력 (Input)</div>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>• 제목 (Title)</li>
+                                <li>• 타겟 연령 (4-5세, 5-7세, 7-8세)</li>
+                                <li>• 페이지 수 (10, 15, 20페이지)</li>
+                                <li>• 아트 스타일 (수채화, 애니메이션 등)</li>
+                                <li>• 캐릭터 수 (1~5명)</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white p-4 rounded">
+                            <div class="font-bold text-gray-800 mb-2">출력 (Output)</div>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>• 스토리 구조 (기승전결)</li>
+                                <li>• 페이지별 텍스트</li>
+                                <li>• 캐릭터 정보 (이름, 특징)</li>
+                                <li>• 핵심 어휘 목록</li>
+                                <li>• 퀴즈 문제 (선택형)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mt-4 bg-white p-4 rounded">
+                        <div class="font-bold text-gray-800 mb-2">처리 과정</div>
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <span class="bg-purple-200 px-3 py-1 rounded">1. 프롬프트 생성</span>
+                            <i class="fas fa-arrow-right"></i>
+                            <span class="bg-purple-200 px-3 py-1 rounded">2. Gemini API 호출</span>
+                            <i class="fas fa-arrow-right"></i>
+                            <span class="bg-purple-200 px-3 py-1 rounded">3. JSON 파싱</span>
+                            <i class="fas fa-arrow-right"></i>
+                            <span class="bg-purple-200 px-3 py-1 rounded">4. DB 저장</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- F2. 이미지 생성 -->
+                <div class="border-l-4 border-blue-500 bg-blue-50 p-6 rounded">
+                    <h4 class="text-xl font-bold text-blue-800 mb-3">
+                        F2. 이미지 생성 (Image Generation)
+                    </h4>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="bg-white p-4 rounded">
+                            <div class="font-bold text-gray-800 mb-2">캐릭터 이미지</div>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>• AI 프롬프트 기반</li>
+                                <li>• 캐릭터별 일관성</li>
+                                <li>• 다양한 표정/포즈</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white p-4 rounded">
+                            <div class="font-bold text-gray-800 mb-2">페이지 삽화</div>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>• 텍스트 기반 생성</li>
+                                <li>• 캐릭터 참조 이미지</li>
+                                <li>• 아트 스타일 일관성</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white p-4 rounded">
+                            <div class="font-bold text-gray-800 mb-2">표지 이미지</div>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>• 전체 스토리 요약</li>
+                                <li>• 메인 캐릭터 포함</li>
+                                <li>• 히스토리 관리</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- F3. TTS 생성 -->
+                <div class="border-l-4 border-green-500 bg-green-50 p-6 rounded">
+                    <h4 class="text-xl font-bold text-green-800 mb-3">
+                        F3. TTS (Text-to-Speech) 음성 생성
+                    </h4>
+                    <div class="bg-white p-4 rounded">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <div class="font-bold text-gray-800 mb-2">지원 모델</div>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Gemini TTS (기본)</li>
+                                    <li>• Google Cloud TTS</li>
+                                    <li>• ElevenLabs (프리미엄)</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-800 mb-2">기능</div>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• 페이지별 개별 생성</li>
+                                    <li>• 음성 스타일 선택</li>
+                                    <li>• 일괄 생성 (병렬)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- F4. 학습 게임 -->
+                <div class="border-l-4 border-orange-500 bg-orange-50 p-6 rounded">
+                    <h4 class="text-xl font-bold text-orange-800 mb-3">
+                        F4. 학습 게임 (Educational Games)
+                    </h4>
+                    <div class="grid md:grid-cols-5 gap-3">
+                        <div class="bg-white p-3 rounded text-center">
+                            <i class="fas fa-question-circle text-orange-600 text-2xl mb-2"></i>
+                            <div class="font-bold text-sm">단어 퀴즈</div>
+                        </div>
+                        <div class="bg-white p-3 rounded text-center">
+                            <i class="fas fa-puzzle-piece text-orange-600 text-2xl mb-2"></i>
+                            <div class="font-bold text-sm">단어 조립</div>
+                        </div>
+                        <div class="bg-white p-3 rounded text-center">
+                            <i class="fas fa-layer-group text-orange-600 text-2xl mb-2"></i>
+                            <div class="font-bold text-sm">메모리 매치</div>
+                        </div>
+                        <div class="bg-white p-3 rounded text-center">
+                            <i class="fas fa-pen text-orange-600 text-2xl mb-2"></i>
+                            <div class="font-bold text-sm">단어 따라쓰기</div>
+                        </div>
+                        <div class="bg-white p-3 rounded text-center">
+                            <i class="fas fa-book text-orange-600 text-2xl mb-2"></i>
+                            <div class="font-bold text-sm">이야기 퀴즈</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 화면 구조 -->
+        <section id="screens" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-desktop text-indigo-600"></i>
+                4. 화면 구조 및 사용자 플로우
+            </h2>
+
+            <!-- 화면 플로우 다이어그램 -->
+            <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-8 rounded-xl mb-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">사용자 플로우</h3>
+                <div class="flex flex-col items-center gap-4">
+                    <!-- 홈 -->
+                    <div class="bg-white rounded-lg shadow-lg p-4 w-64 text-center">
+                        <i class="fas fa-home text-purple-600 text-2xl mb-2"></i>
+                        <div class="font-bold">홈 (Home)</div>
+                        <div class="text-sm text-gray-600">시작 화면</div>
+                    </div>
+                    
+                    <i class="fas fa-arrow-down text-gray-400 text-2xl"></i>
+                    
+                    <!-- 분기점 -->
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <!-- 저작 도구 -->
+                        <div class="flex flex-col items-center gap-4">
+                            <div class="bg-purple-500 text-white rounded-lg shadow-lg p-4 w-64 text-center">
+                                <i class="fas fa-magic text-2xl mb-2"></i>
+                                <div class="font-bold">저작 도구</div>
+                                <div class="text-sm">/author.html</div>
+                            </div>
+                            <i class="fas fa-arrow-down text-purple-400"></i>
+                            <div class="bg-white rounded-lg border-2 border-purple-300 p-3 w-64 text-sm">
+                                • 동화책 목록<br>
+                                • 새 동화책 생성<br>
+                                • 편집 영역<br>
+                                • 캐릭터 관리<br>
+                                • 페이지 관리<br>
+                                • 설정
+                            </div>
+                        </div>
+                        
+                        <!-- 뷰어 -->
+                        <div class="flex flex-col items-center gap-4">
+                            <div class="bg-blue-500 text-white rounded-lg shadow-lg p-4 w-64 text-center">
+                                <i class="fas fa-book-reader text-2xl mb-2"></i>
+                                <div class="font-bold">동화책 뷰어</div>
+                                <div class="text-sm">/viewer.html</div>
+                            </div>
+                            <i class="fas fa-arrow-down text-blue-400"></i>
+                            <div class="bg-white rounded-lg border-2 border-blue-300 p-3 w-64 text-sm">
+                                • 동화책 그리드<br>
+                                • 필터/정렬<br>
+                                • 상세 보기 (/book.html)
+                            </div>
+                            <i class="fas fa-arrow-down text-blue-400"></i>
+                            <div class="bg-blue-500 text-white rounded-lg shadow-lg p-4 w-64 text-center">
+                                <i class="fas fa-mobile-alt text-2xl mb-2"></i>
+                                <div class="font-bold">리더</div>
+                                <div class="text-sm">/reader.html</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 게임 -->
+                        <div class="flex flex-col items-center gap-4">
+                            <div class="bg-green-500 text-white rounded-lg shadow-lg p-4 w-64 text-center">
+                                <i class="fas fa-gamepad text-2xl mb-2"></i>
+                                <div class="font-bold">학습 게임</div>
+                                <div class="text-sm">/games.html</div>
+                            </div>
+                            <i class="fas fa-arrow-down text-green-400"></i>
+                            <div class="bg-white rounded-lg border-2 border-green-300 p-3 w-64 text-sm">
+                                • 게임 목록<br>
+                                • 단어 퀴즈<br>
+                                • 단어 조립<br>
+                                • 메모리 매치<br>
+                                • 따라쓰기<br>
+                                • 이야기 퀴즈
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 화면 상세 -->
+            <div class="space-y-6">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">화면별 상세 구성</h3>
+
+                <!-- S1. 홈 화면 -->
+                <div class="border-2 border-purple-200 rounded-lg p-6">
+                    <h4 class="text-xl font-bold text-purple-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-home"></i>
+                        S1. 홈 화면 (/home.html)
+                    </h4>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="screen-preview bg-gradient-to-br from-purple-500 to-pink-500 p-8 text-white text-center">
+                            <i class="fas fa-book-open text-6xl mb-4"></i>
+                            <div class="text-3xl font-bold mb-2">탱고북</div>
+                            <div class="text-lg mb-6">AI가 만드는 맞춤형 동화책</div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-white text-purple-800 rounded-lg p-4 cursor-pointer hover:scale-105 transition">
+                                    <i class="fas fa-magic text-3xl mb-2"></i>
+                                    <div class="font-bold">저작 도구</div>
+                                </div>
+                                <div class="bg-white text-blue-800 rounded-lg p-4 cursor-pointer hover:scale-105 transition">
+                                    <i class="fas fa-book-reader text-3xl mb-2"></i>
+                                    <div class="font-bold">동화책 보기</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-800 mb-2">주요 요소</div>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li>• 헤더: 로고 + 타이틀</li>
+                                <li>• 설명 문구</li>
+                                <li>• 2개 버튼: 저작 도구 / 뷰어</li>
+                                <li>• 그라디언트 배경</li>
+                            </ul>
+                            <div class="mt-4">
+                                <div class="font-bold text-gray-800 mb-2">동작</div>
+                                <ul class="space-y-2 text-sm text-gray-600">
+                                    <li>• 저작 도구 클릭 → /author.html</li>
+                                    <li>• 동화책 보기 클릭 → /viewer.html</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- S2. 저작 도구 -->
+                <div class="border-2 border-blue-200 rounded-lg p-6">
+                    <h4 class="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-magic"></i>
+                        S2. 저작 도구 (/author.html)
+                    </h4>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="col-span-1">
+                            <div class="font-bold text-gray-800 mb-3">레이아웃</div>
+                            <div class="border rounded p-4 text-sm">
+                                <div class="bg-blue-100 p-2 mb-2 rounded">헤더</div>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div class="bg-purple-100 p-2 rounded min-h-[200px]">
+                                        사이드바<br>
+                                        (동화책<br>
+                                        목록)
+                                    </div>
+                                    <div class="col-span-2 bg-green-100 p-2 rounded min-h-[200px]">
+                                        메인 편집 영역<br>
+                                        (탭: 기본정보, 캐릭터,<br>
+                                        페이지, 어휘, 퀴즈)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-span-2">
+                            <div class="font-bold text-gray-800 mb-3">주요 섹션</div>
+                            <div class="space-y-2 text-sm">
+                                <div class="bg-purple-50 p-3 rounded">
+                                    <strong>1. 사이드바</strong>
+                                    <ul class="ml-4 mt-1 text-gray-600">
+                                        <li>• 동화책 목록 (카드 형태)</li>
+                                        <li>• 제목 편집 (더블클릭)</li>
+                                        <li>• 복사/삭제 버튼</li>
+                                        <li>• 드래그 앤 드롭 정렬</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-blue-50 p-3 rounded">
+                                    <strong>2. 기본 정보 탭</strong>
+                                    <ul class="ml-4 mt-1 text-gray-600">
+                                        <li>• 동화책 생성 폼</li>
+                                        <li>• 제목/연령/페이지수/스타일 입력</li>
+                                        <li>• 생성 버튼</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-green-50 p-3 rounded">
+                                    <strong>3. 캐릭터 탭</strong>
+                                    <ul class="ml-4 mt-1 text-gray-600">
+                                        <li>• 캐릭터 목록 + 이미지</li>
+                                        <li>• 이미지 생성 버튼</li>
+                                        <li>• 이름/설명 편집</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-yellow-50 p-3 rounded">
+                                    <strong>4. 페이지 탭</strong>
+                                    <ul class="ml-4 mt-1 text-gray-600">
+                                        <li>• 페이지 목록 (아코디언)</li>
+                                        <li>• 텍스트 편집</li>
+                                        <li>• 삽화 생성 버튼</li>
+                                        <li>• TTS 생성 버튼</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- S3. 뷰어 -->
+                <div class="border-2 border-green-200 rounded-lg p-6">
+                    <h4 class="text-xl font-bold text-green-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-book-reader"></i>
+                        S3. 동화책 뷰어 (/viewer.html, /book.html)
+                    </h4>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="font-bold text-gray-800 mb-2">목록 화면 (viewer.html)</div>
+                            <div class="bg-white border rounded p-4 text-sm mb-4">
+                                <div class="bg-blue-100 p-2 mb-2 rounded">헤더 + 필터</div>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div class="bg-green-100 p-2 rounded aspect-square"></div>
+                                    <div class="bg-green-100 p-2 rounded aspect-square"></div>
+                                    <div class="bg-green-100 p-2 rounded aspect-square"></div>
+                                </div>
+                                <div class="text-xs text-center mt-2 text-gray-600">동화책 그리드</div>
+                            </div>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>• 필터: 연령별 (4-5, 5-7, 7-8)</li>
+                                <li>• 정렬: 최신순, 오래된순, 제목순</li>
+                                <li>• 카드: 표지 + 제목 + 정보</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-800 mb-2">상세 화면 (book.html)</div>
+                            <div class="bg-white border rounded p-4 text-sm mb-4">
+                                <div class="bg-purple-100 p-8 mb-2 rounded">표지 이미지</div>
+                                <div class="bg-blue-50 p-2 rounded">제목 / 연령 / 정보</div>
+                                <div class="bg-green-100 p-2 rounded mt-2">캐릭터 목록</div>
+                                <div class="bg-yellow-100 p-2 rounded mt-2">읽기 시작 버튼</div>
+                            </div>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>• 표지 이미지 (큰 사이즈)</li>
+                                <li>• 동화책 정보</li>
+                                <li>• 캐릭터 미리보기</li>
+                                <li>• "읽기 시작" → /reader.html</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- S4. 리더 -->
+                <div class="border-2 border-orange-200 rounded-lg p-6">
+                    <h4 class="text-xl font-bold text-orange-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-mobile-alt"></i>
+                        S4. 리더 (/reader.html)
+                    </h4>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="screen-preview bg-gray-100 p-4">
+                            <div class="bg-white rounded-lg shadow p-4">
+                                <div class="text-sm text-gray-500 mb-2">페이지 1/21</div>
+                                <div class="bg-blue-100 aspect-video rounded mb-4 flex items-center justify-center">
+                                    <i class="fas fa-image text-4xl text-blue-300"></i>
+                                </div>
+                                <div class="text-sm text-gray-700 mb-4">
+                                    나는 비행기를 운전하는 조종사였어...
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <button class="bg-gray-300 px-4 py-2 rounded text-sm">이전</button>
+                                    <button class="bg-blue-600 text-white px-4 py-2 rounded text-sm">
+                                        <i class="fas fa-volume-up"></i> 읽어주기
+                                    </button>
+                                    <button class="bg-gray-300 px-4 py-2 rounded text-sm">다음</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-800 mb-3">주요 요소</div>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li>• <strong>헤더:</strong> 제목 + 진행률 (1/21)</li>
+                                <li>• <strong>표지 페이지:</strong> 커버 이미지 (페이지 -1)</li>
+                                <li>• <strong>이미지 영역:</strong> 삽화 표시</li>
+                                <li>• <strong>텍스트 영역:</strong> 페이지 본문</li>
+                                <li>• <strong>컨트롤:</strong> 이전/다음/TTS 버튼</li>
+                                <li>• <strong>진행 바:</strong> 현재 위치 표시</li>
+                            </ul>
+                            <div class="mt-4">
+                                <div class="font-bold text-gray-800 mb-2">인터랙션</div>
+                                <ul class="space-y-2 text-sm text-gray-600">
+                                    <li>• 좌우 스와이프로 페이지 전환</li>
+                                    <li>• TTS 버튼으로 음성 재생</li>
+                                    <li>• 자동 재생 기능</li>
+                                    <li>• 헤더 터치로 숨기기/보이기</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 데이터 구조 -->
+        <section id="data" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-database text-red-600"></i>
+                5. 데이터 구조 설계
+            </h2>
+
+            <div class="space-y-6">
+                <!-- ERD 다이어그램 -->
+                <div class="bg-gradient-to-br from-red-50 to-orange-50 p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Entity Relationship</h3>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <!-- Storybook -->
+                        <div class="bg-white rounded-lg shadow-lg p-6">
+                            <div class="bg-red-600 text-white text-center py-2 rounded-t -mx-6 -mt-6 mb-4">
+                                <i class="fas fa-book mr-2"></i>
+                                Storybook
+                            </div>
+                            <div class="text-sm space-y-1 font-mono">
+                                <div><span class="text-yellow-600">id</span>: string (PK)</div>
+                                <div>title: string</div>
+                                <div>targetAge: string</div>
+                                <div>artStyle: string</div>
+                                <div>pageCount: number</div>
+                                <div>characterCount: number</div>
+                                <div>coverImage: string</div>
+                                <div>isPublic: boolean</div>
+                                <div>createdAt: Date</div>
+                                <div>updatedAt: Date</div>
+                            </div>
+                        </div>
+
+                        <!-- Page -->
+                        <div class="bg-white rounded-lg shadow-lg p-6">
+                            <div class="bg-blue-600 text-white text-center py-2 rounded-t -mx-6 -mt-6 mb-4">
+                                <i class="fas fa-file-alt mr-2"></i>
+                                Page
+                            </div>
+                            <div class="text-sm space-y-1 font-mono">
+                                <div><span class="text-yellow-600">pageNumber</span>: number (PK)</div>
+                                <div><span class="text-green-600">storybookId</span>: string (FK)</div>
+                                <div>text: string</div>
+                                <div>illustrationImage: string</div>
+                                <div>illustrationPrompt: string</div>
+                                <div>ttsAudioUrl: string</div>
+                                <div>sceneDescription: string</div>
+                            </div>
+                        </div>
+
+                        <!-- Character -->
+                        <div class="bg-white rounded-lg shadow-lg p-6">
+                            <div class="bg-purple-600 text-white text-center py-2 rounded-t -mx-6 -mt-6 mb-4">
+                                <i class="fas fa-user mr-2"></i>
+                                Character
+                            </div>
+                            <div class="text-sm space-y-1 font-mono">
+                                <div><span class="text-yellow-600">id</span>: string (PK)</div>
+                                <div><span class="text-green-600">storybookId</span>: string (FK)</div>
+                                <div>name: string</div>
+                                <div>description: string</div>
+                                <div>imageUrl: string</div>
+                                <div>imagePrompt: string</div>
+                                <div>role: string</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-center items-center gap-4 text-gray-600">
+                        <span>Storybook</span>
+                        <i class="fas fa-arrow-right"></i>
+                        <span class="bg-white px-4 py-2 rounded">1:N</span>
+                        <i class="fas fa-arrow-right"></i>
+                        <span>Page / Character / Vocabulary / Quiz</span>
+                    </div>
+                </div>
+
+                <!-- JSON 구조 예시 -->
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">JSON 데이터 구조</h3>
+                    
+                    <!-- Storybook JSON -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-bold text-gray-700 mb-2">Storybook (storybook-{id}.json)</h4>
+                        <div class="data-structure text-xs">
+<pre>{
+  <span class="property">"id"</span>: <span class="string">"1737547200000"</span>,
+  <span class="property">"title"</span>: <span class="string">"어린 왕자"</span>,
+  <span class="property">"targetAge"</span>: <span class="string">"5-7세"</span>,
+  <span class="property">"artStyle"</span>: <span class="string">"수채화"</span>,
+  <span class="property">"pageCount"</span>: <span class="number">20</span>,
+  <span class="property">"characterCount"</span>: <span class="number">3</span>,
+  
+  <span class="property">"coverImage"</span>: <span class="string">"https://r2.dev/1737547200000-cover.png"</span>,
+  <span class="property">"coverPrompt"</span>: <span class="string">"어린 왕자와 사막..."</span>,
+  <span class="property">"coverImageHistory"</span>: [
+    <span class="string">"https://r2.dev/1737547200000-cover-old1.png"</span>,
+    <span class="string">"https://r2.dev/1737547200000-cover-old2.png"</span>
+  ],
+  
+  <span class="property">"pages"</span>: [
+    {
+      <span class="property">"pageNumber"</span>: <span class="number">1</span>,
+      <span class="property">"text"</span>: <span class="string">"나는 비행기를 운전하는 조종사였어..."</span>,
+      <span class="property">"illustrationImage"</span>: <span class="string">"https://r2.dev/page01.png"</span>,
+      <span class="property">"illustrationPrompt"</span>: <span class="string">"사막에 추락한 비행기..."</span>,
+      <span class="property">"ttsAudioUrl"</span>: <span class="string">"https://r2.dev/page01.mp3"</span>,
+      <span class="property">"sceneDescription"</span>: <span class="string">"조종사가 사막에 있는 장면"</span>
+    }
+  ],
+  
+  <span class="property">"characters"</span>: [
+    {
+      <span class="property">"id"</span>: <span class="string">"char_1"</span>,
+      <span class="property">"name"</span>: <span class="string">"어린 왕자"</span>,
+      <span class="property">"description"</span>: <span class="string">"금발의 어린 소년, 호기심 많음"</span>,
+      <span class="property">"imageUrl"</span>: <span class="string">"https://r2.dev/character01.png"</span>,
+      <span class="property">"imagePrompt"</span>: <span class="string">"금발 소년, 파란 옷..."</span>,
+      <span class="property">"role"</span>: <span class="string">"주인공"</span>
+    }
+  ],
+  
+  <span class="property">"vocabulary"</span>: [
+    {
+      <span class="property">"id"</span>: <span class="string">"vocab_1"</span>,
+      <span class="property">"word"</span>: <span class="string">"조종사"</span>,
+      <span class="property">"definition"</span>: <span class="string">"비행기를 운전하는 사람"</span>,
+      <span class="property">"imageUrl"</span>: <span class="string">"https://r2.dev/vocab01.png"</span>
+    }
+  ],
+  
+  <span class="property">"quiz"</span>: {
+    <span class="property">"questions"</span>: [
+      {
+        <span class="property">"id"</span>: <span class="string">"q1"</span>,
+        <span class="property">"question"</span>: <span class="string">"어린 왕자는 어디에서 왔나요?"</span>,
+        <span class="property">"options"</span>: [<span class="string">"지구"</span>, <span class="string">"화성"</span>, <span class="string">"B-612 행성"</span>],
+        <span class="property">"correctAnswer"</span>: <span class="number">2</span>
+      }
+    ]
+  },
+  
+  <span class="property">"isPublic"</span>: <span class="keyword">true</span>,
+  <span class="property">"publishedAt"</span>: <span class="string">"2025-01-22T10:00:00Z"</span>,
+  <span class="property">"createdAt"</span>: <span class="string">"2025-01-22T09:00:00Z"</span>,
+  <span class="property">"updatedAt"</span>: <span class="string">"2025-01-22T10:30:00Z"</span>
+}</pre>
+                        </div>
+                    </div>
+
+                    <!-- Viewer Metadata -->
+                    <div>
+                        <h4 class="text-lg font-bold text-gray-700 mb-2">Viewer Metadata (viewer-metadata.json)</h4>
+                        <div class="data-structure text-xs">
+<pre>{
+  <span class="property">"storybooks"</span>: [
+    {
+      <span class="property">"id"</span>: <span class="string">"1737547200000"</span>,
+      <span class="property">"title"</span>: <span class="string">"어린 왕자"</span>,
+      <span class="property">"coverImage"</span>: <span class="string">"https://r2.dev/1737547200000-cover.png"</span>,
+      <span class="property">"targetAge"</span>: <span class="string">"5-7세"</span>,
+      <span class="property">"artStyle"</span>: <span class="string">"수채화"</span>,
+      <span class="property">"pageCount"</span>: <span class="number">20</span>,
+      <span class="property">"characterCount"</span>: <span class="number">3</span>,
+      <span class="property">"publishedAt"</span>: <span class="string">"2025-01-22T10:00:00Z"</span>
+    }
+  ],
+  <span class="property">"lastUpdated"</span>: <span class="string">"2025-01-22T10:30:00Z"</span>
+}</pre>
+                        </div>
+                        <div class="mt-2 text-sm text-gray-600">
+                            <strong>용도:</strong> 공개된 동화책 목록을 캐시하여 뷰어 페이지 성능 향상
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 스토리지 정책 -->
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded">
+                    <h3 class="text-xl font-bold text-yellow-800 mb-3">스토리지 정책</h3>
+                    <div class="grid md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <div class="font-bold text-gray-800 mb-2">Cloudflare R2 (메인 스토리지)</div>
+                            <ul class="space-y-1 text-gray-600">
+                                <li>• 동화책 JSON: <code>storybook-{id}.json</code></li>
+                                <li>• 이미지: <code>{id}-{type}-{timestamp}.png</code></li>
+                                <li>• TTS 오디오: <code>{id}-page{num}-tts.mp3</code></li>
+                                <li>• 메타데이터: <code>viewer-metadata.json</code></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-800 mb-2">LocalStorage (임시 저장)</div>
+                            <ul class="space-y-1 text-gray-600">
+                                <li>• API 키: <code>gemini_api_key</code></li>
+                                <li>• 이미지 설정: <code>imageSettings</code></li>
+                                <li>• 현재 작업: <code>currentStorybook</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. TypeScript 아키텍처 -->
+        <section id="architecture" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-sitemap text-green-600"></i>
+                6. TypeScript 클린 아키텍처 설계
+            </h2>
+
+            <div class="bg-gradient-to-br from-green-50 to-teal-50 p-8 rounded-xl mb-8">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800">4-Layer Clean Architecture</h3>
+                </div>
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="bg-blue-500 text-white p-6 rounded-lg text-center">
+                        <i class="fas fa-desktop text-3xl mb-3"></i>
+                        <div class="font-bold text-lg mb-2">Presentation</div>
+                        <div class="text-sm opacity-90">React UI</div>
+                    </div>
+                    <div class="bg-green-500 text-white p-6 rounded-lg text-center">
+                        <i class="fas fa-cogs text-3xl mb-3"></i>
+                        <div class="font-bold text-lg mb-2">Application</div>
+                        <div class="text-sm opacity-90">Use Cases</div>
+                    </div>
+                    <div class="bg-purple-500 text-white p-6 rounded-lg text-center">
+                        <i class="fas fa-cube text-3xl mb-3"></i>
+                        <div class="font-bold text-lg mb-2">Domain</div>
+                        <div class="text-sm opacity-90">Business Logic</div>
+                    </div>
+                    <div class="bg-orange-500 text-white p-6 rounded-lg text-center">
+                        <i class="fas fa-database text-3xl mb-3"></i>
+                        <div class="font-bold text-lg mb-2">Infrastructure</div>
+                        <div class="text-sm opacity-90">R2, Gemini</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 border-l-4 border-blue-600 p-6 rounded mb-6">
+                <div class="text-lg font-bold text-blue-800 mb-2">
+                    왜 클린 아키텍처인가?
+                </div>
+                <ul class="space-y-2 text-gray-700">
+                    <li>✅ <strong>관심사의 분리:</strong> UI, 비즈니스 로직, 데이터 접근 완전 분리</li>
+                    <li>✅ <strong>테스트 용이:</strong> 각 레이어를 독립적으로 테스트 가능</li>
+                    <li>✅ <strong>유지보수성:</strong> 변경 사항이 한 레이어에만 영향</li>
+                    <li>✅ <strong>확장성:</strong> 새로운 기능 추가 시 기존 코드 수정 최소화</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 7. 구현 계획 -->
+        <section id="implementation" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-rocket text-indigo-600"></i>
+                7. 구현 로드맵 (12주)
+            </h2>
+
+            <div class="grid md:grid-cols-6 gap-4 mb-8">
+                <div class="bg-indigo-100 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-indigo-800">Week 1</div>
+                    <div class="text-sm text-gray-600 mt-2">프로젝트 초기화</div>
+                </div>
+                <div class="bg-purple-100 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-purple-800">Week 2-3</div>
+                    <div class="text-sm text-gray-600 mt-2">Domain Layer</div>
+                </div>
+                <div class="bg-orange-100 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-orange-800">Week 4-5</div>
+                    <div class="text-sm text-gray-600 mt-2">Infrastructure</div>
+                </div>
+                <div class="bg-green-100 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-green-800">Week 6-7</div>
+                    <div class="text-sm text-gray-600 mt-2">Application</div>
+                </div>
+                <div class="bg-blue-100 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-blue-800">Week 8-10</div>
+                    <div class="text-sm text-gray-600 mt-2">Presentation</div>
+                </div>
+                <div class="bg-red-100 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-red-800">Week 11-12</div>
+                    <div class="text-sm text-gray-600 mt-2">배포 & 테스트</div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white p-8 rounded-xl text-center">
+                <h3 class="text-2xl font-bold mb-4">개발 준비 완료!</h3>
+                <p class="text-lg mb-6">
+                    이 문서를 기반으로 TypeScript + React + Hono로<br>
+                    탱고북 플랫폼을 처음부터 구축할 수 있습니다.
+                </p>
+                <div class="flex justify-center gap-4">
+                    <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
+                        <div class="text-sm opacity-75">총 개발 기간</div>
+                        <div class="text-2xl font-bold">12주</div>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
+                        <div class="text-sm opacity-75">핵심 화면</div>
+                        <div class="text-2xl font-bold">5개</div>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
+                        <div class="text-sm opacity-75">주요 기능</div>
+                        <div class="text-2xl font-bold">15+</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="text-2xl font-bold mb-2">
+                <i class="fas fa-book-open mr-2"></i>
+                탱고북 프로젝트 계획서
+            </div>
+            <p class="text-gray-400">AI 기반 어린이 동화책 생성 플랫폼</p>
+            <p class="text-gray-500 text-sm mt-4">작성일: 2025-01-22</p>
+        </div>
+    </footer>
+
+    <script>
+        // 스무스 스크롤
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 네비게이션 하이라이트
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('nav a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('text-purple-600', 'font-bold');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('text-purple-600', 'font-bold');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
