@@ -468,9 +468,20 @@ async function generateCoverImage() {
                 currentStorybook.coverImageHistory = [];
             }
             
-            // 현재 표지가 있으면 히스토리에 추가
-            if (currentStorybook.coverImage) {
-                currentStorybook.coverImageHistory.unshift(currentStorybook.coverImage);
+            console.log('🖼️ 표지 생성 전 상태:', {
+                currentCover: currentStorybook.coverImage ? '있음' : '없음',
+                historyCount: currentStorybook.coverImageHistory.length
+            });
+            
+            // 현재 표지가 있고, 새 이미지와 다르면 히스토리에 추가
+            if (currentStorybook.coverImage && currentStorybook.coverImage !== imageUrl) {
+                // 히스토리에 이미 같은 URL이 있는지 확인 (중복 방지)
+                if (!currentStorybook.coverImageHistory.includes(currentStorybook.coverImage)) {
+                    currentStorybook.coverImageHistory.unshift(currentStorybook.coverImage);
+                    console.log('✅ 이전 표지를 히스토리에 추가');
+                } else {
+                    console.log('⚠️ 이전 표지가 이미 히스토리에 있음 (중복 방지)');
+                }
                 
                 // 10개 초과 시 가장 오래된 이미지 삭제 요청
                 if (currentStorybook.coverImageHistory.length > 10) {
@@ -493,6 +504,13 @@ async function generateCoverImage() {
             
             currentStorybook.coverImage = imageUrl;
             currentStorybook.coverPrompt = customPrompt;
+            
+            console.log('🖼️ 표지 생성 후 상태:', {
+                currentCover: currentStorybook.coverImage,
+                historyCount: currentStorybook.coverImageHistory.length,
+                historyUrls: currentStorybook.coverImageHistory.slice(0, 3)
+            });
+            
             saveCurrentStorybook();
             
             // UI 업데이트 (표지 이미지만 업데이트하여 섹션 열림 상태 유지)
@@ -547,12 +565,30 @@ async function generateCoverImage() {
 function selectCoverImageFromHistory(historyIndex) {
     const selectedImage = currentStorybook.coverImageHistory[historyIndex];
     
+    console.log('🔄 히스토리에서 선택:', {
+        선택된_인덱스: historyIndex,
+        선택된_이미지: selectedImage,
+        현재_표지: currentStorybook.coverImage,
+        히스토리_개수: currentStorybook.coverImageHistory.length
+    });
+    
+    // 현재 표지와 선택한 이미지가 같으면 아무것도 안 함 (중복 방지)
+    if (currentStorybook.coverImage === selectedImage) {
+        console.log('⚠️ 이미 같은 이미지입니다. 교환하지 않음.');
+        return;
+    }
+    
     // 현재 표지를 히스토리에 추가
     currentStorybook.coverImageHistory.splice(historyIndex, 1); // 선택된 항목 제거
     currentStorybook.coverImageHistory.unshift(currentStorybook.coverImage); // 현재 표지를 맨 앞에 추가
     
     // 선택한 이미지를 현재 표지로 설정
     currentStorybook.coverImage = selectedImage;
+    
+    console.log('✅ 표지 교환 완료:', {
+        새_표지: currentStorybook.coverImage,
+        히스토리_개수: currentStorybook.coverImageHistory.length
+    });
     
     saveCurrentStorybook();
     
