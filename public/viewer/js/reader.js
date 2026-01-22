@@ -275,7 +275,7 @@ function previousPage() {
 // TTS 재생
 async function playTTS() {
     const page = currentBook.pages[currentPage];
-    const button = document.getElementById('tts-button');
+    const button = document.getElementById('tts-button-header');
     const buttonText = document.getElementById('tts-text');
     
     // 이미 재생 중이면 중지

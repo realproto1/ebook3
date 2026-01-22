@@ -98,17 +98,29 @@
         
         header {
             flex-shrink: 0;
-            height: 44px;
-            padding: 0.5rem 1rem;
+            height: 50px;
+            padding: 0.75rem 1rem;
             font-size: 0.875rem;
             transition: transform 0.3s ease, opacity 0.3s ease;
             position: relative;
             z-index: 20;
+            background: linear-gradient(
+                to bottom,
+                rgba(0, 0, 0, 0.6) 0%,
+                rgba(0, 0, 0, 0.4) 50%,
+                transparent 100%
+            );
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
         header.controls-hidden {
             transform: translateY(-100%);
             opacity: 0;
+            pointer-events: none;
         }
         
         main {
@@ -149,7 +161,8 @@
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 3rem 2rem 2rem 2rem;
+            max-height: 25%;
+            padding: 2rem 2rem 1.5rem 2rem;
             background: linear-gradient(
                 to top, 
                 rgba(0, 0, 0, 0.75) 0%, 
@@ -175,74 +188,77 @@
         }
         
         #page-text {
-            font-size: 1.125rem;
-            line-height: 1.75;
-            margin-bottom: 1rem;
+            font-size: 1.375rem;
+            line-height: 1.8;
+            margin-bottom: 0;
             color: #ffffff;
             text-align: center;
             text-shadow: 
                 0 1px 2px rgba(0, 0, 0, 0.8),
                 0 2px 8px rgba(0, 0, 0, 0.6),
                 0 0 10px rgba(0, 0, 0, 0.5);
-            font-weight: 400;
+            font-weight: 500;
             letter-spacing: 0.3px;
             word-break: keep-all;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
         
-        #tts-button {
+        /* 헤더 TTS 버튼 */
+        #tts-button-header {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            background: rgba(255, 255, 255, 0.2);
+            gap: 0.375rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.15);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             border-radius: 9999px;
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             box-shadow: 
-                0 2px 8px rgba(0, 0, 0, 0.3),
-                0 1px 4px rgba(0, 0, 0, 0.2);
+                0 2px 6px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             transition: all 0.3s ease;
             cursor: pointer;
         }
         
-        #tts-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 
-                0 4px 12px rgba(0, 0, 0, 0.4),
-                0 2px 6px rgba(0, 0, 0, 0.3);
+        #tts-button-header:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
         }
         
-        #tts-button:active {
+        #tts-button-header:active {
             transform: translateY(0);
         }
         
-        #tts-button.playing {
-            background: rgba(102, 126, 234, 0.5);
+        #tts-button-header.playing {
+            background: rgba(102, 126, 234, 0.4);
             border-color: rgba(102, 126, 234, 0.6);
             animation: pulse-glow 1.5s ease-in-out infinite;
         }
         
         /* 모바일 가로 모드 */
         @media (max-width: 926px) and (orientation: landscape) {
+            header {
+                height: 44px;
+                padding: 0.5rem 1rem;
+            }
+            
             #page-text-container {
-                padding: 2rem 1.5rem 1.5rem 1.5rem;
+                padding: 1.5rem 1.25rem 1.25rem 1.25rem;
+                max-height: 28%;
             }
             
             #page-text {
-                font-size: 0.95rem;
-                line-height: 1.6;
+                font-size: 1.125rem;
+                line-height: 1.65;
             }
             
-            #tts-button {
-                padding: 0.625rem 1.25rem;
-                font-size: 0.85rem;
+            #tts-button-header {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.75rem;
             }
             
             #prev-btn {
@@ -257,23 +273,28 @@
         /* 모바일 세로 모드 */
         @media (max-width: 768px) and (orientation: portrait) {
             header {
-                height: 36px;
+                height: 44px;
                 font-size: 0.75rem;
-                padding: 0.25rem 0.75rem;
+                padding: 0.5rem 0.75rem;
             }
             
             #page-text-container {
-                padding: 2rem 1.25rem 1.25rem 1.25rem;
+                padding: 1.5rem 1.25rem 1.25rem 1.25rem;
+                max-height: 28%;
             }
             
             #page-text {
-                font-size: 1rem;
-                line-height: 1.65;
+                font-size: 1.25rem;
+                line-height: 1.7;
             }
             
-            #tts-button {
-                padding: 0.625rem 1.25rem;
-                font-size: 0.85rem;
+            #tts-button-header {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.7rem;
+            }
+            
+            #tts-button-header span {
+                display: none;
             }
             
             .nav-button {
@@ -335,6 +356,15 @@
                 <button onclick="toggleAutoPlay()" class="hover:text-gray-300 transition" title="자동 재생">
                     <i class="fas fa-play text-sm" id="autoplay-icon"></i>
                 </button>
+                <!-- 읽어주기 버튼 -->
+                <button 
+                    id="tts-button-header"
+                    onclick="playTTS(); event.stopPropagation();"
+                    title="읽어주기"
+                >
+                    <i class="fas fa-volume-up"></i>
+                    <span id="tts-text">읽어주기</span>
+                </button>
             </div>
         </header>
 
@@ -363,15 +393,6 @@
                 <!-- 텍스트 오버레이 -->
                 <div id="page-text-container" class="controls">
                     <p id="page-text"></p>
-                    
-                    <!-- TTS 재생 버튼 -->
-                    <button 
-                        id="tts-button"
-                        onclick="event.stopPropagation(); playTTS();"
-                    >
-                        <i class="fas fa-volume-up"></i>
-                        <span id="tts-text">읽어주기</span>
-                    </button>
                 </div>
             </div>
             
