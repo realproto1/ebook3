@@ -421,14 +421,24 @@ let controlsVisible = true;
 let hideControlsTimeout = null;
 
 window.toggleControls = function() {
+    console.log('🔄 toggleControls 호출됨');
+    console.log('현재 controlsVisible:', controlsVisible);
+    
     const header = document.querySelector('header');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     
+    if (!header || !prevBtn || !nextBtn) {
+        console.error('❌ 요소를 찾을 수 없음:', { header, prevBtn, nextBtn });
+        return;
+    }
+    
     controlsVisible = !controlsVisible;
+    console.log('변경된 controlsVisible:', controlsVisible);
     
     if (controlsVisible) {
         // 컨트롤 표시 (헤더 + 버튼만)
+        console.log('✅ 컨트롤 표시');
         header.classList.remove('controls-hidden');
         prevBtn.classList.remove('controls-hidden');
         nextBtn.classList.remove('controls-hidden');
@@ -436,12 +446,14 @@ window.toggleControls = function() {
         // 3초 후 자동 숨김
         clearTimeout(hideControlsTimeout);
         hideControlsTimeout = setTimeout(() => {
+            console.log('⏰ 3초 타이머 실행');
             if (controlsVisible) {
                 window.toggleControls();
             }
         }, 3000);
     } else {
         // 컨트롤 숨김 (헤더 + 버튼만)
+        console.log('❌ 컨트롤 숨김');
         header.classList.add('controls-hidden');
         prevBtn.classList.add('controls-hidden');
         nextBtn.classList.add('controls-hidden');
