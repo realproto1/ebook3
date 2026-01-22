@@ -125,17 +125,21 @@
             left: 0;
             right: 0;
             bottom: 0;
-            display: flex;
-            flex-direction: column;
+            /* flex 제거 - absolute positioning 사용 */
         }
         
         #page-image-container {
-            flex: 1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             background: #000;
+            z-index: 1;
         }
         
         #page-image {
@@ -157,15 +161,17 @@
         }
         
         #page-text-container {
-            flex-shrink: 0;
-            max-height: 30%;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 35%;
             overflow-y: auto;
             padding: 1.5rem 1.5rem 1rem 1.5rem !important;
             background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.85) 70%, transparent);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             z-index: 10;
-            position: relative;
         }
         
         #page-text-container::before {
@@ -195,37 +201,11 @@
             -moz-osx-font-smoothing: grayscale;
         }
         
-        /* 모바일 가로 모드 - 좌우 분할 레이아웃 */
+        /* 모바일 가로 모드 - 오버레이 유지 */
         @media (max-width: 926px) and (orientation: landscape) {
-            #page-content {
-                flex-direction: row;
-            }
-            
-            #page-image-container {
-                flex: 0 0 65%;
-                max-width: 65%;
-            }
-            
             #page-text-container {
-                flex: 0 0 35%;
-                max-width: 35%;
-                max-height: 100%;
-                position: relative;
-                background: linear-gradient(to left, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.85));
-                backdrop-filter: blur(20px) saturate(180%);
-                -webkit-backdrop-filter: blur(20px) saturate(180%);
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                padding: 1.5rem !important;
-            }
-            
-            #page-text-container::before {
-                height: 100%;
-                width: 2px;
-                left: 0;
-                top: 0;
-                background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.3), transparent);
+                max-height: 40%;
+                padding: 1rem 1.5rem !important;
             }
             
             #page-text {
@@ -239,8 +219,7 @@
             }
             
             #next-btn {
-                right: 35% !important;
-                margin-right: 0.5rem !important;
+                right: 0.5rem !important;
             }
         }
         
@@ -417,6 +396,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-    <script src="/viewer/js/reader.js?v=20250122-overlay-fix"></script>
+    <script src="/viewer/js/reader.js?v=20250122-overlay-v2"></script>
 </body>
 </html>
