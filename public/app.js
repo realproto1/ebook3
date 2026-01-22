@@ -495,8 +495,8 @@ async function generateCoverImage() {
             currentStorybook.coverPrompt = customPrompt;
             saveCurrentStorybook();
             
-            // UI 업데이트
-            displayStorybook(currentStorybook);
+            // UI 업데이트 (표지 이미지만 업데이트하여 섹션 열림 상태 유지)
+            updateCoverImageDisplay();
             
             showNotification('success', '표지 생성 완료!', '동화책 표지가 생성되었습니다.');
             console.log(`✅ 표지 이미지 생성 완료 (R2 업로드 포함)`);
@@ -555,9 +555,52 @@ function selectCoverImageFromHistory(historyIndex) {
     currentStorybook.coverImage = selectedImage;
     
     saveCurrentStorybook();
-    displayStorybook(currentStorybook);
     
-    showNotification('✅ 표지 이미지가 변경되었습니다.', 'success');
+    // 표지 이미지 부분만 업데이트 (전체 페이지 재렌더링 안 함)
+    updateCoverImageDisplay();
+    
+    showNotification('success', '표지 변경 완료', '이전 버전이 현재 표지로 설정되었습니다.');
+}
+
+// 표지 이미지 디스플레이만 업데이트 (섹션 열림 상태 유지)
+function updateCoverImageDisplay() {
+    const coverDisplay = document.getElementById('cover-image-display');
+    if (!coverDisplay || !currentStorybook) return;
+    
+    const history = currentStorybook.coverImageHistory || [];
+    
+    if (currentStorybook.coverImage) {
+        coverDisplay.innerHTML = `
+            <div class="flex gap-2 h-full">
+                <!-- 메인 이미지 -->
+                <div class="flex-1 relative group">
+                    <img src="${currentStorybook.coverImage}" alt="표지" class="w-full h-full object-cover rounded-lg"/>
+                    <button 
+                        onclick="downloadImage('${currentStorybook.coverImage}', '${currentStorybook.title}_표지.png')"
+                        class="absolute top-3 right-3 bg-white bg-opacity-90 text-indigo-600 w-12 h-12 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                        title="다운로드"
+                    >
+                        <i class="fas fa-download text-lg"></i>
+                    </button>
+                </div>
+                ${history.length > 0 ? `
+                    <!-- 히스토리 -->
+                    <div class="w-24 overflow-y-auto space-y-2 p-1" style="scrollbar-width: thin; scrollbar-color: rgba(99, 102, 241, 0.5) rgba(99, 102, 241, 0.1);">
+                        ${history.map((url, histIdx) => `
+                            <div class="relative group cursor-pointer border-2 border-transparent hover:border-indigo-400 rounded transition" onclick="selectCoverImageFromHistory(${histIdx})" title="이전 버전 ${histIdx + 1}">
+                                <img src="${url}" alt="이전 ${histIdx + 1}" class="w-full h-20 object-cover rounded"/>
+                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition rounded flex items-center justify-center">
+                                    <i class="fas fa-check text-white opacity-0 group-hover:opacity-100 transition"></i>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    } else {
+        coverDisplay.innerHTML = '<div class="flex items-center justify-center h-full"><div class="text-center p-6"><i class="fas fa-book-open text-6xl text-white opacity-50 mb-4"></i><p class="text-white text-sm">표지 이미지 생성 대기중</p></div></div>';
+    }
 }
 
 // 페이지 로드 시 초기화
