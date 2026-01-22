@@ -1028,6 +1028,877 @@
                     <li>✅ <strong>확장성:</strong> 새로운 기능 추가 시 기존 코드 수정 최소화</li>
                 </ul>
             </div>
+
+            <!-- 전체 폴더 구조 -->
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">완전한 폴더 구조</h3>
+                <div class="bg-gray-900 text-green-400 p-6 rounded-lg font-mono text-xs overflow-x-auto">
+<pre>tangobook-v2/
+├── <span class="text-blue-400">apps/</span>
+│   ├── <span class="text-blue-400">web/</span>                          # 프론트엔드 (React + Vite)
+│   │   ├── <span class="text-blue-400">src/</span>
+│   │   │   ├── <span class="text-blue-400">pages/</span>               # 📄 페이지 컴포넌트
+│   │   │   │   ├── HomePage.tsx         # 홈 화면
+│   │   │   │   ├── AuthorPage.tsx       # 저작 도구
+│   │   │   │   ├── ViewerPage.tsx       # 뷰어
+│   │   │   │   ├── BookDetailPage.tsx   # 동화책 상세
+│   │   │   │   ├── ReaderPage.tsx       # 리더
+│   │   │   │   └── GamesPage.tsx        # 게임
+│   │   │   │
+│   │   │   ├── <span class="text-blue-400">components/</span>          # 🧩 재사용 컴포넌트
+│   │   │   │   ├── <span class="text-blue-400">storybook/</span>
+│   │   │   │   │   ├── StorybookCard.tsx
+│   │   │   │   │   ├── StorybookEditor.tsx
+│   │   │   │   │   ├── PageEditor.tsx
+│   │   │   │   │   ├── CharacterCard.tsx
+│   │   │   │   │   └── CoverImageEditor.tsx
+│   │   │   │   ├── <span class="text-blue-400">reader/</span>
+│   │   │   │   │   ├── PageView.tsx
+│   │   │   │   │   ├── TTSControls.tsx
+│   │   │   │   │   └── ProgressBar.tsx
+│   │   │   │   ├── <span class="text-blue-400">common/</span>
+│   │   │   │   │   ├── Button.tsx
+│   │   │   │   │   ├── Modal.tsx
+│   │   │   │   │   ├── Input.tsx
+│   │   │   │   │   ├── Card.tsx
+│   │   │   │   │   └── Spinner.tsx
+│   │   │   │   └── <span class="text-blue-400">layout/</span>
+│   │   │   │       ├── Header.tsx
+│   │   │   │       ├── Sidebar.tsx
+│   │   │   │       └── Footer.tsx
+│   │   │   │
+│   │   │   ├── <span class="text-blue-400">hooks/</span>              # 🪝 커스텀 훅
+│   │   │   │   ├── useStorybook.ts       # 동화책 CRUD
+│   │   │   │   ├── useImageGeneration.ts # 이미지 생성
+│   │   │   │   ├── useTTS.ts             # TTS 생성
+│   │   │   │   ├── useCharacters.ts      # 캐릭터 관리
+│   │   │   │   └── usePages.ts           # 페이지 관리
+│   │   │   │
+│   │   │   ├── <span class="text-blue-400">stores/</span>             # 🗃️ 상태 관리 (Zustand)
+│   │   │   │   ├── storybookStore.ts     # 동화책 상태
+│   │   │   │   ├── uiStore.ts            # UI 상태
+│   │   │   │   └── authStore.ts          # 인증 상태
+│   │   │   │
+│   │   │   ├── <span class="text-blue-400">services/</span>           # 🌐 API 클라이언트
+│   │   │   │   ├── api.ts                # Axios 인스턴스
+│   │   │   │   └── queries.ts            # React Query hooks
+│   │   │   │
+│   │   │   ├── <span class="text-blue-400">types/</span>              # 📝 타입 정의
+│   │   │   │   ├── storybook.types.ts
+│   │   │   │   ├── page.types.ts
+│   │   │   │   └── api.types.ts
+│   │   │   │
+│   │   │   ├── <span class="text-blue-400">utils/</span>              # 🛠️ 유틸리티
+│   │   │   │   ├── format.ts
+│   │   │   │   ├── validation.ts
+│   │   │   │   └── constants.ts
+│   │   │   │
+│   │   │   ├── App.tsx
+│   │   │   └── main.tsx
+│   │   │
+│   │   ├── package.json
+│   │   ├── vite.config.ts
+│   │   ├── tsconfig.json
+│   │   └── index.html
+│   │
+│   └── <span class="text-blue-400">api/</span>                          # 백엔드 (Hono + TypeScript)
+│       ├── <span class="text-blue-400">src/</span>
+│       │   │
+│       │   ├── <span class="text-blue-400">presentation/</span>        # 🎨 Presentation Layer
+│       │   │   ├── <span class="text-blue-400">routes/</span>
+│       │   │   │   ├── storybook.routes.ts    # 동화책 API
+│       │   │   │   ├── image.routes.ts        # 이미지 생성 API
+│       │   │   │   ├── tts.routes.ts          # TTS 생성 API
+│       │   │   │   ├── character.routes.ts    # 캐릭터 API
+│       │   │   │   └── viewer.routes.ts       # 뷰어 API
+│       │   │   │
+│       │   │   ├── <span class="text-blue-400">middlewares/</span>
+│       │   │   │   ├── auth.middleware.ts     # 인증 미들웨어
+│       │   │   │   ├── error.middleware.ts    # 에러 처리
+│       │   │   │   ├── logging.middleware.ts  # 로깅
+│       │   │   │   └── validation.middleware.ts # 유효성 검증
+│       │   │   │
+│       │   │   └── <span class="text-blue-400">dto/</span>              # Data Transfer Objects
+│       │   │       ├── storybook.dto.ts
+│       │   │       ├── image.dto.ts
+│       │   │       └── tts.dto.ts
+│       │   │
+│       │   ├── <span class="text-blue-400">application/</span>         # 🎯 Application Layer
+│       │   │   ├── <span class="text-blue-400">usecases/</span>
+│       │   │   │   ├── <span class="text-blue-400">storybook/</span>
+│       │   │   │   │   ├── CreateStorybookUseCase.ts
+│       │   │   │   │   ├── UpdateStorybookUseCase.ts
+│       │   │   │   │   ├── DeleteStorybookUseCase.ts
+│       │   │   │   │   ├── DuplicateStorybookUseCase.ts
+│       │   │   │   │   ├── GetStorybookUseCase.ts
+│       │   │   │   │   └── ListStorybooksUseCase.ts
+│       │   │   │   │
+│       │   │   │   ├── <span class="text-blue-400">image/</span>
+│       │   │   │   │   ├── GenerateCoverUseCase.ts
+│       │   │   │   │   ├── GenerateCharacterUseCase.ts
+│       │   │   │   │   └── GenerateIllustrationUseCase.ts
+│       │   │   │   │
+│       │   │   │   ├── <span class="text-blue-400">tts/</span>
+│       │   │   │   │   ├── GenerateTTSUseCase.ts
+│       │   │   │   │   └── GenerateBulkTTSUseCase.ts
+│       │   │   │   │
+│       │   │   │   └── <span class="text-blue-400">viewer/</span>
+│       │   │   │       ├── GetPublicStorybooksUseCase.ts
+│       │   │   │       └── UpdateViewerMetadataUseCase.ts
+│       │   │   │
+│       │   │   ├── <span class="text-blue-400">commands/</span>        # CQRS - Commands (쓰기)
+│       │   │   │   ├── UpdateTitleCommand.ts
+│       │   │   │   ├── UpdatePageTextCommand.ts
+│       │   │   │   └── AddCharacterCommand.ts
+│       │   │   │
+│       │   │   ├── <span class="text-blue-400">queries/</span>         # CQRS - Queries (읽기)
+│       │   │   │   ├── GetStorybookQuery.ts
+│       │   │   │   ├── ListStorybooksQuery.ts
+│       │   │   │   └── GetPageQuery.ts
+│       │   │   │
+│       │   │   └── <span class="text-blue-400">services/</span>        # Application Services
+│       │   │       ├── StorybookService.ts
+│       │   │       ├── ImageService.ts
+│       │   │       └── TTSService.ts
+│       │   │
+│       │   ├── <span class="text-blue-400">domain/</span>              # 💎 Domain Layer
+│       │   │   ├── <span class="text-blue-400">entities/</span>        # 엔티티 (비즈니스 객체)
+│       │   │   │   ├── Storybook.ts
+│       │   │   │   ├── Page.ts
+│       │   │   │   ├── Character.ts
+│       │   │   │   ├── Vocabulary.ts
+│       │   │   │   └── Quiz.ts
+│       │   │   │
+│       │   │   ├── <span class="text-blue-400">value-objects/</span>   # 값 객체 (불변)
+│       │   │   │   ├── StorybookId.ts
+│       │   │   │   ├── Title.ts
+│       │   │   │   ├── ImageUrl.ts
+│       │   │   │   ├── TTSAudioUrl.ts
+│       │   │   │   └── TargetAge.ts
+│       │   │   │
+│       │   │   ├── <span class="text-blue-400">events/</span>          # 도메인 이벤트
+│       │   │   │   ├── StorybookCreatedEvent.ts
+│       │   │   │   ├── PageAddedEvent.ts
+│       │   │   │   ├── CharacterCreatedEvent.ts
+│       │   │   │   └── ImageGeneratedEvent.ts
+│       │   │   │
+│       │   │   ├── <span class="text-blue-400">repositories/</span>    # Repository 인터페이스
+│       │   │   │   ├── IStorybookRepository.ts
+│       │   │   │   ├── IImageRepository.ts
+│       │   │   │   ├── ITTSRepository.ts
+│       │   │   │   └── IViewerMetadataRepository.ts
+│       │   │   │
+│       │   │   └── <span class="text-blue-400">services/</span>        # 도메인 서비스
+│       │   │       ├── StorybookValidator.ts
+│       │   │       ├── ImagePromptBuilder.ts
+│       │   │       └── TTSPromptBuilder.ts
+│       │   │
+│       │   ├── <span class="text-blue-400">infrastructure/</span>      # 🏗️ Infrastructure Layer
+│       │   │   ├── <span class="text-blue-400">repositories/</span>    # Repository 구현체
+│       │   │   │   ├── R2StorybookRepository.ts
+│       │   │   │   ├── R2ImageRepository.ts
+│       │   │   │   ├── R2TTSRepository.ts
+│       │   │   │   └── R2ViewerMetadataRepository.ts
+│       │   │   │
+│       │   │   ├── <span class="text-blue-400">clients/</span>         # 외부 API 클라이언트
+│       │   │   │   ├── GeminiClient.ts        # Gemini API
+│       │   │   │   ├── R2Client.ts            # Cloudflare R2
+│       │   │   │   └── TTSClient.ts           # TTS API
+│       │   │   │
+│       │   │   ├── <span class="text-blue-400">adapters/</span>        # Adapter 패턴
+│       │   │   │   ├── GeminiAdapter.ts
+│       │   │   │   └── R2Adapter.ts
+│       │   │   │
+│       │   │   ├── <span class="text-blue-400">factories/</span>       # Factory 패턴
+│       │   │   │   ├── RepositoryFactory.ts
+│       │   │   │   ├── ClientFactory.ts
+│       │   │   │   └── ServiceFactory.ts
+│       │   │   │
+│       │   │   └── <span class="text-blue-400">mappers/</span>         # 데이터 변환
+│       │   │       ├── StorybookMapper.ts
+│       │   │       ├── PageMapper.ts
+│       │   │       └── CharacterMapper.ts
+│       │   │
+│       │   ├── <span class="text-blue-400">shared/</span>              # 🔧 Shared (공통 코드)
+│       │   │   ├── <span class="text-blue-400">utils/</span>
+│       │   │   │   ├── logger.ts
+│       │   │   │   ├── crypto.ts
+│       │   │   │   └── date.ts
+│       │   │   │
+│       │   │   ├── <span class="text-blue-400">errors/</span>
+│       │   │   │   ├── DomainError.ts
+│       │   │   │   ├── ValidationError.ts
+│       │   │   │   ├── NotFoundError.ts
+│       │   │   │   └── UnauthorizedError.ts
+│       │   │   │
+│       │   │   ├── <span class="text-blue-400">types/</span>
+│       │   │   │   ├── common.types.ts
+│       │   │   │   └── result.types.ts
+│       │   │   │
+│       │   │   └── <span class="text-blue-400">constants/</span>
+│       │   │       ├── errors.ts
+│       │   │       └── config.ts
+│       │   │
+│       │   └── index.ts                  # 진입점
+│       │
+│       ├── package.json
+│       ├── tsconfig.json
+│       └── wrangler.jsonc
+│
+├── <span class="text-blue-400">packages/</span>                         # 공유 패키지
+│   ├── <span class="text-blue-400">types/</span>                        # 공통 타입
+│   │   ├── storybook.types.ts
+│   │   ├── api.types.ts
+│   │   └── index.ts
+│   │
+│   └── <span class="text-blue-400">config/</span>                       # 공통 설정
+│       ├── constants.ts
+│       └── index.ts
+│
+├── <span class="text-blue-400">tests/</span>                            # 테스트
+│   ├── <span class="text-blue-400">unit/</span>                         # 단위 테스트
+│   │   ├── domain/
+│   │   ├── application/
+│   │   └── infrastructure/
+│   │
+│   ├── <span class="text-blue-400">integration/</span>                  # 통합 테스트
+│   │   ├── api/
+│   │   └── repositories/
+│   │
+│   └── <span class="text-blue-400">e2e/</span>                          # E2E 테스트
+│       ├── author.spec.ts
+│       ├── viewer.spec.ts
+│       └── reader.spec.ts
+│
+├── <span class="text-blue-400">docs/</span>                             # 문서
+│   ├── architecture.md
+│   ├── api.md
+│   └── deployment.md
+│
+├── package.json                     # 루트 패키지
+├── pnpm-workspace.yaml              # Monorepo 설정
+├── tsconfig.json                    # 공통 TS 설정
+└── README.md</pre>
+                </div>
+            </div>
+
+            <!-- 각 파일의 역할 -->
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">주요 파일 역할 상세</h3>
+                
+                <div class="space-y-6">
+                    <!-- Presentation Layer -->
+                    <div class="border-2 border-blue-200 rounded-lg p-6">
+                        <h4 class="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-desktop"></i>
+                            Presentation Layer 파일 역할
+                        </h4>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-blue-50 p-4 rounded">
+                                <div class="font-bold text-gray-800 mb-2">📁 routes/ - API 라우트</div>
+                                <div class="text-sm space-y-2">
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-blue-600">storybook.routes.ts</code>
+                                        <span class="text-gray-600">
+                                            GET /api/storybooks, POST /api/storybooks, PUT /api/storybooks/:id 등<br>
+                                            → Use Case 호출, DTO 변환
+                                        </span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-blue-600">image.routes.ts</code>
+                                        <span class="text-gray-600">
+                                            POST /api/generate-cover, POST /api/generate-illustration<br>
+                                            → GenerateImageUseCase 실행
+                                        </span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-blue-600">tts.routes.ts</code>
+                                        <span class="text-gray-600">
+                                            POST /api/generate-tts, POST /api/generate-bulk-tts<br>
+                                            → GenerateTTSUseCase 실행
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-blue-50 p-4 rounded">
+                                <div class="font-bold text-gray-800 mb-2">📁 middlewares/ - 미들웨어</div>
+                                <div class="text-sm space-y-2">
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-blue-600">auth.middleware.ts</code>
+                                        <span class="text-gray-600">API 키 검증, 인증 처리</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-blue-600">error.middleware.ts</code>
+                                        <span class="text-gray-600">전역 에러 핸들링, 에러 응답 포맷</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-blue-600">logging.middleware.ts</code>
+                                        <span class="text-gray-600">요청/응답 로깅</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Application Layer -->
+                    <div class="border-2 border-green-200 rounded-lg p-6">
+                        <h4 class="text-xl font-bold text-green-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-cogs"></i>
+                            Application Layer 파일 역할
+                        </h4>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-green-50 p-4 rounded">
+                                <div class="font-bold text-gray-800 mb-2">📁 usecases/ - Use Cases (비즈니스 유즈케이스)</div>
+                                <div class="text-sm space-y-2">
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-green-600">CreateStorybookUseCase.ts</code>
+                                        <span class="text-gray-600">
+                                            동화책 생성 플로우:<br>
+                                            1. Gemini API 호출 (이야기 생성)<br>
+                                            2. Storybook 엔티티 생성<br>
+                                            3. Repository에 저장<br>
+                                            4. 도메인 이벤트 발행
+                                        </span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-green-600">GenerateCoverUseCase.ts</code>
+                                        <span class="text-gray-600">
+                                            표지 생성 플로우:<br>
+                                            1. 프롬프트 빌드<br>
+                                            2. Gemini Image API 호출<br>
+                                            3. R2에 업로드<br>
+                                            4. Storybook 업데이트
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-green-50 p-4 rounded">
+                                <div class="font-bold text-gray-800 mb-2">📁 commands/ & queries/ - CQRS 패턴</div>
+                                <div class="text-sm space-y-2">
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-green-600">UpdateTitleCommand.ts</code>
+                                        <span class="text-gray-600">
+                                            쓰기 작업: 제목 변경 + DB 업데이트
+                                        </span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-green-600">GetStorybookQuery.ts</code>
+                                        <span class="text-gray-600">
+                                            읽기 작업: ID로 동화책 조회 (캐시 활용)
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Domain Layer -->
+                    <div class="border-2 border-purple-200 rounded-lg p-6">
+                        <h4 class="text-xl font-bold text-purple-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-cube"></i>
+                            Domain Layer 파일 역할
+                        </h4>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-purple-50 p-4 rounded">
+                                <div class="font-bold text-gray-800 mb-2">📁 entities/ - 엔티티 (비즈니스 객체)</div>
+                                <div class="text-sm space-y-2">
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-purple-600">Storybook.ts</code>
+                                        <span class="text-gray-600">
+                                            동화책 엔티티:<br>
+                                            - 생성: <code>static create(params)</code><br>
+                                            - 복사: <code>duplicate()</code><br>
+                                            - 페이지 추가: <code>addPage(page)</code><br>
+                                            - 유효성 검증: <code>validate()</code>
+                                        </span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-purple-600">Page.ts</code>
+                                        <span class="text-gray-600">
+                                            페이지 엔티티:<br>
+                                            - 텍스트 업데이트<br>
+                                            - 이미지 첨부<br>
+                                            - TTS URL 설정
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-purple-50 p-4 rounded">
+                                <div class="font-bold text-gray-800 mb-2">📁 value-objects/ - 값 객체 (불변)</div>
+                                <div class="text-sm space-y-2">
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-purple-600">Title.ts</code>
+                                        <span class="text-gray-600">
+                                            제목 값 객체:<br>
+                                            - 길이 검증 (1-100자)<br>
+                                            - 특수문자 필터링<br>
+                                            - 불변성 보장
+                                        </span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-purple-600">ImageUrl.ts</code>
+                                        <span class="text-gray-600">
+                                            이미지 URL 값 객체:<br>
+                                            - URL 포맷 검증<br>
+                                            - R2 도메인 확인
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-purple-50 p-4 rounded">
+                                <div class="font-bold text-gray-800 mb-2">📁 repositories/ - Repository 인터페이스</div>
+                                <div class="text-sm space-y-2">
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-purple-600">IStorybookRepository.ts</code>
+                                        <span class="text-gray-600">
+                                            <code>findById(id)</code>, <code>save(storybook)</code>, <code>delete(id)</code><br>
+                                            → Infrastructure에서 구현
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Infrastructure Layer -->
+                    <div class="border-2 border-orange-200 rounded-lg p-6">
+                        <h4 class="text-xl font-bold text-orange-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-database"></i>
+                            Infrastructure Layer 파일 역할
+                        </h4>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-orange-50 p-4 rounded">
+                                <div class="font-bold text-gray-800 mb-2">📁 repositories/ - Repository 구현체</div>
+                                <div class="text-sm space-y-2">
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-orange-600">R2StorybookRepository.ts</code>
+                                        <span class="text-gray-600">
+                                            Cloudflare R2 구현:<br>
+                                            - <code>findById()</code>: R2에서 JSON 읽기<br>
+                                            - <code>save()</code>: R2에 JSON 쓰기<br>
+                                            - Mapper를 통한 변환
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-orange-50 p-4 rounded">
+                                <div class="font-bold text-gray-800 mb-2">📁 clients/ - 외부 API 클라이언트</div>
+                                <div class="text-sm space-y-2">
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-orange-600">GeminiClient.ts</code>
+                                        <span class="text-gray-600">
+                                            Gemini API 래퍼:<br>
+                                            - <code>generateText(prompt)</code><br>
+                                            - <code>generateImage(prompt)</code><br>
+                                            - 재시도 로직 포함
+                                        </span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-orange-600">R2Client.ts</code>
+                                        <span class="text-gray-600">
+                                            R2 SDK 래퍼:<br>
+                                            - <code>get(key)</code>, <code>put(key, data)</code><br>
+                                            - 에러 처리
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-orange-50 p-4 rounded">
+                                <div class="font-bold text-gray-800 mb-2">📁 mappers/ - 데이터 변환</div>
+                                <div class="text-sm space-y-2">
+                                    <div class="flex items-start gap-2">
+                                        <code class="bg-white px-2 py-1 rounded text-orange-600">StorybookMapper.ts</code>
+                                        <span class="text-gray-600">
+                                            <code>toDomain(json)</code>: JSON → 도메인 엔티티<br>
+                                            <code>toPersistence(entity)</code>: 엔티티 → JSON
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 데이터 파이프라인 -->
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">데이터 플로우 파이프라인</h3>
+                
+                <!-- 동화책 생성 파이프라인 -->
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg mb-6">
+                    <h4 class="text-lg font-bold text-gray-800 mb-4">
+                        📝 예시 1: 동화책 생성 플로우
+                    </h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                1. React Component
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>AuthorPage.tsx</code><br>
+                                사용자 입력 (제목, 연령, 페이지수)
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                2. Custom Hook
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>useStorybook.ts</code><br>
+                                <code>createStorybook({ title, age, pages })</code>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                3. API Client
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>POST /api/storybooks</code><br>
+                                axios 요청
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-green-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                4. Hono Route
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>storybook.routes.ts</code><br>
+                                DTO 검증 → Use Case 호출
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-green-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                5. Use Case
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>CreateStorybookUseCase.execute()</code><br>
+                                비즈니스 로직 실행
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-purple-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                6. Domain Entity
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>Storybook.create(params)</code><br>
+                                엔티티 생성 + 유효성 검증
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                7. Gemini Client
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>GeminiClient.generateText()</code><br>
+                                AI 스토리 생성
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-purple-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                8. Repository Interface
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>IStorybookRepository.save()</code><br>
+                                도메인 → 저장 요청
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                9. Repository Impl
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>R2StorybookRepository.save()</code><br>
+                                Mapper → JSON 변환
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                10. R2 Client
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>R2Client.put(key, json)</code><br>
+                                Cloudflare R2 저장
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-green-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                11. Event Bus
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>StorybookCreatedEvent</code><br>
+                                도메인 이벤트 발행
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                12. React State
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>storybookStore.addStorybook()</code><br>
+                                Zustand 상태 업데이트 → UI 갱신
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 이미지 생성 파이프라인 -->
+                <div class="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg mb-6">
+                    <h4 class="text-lg font-bold text-gray-800 mb-4">
+                        🎨 예시 2: 표지 이미지 생성 플로우
+                    </h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                1. UI Component
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>CoverImageEditor.tsx</code><br>
+                                "표지 생성" 버튼 클릭
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                2. Custom Hook
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>useImageGeneration.ts</code><br>
+                                <code>generateCover(storybookId, prompt)</code>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-green-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                3. Hono Route
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>POST /api/generate-cover</code><br>
+                                image.routes.ts
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-green-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                4. Use Case
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>GenerateCoverUseCase.execute()</code><br>
+                                표지 생성 로직
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-purple-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                5. Domain Service
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>ImagePromptBuilder.buildCoverPrompt()</code><br>
+                                프롬프트 최적화
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                6. Gemini Client
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>GeminiClient.generateImage(prompt)</code><br>
+                                AI 이미지 생성 → Base64 반환
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                7. R2 Image Repo
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>R2ImageRepository.upload(base64)</code><br>
+                                Base64 → PNG → R2 업로드
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-purple-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                8. Domain Entity
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>Storybook.setCoverImage(imageUrl)</code><br>
+                                엔티티 업데이트 + 히스토리 추가
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                9. Repository
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>R2StorybookRepository.save(storybook)</code><br>
+                                JSON 업데이트
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                10. UI Update
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                React Query 캐시 무효화 → UI 자동 갱신
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 조회 파이프라인 -->
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg">
+                    <h4 class="text-lg font-bold text-gray-800 mb-4">
+                        📖 예시 3: 동화책 조회 플로우 (뷰어)
+                    </h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                1. React Component
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>ViewerPage.tsx</code><br>
+                                페이지 마운트
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                2. React Query
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>useQuery(['storybooks'])</code><br>
+                                캐시 확인 → 없으면 API 호출
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-green-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                3. Hono Route
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>GET /api/viewer/storybooks</code><br>
+                                viewer.routes.ts
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-green-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                4. Query Handler
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>GetPublicStorybooksQuery.execute()</code><br>
+                                CQRS Query
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                5. Metadata Repo
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>R2ViewerMetadataRepository.getAll()</code><br>
+                                viewer-metadata.json 읽기 (캐시됨)
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold min-w-[200px]">
+                                6. UI Render
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <code>StorybookCard</code> 컴포넌트 렌더링<br>
+                                그리드 레이아웃으로 표시
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 의존성 규칙 -->
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded">
+                <h3 class="text-xl font-bold text-yellow-800 mb-4">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    의존성 규칙 (Dependency Rule)
+                </h3>
+                <div class="space-y-4">
+                    <div class="bg-white p-4 rounded">
+                        <div class="font-bold text-gray-800 mb-2">✅ 허용되는 의존성 방향</div>
+                        <div class="text-sm text-gray-600 space-y-1">
+                            <div>• Presentation → Application → Domain ← Infrastructure</div>
+                            <div>• 외부 레이어는 내부 레이어를 의존할 수 있음</div>
+                            <div>• 예: Use Case는 Domain Entity를 사용 가능</div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded">
+                        <div class="font-bold text-gray-800 mb-2">❌ 금지되는 의존성 방향</div>
+                        <div class="text-sm text-gray-600 space-y-1">
+                            <div>• Domain → Infrastructure (절대 안 됨!)</div>
+                            <div>• Domain → Application (절대 안 됨!)</div>
+                            <div>• 예: Domain Entity에서 R2Client를 직접 호출하면 안 됨</div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded">
+                        <div class="font-bold text-gray-800 mb-2">🔄 의존성 역전 (Dependency Inversion)</div>
+                        <div class="text-sm text-gray-600 space-y-1">
+                            <div>• Domain이 Repository <strong>인터페이스</strong>를 정의</div>
+                            <div>• Infrastructure가 Repository <strong>구현체</strong>를 제공</div>
+                            <div>• Application은 인터페이스만 의존 (구현체 모름)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- 7. 구현 계획 -->
