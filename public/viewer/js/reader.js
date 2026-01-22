@@ -420,7 +420,7 @@ window.addEventListener('touchend', () => {
 let controlsVisible = true;
 let hideControlsTimeout = null;
 
-function toggleControls() {
+window.toggleControls = function() {
     const header = document.querySelector('header');
     const textContainer = document.getElementById('page-text-container');
     const prevBtn = document.getElementById('prev-btn');
@@ -439,7 +439,7 @@ function toggleControls() {
         clearTimeout(hideControlsTimeout);
         hideControlsTimeout = setTimeout(() => {
             if (controlsVisible) {
-                toggleControls();
+                window.toggleControls();
             }
         }, 5000);
     } else {
@@ -451,13 +451,11 @@ function toggleControls() {
         
         clearTimeout(hideControlsTimeout);
     }
-}
+};
 
-// 페이지 로드 시 5초 후 자동 숨김
-window.addEventListener('load', () => {
-    hideControlsTimeout = setTimeout(() => {
-        if (controlsVisible) {
-            toggleControls();
-        }
-    }, 5000);
-});
+// 초기 상태: 컨트롤 표시, 10초 후 자동 숨김 (처음엔 텍스트 읽을 시간 필요)
+setTimeout(() => {
+    if (controlsVisible && document.getElementById('page-text-container')) {
+        window.toggleControls();
+    }
+}, 10000);
