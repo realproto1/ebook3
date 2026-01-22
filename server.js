@@ -3402,6 +3402,26 @@ app.put('/api/storybooks/:id/public', requireAPIKey, async (req, res) => {
       publishedAt: storybook.publishedAt,
       message: isPublic ? '동화책이 뷰어에 공개되었습니다.' : '동화책이 비공개로 전환되었습니다.'
     });
+  } catch (error) {
+    console.error('❌ 공개 상태 변경 실패:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: '공개 상태 변경 실패: ' + error.message 
+    });
+  }
+});
+
+// 뷰어 메타데이터 수동 업데이트 API (표지 변경 시 사용)
+app.post('/api/viewer/refresh-metadata', async (req, res) => {
+  try {
+    console.log('🔄 Manual viewer metadata refresh requested');
+    
+    await updateViewerMetadata();
+    
+    res.json({ 
+      success: true,
+      message: '뷰어 메타데이터가 업데이트되었습니다.'
+    });
     
   } catch (error) {
     console.error('❌ 공개 상태 변경 실패:', error);

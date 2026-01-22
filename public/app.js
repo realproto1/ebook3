@@ -4080,6 +4080,19 @@ async function saveToR2(storybook) {
         
         if (response.data.success) {
             console.log(`✅ R2 저장 완료: ${storybook.title}`);
+            
+            // 공개된 동화책이면 뷰어 메타데이터도 업데이트
+            if (storybook.isPublic) {
+                console.log('🔄 공개 동화책 - 뷰어 메타데이터 업데이트 중...');
+                try {
+                    const metaResponse = await axios.post('/api/viewer/refresh-metadata');
+                    if (metaResponse.data.success) {
+                        console.log('✅ 뷰어 메타데이터 업데이트 완료');
+                    }
+                } catch (metaError) {
+                    console.warn('⚠️ 뷰어 메타데이터 업데이트 실패:', metaError.message);
+                }
+            }
         } else {
             console.error('R2 저장 실패:', response.data.error);
         }
