@@ -55,6 +55,7 @@
                     <a href="#screens" class="hover:text-purple-600">화면</a>
                     <a href="#data" class="hover:text-purple-600">데이터</a>
                     <a href="#architecture" class="hover:text-purple-600">아키텍처</a>
+                    <a href="#prompt-specs" class="hover:text-purple-600">프롬프트</a>
                     <a href="#implementation" class="hover:text-purple-600">구현</a>
                 </div>
             </div>
@@ -1901,11 +1902,471 @@
             </div>
         </section>
 
-        <!-- 7. 구현 계획 -->
+        <!-- 7. 프롬프트 규약 & 설정 -->
+        <section id="prompt-specs" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-magic text-purple-600"></i>
+                7. 프롬프트 규약 & AI 설정
+            </h2>
+
+            <div class="bg-purple-50 border-l-4 border-purple-600 p-6 rounded mb-8">
+                <p class="text-purple-800 font-semibold mb-2">
+                    <i class="fas fa-star mr-2"></i>
+                    탱고북의 핵심 기능: AI 이미지 생성 프롬프트 규약
+                </p>
+                <p class="text-gray-700">
+                    일관된 품질의 동화책 이미지를 생성하기 위한 체계적인 프롬프트 빌딩 규칙입니다.
+                </p>
+            </div>
+
+            <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-book text-indigo-600"></i>
+                7.1 표지 이미지 프롬프트 규약
+            </h3>
+
+            <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                <div class="mb-4">
+                    <h4 class="text-lg font-bold text-gray-800 mb-2">함수: buildCoverPrompt(storybook)</h4>
+                    <p class="text-sm text-gray-600 mb-4">동화책 표지 이미지 생성을 위한 프롬프트를 자동으로 생성합니다.</p>
+                </div>
+
+                <div class="data-structure mb-4">
+<span class="keyword">function</span> <span class="property">buildCoverPrompt</span>(storybook) {
+    <span class="keyword">const</span> title = storybook.title || <span class="string">'동화책'</span>;
+    <span class="keyword">const</span> theme = storybook.theme || <span class="string">''</span>;
+    <span class="keyword">const</span> artStyle = storybook.artStyle || <span class="string">'Disney animation style'</span>;
+    <span class="keyword">const</span> characters = storybook.characters.map(c => c.name).join(<span class="string">', '</span>);
+    
+    <span class="keyword">return</span> <span class="string">`Create a beautiful, professional book cover illustration...
+    
+**Book Title:** ${title}
+**Theme:** ${theme}
+**Art Style:** ${artStyle}
+**Main Characters:** ${characters}
+
+**Cover Requirements:**
+- Eye-catching, vibrant illustration
+- Show the main characters in an engaging scene
+- Magical atmosphere suitable for children ages 4-8
+- Professional book cover quality
+
+**DO NOT include:**
+- Any text, title, or letters on the cover
+- Book spine or binding elements
+- Just pure illustration`</span>;
+}
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded border-l-4 border-blue-500">
+                        <h5 class="font-bold text-blue-800 mb-2">입력 데이터</h5>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• 동화책 제목 (title)</li>
+                            <li>• 주제/테마 (theme)</li>
+                            <li>• 그림체 스타일 (artStyle)</li>
+                            <li>• 주요 캐릭터 목록 (characters)</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-4 rounded border-l-4 border-green-500">
+                        <h5 class="font-bold text-green-800 mb-2">출력 제약사항</h5>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• 텍스트/글자 표시 금지</li>
+                            <li>• 책 등받이 요소 제거</li>
+                            <li>• 순수 일러스트레이션만</li>
+                            <li>• 4-8세 어린이 적합성</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2 mt-8">
+                <i class="fas fa-user-circle text-indigo-600"></i>
+                7.2 캐릭터 레퍼런스 시트 프롬프트 규약
+            </h3>
+
+            <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                <div class="mb-4">
+                    <h4 class="text-lg font-bold text-gray-800 mb-2">함수: buildCharacterPrompt(description, artStyle, settings, isRegeneration)</h4>
+                    <p class="text-sm text-gray-600 mb-4">캐릭터 일관성을 위한 레퍼런스 시트 생성 프롬프트입니다.</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 mb-4">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h5 class="font-bold text-blue-800 mb-2 text-sm">레퍼런스 시트 구성</h5>
+                        <ul class="text-xs text-gray-700 space-y-1">
+                            <li>1. 정면 전신 뷰</li>
+                            <li>2. 3/4 뷰 & 측면</li>
+                            <li>3. 3가지 표정</li>
+                            <li>4. 의상/색상 디테일</li>
+                        </ul>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h5 class="font-bold text-green-800 mb-2 text-sm">재생성 모드</h5>
+                        <ul class="text-xs text-gray-700 space-y-1">
+                            <li>• 기존 레퍼런스 이미지 분석</li>
+                            <li>• 핵심 디자인 요소 유지</li>
+                            <li>• 명시된 변경사항만 적용</li>
+                            <li>• 색상 팔레트 일관성</li>
+                        </ul>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h5 class="font-bold text-purple-800 mb-2 text-sm">제약사항</h5>
+                        <ul class="text-xs text-gray-700 space-y-1">
+                            <li>• NO TEXT (텍스트 금지)</li>
+                            <li>• 흰색 배경 + 그리드</li>
+                            <li>• 4-8세 적합 디자인</li>
+                            <li>• 고품질 일러스트</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                    <h5 class="font-bold text-yellow-800 mb-2">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        재생성 모드 우선순위
+                    </h5>
+                    <ol class="text-sm text-gray-700 space-y-1">
+                        <li>1️⃣ <strong>Reference Image</strong> - 기본 디자인</li>
+                        <li>2️⃣ <strong>Updated Description</strong> - 수정사항만</li>
+                        <li>3️⃣ <strong>Art Style</strong> - 레퍼런스에 이미 확립됨</li>
+                    </ol>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2 mt-8">
+                <i class="fas fa-image text-indigo-600"></i>
+                7.3 페이지 삽화 이미지 프롬프트 규약
+            </h3>
+
+            <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                <div class="mb-4">
+                    <h4 class="text-lg font-bold text-gray-800 mb-2">함수: buildIllustrationPrompt(page, artStyle, characterReferences, settings, editNote)</h4>
+                    <p class="text-sm text-gray-600 mb-4">스토리 페이지별 삽화 생성을 위한 가장 복잡하고 정교한 프롬프트입니다.</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-white p-4 rounded border-2 border-indigo-300">
+                        <h5 class="font-bold text-indigo-800 mb-3">🎯 핵심 기능</h5>
+                        <ul class="text-sm text-gray-700 space-y-2">
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                <span><strong>자동 캐릭터 감지:</strong> 페이지 텍스트 분석해 등장 캐릭터만 필터링</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                <span><strong>스토리 컨텍스트:</strong> 최근 3페이지 내용 포함 (타임아웃 방지)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                <span><strong>이전 페이지 참조:</strong> 바로 전 페이지 이미지로 일관성 유지</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                <span><strong>재생성 모드:</strong> editNote 있으면 스토리 컨텍스트 생략</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-4 rounded border-2 border-purple-300">
+                        <h5 class="font-bold text-purple-800 mb-3">📋 프롬프트 구성요소</h5>
+                        <ul class="text-sm text-gray-700 space-y-2">
+                            <li>• <strong>Scene Description:</strong> 장면 묘사</li>
+                            <li>• <strong>Scene Structure:</strong> 캐릭터/배경/분위기</li>
+                            <li>• <strong>Character References:</strong> 필터링된 캐릭터 레퍼런스</li>
+                            <li>• <strong>Art Style:</strong> 일관된 그림체</li>
+                            <li>• <strong>Composition:</strong> 수평 레이아웃</li>
+                            <li>• <strong>Lighting & Atmosphere:</strong> 조명/분위기</li>
+                            <li>• <strong>Color Palette:</strong> 4-8세 적합 색상</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-4">
+                    <h5 class="font-bold text-red-800 mb-2">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        재생성 모드 동작 방식
+                    </h5>
+                    <div class="text-sm text-gray-700 space-y-2">
+                        <p><strong>STEP 1 - 레퍼런스 이미지 분석:</strong></p>
+                        <ul class="ml-4 space-y-1">
+                            <li>• 현재 삽화 이미지 (현재 상태)</li>
+                            <li>• 캐릭터 레퍼런스 시트 (캐릭터 일관성)</li>
+                            <li>• 선택된 레퍼런스 페이지들 (추가 컨텍스트)</li>
+                        </ul>
+                        <p class="mt-2"><strong>STEP 2 - 수정 요청 읽기:</strong></p>
+                        <ul class="ml-4 space-y-1">
+                            <li>• editNote가 있으면: 사용자 요청대로 생성</li>
+                            <li>• editNote가 없으면: 약간 변형된 버전 생성</li>
+                            <li>• 원본 장면 설명은 무시 (수정 요청 우선)</li>
+                        </ul>
+                        <p class="mt-2"><strong>우선순위:</strong> 1. 수정 요청 → 2. 캐릭터 레퍼런스 → 3. 레퍼런스 이미지 → 4. 아트 스타일</p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-blue-100 to-purple-100 p-4 rounded">
+                    <h5 class="font-bold text-gray-800 mb-2">
+                        <i class="fas fa-filter mr-2"></i>
+                        캐릭터 자동 필터링 로직
+                    </h5>
+                    <div class="data-structure text-xs">
+<span class="comment">// 페이지에 등장하는 캐릭터만 자동 감지</span>
+<span class="keyword">const</span> allText = <span class="string">`${pageText} ${sceneCharacters} ${editNote}`</span>.toLowerCase();
+<span class="keyword">const</span> relevantCharacters = characterReferences.<span class="property">filter</span>(char => {
+    <span class="keyword">const</span> charName = char.name.toLowerCase();
+    <span class="keyword">return</span> allText.includes(charName) || 
+           allText.includes(char.description.toLowerCase().split(<span class="string">' '</span>)[<span class="number">0</span>]);
+});
+
+console.log(<span class="string">`👥 전체 ${characterReferences.length}명 → 등장 ${filteredCharacters.length}명`</span>);
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2 mt-8">
+                <i class="fas fa-cogs text-orange-600"></i>
+                7.4 이미지 생성 모델 선택 옵션
+            </h3>
+
+            <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                <p class="text-sm text-gray-700 mb-4">
+                    탱고북은 다양한 AI 이미지 생성 모델을 지원하며, 이미지 타입별로 최적의 모델을 선택할 수 있습니다.
+                </p>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-white p-5 rounded-lg border-2 border-purple-300">
+                        <h4 class="text-lg font-bold text-purple-800 mb-3 flex items-center gap-2">
+                            <i class="fas fa-palette"></i>
+                            이미지 타입별 모델
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="bg-purple-50 p-3 rounded">
+                                <div class="font-bold text-sm text-purple-900 mb-1">1. 표지 이미지 (coverModel)</div>
+                                <p class="text-xs text-gray-600">동화책 표지 생성용 - 고품질, 매력적인 표지</p>
+                            </div>
+                            <div class="bg-blue-50 p-3 rounded">
+                                <div class="font-bold text-sm text-blue-900 mb-1">2. 캐릭터 레퍼런스 (characterModel)</div>
+                                <p class="text-xs text-gray-600">캐릭터 일관성 유지용 - 정확한 레퍼런스 시트</p>
+                            </div>
+                            <div class="bg-green-50 p-3 rounded">
+                                <div class="font-bold text-sm text-green-900 mb-1">3. 페이지 삽화 (illustrationModel)</div>
+                                <p class="text-xs text-gray-600">스토리 페이지용 - 세밀한 장면 표현</p>
+                            </div>
+                            <div class="bg-orange-50 p-3 rounded">
+                                <div class="font-bold text-sm text-orange-900 mb-1">4. 주요 사물 (keyObjectModel)</div>
+                                <p class="text-xs text-gray-600">스토리 핵심 사물 - 단순하고 명확한 표현</p>
+                            </div>
+                            <div class="bg-pink-50 p-3 rounded">
+                                <div class="font-bold text-sm text-pink-900 mb-1">5. 어휘 카드 (vocabularyModel)</div>
+                                <p class="text-xs text-gray-600">어휘 학습용 - 직관적이고 교육적</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-lg border-2 border-blue-300">
+                        <h4 class="text-lg font-bold text-blue-800 mb-3 flex items-center gap-2">
+                            <i class="fas fa-sliders-h"></i>
+                            이미지 설정 (imageSettings)
+                        </h4>
+                        <div class="data-structure text-xs mb-3">
+<span class="keyword">let</span> imageSettings = {
+    <span class="property">aspectRatio</span>: <span class="string">'16:9'</span>,
+    <span class="property">enforceNoText</span>: <span class="keyword">true</span>,
+    <span class="property">enforceCharacterConsistency</span>: <span class="keyword">true</span>,
+    <span class="property">additionalPrompt</span>: <span class="string">''</span>,
+    <span class="property">imageQuality</span>: <span class="string">'high'</span>,
+    <span class="property">characterModel</span>: <span class="string">'gemini-3-pro'</span>,
+    <span class="property">keyObjectModel</span>: <span class="string">'gemini-3-pro'</span>,
+    <span class="property">illustrationModel</span>: <span class="string">'gemini-3-pro'</span>,
+    <span class="property">vocabularyModel</span>: <span class="string">'gemini-3-pro'</span>,
+    <span class="property">coverModel</span>: <span class="string">'gemini-3-pro'</span>
+};
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded">
+                            <p class="text-xs text-gray-700">
+                                <strong>저장 위치:</strong> <code>localStorage.getItem('imageSettings')</code>
+                            </p>
+                            <p class="text-xs text-gray-700 mt-2">
+                                <strong>지원 모델:</strong> gemini-3-pro-image-preview, gemini-2-flash-image-generation 등
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-5 rounded-lg border-2 border-indigo-300">
+                    <h4 class="text-lg font-bold text-indigo-900 mb-3 flex items-center gap-2">
+                        <i class="fas fa-microphone"></i>
+                        TTS (음성 합성) 설정
+                    </h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="data-structure text-xs mb-2">
+<span class="property">ttsModel</span>: <span class="string">'gemini-tts-1'</span>,
+<span class="property">ttsVoiceConfig</span>: {
+    <span class="property">speakingRate</span>: <span class="number">0.9</span>,
+    <span class="property">pitch</span>: <span class="number">0</span>,
+    <span class="property">volumeGainDb</span>: <span class="number">0</span>
+}
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-700">
+                            <p class="mb-2"><strong>TTS 생성 시점:</strong></p>
+                            <ul class="space-y-1">
+                                <li>• 페이지별 텍스트 음성 생성</li>
+                                <li>• 자동 재생 기능 지원</li>
+                                <li>• R2에 오디오 파일 저장</li>
+                                <li>• 리더 앱에서 재생</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2 mt-8">
+                <i class="fas fa-database text-teal-600"></i>
+                7.5 Cloudflare R2 스토리지 설정
+            </h3>
+
+            <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                <div class="bg-teal-50 border-l-4 border-teal-600 p-4 rounded mb-4">
+                    <h4 class="font-bold text-teal-900 mb-2">
+                        <i class="fas fa-cloud mr-2"></i>
+                        R2 버킷 정보
+                    </h4>
+                    <p class="text-sm text-gray-700 mb-3">
+                        탱고북은 Cloudflare R2를 메인 스토리지로 사용하여 동화책 데이터, 이미지, 오디오 파일을 저장합니다.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-white p-4 rounded border-2 border-gray-300">
+                        <h5 class="font-bold text-gray-800 mb-3">환경 변수 설정</h5>
+                        <div class="data-structure text-xs">
+<span class="comment">// Cloudflare R2 설정</span>
+<span class="keyword">const</span> R2_ACCOUNT_ID = 
+    <span class="string">'ad0cc40df8e41b561442058f198278ea'</span>;
+<span class="keyword">const</span> R2_ACCESS_KEY_ID = 
+    <span class="string">'764805a6659844bc5b989f14e1d7408c'</span>;
+<span class="keyword">const</span> R2_SECRET_ACCESS_KEY = 
+    <span class="string">'fa1a1d55c9278d758d2f3a4da79cc2858...'</span>;
+<span class="keyword">const</span> R2_BUCKET_NAME = 
+    <span class="string">'storybook-images'</span>;
+<span class="keyword">const</span> R2_PUBLIC_URL = 
+    <span class="string">'https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev'</span>;
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded border-2 border-gray-300">
+                        <h5 class="font-bold text-gray-800 mb-3">R2 클라이언트 초기화</h5>
+                        <div class="data-structure text-xs">
+<span class="keyword">const</span> r2Client = <span class="keyword">new</span> S3Client({
+  <span class="property">region</span>: <span class="string">'auto'</span>,
+  <span class="property">endpoint</span>: 
+    <span class="string">`https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`</span>,
+  <span class="property">credentials</span>: {
+    <span class="property">accessKeyId</span>: R2_ACCESS_KEY_ID,
+    <span class="property">secretAccessKey</span>: R2_SECRET_ACCESS_KEY
+  }
+});
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-lg border-2 border-blue-300 mb-4">
+                    <h5 class="font-bold text-blue-900 mb-3 flex items-center gap-2">
+                        <i class="fas fa-folder-open"></i>
+                        R2 파일 저장 규칙
+                    </h5>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm font-bold text-gray-800 mb-2">파일명 규칙:</p>
+                            <ul class="text-xs text-gray-700 space-y-1">
+                                <li>• <strong>동화책 JSON:</strong> <code>storybook-{id}.json</code></li>
+                                <li>• <strong>표지 이미지:</strong> <code>{id}-cover-{timestamp}.png</code></li>
+                                <li>• <strong>캐릭터 레퍼런스:</strong> <code>{id}-character-{index}-{timestamp}.png</code></li>
+                                <li>• <strong>페이지 삽화:</strong> <code>{id}-page{num}-{timestamp}.png</code></li>
+                                <li>• <strong>TTS 오디오:</strong> <code>{id}-page{num}-tts.mp3</code></li>
+                                <li>• <strong>메타데이터:</strong> <code>viewer-metadata.json</code></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-gray-800 mb-2">주요 함수:</p>
+                            <div class="data-structure text-xs">
+<span class="comment">// 이미지 업로드</span>
+<span class="keyword">async function</span> <span class="property">uploadImageToR2</span>(
+    imageUrl, filename
+) { <span class="comment">/* ... */</span> }
+
+<span class="comment">// JSON 데이터 업로드</span>
+<span class="keyword">async function</span> <span class="property">uploadJSONToR2</span>(
+    data, filename
+) { <span class="comment">/* ... */</span> }
+
+<span class="comment">// R2에서 데이터 읽기</span>
+<span class="keyword">async function</span> <span class="property">getJSONFromR2</span>(
+    filename
+) { <span class="comment">/* ... */</span> }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded border-2 border-yellow-400">
+                    <h5 class="font-bold text-orange-900 mb-2 flex items-center gap-2">
+                        <i class="fas fa-train mr-2"></i>
+                        Railway 배포 설정
+                    </h5>
+                    <p class="text-sm text-gray-700 mb-3">
+                        현재 탱고북 서버는 Railway 플랫폼에 배포되어 있으며, 환경 변수를 통해 R2 연동이 설정되어 있습니다.
+                    </p>
+                    <div class="grid grid-cols-3 gap-3 text-xs">
+                        <div class="bg-white p-3 rounded">
+                            <p class="font-bold text-gray-800 mb-1">플랫폼</p>
+                            <p class="text-gray-600">Railway.app</p>
+                        </div>
+                        <div class="bg-white p-3 rounded">
+                            <p class="font-bold text-gray-800 mb-1">서버 구성</p>
+                            <p class="text-gray-600">Express + Node.js</p>
+                        </div>
+                        <div class="bg-white p-3 rounded">
+                            <p class="font-bold text-gray-800 mb-1">스토리지</p>
+                            <p class="text-gray-600">Cloudflare R2</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 bg-white p-3 rounded">
+                        <p class="text-xs text-gray-700">
+                            <strong>환경 변수 설정 위치:</strong> Railway Dashboard → Project → Variables<br>
+                            <code class="text-xs">R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, GEMINI_API_KEY</code>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-purple-100 via-pink-100 to-red-100 p-6 rounded-xl">
+                <h4 class="text-xl font-bold text-purple-900 mb-3 flex items-center gap-2">
+                    <i class="fas fa-lightbulb"></i>
+                    프롬프트 규약 핵심 요약
+                </h4>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-white/70 p-4 rounded-lg">
+                        <h5 class="font-bold text-purple-800 mb-2">1. 표지 프롬프트</h5>
+                        <p class="text-xs text-gray-700">매력적인 표지, 캐릭터 등장, 텍스트 없이 순수 일러스트</p>
+                    </div>
+                    <div class="bg-white/70 p-4 rounded-lg">
+                        <h5 class="font-bold text-blue-800 mb-2">2. 캐릭터 프롬프트</h5>
+                        <p class="text-xs text-gray-700">레퍼런스 시트, 다각도 뷰, 재생성 시 일관성 유지</p>
+                    </div>
+                    <div class="bg-white/70 p-4 rounded-lg">
+                        <h5 class="font-bold text-green-800 mb-2">3. 삽화 프롬프트</h5>
+                        <p class="text-xs text-gray-700">자동 캐릭터 필터링, 스토리 컨텍스트, 이전 페이지 참조</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. 구현 계획 -->
         <section id="implementation" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
             <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
                 <i class="fas fa-rocket text-indigo-600"></i>
-                7. 구현 로드맵 (12주)
+                8. 구현 로드맵 (12주)
             </h2>
 
             <div class="grid md:grid-cols-6 gap-4 mb-8">
