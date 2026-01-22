@@ -275,7 +275,7 @@ function previousPage() {
 // TTS 재생
 async function playTTS() {
     const page = currentBook.pages[currentPage];
-    const button = document.querySelector('button[onclick="playTTS()"]');
+    const button = document.getElementById('tts-button');
     const buttonText = document.getElementById('tts-text');
     
     // 이미 재생 중이면 중지
@@ -283,6 +283,7 @@ async function playTTS() {
         currentAudio.pause();
         currentAudio = null;
         buttonText.textContent = '읽어주기';
+        button.classList.remove('playing');
         return;
     }
     
@@ -290,16 +291,19 @@ async function playTTS() {
     if (page.ttsAudioUrl) {
         try {
             buttonText.textContent = '재생 중...';
+            button.classList.add('playing');
             currentAudio = new Audio(page.ttsAudioUrl);
             
             currentAudio.addEventListener('ended', () => {
                 currentAudio = null;
                 buttonText.textContent = '읽어주기';
+                button.classList.remove('playing');
             });
             
             currentAudio.addEventListener('error', () => {
                 currentAudio = null;
                 buttonText.textContent = '읽어주기';
+                button.classList.remove('playing');
                 alert('음성 재생에 실패했습니다.');
             });
             
@@ -309,6 +313,7 @@ async function playTTS() {
             console.error('TTS playback error:', error);
             currentAudio = null;
             buttonText.textContent = '읽어주기';
+            button.classList.remove('playing');
             alert('음성 재생에 실패했습니다.');
         }
     } else {
