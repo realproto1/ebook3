@@ -1055,20 +1055,32 @@ async function deleteStorybook(id) {
     const storybook = storybooks.find(b => b.id === id);
     const title = storybook ? storybook.title : '이 동화책';
     
+    console.log(`🗑️ 삭제 요청: ID ${id}, 제목: ${title}`);
+    
     // 명확한 확인 메시지
     const confirmMessage = `⚠️ 정말로 삭제하시겠습니까?\n\n동화책: "${title}"\n\n이 작업은 되돌릴 수 없습니다.\n- 모든 페이지\n- 캐릭터 레퍼런스\n- 표지 이미지\n- 생성된 모든 콘텐츠\n\n위 내용이 영구적으로 삭제됩니다.`;
     
     if (confirm(confirmMessage)) {
+        console.log(`✅ 사용자 확인: 삭제 진행`);
         try {
             // R2에서 삭제
             console.log(`🗑️ R2에서 삭제 시작: ID ${id}`);
+            console.log(`📡 API 호출: DELETE /api/storybooks/${id}`);
+            
             const response = await axios.delete(`/api/storybooks/${id}`);
+            
+            console.log(`📡 서버 응답:`, response.data);
             
             if (response.data.success) {
                 console.log(`✅ R2 삭제 완료`);
                 
                 // localStorage에서도 삭제
+                const beforeCount = storybooks.length;
                 storybooks = storybooks.filter(b => b.id !== id);
+                const afterCount = storybooks.length;
+                
+                console.log(`📊 동화책 목록 업데이트: ${beforeCount}권 → ${afterCount}권`);
+                
                 saveStorybooks();
                 renderBookList();
                 
@@ -1084,8 +1096,11 @@ async function deleteStorybook(id) {
             }
         } catch (error) {
             console.error('❌ 삭제 오류:', error);
+            console.error('에러 상세:', error.response ? error.response.data : error.message);
             showNotification('error', '동화책 삭제에 실패했습니다.');
         }
+    } else {
+        console.log(`❌ 사용자 취소: 삭제 취소됨`);
     }
 }
 
