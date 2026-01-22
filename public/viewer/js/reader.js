@@ -415,3 +415,49 @@ window.addEventListener('touchend', () => {
         hideAddressBar();
     }, 300);
 }, { passive: true });
+
+// 컨트롤 표시/숨김 토글
+let controlsVisible = true;
+let hideControlsTimeout = null;
+
+function toggleControls() {
+    const header = document.querySelector('header');
+    const textContainer = document.getElementById('page-text-container');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    
+    controlsVisible = !controlsVisible;
+    
+    if (controlsVisible) {
+        // 컨트롤 표시
+        header.classList.remove('controls-hidden');
+        textContainer.classList.remove('controls-hidden');
+        prevBtn.classList.remove('controls-hidden');
+        nextBtn.classList.remove('controls-hidden');
+        
+        // 5초 후 자동 숨김
+        clearTimeout(hideControlsTimeout);
+        hideControlsTimeout = setTimeout(() => {
+            if (controlsVisible) {
+                toggleControls();
+            }
+        }, 5000);
+    } else {
+        // 컨트롤 숨김
+        header.classList.add('controls-hidden');
+        textContainer.classList.add('controls-hidden');
+        prevBtn.classList.add('controls-hidden');
+        nextBtn.classList.add('controls-hidden');
+        
+        clearTimeout(hideControlsTimeout);
+    }
+}
+
+// 페이지 로드 시 5초 후 자동 숨김
+window.addEventListener('load', () => {
+    hideControlsTimeout = setTimeout(() => {
+        if (controlsVisible) {
+            toggleControls();
+        }
+    }, 5000);
+});

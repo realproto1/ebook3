@@ -99,15 +99,16 @@
         header {
             flex-shrink: 0;
             height: 44px;
-            padding: 0.5rem 1rem !important;
+            padding: 0.5rem 1rem;
             font-size: 0.875rem;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease;
             position: relative;
             z-index: 20;
         }
         
-        header.hidden {
+        header.controls-hidden {
             transform: translateY(-100%);
+            opacity: 0;
         }
         
         main {
@@ -118,14 +119,12 @@
         
         /* 기본 레이아웃 (세로 모드 / PC) */
         #page-content {
-            height: 100%;
-            width: 100%;
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            /* flex 제거 - absolute positioning 사용 */
+            cursor: pointer;
         }
         
         #page-image-container {
@@ -134,19 +133,15 @@
             left: 0;
             right: 0;
             bottom: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            background: #000;
             z-index: 1;
         }
         
         #page-image {
             width: 100%;
             height: 100%;
-            object-fit: cover;  /* 화면 전체를 채움 */
+            object-fit: cover;
             object-position: center;
+            display: block;
         }
         
         #page-text-container {
@@ -154,13 +149,19 @@
             bottom: 0;
             left: 0;
             right: 0;
-            max-height: 35%;
-            overflow-y: auto;
-            padding: 1.5rem 1.5rem 1rem 1.5rem !important;
+            padding: 1.5rem;
             background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.85) 70%, transparent);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             z-index: 10;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        /* 컨트롤 숨김/보임 */
+        #page-text-container.controls-hidden {
+            opacity: 0;
+            transform: translateY(100%);
+            pointer-events: none;
         }
         
         #page-text-container::before {
@@ -174,9 +175,9 @@
         }
         
         #page-text {
-            font-size: 1.125rem !important;
-            line-height: 1.75 !important;
-            margin-bottom: 0.875rem !important;
+            font-size: 1.125rem;
+            line-height: 1.75;
+            margin-bottom: 0.875rem;
             color: #ffffff;
             text-shadow: 
                 0 0 10px rgba(255, 255, 255, 0.3),
@@ -190,85 +191,22 @@
             -moz-osx-font-smoothing: grayscale;
         }
         
-        /* 모바일 가로 모드 - 오버레이 유지 */
-        @media (max-width: 926px) and (orientation: landscape) {
-            #page-text-container {
-                max-height: 40%;
-                padding: 1rem 1.5rem !important;
-            }
-            
-            #page-text {
-                font-size: 1rem !important;
-                line-height: 1.65 !important;
-            }
-            
-            /* 가로 모드에서 버튼 위치 조정 */
-            #prev-btn {
-                left: 0.5rem !important;
-            }
-            
-            #next-btn {
-                right: 0.5rem !important;
-            }
-        }
-        
-        /* 모바일 세로 모드 */
-        @media (max-width: 768px) and (orientation: portrait) {
-            header {
-                height: 36px !important;
-                font-size: 0.75rem;
-                padding: 0.25rem 0.75rem !important;
-            }
-            
-            .nav-button {
-                padding: 0.5rem !important;
-                width: 40px !important;
-                height: 40px !important;
-            }
-            
-            .nav-button i {
-                font-size: 1rem !important;
-            }
-            
-            #page-text-container {
-                padding: 1rem 1rem 0.75rem 1rem !important;
-                max-height: 32%;
-            }
-            
-            #page-text {
-                font-size: 1rem !important;
-                line-height: 1.65 !important;
-                text-shadow: 
-                    0 0 8px rgba(255, 255, 255, 0.4),
-                    0 0 15px rgba(255, 255, 255, 0.25),
-                    0 2px 6px rgba(0, 0, 0, 0.9),
-                    0 4px 12px rgba(0, 0, 0, 0.7);
-            }
-            
-            button {
-                padding: 0.5rem 0.75rem !important;
-                font-size: 0.75rem !important;
-            }
-        }
-        
-        /* 네비게이션 버튼 z-index */
-        .nav-button {
-            z-index: 15;
-        }
-        
-        /* 진행바 숨기기 (더 많은 공간 확보) */
-        #progress-bar-container {
-            display: none;
-        }
-        
-        /* TTS 버튼 스타일 개선 */
         #tts-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
             box-shadow: 
                 0 4px 15px rgba(102, 126, 234, 0.4),
                 0 2px 8px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
         }
         
         #tts-button:hover {
@@ -285,6 +223,70 @@
         #tts-button.playing {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+        
+        /* 모바일 가로 모드 */
+        @media (max-width: 926px) and (orientation: landscape) {
+            #page-text-container {
+                padding: 1rem 1.5rem;
+            }
+            
+            #page-text {
+                font-size: 1rem;
+                line-height: 1.65;
+            }
+            
+            #prev-btn {
+                left: 0.5rem;
+            }
+            
+            #next-btn {
+                right: 0.5rem;
+            }
+        }
+        
+        /* 모바일 세로 모드 */
+        @media (max-width: 768px) and (orientation: portrait) {
+            header {
+                height: 36px;
+                font-size: 0.75rem;
+                padding: 0.25rem 0.75rem;
+            }
+            
+            .nav-button {
+                padding: 0.5rem;
+                width: 40px;
+                height: 40px;
+            }
+            
+            .nav-button i {
+                font-size: 1rem;
+            }
+            
+            #page-text-container {
+                padding: 1rem;
+            }
+            
+            #page-text {
+                font-size: 1rem;
+                line-height: 1.65;
+            }
+            
+            #tts-button {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.75rem;
+            }
+        }
+        
+        /* 네비게이션 버튼 */
+        .nav-button {
+            z-index: 15;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-button.controls-hidden {
+            opacity: 0;
+            pointer-events: none;
         }
         
         @keyframes pulse-glow {
@@ -339,26 +341,24 @@
             </button>
             
             <!-- 페이지 콘텐츠 -->
-            <div id="page-content">
+            <div id="page-content" onclick="toggleControls()">
                 <!-- 이미지 -->
-                <div id="page-image-container" class="mb-2 overflow-hidden">
+                <div id="page-image-container">
                     <img 
                         id="page-image" 
                         src="" 
-                        alt="" 
-                        class="page-transition"
+                        alt=""
                     >
                 </div>
                 
-                <!-- 텍스트 -->
-                <div id="page-text-container">
-                    <p id="page-text" class="mb-2"></p>
+                <!-- 텍스트 오버레이 -->
+                <div id="page-text-container" class="controls">
+                    <p id="page-text"></p>
                     
                     <!-- TTS 재생 버튼 -->
                     <button 
                         id="tts-button"
-                        onclick="playTTS()"
-                        class="px-5 py-2.5 rounded-full font-semibold transition shadow-lg text-sm flex items-center gap-2"
+                        onclick="event.stopPropagation(); playTTS();"
                     >
                         <i class="fas fa-volume-up"></i>
                         <span id="tts-text">읽어주기</span>
@@ -385,6 +385,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-    <script src="/viewer/js/reader.js?v=20250122-fullcover"></script>
+    <script src="/viewer/js/reader.js?v=20250122-toggle-controls"></script>
 </body>
 </html>
