@@ -601,7 +601,18 @@ function selectCoverImageFromHistory(historyIndex) {
 // 표지 이미지 디스플레이만 업데이트 (섹션 열림 상태 유지)
 function updateCoverImageDisplay() {
     const coverDisplay = document.getElementById('cover-image-display');
-    if (!coverDisplay || !currentStorybook) return;
+    if (!coverDisplay || !currentStorybook) {
+        console.warn('⚠️ updateCoverImageDisplay: coverDisplay 또는 currentStorybook이 없음', {
+            coverDisplay: !!coverDisplay,
+            currentStorybook: !!currentStorybook
+        });
+        return;
+    }
+    
+    console.log('🔄 updateCoverImageDisplay 호출:', {
+        coverImage: currentStorybook.coverImage,
+        historyCount: (currentStorybook.coverImageHistory || []).length
+    });
     
     const history = currentStorybook.coverImageHistory || [];
     
@@ -1590,6 +1601,12 @@ async function generateStorybook() {
 }
 
 function displayStorybook(storybook) {
+    console.log('📺 displayStorybook 호출:', {
+        title: storybook.title,
+        coverImage: storybook.coverImage,
+        historyCount: (storybook.coverImageHistory || []).length
+    });
+    
     const resultDiv = document.getElementById('storybookResult');
     
     let html = `
