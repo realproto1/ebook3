@@ -149,10 +149,17 @@
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 1.5rem;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.85) 70%, transparent);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            padding: 3rem 2rem 2rem 2rem;
+            background: linear-gradient(
+                to top, 
+                rgba(0, 0, 0, 0.75) 0%, 
+                rgba(0, 0, 0, 0.6) 25%,
+                rgba(0, 0, 0, 0.4) 50%,
+                rgba(0, 0, 0, 0.2) 75%,
+                transparent 100%
+            );
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             z-index: 10;
             /* 텍스트는 항상 표시 - 토글하지 않음 */
         }
@@ -163,21 +170,21 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 2px;
-            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
         }
         
         #page-text {
             font-size: 1.125rem;
             line-height: 1.75;
-            margin-bottom: 0.875rem;
+            margin-bottom: 1rem;
             color: #ffffff;
+            text-align: center;
             text-shadow: 
-                0 0 10px rgba(255, 255, 255, 0.3),
-                0 0 20px rgba(255, 255, 255, 0.2),
-                0 2px 8px rgba(0, 0, 0, 0.8),
-                0 4px 16px rgba(0, 0, 0, 0.6);
-            font-weight: 500;
+                0 1px 2px rgba(0, 0, 0, 0.8),
+                0 2px 8px rgba(0, 0, 0, 0.6),
+                0 0 10px rgba(0, 0, 0, 0.5);
+            font-weight: 400;
             letter-spacing: 0.3px;
             word-break: keep-all;
             -webkit-font-smoothing: antialiased;
@@ -188,25 +195,28 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.625rem 1.25rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 9999px;
-            font-weight: 600;
-            font-size: 0.875rem;
+            font-weight: 500;
+            font-size: 0.9rem;
             box-shadow: 
-                0 4px 15px rgba(102, 126, 234, 0.4),
-                0 2px 8px rgba(0, 0, 0, 0.3);
+                0 2px 8px rgba(0, 0, 0, 0.3),
+                0 1px 4px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             transition: all 0.3s ease;
             cursor: pointer;
         }
         
         #tts-button:hover {
+            background: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
             box-shadow: 
-                0 6px 20px rgba(102, 126, 234, 0.5),
-                0 4px 12px rgba(0, 0, 0, 0.4);
+                0 4px 12px rgba(0, 0, 0, 0.4),
+                0 2px 6px rgba(0, 0, 0, 0.3);
         }
         
         #tts-button:active {
@@ -214,19 +224,25 @@
         }
         
         #tts-button.playing {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: rgba(102, 126, 234, 0.5);
+            border-color: rgba(102, 126, 234, 0.6);
             animation: pulse-glow 1.5s ease-in-out infinite;
         }
         
         /* 모바일 가로 모드 */
         @media (max-width: 926px) and (orientation: landscape) {
             #page-text-container {
-                padding: 1rem 1.5rem;
+                padding: 2rem 1.5rem 1.5rem 1.5rem;
             }
             
             #page-text {
-                font-size: 1rem;
-                line-height: 1.65;
+                font-size: 0.95rem;
+                line-height: 1.6;
+            }
+            
+            #tts-button {
+                padding: 0.625rem 1.25rem;
+                font-size: 0.85rem;
             }
             
             #prev-btn {
@@ -246,18 +262,8 @@
                 padding: 0.25rem 0.75rem;
             }
             
-            .nav-button {
-                padding: 0.5rem;
-                width: 40px;
-                height: 40px;
-            }
-            
-            .nav-button i {
-                font-size: 1rem;
-            }
-            
             #page-text-container {
-                padding: 1rem;
+                padding: 2rem 1.25rem 1.25rem 1.25rem;
             }
             
             #page-text {
@@ -266,8 +272,18 @@
             }
             
             #tts-button {
-                padding: 0.5rem 0.75rem;
-                font-size: 0.75rem;
+                padding: 0.625rem 1.25rem;
+                font-size: 0.85rem;
+            }
+            
+            .nav-button {
+                padding: 0.5rem;
+                width: 40px;
+                height: 40px;
+            }
+            
+            .nav-button i {
+                font-size: 1rem;
             }
         }
         
