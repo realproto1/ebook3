@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>탱고북 v2.0 - 전면 재설계 개발 기획서</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        .keyword { color: #569cd6; }
+        .string { color: #ce9178; }
+        .comment { color: #6a9955; }
+        .type { color: #4ec9b0; }
+        .function { color: #dcdcaa; }
+        
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .nav-item {
+            transition: all 0.3s;
+        }
+        
+        .nav-item:hover {
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .section {
+            scroll-margin-top: 80px;
+        }
+        
+        .pattern-card {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .pattern-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media print {
+            nav { display: none; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 네비게이션 -->
+    <nav class="py-4">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-book-open text-3xl text-purple-600"></i>
+                    <h1 class="text-2xl font-bold text-gray-800">탱고북 v2.0 재설계</h1>
+                </div>
+                <div class="flex gap-6">
+                    <a href="#overview" class="nav-item">개요</a>
+                    <a href="#problems" class="nav-item">문제점</a>
+                    <a href="#architecture" class="nav-item">아키텍처</a>
+                    <a href="#patterns" class="nav-item">디자인 패턴</a>
+                    <a href="#structure" class="nav-item">폴더 구조</a>
+                    <a href="#implementation" class="nav-item">구현 가이드</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- 헤더 -->
+        <div class="gradient-bg text-white rounded-2xl p-12 mb-12 shadow-2xl">
+            <div class="text-center">
+                <h1 class="text-5xl font-bold mb-4">
+                    <i class="fas fa-rocket mr-3"></i>
+                    탱고북 v2.0
+                </h1>
+                <h2 class="text-3xl mb-6">TypeScript + 디자인 패턴 기반 전면 재설계</h2>
+                <div class="flex justify-center gap-8 text-lg">
+                    <div>
+                        <i class="fas fa-calendar-alt mr-2"></i>
+                        작성일: 2025-01-22
+                    </div>
+                    <div>
+                        <i class="fas fa-code mr-2"></i>
+                        기술 스택: TypeScript, Hono, React
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 목차 -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-list mr-3 text-blue-600"></i>
+                목차
+            </h2>
+            <div class="grid grid-cols-2 gap-4">
+                <a href="#overview" class="p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
+                    <div class="font-bold text-blue-800">1. 프로젝트 개요</div>
+                    <div class="text-sm text-gray-600">현재 상황과 재설계 목표</div>
+                </a>
+                <a href="#problems" class="p-4 bg-red-50 rounded-lg hover:bg-red-100 transition">
+                    <div class="font-bold text-red-800">2. 현재 문제점 분석</div>
+                    <div class="text-sm text-gray-600">9,322줄의 코드가 가진 문제들</div>
+                </a>
+                <a href="#architecture" class="p-4 bg-green-50 rounded-lg hover:bg-green-100 transition">
+                    <div class="font-bold text-green-800">3. 새로운 아키텍처</div>
+                    <div class="text-sm text-gray-600">클린 아키텍처 + DDD</div>
+                </a>
+                <a href="#patterns" class="p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition">
+                    <div class="font-bold text-purple-800">4. 디자인 패턴</div>
+                    <div class="text-sm text-gray-600">적용할 8가지 패턴</div>
+                </a>
+                <a href="#structure" class="p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition">
+                    <div class="font-bold text-yellow-800">5. 폴더 구조</div>
+                    <div class="text-sm text-gray-600">모듈화된 디렉토리 설계</div>
+                </a>
+                <a href="#implementation" class="p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition">
+                    <div class="font-bold text-indigo-800">6. 구현 가이드</div>
+                    <div class="text-sm text-gray-600">단계별 마이그레이션 계획</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 1. 프로젝트 개요 -->
+        <section id="overview" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-info-circle mr-3 text-blue-600"></i>
+                1. 프로젝트 개요
+            </h2>
+
+            <div class="space-y-6">
+                <div class="bg-blue-50 border-l-4 border-blue-600 p-6 rounded">
+                    <h3 class="text-xl font-bold text-blue-800 mb-3">현재 상황</h3>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div class="bg-white p-4 rounded-lg">
+                            <div class="text-3xl font-bold text-red-600">9,322</div>
+                            <div class="text-sm text-gray-600">총 코드 라인</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg">
+                            <div class="text-3xl font-bold text-orange-600">182</div>
+                            <div class="text-sm text-gray-600">총 함수 개수</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg">
+                            <div class="text-3xl font-bold text-yellow-600">2</div>
+                            <div class="text-sm text-gray-600">거대 파일 (server.js, app.js)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-green-50 border-l-4 border-green-600 p-6 rounded">
+                    <h3 class="text-xl font-bold text-green-800 mb-3">재설계 목표</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                            <div>
+                                <strong>유지보수성 향상:</strong> 모듈화된 코드로 수정/확장 용이
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                            <div>
+                                <strong>타입 안정성:</strong> TypeScript로 컴파일 타임 에러 감지
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                            <div>
+                                <strong>테스트 가능성:</strong> 단위 테스트가 가능한 구조
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                            <div>
+                                <strong>성능 최적화:</strong> 불필요한 리렌더링 방지, 지연 로딩
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                            <div>
+                                <strong>확장성:</strong> 새로운 기능 추가가 쉬운 구조
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 현재 문제점 분석 -->
+        <section id="problems" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-exclamation-triangle mr-3 text-red-600"></i>
+                2. 현재 문제점 분석
+            </h2>
+
+            <div class="space-y-6">
+                <!-- 문제 1: 거대 파일 -->
+                <div class="border-l-4 border-red-500 bg-red-50 p-6 rounded">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-file-code text-red-600 text-2xl"></i>
+                        <h3 class="text-xl font-bold text-red-800">문제 1: 거대한 단일 파일</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="bg-white p-4 rounded">
+                            <div class="font-bold text-gray-800 mb-2">server.js: 3,648줄</div>
+                            <ul class="text-sm text-gray-600 space-y-1 ml-4">
+                                <li>• 19개 함수가 모두 한 파일에 존재</li>
+                                <li>• API 라우팅, 비즈니스 로직, DB 처리가 혼재</li>
+                                <li>• 새로운 기능 추가 시 어디에 넣어야 할지 혼란</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white p-4 rounded">
+                            <div class="font-bold text-gray-800 mb-2">app.js: 5,674줄</div>
+                            <ul class="text-sm text-gray-600 space-y-1 ml-4">
+                                <li>• 163개 함수가 전역 스코프에 선언</li>
+                                <li>• UI 로직, 상태 관리, API 호출이 뒤섞임</li>
+                                <li>• 함수 간 의존성 추적 불가능</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 문제 2: 타입 안정성 부재 -->
+                <div class="border-l-4 border-orange-500 bg-orange-50 p-6 rounded">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-question-circle text-orange-600 text-2xl"></i>
+                        <h3 class="text-xl font-bold text-orange-800">문제 2: 타입 안정성 부재</h3>
+                    </div>
+                    <div class="bg-white p-4 rounded">
+                        <pre class="code-block text-sm"><span class="comment">// 현재: 어떤 타입인지 알 수 없음</span>
+<span class="keyword">function</span> <span class="function">displayStorybook</span>(storybook) {
+    <span class="comment">// storybook.title? storybook.pages? 존재 여부 불명</span>
+    <span class="keyword">const</span> title = storybook.title;
+    <span class="keyword">const</span> pages = storybook.pages; <span class="comment">// undefined일 수도...</span>
+}
+
+<span class="comment">// 문제:</span>
+<span class="comment">// - 런타임 에러 발생 가능</span>
+<span class="comment">// - IDE 자동완성 불가</span>
+<span class="comment">// - 리팩토링 시 영향 범위 파악 어려움</span></pre>
+                    </div>
+                </div>
+
+                <!-- 문제 3: 전역 상태 관리 -->
+                <div class="border-l-4 border-yellow-500 bg-yellow-50 p-6 rounded">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-globe text-yellow-600 text-2xl"></i>
+                        <h3 class="text-xl font-bold text-yellow-800">문제 3: 전역 상태 혼란</h3>
+                    </div>
+                    <div class="bg-white p-4 rounded">
+                        <pre class="code-block text-sm"><span class="comment">// 전역 변수들이 파일 전체에 흩어짐</span>
+<span class="keyword">let</span> currentStorybook = <span class="keyword">null</span>;
+<span class="keyword">let</span> storybooks = [];
+<span class="keyword">let</span> currentPage = <span class="string">0</span>;
+<span class="keyword">let</span> isAutoPlaying = <span class="keyword">false</span>;
+
+<span class="comment">// 문제:</span>
+<span class="comment">// - 어디서든 변경 가능 (예측 불가능)</span>
+<span class="comment">// - 상태 변경 추적 불가</span>
+<span class="comment">// - 디버깅 어려움</span></pre>
+                    </div>
+                </div>
+
+                <!-- 문제 4: 중복 코드 -->
+                <div class="border-l-4 border-purple-500 bg-purple-50 p-6 rounded">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-copy text-purple-600 text-2xl"></i>
+                        <h3 class="text-xl font-bold text-purple-800">문제 4: 중복 코드</h3>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="bg-white p-3 rounded">• API 호출 로직이 각 함수마다 반복</div>
+                        <div class="bg-white p-3 rounded">• 에러 처리가 일관성 없이 중복</div>
+                        <div class="bg-white p-3 rounded">• 유사한 UI 렌더링 코드 반복</div>
+                    </div>
+                </div>
+
+                <!-- 문제 5: 테스트 불가능 -->
+                <div class="border-l-4 border-pink-500 bg-pink-50 p-6 rounded">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-vial text-pink-600 text-2xl"></i>
+                        <h3 class="text-xl font-bold text-pink-800">문제 5: 테스트 불가능</h3>
+                    </div>
+                    <div class="bg-white p-4 rounded text-sm">
+                        <ul class="space-y-2">
+                            <li>• 함수들이 전역 상태에 강하게 결합</li>
+                            <li>• DOM 조작과 비즈니스 로직이 혼재</li>
+                            <li>• 의존성 주입 불가능</li>
+                            <li>• 단위 테스트 작성 불가</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 새로운 아키텍처 -->
+        <section id="architecture" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-sitemap mr-3 text-green-600"></i>
+                3. 새로운 아키텍처
+            </h2>
+
+            <div class="space-y-8">
+                <!-- 아키텍처 다이어그램 -->
+                <div class="bg-gradient-to-br from-green-50 to-blue-50 p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+                        클린 아키텍처 + DDD (Domain-Driven Design)
+                    </h3>
+                    <div class="grid grid-cols-4 gap-4">
+                        <!-- Presentation Layer -->
+                        <div class="bg-blue-500 text-white p-6 rounded-lg text-center">
+                            <i class="fas fa-desktop text-3xl mb-3"></i>
+                            <div class="font-bold text-lg mb-2">Presentation</div>
+                            <div class="text-sm opacity-90">UI Components</div>
+                        </div>
+                        
+                        <!-- Application Layer -->
+                        <div class="bg-green-500 text-white p-6 rounded-lg text-center">
+                            <i class="fas fa-cogs text-3xl mb-3"></i>
+                            <div class="font-bold text-lg mb-2">Application</div>
+                            <div class="text-sm opacity-90">Use Cases</div>
+                        </div>
+                        
+                        <!-- Domain Layer -->
+                        <div class="bg-purple-500 text-white p-6 rounded-lg text-center">
+                            <i class="fas fa-cube text-3xl mb-3"></i>
+                            <div class="font-bold text-lg mb-2">Domain</div>
+                            <div class="text-sm opacity-90">Business Logic</div>
+                        </div>
+                        
+                        <!-- Infrastructure Layer -->
+                        <div class="bg-orange-500 text-white p-6 rounded-lg text-center">
+                            <i class="fas fa-database text-3xl mb-3"></i>
+                            <div class="font-bold text-lg mb-2">Infrastructure</div>
+                            <div class="text-sm opacity-90">External Services</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 레이어별 상세 설명 -->
+                <div class="grid grid-cols-2 gap-6">
+                    <!-- Presentation Layer -->
+                    <div class="border-2 border-blue-200 rounded-lg p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i class="fas fa-desktop text-blue-600 text-2xl"></i>
+                            <h3 class="text-xl font-bold text-blue-800">Presentation Layer</h3>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <div class="bg-blue-50 p-3 rounded">
+                                <strong>역할:</strong> UI 렌더링 및 사용자 입력 처리
+                            </div>
+                            <div class="bg-white p-3 rounded border border-blue-100">
+                                <strong>기술:</strong>
+                                <ul class="mt-2 space-y-1 ml-4">
+                                    <li>• React 18 (TSX)</li>
+                                    <li>• TailwindCSS</li>
+                                    <li>• React Query (서버 상태)</li>
+                                    <li>• Zustand (클라이언트 상태)</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white p-3 rounded border border-blue-100">
+                                <strong>구성요소:</strong>
+                                <ul class="mt-2 space-y-1 ml-4">
+                                    <li>• Pages (페이지)</li>
+                                    <li>• Components (재사용 컴포넌트)</li>
+                                    <li>• Hooks (커스텀 훅)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Application Layer -->
+                    <div class="border-2 border-green-200 rounded-lg p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i class="fas fa-cogs text-green-600 text-2xl"></i>
+                            <h3 class="text-xl font-bold text-green-800">Application Layer</h3>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <div class="bg-green-50 p-3 rounded">
+                                <strong>역할:</strong> 비즈니스 유즈케이스 구현
+                            </div>
+                            <div class="bg-white p-3 rounded border border-green-100">
+                                <strong>패턴:</strong>
+                                <ul class="mt-2 space-y-1 ml-4">
+                                    <li>• Command Pattern</li>
+                                    <li>• Query Pattern (CQRS)</li>
+                                    <li>• Use Case Pattern</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white p-3 rounded border border-green-100">
+                                <strong>구성요소:</strong>
+                                <ul class="mt-2 space-y-1 ml-4">
+                                    <li>• Commands (쓰기 작업)</li>
+                                    <li>• Queries (읽기 작업)</li>
+                                    <li>• Services (조율)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Domain Layer -->
+                    <div class="border-2 border-purple-200 rounded-lg p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i class="fas fa-cube text-purple-600 text-2xl"></i>
+                            <h3 class="text-xl font-bold text-purple-800">Domain Layer</h3>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <div class="bg-purple-50 p-3 rounded">
+                                <strong>역할:</strong> 핵심 비즈니스 로직 (프레임워크 독립적)
+                            </div>
+                            <div class="bg-white p-3 rounded border border-purple-100">
+                                <strong>패턴:</strong>
+                                <ul class="mt-2 space-y-1 ml-4">
+                                    <li>• Entity Pattern</li>
+                                    <li>• Value Object Pattern</li>
+                                    <li>• Repository Pattern</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white p-3 rounded border border-purple-100">
+                                <strong>구성요소:</strong>
+                                <ul class="mt-2 space-y-1 ml-4">
+                                    <li>• Entities (엔티티)</li>
+                                    <li>• Value Objects (값 객체)</li>
+                                    <li>• Domain Events (이벤트)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Infrastructure Layer -->
+                    <div class="border-2 border-orange-200 rounded-lg p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i class="fas fa-database text-orange-600 text-2xl"></i>
+                            <h3 class="text-xl font-bold text-orange-800">Infrastructure Layer</h3>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <div class="bg-orange-50 p-3 rounded">
+                                <strong>역할:</strong> 외부 시스템 연동 (DB, API 등)
+                            </div>
+                            <div class="bg-white p-3 rounded border border-orange-100">
+                                <strong>패턴:</strong>
+                                <ul class="mt-2 space-y-1 ml-4">
+                                    <li>• Adapter Pattern</li>
+                                    <li>• Factory Pattern</li>
+                                    <li>• Singleton Pattern</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white p-3 rounded border border-orange-100">
+                                <strong>구성요소:</strong>
+                                <ul class="mt-2 space-y-1 ml-4">
+                                    <li>• Repository Implementations</li>
+                                    <li>• API Clients (Gemini, R2)</li>
+                                    <li>• Database Adapters</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 의존성 규칙 -->
+                <div class="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-yellow-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-arrow-right"></i>
+                        의존성 규칙 (Dependency Rule)
+                    </h3>
+                    <div class="bg-white p-4 rounded">
+                        <div class="text-center mb-4">
+                            <div class="inline-flex items-center gap-4 text-lg font-bold">
+                                <span class="text-blue-600">Presentation</span>
+                                <i class="fas fa-arrow-right text-gray-400"></i>
+                                <span class="text-green-600">Application</span>
+                                <i class="fas fa-arrow-right text-gray-400"></i>
+                                <span class="text-purple-600">Domain</span>
+                                <i class="fas fa-arrow-left text-gray-400"></i>
+                                <span class="text-orange-600">Infrastructure</span>
+                            </div>
+                        </div>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check text-green-600 mt-1"></i>
+                                <span><strong>외부 레이어</strong>는 내부 레이어를 의존할 수 있음</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-times text-red-600 mt-1"></i>
+                                <span><strong>내부 레이어</strong>는 외부 레이어를 의존하면 안 됨</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-lightbulb text-yellow-600 mt-1"></i>
+                                <span><strong>Domain Layer</strong>는 순수한 TypeScript로 작성 (프레임워크 독립)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 디자인 패턴 -->
+        <section id="patterns" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-puzzle-piece mr-3 text-purple-600"></i>
+                4. 적용할 디자인 패턴
+            </h2>
+
+            <div class="grid grid-cols-2 gap-6">
+                <!-- Pattern 1: Repository Pattern -->
+                <div class="pattern-card border-2 border-purple-200 rounded-lg p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-database text-purple-600 text-2xl"></i>
+                        <h3 class="text-xl font-bold text-purple-800">Repository Pattern</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="text-sm text-gray-600">
+                            데이터 접근 로직을 추상화하여 비즈니스 로직과 분리
+                        </div>
+                        <pre class="code-block text-xs"><span class="comment">// Domain Layer - Interface</span>
+<span class="keyword">interface</span> <span class="type">IStorybookRepository</span> {
+  <span class="function">findById</span>(id: <span class="type">string</span>): <span class="type">Promise</span>&lt;<span class="type">Storybook</span> | <span class="keyword">null</span>&gt;;
+  <span class="function">save</span>(storybook: <span class="type">Storybook</span>): <span class="type">Promise</span>&lt;<span class="keyword">void</span>&gt;;
+  <span class="function">delete</span>(id: <span class="type">string</span>): <span class="type">Promise</span>&lt;<span class="keyword">void</span>&gt;;
+}
+
+<span class="comment">// Infrastructure Layer - Implementation</span>
+<span class="keyword">class</span> <span class="type">R2StorybookRepository</span> <span class="keyword">implements</span> <span class="type">IStorybookRepository</span> {
+  <span class="keyword">async</span> <span class="function">findById</span>(id: <span class="type">string</span>) {
+    <span class="comment">// R2 API 호출</span>
+  }
+}</pre>
+                        <div class="bg-purple-50 p-3 rounded text-sm">
+                            <strong>장점:</strong> DB 변경 시 Repository만 교체하면 됨
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pattern 2: Factory Pattern -->
+                <div class="pattern-card border-2 border-blue-200 rounded-lg p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-industry text-blue-600 text-2xl"></i>
+                        <h3 class="text-xl font-bold text-blue-800">Factory Pattern</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="text-sm text-gray-600">
+                            객체 생성 로직을 캡슐화하여 복잡한 생성 과정 단순화
+                        </div>
+                        <pre class="code-block text-xs"><span class="comment">// 동화책 생성 팩토리</span>
+<span class="keyword">class</span> <span class="type">StorybookFactory</span> {
+  <span class="keyword">static</span> <span class="function">create</span>(params: <span class="type">CreateStorybookParams</span>): <span class="type">Storybook</span> {
+    <span class="keyword">return</span> <span class="keyword">new</span> <span class="type">Storybook</span>({
+      id: <span class="function">generateId</span>(),
+      title: params.title,
+      pages: params.pages.<span class="function">map</span>(p => <span class="type">Page</span>.<span class="function">create</span>(p)),
+      createdAt: <span class="keyword">new</span> <span class="type">Date</span>()
+    });
+  }
+  
+  <span class="keyword">static</span> <span class="function">duplicate</span>(original: <span class="type">Storybook</span>): <span class="type">Storybook</span> {
+    <span class="keyword">return</span> <span class="keyword">new</span> <span class="type">Storybook</span>({
+      ...original,
+      id: <span class="function">generateId</span>(),
+      title: <span class="string">`${original.title} (복사본)`</span>
+    });
+  }
+}</pre>
+                        <div class="bg-blue-50 p-3 rounded text-sm">
+                            <strong>장점:</strong> 생성 로직 중앙 관리, 일관성 보장
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pattern 3: Observer Pattern (Event Bus) -->
+                <div class="pattern-card border-2 border-green-200 rounded-lg p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-broadcast-tower text-green-600 text-2xl"></i>
+                        <h3 class="text-xl font-bold text-green-800">Observer Pattern (Event Bus)</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="text-sm text-gray-600">
+                            느슨한 결합으로 컴포넌트 간 통신
+                        </div>
+                        <pre class="code-block text-xs"><span class="comment">// 이벤트 정의</span>
+<span class="keyword">type</span> <span class="type">DomainEvent</span> = 
+  | { type: <span class="string">'STORYBOOK_CREATED'</span>; payload: <span class="type">Storybook</span> }
+  | { type: <span class="string">'PAGE_ADDED'</span>; payload: { bookId: <span class="type">string</span>; page: <span class="type">Page</span> } };
+
+<span class="comment">// Event Bus</span>
+<span class="keyword">class</span> <span class="type">EventBus</span> {
+  <span class="keyword">private</span> listeners = <span class="keyword">new</span> <span class="type">Map</span>();
+  
+  <span class="function">on</span>(event: <span class="type">string</span>, handler: <span class="type">Function</span>) {
+    <span class="comment">// 구독</span>
+  }
+  
+  <span class="function">emit</span>(event: <span class="type">DomainEvent</span>) {
+    <span class="comment">// 발행</span>
+  }
+}</pre>
+                        <div class="bg-green-50 p-3 rounded text-sm">
+                            <strong>장점:</strong> 모듈 간 결합도 최소화
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pattern 4: Command Pattern -->
+                <div class="pattern-card border-2 border-orange-200 rounded-lg p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-terminal text-orange-600 text-2xl"></i>
+                        <h3 class="text-xl font-bold text-orange-800">Command Pattern</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="text-sm text-gray-600">
+                            작업을 객체로 캡슐화하여 실행 취소/재실행 가능
+                        </div>
+                        <pre class="code-block text-xs"><span class="comment">// 커맨드 인터페이스</span>
+<span class="keyword">interface</span> <span class="type">Command</span> {
+  <span class="function">execute</span>(): <span class="type">Promise</span>&lt;<span class="keyword">void</span>&gt;;
+  <span class="function">undo</span>(): <span class="type">Promise</span>&lt;<span class="keyword">void</span>&gt;;
+}
+
+<span class="comment">// 구체적인 커맨드</span>
+<span class="keyword">class</span> <span class="type">UpdateTitleCommand</span> <span class="keyword">implements</span> <span class="type">Command</span> {
+  <span class="keyword">constructor</span>(
+    <span class="keyword">private</span> bookId: <span class="type">string</span>,
+    <span class="keyword">private</span> newTitle: <span class="type">string</span>,
+    <span class="keyword">private</span> oldTitle: <span class="type">string</span>
+  ) {}
+  
+  <span class="keyword">async</span> <span class="function">execute</span>() {
+    <span class="keyword">await</span> <span class="keyword">this</span>.repository.<span class="function">updateTitle</span>(<span class="keyword">this</span>.bookId, <span class="keyword">this</span>.newTitle);
+  }
+  
+  <span class="keyword">async</span> <span class="function">undo</span>() {
+    <span class="keyword">await</span> <span class="keyword">this</span>.repository.<span class="function">updateTitle</span>(<span class="keyword">this</span>.bookId, <span class="keyword">this</span>.oldTitle);
+  }
+}</pre>
+                        <div class="bg-orange-50 p-3 rounded text-sm">
+                            <strong>장점:</strong> Undo/Redo 기능 구현 용이
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pattern 5: Strategy Pattern -->
+                <div class="pattern-card border-2 border-red-200 rounded-lg p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-chess text-red-600 text-2xl"></i>
+                        <h3 class="text-xl font-bold text-red-800">Strategy Pattern</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="text-sm text-gray-600">
+                            알고리즘을 캡슐화하여 런타임에 교체 가능
+                        </div>
+                        <pre class="code-block text-xs"><span class="comment">// 이미지 생성 전략</span>
+<span class="keyword">interface</span> <span class="type">ImageGenerationStrategy</span> {
+  <span class="function">generate</span>(prompt: <span class="type">string</span>): <span class="type">Promise</span>&lt;<span class="type">string</span>&gt;;
+}
+
+<span class="keyword">class</span> <span class="type">GeminiStrategy</span> <span class="keyword">implements</span> <span class="type">ImageGenerationStrategy</span> {
+  <span class="keyword">async</span> <span class="function">generate</span>(prompt: <span class="type">string</span>) {
+    <span class="comment">// Gemini API 호출</span>
+  }
+}
+
+<span class="keyword">class</span> <span class="type">ImageGenerator</span> {
+  <span class="keyword">constructor</span>(<span class="keyword">private</span> strategy: <span class="type">ImageGenerationStrategy</span>) {}
+  
+  <span class="function">setStrategy</span>(strategy: <span class="type">ImageGenerationStrategy</span>) {
+    <span class="keyword">this</span>.strategy = strategy;
+  }
+}</pre>
+                        <div class="bg-red-50 p-3 rounded text-sm">
+                            <strong>장점:</strong> AI 모델 변경 시 유연하게 대응
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pattern 6: Adapter Pattern -->
+                <div class="pattern-card border-2 border-indigo-200 rounded-lg p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-plug text-indigo-600 text-2xl"></i>
+                        <h3 class="text-xl font-bold text-indigo-800">Adapter Pattern</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="text-sm text-gray-600">
+                            외부 API를 내부 인터페이스에 맞게 변환
+                        </div>
+                        <pre class="code-block text-xs"><span class="comment">// 내부 인터페이스</span>
+<span class="keyword">interface</span> <span class="type">IAIService</span> {
+  <span class="function">generateText</span>(prompt: <span class="type">string</span>): <span class="type">Promise</span>&lt;<span class="type">string</span>&gt;;
+}
+
+<span class="comment">// Gemini API Adapter</span>
+<span class="keyword">class</span> <span class="type">GeminiAdapter</span> <span class="keyword">implements</span> <span class="type">IAIService</span> {
+  <span class="keyword">async</span> <span class="function">generateText</span>(prompt: <span class="type">string</span>) {
+    <span class="comment">// Gemini의 복잡한 API를 단순화</span>
+    <span class="keyword">const</span> result = <span class="keyword">await</span> geminiClient.<span class="function">generateContent</span>({
+      contents: [{ role: <span class="string">'user'</span>, parts: [{ text: prompt }] }]
+    });
+    <span class="keyword">return</span> result.response.<span class="function">text</span>();
+  }
+}</pre>
+                        <div class="bg-indigo-50 p-3 rounded text-sm">
+                            <strong>장점:</strong> 외부 API 변경에 영향 최소화
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pattern 7: Singleton Pattern -->
+                <div class="pattern-card border-2 border-pink-200 rounded-lg p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-circle text-pink-600 text-2xl"></i>
+                        <h3 class="text-xl font-bold text-pink-800">Singleton Pattern</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="text-sm text-gray-600">
+                            전역적으로 하나의 인스턴스만 존재하도록 보장
+                        </div>
+                        <pre class="code-block text-xs"><span class="comment">// API 클라이언트 싱글톤</span>
+<span class="keyword">class</span> <span class="type">GeminiClient</span> {
+  <span class="keyword">private</span> <span class="keyword">static</span> instance: <span class="type">GeminiClient</span>;
+  
+  <span class="keyword">private</span> <span class="keyword">constructor</span>() {
+    <span class="comment">// private constructor</span>
+  }
+  
+  <span class="keyword">static</span> <span class="function">getInstance</span>(): <span class="type">GeminiClient</span> {
+    <span class="keyword">if</span> (!<span class="type">GeminiClient</span>.instance) {
+      <span class="type">GeminiClient</span>.instance = <span class="keyword">new</span> <span class="type">GeminiClient</span>();
+    }
+    <span class="keyword">return</span> <span class="type">GeminiClient</span>.instance;
+  }
+}</pre>
+                        <div class="bg-pink-50 p-3 rounded text-sm">
+                            <strong>장점:</strong> API 클라이언트 중복 생성 방지
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pattern 8: Decorator Pattern -->
+                <div class="pattern-card border-2 border-teal-200 rounded-lg p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-layer-group text-teal-600 text-2xl"></i>
+                        <h3 class="text-xl font-bold text-teal-800">Decorator Pattern</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="text-sm text-gray-600">
+                            기존 객체에 동적으로 새로운 기능 추가
+                        </div>
+                        <pre class="code-block text-xs"><span class="comment">// 로깅 데코레이터</span>
+<span class="keyword">function</span> <span class="function">withLogging</span>(target: <span class="keyword">any</span>) {
+  <span class="keyword">return</span> <span class="keyword">class</span> <span class="keyword">extends</span> target {
+    <span class="keyword">async</span> <span class="function">execute</span>(...args: <span class="keyword">any</span>[]) {
+      console.<span class="function">log</span>(<span class="string">`Executing ${target.name}`</span>);
+      <span class="keyword">const</span> result = <span class="keyword">await</span> <span class="keyword">super</span>.<span class="function">execute</span>(...args);
+      console.<span class="function">log</span>(<span class="string">`Completed ${target.name}`</span>);
+      <span class="keyword">return</span> result;
+    }
+  };
+}
+
+<span class="comment">// 사용</span>
+<span class="keyword">@withLogging</span>
+<span class="keyword">class</span> <span class="type">CreateStorybookUseCase</span> { ... }</pre>
+                        <div class="bg-teal-50 p-3 rounded text-sm">
+                            <strong>장점:</strong> 횡단 관심사(로깅, 캐싱) 분리
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 폴더 구조 -->
+        <section id="structure" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-folder-open mr-3 text-yellow-600"></i>
+                5. 새로운 폴더 구조
+            </h2>
+
+            <div class="space-y-6">
+                <!-- 전체 구조 -->
+                <div class="bg-gray-900 text-green-400 p-6 rounded-lg font-mono text-sm overflow-x-auto">
+<pre>tangobook-v2/
+├── <span class="text-blue-400">apps/</span>                          # 애플리케이션
+│   ├── <span class="text-blue-400">web/</span>                       # 웹 프론트엔드 (React)
+│   │   ├── <span class="text-blue-400">src/</span>
+│   │   │   ├── <span class="text-blue-400">pages/</span>            # 페이지 컴포넌트
+│   │   │   │   ├── AuthorPage.tsx      # 저작도구
+│   │   │   │   ├── ViewerPage.tsx      # 뷰어
+│   │   │   │   └── ReaderPage.tsx      # 리더
+│   │   │   ├── <span class="text-blue-400">components/</span>       # 재사용 컴포넌트
+│   │   │   │   ├── <span class="text-blue-400">storybook/</span>
+│   │   │   │   │   ├── StorybookCard.tsx
+│   │   │   │   │   ├── StorybookEditor.tsx
+│   │   │   │   │   └── PageEditor.tsx
+│   │   │   │   ├── <span class="text-blue-400">common/</span>
+│   │   │   │   │   ├── Button.tsx
+│   │   │   │   │   ├── Modal.tsx
+│   │   │   │   │   └── Input.tsx
+│   │   │   │   └── <span class="text-blue-400">layout/</span>
+│   │   │   │       ├── Header.tsx
+│   │   │   │       ├── Sidebar.tsx
+│   │   │   │       └── Footer.tsx
+│   │   │   ├── <span class="text-blue-400">hooks/</span>           # 커스텀 훅
+│   │   │   │   ├── useStorybook.ts
+│   │   │   │   ├── useImageGeneration.ts
+│   │   │   │   └── useTTS.ts
+│   │   │   ├── <span class="text-blue-400">stores/</span>          # 상태 관리 (Zustand)
+│   │   │   │   ├── storybookStore.ts
+│   │   │   │   ├── uiStore.ts
+│   │   │   │   └── authStore.ts
+│   │   │   ├── <span class="text-blue-400">services/</span>        # API 클라이언트
+│   │   │   │   ├── api.ts
+│   │   │   │   └── queries.ts
+│   │   │   └── App.tsx
+│   │   ├── package.json
+│   │   └── vite.config.ts
+│   │
+│   └── <span class="text-blue-400">api/</span>                      # API 백엔드 (Hono)
+│       ├── <span class="text-blue-400">src/</span>
+│       │   ├── <span class="text-blue-400">presentation/</span>    # HTTP 레이어
+│       │   │   ├── <span class="text-blue-400">routes/</span>
+│       │   │   │   ├── storybook.routes.ts
+│       │   │   │   ├── image.routes.ts
+│       │   │   │   └── tts.routes.ts
+│       │   │   ├── <span class="text-blue-400">middlewares/</span>
+│       │   │   │   ├── auth.middleware.ts
+│       │   │   │   ├── error.middleware.ts
+│       │   │   │   └── logging.middleware.ts
+│       │   │   └── <span class="text-blue-400">dto/</span>          # Data Transfer Objects
+│       │   │       ├── storybook.dto.ts
+│       │   │       └── image.dto.ts
+│       │   │
+│       │   ├── <span class="text-blue-400">application/</span>     # 비즈니스 로직
+│       │   │   ├── <span class="text-blue-400">usecases/</span>
+│       │   │   │   ├── <span class="text-blue-400">storybook/</span>
+│       │   │   │   │   ├── CreateStorybookUseCase.ts
+│       │   │   │   │   ├── UpdateStorybookUseCase.ts
+│       │   │   │   │   ├── DeleteStorybookUseCase.ts
+│       │   │   │   │   └── DuplicateStorybookUseCase.ts
+│       │   │   │   ├── <span class="text-blue-400">image/</span>
+│       │   │   │   │   ├── GenerateCoverUseCase.ts
+│       │   │   │   │   └── GenerateIllustrationUseCase.ts
+│       │   │   │   └── <span class="text-blue-400">tts/</span>
+│       │   │   │       └── GenerateTTSUseCase.ts
+│       │   │   ├── <span class="text-blue-400">commands/</span>    # CQRS - Commands
+│       │   │   │   └── UpdateTitleCommand.ts
+│       │   │   └── <span class="text-blue-400">queries/</span>     # CQRS - Queries
+│       │   │       └── GetStorybookQuery.ts
+│       │   │
+│       │   ├── <span class="text-blue-400">domain/</span>          # 도메인 로직
+│       │   │   ├── <span class="text-blue-400">entities/</span>
+│       │   │   │   ├── Storybook.ts
+│       │   │   │   ├── Page.ts
+│       │   │   │   ├── Character.ts
+│       │   │   │   └── Quiz.ts
+│       │   │   ├── <span class="text-blue-400">value-objects/</span>
+│       │   │   │   ├── StorybookId.ts
+│       │   │   │   ├── Title.ts
+│       │   │   │   └── ImageUrl.ts
+│       │   │   ├── <span class="text-blue-400">events/</span>
+│       │   │   │   ├── StorybookCreatedEvent.ts
+│       │   │   │   └── PageAddedEvent.ts
+│       │   │   ├── <span class="text-blue-400">repositories/</span> # 인터페이스
+│       │   │   │   ├── IStorybookRepository.ts
+│       │   │   │   └── IImageRepository.ts
+│       │   │   └── <span class="text-blue-400">services/</span>    # 도메인 서비스
+│       │   │       └── StorybookValidator.ts
+│       │   │
+│       │   ├── <span class="text-blue-400">infrastructure/</span> # 외부 연동
+│       │   │   ├── <span class="text-blue-400">repositories/</span> # 구현체
+│       │   │   │   ├── R2StorybookRepository.ts
+│       │   │   │   └── R2ImageRepository.ts
+│       │   │   ├── <span class="text-blue-400">clients/</span>     # 외부 API
+│       │   │   │   ├── GeminiClient.ts
+│       │   │   │   └── R2Client.ts
+│       │   │   ├── <span class="text-blue-400">adapters/</span>
+│       │   │   │   └── GeminiAdapter.ts
+│       │   │   └── <span class="text-blue-400">factories/</span>
+│       │   │       └── RepositoryFactory.ts
+│       │   │
+│       │   ├── <span class="text-blue-400">shared/</span>          # 공유 코드
+│       │   │   ├── <span class="text-blue-400">utils/</span>
+│       │   │   │   ├── logger.ts
+│       │   │   │   └── crypto.ts
+│       │   │   ├── <span class="text-blue-400">errors/</span>
+│       │   │   │   ├── DomainError.ts
+│       │   │   │   └── ValidationError.ts
+│       │   │   └── <span class="text-blue-400">types/</span>
+│       │   │       └── common.types.ts
+│       │   │
+│       │   └── index.ts
+│       ├── package.json
+│       └── tsconfig.json
+│
+├── <span class="text-blue-400">packages/</span>                     # 공유 패키지
+│   ├── <span class="text-blue-400">types/</span>                    # 공통 타입
+│   │   ├── storybook.types.ts
+│   │   └── api.types.ts
+│   └── <span class="text-blue-400">config/</span>                   # 공통 설정
+│       └── constants.ts
+│
+├── <span class="text-blue-400">tests/</span>                        # 테스트
+│   ├── <span class="text-blue-400">unit/</span>
+│   ├── <span class="text-blue-400">integration/</span>
+│   └── <span class="text-blue-400">e2e/</span>
+│
+├── <span class="text-blue-400">docs/</span>                         # 문서
+│   ├── architecture.md
+│   ├── api.md
+│   └── deployment.md
+│
+├── package.json              # 루트 패키지 (Monorepo)
+├── pnpm-workspace.yaml       # Monorepo 설정
+├── tsconfig.json             # 공통 TypeScript 설정
+└── README.md</pre>
+                </div>
+
+                <!-- 레이어별 파일 예시 -->
+                <div class="grid grid-cols-2 gap-6">
+                    <!-- Domain Layer 예시 -->
+                    <div class="border-2 border-purple-200 rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-purple-800 mb-4">
+                            <i class="fas fa-cube mr-2"></i>
+                            Domain Layer 예시
+                        </h3>
+                        <pre class="code-block text-xs"><span class="comment">// domain/entities/Storybook.ts</span>
+<span class="keyword">export</span> <span class="keyword">class</span> <span class="type">Storybook</span> {
+  <span class="keyword">private</span> <span class="keyword">constructor</span>(
+    <span class="keyword">public</span> <span class="keyword">readonly</span> id: <span class="type">StorybookId</span>,
+    <span class="keyword">public</span> title: <span class="type">Title</span>,
+    <span class="keyword">public</span> pages: <span class="type">Page</span>[],
+    <span class="keyword">public</span> coverImage?: <span class="type">ImageUrl</span>
+  ) {}
+
+  <span class="keyword">static</span> <span class="function">create</span>(params: <span class="type">CreateStorybookParams</span>): <span class="type">Storybook</span> {
+    <span class="comment">// 유효성 검증</span>
+    <span class="keyword">if</span> (!params.title) {
+      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">ValidationError</span>(<span class="string">'제목은 필수입니다'</span>);
+    }
+    
+    <span class="keyword">return</span> <span class="keyword">new</span> <span class="type">Storybook</span>(
+      <span class="type">StorybookId</span>.<span class="function">generate</span>(),
+      <span class="type">Title</span>.<span class="function">create</span>(params.title),
+      []
+    );
+  }
+
+  <span class="function">addPage</span>(page: <span class="type">Page</span>): <span class="keyword">void</span> {
+    <span class="keyword">this</span>.pages.<span class="function">push</span>(page);
+    <span class="comment">// 도메인 이벤트 발행</span>
+    <span class="type">DomainEvents</span>.<span class="function">raise</span>(<span class="keyword">new</span> <span class="type">PageAddedEvent</span>(<span class="keyword">this</span>.id, page));
+  }
+
+  <span class="function">duplicate</span>(): <span class="type">Storybook</span> {
+    <span class="keyword">return</span> <span class="keyword">new</span> <span class="type">Storybook</span>(
+      <span class="type">StorybookId</span>.<span class="function">generate</span>(),
+      <span class="type">Title</span>.<span class="function">create</span>(<span class="string">`${<span class="keyword">this</span>.title.value} (복사본)`</span>),
+      <span class="keyword">this</span>.pages.<span class="function">map</span>(p => p.<span class="function">clone</span>()),
+      <span class="keyword">this</span>.coverImage
+    );
+  }
+}</pre>
+                    </div>
+
+                    <!-- Use Case 예시 -->
+                    <div class="border-2 border-green-200 rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-green-800 mb-4">
+                            <i class="fas fa-cogs mr-2"></i>
+                            Application Layer 예시
+                        </h3>
+                        <pre class="code-block text-xs"><span class="comment">// application/usecases/storybook/CreateStorybookUseCase.ts</span>
+<span class="keyword">export</span> <span class="keyword">class</span> <span class="type">CreateStorybookUseCase</span> {
+  <span class="keyword">constructor</span>(
+    <span class="keyword">private</span> storybookRepo: <span class="type">IStorybookRepository</span>,
+    <span class="keyword">private</span> eventBus: <span class="type">EventBus</span>
+  ) {}
+
+  <span class="keyword">async</span> <span class="function">execute</span>(params: <span class="type">CreateStorybookParams</span>): <span class="type">Promise</span>&lt;<span class="type">Storybook</span>&gt; {
+    <span class="comment">// 1. 도메인 엔티티 생성</span>
+    <span class="keyword">const</span> storybook = <span class="type">Storybook</span>.<span class="function">create</span>(params);
+    
+    <span class="comment">// 2. 저장</span>
+    <span class="keyword">await</span> <span class="keyword">this</span>.storybookRepo.<span class="function">save</span>(storybook);
+    
+    <span class="comment">// 3. 이벤트 발행</span>
+    <span class="keyword">this</span>.eventBus.<span class="function">emit</span>({
+      type: <span class="string">'STORYBOOK_CREATED'</span>,
+      payload: storybook
+    });
+    
+    <span class="keyword">return</span> storybook;
+  }
+}</pre>
+                    </div>
+
+                    <!-- Repository 인터페이스 -->
+                    <div class="border-2 border-blue-200 rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-blue-800 mb-4">
+                            <i class="fas fa-database mr-2"></i>
+                            Repository Interface
+                        </h3>
+                        <pre class="code-block text-xs"><span class="comment">// domain/repositories/IStorybookRepository.ts</span>
+<span class="keyword">export</span> <span class="keyword">interface</span> <span class="type">IStorybookRepository</span> {
+  <span class="function">findById</span>(id: <span class="type">StorybookId</span>): <span class="type">Promise</span>&lt;<span class="type">Storybook</span> | <span class="keyword">null</span>&gt;;
+  <span class="function">findAll</span>(): <span class="type">Promise</span>&lt;<span class="type">Storybook</span>[]&gt;;
+  <span class="function">save</span>(storybook: <span class="type">Storybook</span>): <span class="type">Promise</span>&lt;<span class="keyword">void</span>&gt;;
+  <span class="function">delete</span>(id: <span class="type">StorybookId</span>): <span class="type">Promise</span>&lt;<span class="keyword">void</span>&gt;;
+}</pre>
+                    </div>
+
+                    <!-- Repository 구현체 -->
+                    <div class="border-2 border-orange-200 rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-orange-800 mb-4">
+                            <i class="fas fa-code mr-2"></i>
+                            Repository Implementation
+                        </h3>
+                        <pre class="code-block text-xs"><span class="comment">// infrastructure/repositories/R2StorybookRepository.ts</span>
+<span class="keyword">export</span> <span class="keyword">class</span> <span class="type">R2StorybookRepository</span> <span class="keyword">implements</span> <span class="type">IStorybookRepository</span> {
+  <span class="keyword">constructor</span>(<span class="keyword">private</span> r2Client: <span class="type">R2Client</span>) {}
+
+  <span class="keyword">async</span> <span class="function">findById</span>(id: <span class="type">StorybookId</span>): <span class="type">Promise</span>&lt;<span class="type">Storybook</span> | <span class="keyword">null</span>&gt; {
+    <span class="keyword">const</span> data = <span class="keyword">await</span> <span class="keyword">this</span>.r2Client.<span class="function">get</span>(<span class="string">`storybook-${id.value}.json`</span>);
+    <span class="keyword">if</span> (!data) <span class="keyword">return</span> <span class="keyword">null</span>;
+    
+    <span class="comment">// 도메인 엔티티로 변환</span>
+    <span class="keyword">return</span> <span class="type">StorybookMapper</span>.<span class="function">toDomain</span>(data);
+  }
+
+  <span class="keyword">async</span> <span class="function">save</span>(storybook: <span class="type">Storybook</span>): <span class="type">Promise</span>&lt;<span class="keyword">void</span>&gt; {
+    <span class="comment">// 도메인 엔티티를 저장 형식으로 변환</span>
+    <span class="keyword">const</span> data = <span class="type">StorybookMapper</span>.<span class="function">toPersistence</span>(storybook);
+    <span class="keyword">await</span> <span class="keyword">this</span>.r2Client.<span class="function">put</span>(
+      <span class="string">`storybook-${storybook.id.value}.json`</span>,
+      data
+    );
+  }
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. 구현 가이드 -->
+        <section id="implementation" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-rocket mr-3 text-indigo-600"></i>
+                6. 단계별 구현 가이드
+            </h2>
+
+            <div class="space-y-8">
+                <!-- Phase 1 -->
+                <div class="border-l-4 border-indigo-500 bg-indigo-50 p-6 rounded">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-xl">
+                            1
+                        </div>
+                        <h3 class="text-2xl font-bold text-indigo-800">Phase 1: 프로젝트 초기화 (1주)</h3>
+                    </div>
+                    <div class="ml-15 space-y-4">
+                        <div class="bg-white p-4 rounded">
+                            <h4 class="font-bold text-gray-800 mb-2">1.1. Monorepo 설정</h4>
+                            <pre class="code-block text-xs mt-2"><span class="comment"># pnpm 설치</span>
+npm install -g pnpm
+
+<span class="comment"># 프로젝트 생성</span>
+mkdir tangobook-v2 && cd tangobook-v2
+pnpm init
+
+<span class="comment"># workspace 설정</span>
+echo <span class="string">"packages:\n  - 'apps/*'\n  - 'packages/*'"</span> > pnpm-workspace.yaml
+
+<span class="comment"># TypeScript 설정</span>
+pnpm add -D typescript @types/node
+npx tsc --init</pre>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded">
+                            <h4 class="font-bold text-gray-800 mb-2">1.2. 프론트엔드 설정 (React + Vite)</h4>
+                            <pre class="code-block text-xs mt-2"><span class="comment"># React 앱 생성</span>
+cd apps
+pnpm create vite web --template react-ts
+
+<span class="comment"># 필수 패키지 설치</span>
+cd web
+pnpm add react-query zustand axios
+pnpm add -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p</pre>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded">
+                            <h4 class="font-bold text-gray-800 mb-2">1.3. 백엔드 설정 (Hono)</h4>
+                            <pre class="code-block text-xs mt-2"><span class="comment"># API 프로젝트 생성</span>
+mkdir -p apps/api/src
+cd apps/api
+
+<span class="comment"># 패키지 설치</span>
+pnpm add hono @hono/node-server
+pnpm add -D typescript @types/node tsx
+
+<span class="comment"># tsconfig.json</span>
+{
+  <span class="string">"compilerOptions"</span>: {
+    <span class="string">"target"</span>: <span class="string">"ES2022"</span>,
+    <span class="string">"module"</span>: <span class="string">"ESNext"</span>,
+    <span class="string">"moduleResolution"</span>: <span class="string">"bundler"</span>,
+    <span class="string">"strict"</span>: <span class="keyword">true</span>,
+    <span class="string">"esModuleInterop"</span>: <span class="keyword">true</span>,
+    <span class="string">"skipLibCheck"</span>: <span class="keyword">true</span>,
+    <span class="string">"outDir"</span>: <span class="string">"./dist"</span>,
+    <span class="string">"baseUrl"</span>: <span class="string">"./src"</span>,
+    <span class="string">"paths"</span>: {
+      <span class="string">"@/*"</span>: [<span class="string">"./*"</span>]
+    }
+  }
+}</pre>
+                        </div>
+
+                        <div class="bg-indigo-100 p-4 rounded">
+                            <strong>✅ 체크리스트:</strong>
+                            <ul class="mt-2 space-y-1">
+                                <li>□ Monorepo 구조 생성</li>
+                                <li>□ TypeScript 설정 완료</li>
+                                <li>□ React + Vite 프론트엔드 구성</li>
+                                <li>□ Hono 백엔드 구성</li>
+                                <li>□ ESLint + Prettier 설정</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 2 -->
+                <div class="border-l-4 border-green-500 bg-green-50 p-6 rounded">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-xl">
+                            2
+                        </div>
+                        <h3 class="text-2xl font-bold text-green-800">Phase 2: Domain Layer 구축 (2주)</h3>
+                    </div>
+                    <div class="ml-15 space-y-4">
+                        <div class="bg-white p-4 rounded">
+                            <h4 class="font-bold text-gray-800 mb-2">2.1. Entity 정의</h4>
+                            <ul class="text-sm space-y-2 mt-2">
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">Storybook</code> - 동화책</li>
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">Page</code> - 페이지</li>
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">Character</code> - 캐릭터</li>
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">Quiz</code> - 퀴즈</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded">
+                            <h4 class="font-bold text-gray-800 mb-2">2.2. Value Object 정의</h4>
+                            <ul class="text-sm space-y-2 mt-2">
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">StorybookId</code> - ID 값 객체</li>
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">Title</code> - 제목 (유효성 검증 포함)</li>
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">ImageUrl</code> - 이미지 URL</li>
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">TTSAudioUrl</code> - TTS URL</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded">
+                            <h4 class="font-bold text-gray-800 mb-2">2.3. Repository Interface</h4>
+                            <ul class="text-sm space-y-2 mt-2">
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">IStorybookRepository</code></li>
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">IImageRepository</code></li>
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">ITTSRepository</code></li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-green-100 p-4 rounded">
+                            <strong>✅ 체크리스트:</strong>
+                            <ul class="mt-2 space-y-1">
+                                <li>□ 모든 Entity 정의 완료</li>
+                                <li>□ Value Object 정의 완료</li>
+                                <li>□ Repository Interface 정의</li>
+                                <li>□ 도메인 이벤트 정의</li>
+                                <li>□ 단위 테스트 작성</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 3 -->
+                <div class="border-l-4 border-purple-500 bg-purple-50 p-6 rounded">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-xl">
+                            3
+                        </div>
+                        <h3 class="text-2xl font-bold text-purple-800">Phase 3: Infrastructure Layer 구축 (2주)</h3>
+                    </div>
+                    <div class="ml-15 space-y-4">
+                        <div class="bg-white p-4 rounded">
+                            <h4 class="font-bold text-gray-800 mb-2">3.1. External Clients</h4>
+                            <ul class="text-sm space-y-2 mt-2">
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">R2Client</code> - Cloudflare R2 클라이언트</li>
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">GeminiClient</code> - Gemini API 클라이언트</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded">
+                            <h4 class="font-bold text-gray-800 mb-2">3.2. Repository 구현</h4>
+                            <ul class="text-sm space-y-2 mt-2">
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">R2StorybookRepository</code></li>
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">R2ImageRepository</code></li>
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">GeminiTTSRepository</code></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded">
+                            <h4 class="font-bold text-gray-800 mb-2">3.3. Adapters</h4>
+                            <ul class="text-sm space-y-2 mt-2">
+                                <li>• <code class="bg-gray-200 px-2 py-1 rounded">GeminiAdapter</code> - Gemini API를 내부 인터페이스로 변환</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-purple-100 p-4 rounded">
+                            <strong>✅ 체크리스트:</strong>
+                            <ul class="mt-2 space-y-1">
+                                <li>□ R2 Client 구현</li>
+                                <li>□ Gemini Client 구현</li>
+                                <li>□ Repository 구현 완료</li>
+                                <li>□ Adapter 구현 완료</li>
+                                <li>□ 통합 테스트 작성</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 4 -->
+                <div class="border-l-4 border-orange-500 bg-orange-50 p-6 rounded">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 bg-orange-600 text-white rounded-full flex items-center justify-center font-bold text-xl">
+                            4
+                        </div>
+                        <h3 class="text-2xl font-bold text-orange-800">Phase 4: Application Layer 구축 (2주)</h3>
+                    </div>
+                    <div class="ml-15 space-y-4">
+                        <div class="bg-white p-4 rounded">
+                            <h4 class="font-bold text-gray-800 mb-2">4.1. Use Cases 구현</h4>
+                            <div class="grid grid-cols-2 gap-4 mt-2 text-sm">
+                                <div>
+                                    <strong>동화책 관리:</strong>
+                                    <ul class="mt-1 space-y-1">
+                                        <li>• CreateStorybookUseCase</li>
+                                        <li>• UpdateStorybookUseCase</li>
+                                        <li>• DeleteStorybookUseCase</li>
+                                        <li>• DuplicateStorybookUseCase</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <strong>이미지 생성:</strong>
+                                    <ul class="mt-1 space-y-1">
+                                        <li>• GenerateCoverUseCase</li>
+                                        <li>• GenerateIllustrationUseCase</li>
+                                        <li>• GenerateCharacterUseCase</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded">
+                            <h4 class="font-bold text-gray-800 mb-2">4.2. CQRS 패턴 적용</h4>
+                            <ul class="text-sm space-y-2 mt-2">
+                                <li>• <strong>Commands</strong>: 쓰기 작업 (Create, Update, Delete)</li>
+                                <li>• <strong>Queries</strong>: 읽기 작업 (Get, List)</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-orange-100 p-4 rounded">
+                            <strong>✅ 체크리스트:</strong>
+                            <ul class="mt-2 space-y-1">
+                                <li>□ 모든 Use Case 구현</li>
+                                <li>□ Commands 구현</li>
+                                <li>□ Queries 구현</li>
+                                <li>□ Event Bus 구현</li>
+                                <li>□ Use Case 테스트</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 5 -->
+                <div class="border-l-4 border-blue-500 bg-blue-50 p-6 rounded">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xl">
+                            5
+                        </div>
+                        <h3 class="text-2xl font-bold text-blue-800">Phase 5: Presentation Layer 구축 (3주)</h3>
+                    </div>
+                    <div class="ml-15 space-y-4">
+                        <div class="bg-white p-4 rounded">
+                            <h4 class="font-bold text-gray-800 mb-2">5.1. API Routes (Hono)</h4>
+                            <pre class="code-block text-xs mt-2"><span class="comment">// storybook.routes.ts</span>
+<span class="keyword">import</span> { <span class="type">Hono</span> } <span class="keyword">from</span> <span class="string">'hono'</span>;
+
+<span class="keyword">const</span> app = <span class="keyword">new</span> <span class="type">Hono</span>();
+
+app.<span class="function">get</span>(<span class="string">'/storybooks'</span>, <span class="keyword">async</span> (c) => {
+  <span class="keyword">const</span> query = <span class="keyword">new</span> <span class="type">GetStorybooksQuery</span>();
+  <span class="keyword">const</span> storybooks = <span class="keyword">await</span> query.<span class="function">execute</span>();
+  <span class="keyword">return</span> c.<span class="function">json</span>(storybooks);
+});
+
+app.<span class="function">post</span>(<span class="string">'/storybooks'</span>, <span class="keyword">async</span> (c) => {
+  <span class="keyword">const</span> body = <span class="keyword">await</span> c.req.<span class="function">json</span>();
+  <span class="keyword">const</span> useCase = <span class="keyword">new</span> <span class="type">CreateStorybookUseCase</span>(...);
+  <span class="keyword">const</span> storybook = <span class="keyword">await</span> useCase.<span class="function">execute</span>(body);
+  <span class="keyword">return</span> c.<span class="function">json</span>(storybook, <span class="string">201</span>);
+});</pre>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded">
+                            <h4 class="font-bold text-gray-800 mb-2">5.2. React Components</h4>
+                            <pre class="code-block text-xs mt-2"><span class="comment">// StorybookCard.tsx</span>
+<span class="keyword">export</span> <span class="keyword">function</span> <span class="type">StorybookCard</span>({ storybook }: <span class="type">Props</span>) {
+  <span class="keyword">const</span> { <span class="function">mutate</span>: deleteStorybook } = <span class="function">useDeleteStorybook</span>();
+  
+  <span class="keyword">return</span> (
+    &lt;<span class="keyword">div</span> className=<span class="string">"card"</span>&gt;
+      &lt;<span class="keyword">img</span> src={storybook.coverImage} /&gt;
+      &lt;<span class="keyword">h3</span>&gt;{storybook.title}&lt;/<span class="keyword">h3</span>&gt;
+      &lt;<span class="keyword">button</span> onClick={() => <span class="function">deleteStorybook</span>(storybook.id)}&gt;
+        삭제
+      &lt;/<span class="keyword">button</span>&gt;
+    &lt;/<span class="keyword">div</span>&gt;
+  );
+}</pre>
+                        </div>
+
+                        <div class="bg-blue-100 p-4 rounded">
+                            <strong>✅ 체크리스트:</strong>
+                            <ul class="mt-2 space-y-1">
+                                <li>□ API 라우트 구현</li>
+                                <li>□ 미들웨어 구현 (Auth, Error)</li>
+                                <li>□ React 컴포넌트 구현</li>
+                                <li>□ 커스텀 훅 구현</li>
+                                <li>□ E2E 테스트 작성</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 6 -->
+                <div class="border-l-4 border-red-500 bg-red-50 p-6 rounded">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-xl">
+                            6
+                        </div>
+                        <h3 class="text-2xl font-bold text-red-800">Phase 6: 마이그레이션 & 배포 (2주)</h3>
+                    </div>
+                    <div class="ml-15 space-y-4">
+                        <div class="bg-white p-4 rounded">
+                            <h4 class="font-bold text-gray-800 mb-2">6.1. 데이터 마이그레이션</h4>
+                            <ul class="text-sm space-y-2 mt-2">
+                                <li>• 기존 R2 데이터 백업</li>
+                                <li>• 새 데이터 구조로 변환</li>
+                                <li>• 이미지 URL 유지</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded">
+                            <h4 class="font-bold text-gray-800 mb-2">6.2. 배포</h4>
+                            <pre class="code-block text-xs mt-2"><span class="comment"># Cloudflare Pages (Frontend)</span>
+wrangler pages deploy apps/web/dist --project-name tangobook-v2
+
+<span class="comment"># Cloudflare Workers (Backend API)</span>
+wrangler deploy apps/api</pre>
+                        </div>
+
+                        <div class="bg-red-100 p-4 rounded">
+                            <strong>✅ 체크리스트:</strong>
+                            <ul class="mt-2 space-y-1">
+                                <li>□ 데이터 마이그레이션 완료</li>
+                                <li>□ 프론트엔드 배포</li>
+                                <li>□ 백엔드 배포</li>
+                                <li>□ 성능 테스트</li>
+                                <li>□ 사용자 테스트</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 타임라인 -->
+                <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-6 text-center">전체 타임라인</h3>
+                    <div class="grid grid-cols-6 gap-4 text-center">
+                        <div class="bg-white/20 backdrop-blur rounded-lg p-4">
+                            <div class="text-3xl font-bold mb-2">1주</div>
+                            <div class="text-sm">초기화</div>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur rounded-lg p-4">
+                            <div class="text-3xl font-bold mb-2">2주</div>
+                            <div class="text-sm">Domain</div>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur rounded-lg p-4">
+                            <div class="text-3xl font-bold mb-2">2주</div>
+                            <div class="text-sm">Infrastructure</div>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur rounded-lg p-4">
+                            <div class="text-3xl font-bold mb-2">2주</div>
+                            <div class="text-sm">Application</div>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur rounded-lg p-4">
+                            <div class="text-3xl font-bold mb-2">3주</div>
+                            <div class="text-sm">Presentation</div>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur rounded-lg p-4">
+                            <div class="text-3xl font-bold mb-2">2주</div>
+                            <div class="text-sm">배포</div>
+                        </div>
+                    </div>
+                    <div class="mt-6 text-center text-2xl font-bold">
+                        총 12주 (약 3개월)
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. 기술 스택 요약 -->
+        <section class="bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-layer-group mr-3 text-blue-600"></i>
+                7. 기술 스택 요약
+            </h2>
+
+            <div class="grid grid-cols-3 gap-6">
+                <!-- Frontend -->
+                <div class="border-2 border-blue-200 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-desktop"></i>
+                        Frontend
+                    </h3>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>React 18</strong> - UI 라이브러리
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>TypeScript</strong> - 타입 안정성
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>Vite</strong> - 빌드 도구
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>TailwindCSS</strong> - 스타일링
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>React Query</strong> - 서버 상태
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>Zustand</strong> - 클라이언트 상태
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Backend -->
+                <div class="border-2 border-green-200 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-green-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-server"></i>
+                        Backend
+                    </h3>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>Hono</strong> - 웹 프레임워크
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>TypeScript</strong> - 타입 안정성
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>Cloudflare Workers</strong> - 런타임
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>Cloudflare R2</strong> - 스토리지
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>Gemini API</strong> - AI 모델
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- DevOps -->
+                <div class="border-2 border-purple-200 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-purple-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-tools"></i>
+                        DevOps
+                    </h3>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>pnpm</strong> - 패키지 매니저
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>Monorepo</strong> - 코드 구조
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>Vitest</strong> - 테스트 프레임워크
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>ESLint</strong> - 코드 품질
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <strong>Wrangler</strong> - 배포 도구
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. 기대 효과 -->
+        <section class="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">
+                <i class="fas fa-trophy mr-3 text-yellow-500"></i>
+                8. 기대 효과
+            </h2>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg p-6 shadow">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-tachometer-alt text-blue-600 text-3xl"></i>
+                        <h3 class="text-xl font-bold text-gray-800">개발 속도 향상</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm">
+                        <li>• 모듈화된 코드로 <strong>버그 수정 시간 70% 감소</strong></li>
+                        <li>• 타입 체크로 <strong>런타임 에러 90% 감소</strong></li>
+                        <li>• 재사용 가능한 컴포넌트로 <strong>개발 시간 50% 단축</strong></li>
+                    </ul>
+                </div>
+
+                <div class="bg-white rounded-lg p-6 shadow">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-shield-alt text-green-600 text-3xl"></i>
+                        <h3 class="text-xl font-bold text-gray-800">안정성 향상</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm">
+                        <li>• TypeScript로 <strong>타입 안정성 100% 보장</strong></li>
+                        <li>• 단위 테스트로 <strong>코드 커버리지 80% 이상</strong></li>
+                        <li>• E2E 테스트로 <strong>사용자 시나리오 검증</strong></li>
+                    </ul>
+                </div>
+
+                <div class="bg-white rounded-lg p-6 shadow">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-rocket text-purple-600 text-3xl"></i>
+                        <h3 class="text-xl font-bold text-gray-800">확장성 향상</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm">
+                        <li>• <strong>새로운 기능 추가</strong>가 쉬운 구조</li>
+                        <li>• <strong>외부 서비스 교체</strong> 용이 (Adapter 패턴)</li>
+                        <li>• <strong>마이크로 서비스</strong>로 확장 가능</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white rounded-lg p-6 shadow">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fas fa-users text-orange-600 text-3xl"></i>
+                        <h3 class="text-xl font-bold text-gray-800">팀 협업 향상</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm">
+                        <li>• <strong>명확한 레이어 분리</strong>로 역할 구분</li>
+                        <li>• <strong>표준화된 코드</strong>로 이해도 향상</li>
+                        <li>• <strong>문서화</strong>로 온보딩 시간 단축</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-yellow-100 border-l-4 border-yellow-500 p-6 rounded">
+                <div class="flex items-center gap-3 mb-2">
+                    <i class="fas fa-lightbulb text-yellow-600 text-2xl"></i>
+                    <h3 class="text-xl font-bold text-yellow-800">핵심 가치</h3>
+                </div>
+                <p class="text-gray-700 text-lg">
+                    <strong>3개월의 투자</strong>로 <strong>향후 수년간의 유지보수 비용 절감</strong>과 
+                    <strong>안정적인 서비스 운영</strong>을 보장합니다.
+                </p>
+            </div>
+        </section>
+
+        <!-- 결론 -->
+        <div class="gradient-bg text-white rounded-2xl p-12 text-center">
+            <h2 class="text-4xl font-bold mb-6">
+                <i class="fas fa-flag-checkered mr-3"></i>
+                결론
+            </h2>
+            <p class="text-xl mb-8 leading-relaxed">
+                현재의 <strong>9,322줄의 단일 파일 구조</strong>를<br/>
+                <strong>TypeScript 기반 클린 아키텍처</strong>로 전면 재설계하여<br/>
+                <strong>유지보수성, 안정성, 확장성</strong>을 획기적으로 개선합니다.
+            </p>
+            <div class="flex justify-center gap-6 text-lg">
+                <div class="bg-white/20 backdrop-blur rounded-lg px-8 py-4">
+                    <strong>12주</strong> 개발 기간
+                </div>
+                <div class="bg-white/20 backdrop-blur rounded-lg px-8 py-4">
+                    <strong>4개 레이어</strong> 아키텍처
+                </div>
+                <div class="bg-white/20 backdrop-blur rounded-lg px-8 py-4">
+                    <strong>8가지</strong> 디자인 패턴
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-lg mb-2">탱고북 v2.0 재설계 기획서</p>
+            <p class="text-gray-400">작성일: 2025-01-22</p>
+        </div>
+    </footer>
+
+    <script>
+        // 스크롤 시 네비게이션 하이라이트
+        const sections = document.querySelectorAll('.section');
+        const navItems = document.querySelectorAll('nav a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navItems.forEach(item => {
+                item.classList.remove('font-bold', 'text-purple-600');
+                if (item.getAttribute('href') === `#${current}`) {
+                    item.classList.add('font-bold', 'text-purple-600');
+                }
+            });
+        });
+
+        // 스무스 스크롤
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
