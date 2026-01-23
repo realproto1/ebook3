@@ -1097,22 +1097,36 @@ function renderBookList() {
             <!-- 버튼 그룹 -->
             <div class="flex gap-1 mt-2 px-1">
                 <button 
+                    onclick="event.stopPropagation(); openReader('${book.id}')"
+                    class="flex-1 bg-green-100 hover:bg-green-200 text-green-700 text-xs py-1.5 rounded transition"
+                    title="동화책 보기"
+                >
+                    <i class="fas fa-book-open mr-1"></i>보기
+                </button>
+                <button 
+                    onclick="event.stopPropagation(); openQuiz('${book.id}')"
+                    class="flex-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 text-xs py-1.5 rounded transition"
+                    title="퀴즈 풀기"
+                >
+                    <i class="fas fa-question-circle mr-1"></i>퀴즈
+                </button>
+                <button 
                     onclick="event.stopPropagation(); selectStorybook('${book.id}')"
                     class="flex-1 bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs py-1.5 rounded transition"
-                    title="열기"
+                    title="편집"
                 >
-                    <i class="fas fa-folder-open mr-1"></i>열기
+                    <i class="fas fa-edit mr-1"></i>편집
                 </button>
                 <button 
                     onclick="event.stopPropagation(); duplicateStorybookById('${book.id}')"
-                    class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs py-1.5 rounded transition"
+                    class="bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs py-1.5 px-2.5 rounded transition"
                     title="복사"
                 >
-                    <i class="fas fa-copy mr-1"></i>복사
+                    <i class="fas fa-copy"></i>
                 </button>
                 <button 
                     onclick="event.stopPropagation(); deleteStorybook('${book.id}')"
-                    class="bg-red-100 hover:bg-red-200 text-red-700 text-xs py-1.5 px-3 rounded transition"
+                    class="bg-red-100 hover:bg-red-200 text-red-700 text-xs py-1.5 px-2.5 rounded transition"
                     title="삭제"
                 >
                     <i class="fas fa-trash"></i>
@@ -6346,3 +6360,43 @@ function getPageTTS(page, lang) {
     
     return null;
 }
+
+// 동화책 뷰어 열기
+function openReader(bookId) {
+    const book = storybooks.find(b => b.id === bookId);
+    if (!book) {
+        alert('동화책을 찾을 수 없습니다.');
+        return;
+    }
+    
+    // 동화책 데이터를 localStorage에 임시 저장
+    localStorage.setItem('temp_reader_book', JSON.stringify(book));
+    
+    // reader.html로 이동
+    window.open('/reader.html', '_blank');
+}
+
+// 퀴즈 페이지 열기
+function openQuiz(bookId) {
+    const book = storybooks.find(b => b.id === bookId);
+    if (!book) {
+        alert('동화책을 찾을 수 없습니다.');
+        return;
+    }
+    
+    // 퀴즈가 있는지 확인
+    if (!book.educational_content || !book.educational_content.comprehension_questions || book.educational_content.comprehension_questions.length === 0) {
+        if (confirm('이 동화책에는 아직 퀴즈가 없습니다.\n퀴즈를 생성하시겠습니까?')) {
+            // 퀴즈 생성 페이지로 이동하거나 생성 함수 호출
+            alert('퀴즈 생성 기능은 준비 중입니다.');
+        }
+        return;
+    }
+    
+    // 퀴즈 데이터를 localStorage에 임시 저장
+    localStorage.setItem('temp_quiz_book', JSON.stringify(book));
+    
+    // quiz.html로 이동
+    window.open('/quiz.html', '_blank');
+}
+
