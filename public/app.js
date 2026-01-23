@@ -4327,6 +4327,15 @@ async function generateAllTTS() {
                     
                     successCount++;
                     console.log(`✅ 페이지 ${page.pageNumber} TTS 생성 완료 (${currentLanguage})`);
+                    
+                    // 즉시 R2에 저장 (각 TTS 생성마다)
+                    try {
+                        await saveToR2(currentStorybook);
+                        console.log(`💾 페이지 ${page.pageNumber} R2 저장 완료`);
+                    } catch (saveError) {
+                        console.error(`⚠️ 페이지 ${page.pageNumber} R2 저장 실패 (TTS는 메모리에 유지):`, saveError.message);
+                        // 저장 실패해도 계속 진행
+                    }
                 } else {
                     throw new Error('TTS 생성 실패');
                 }
@@ -4341,17 +4350,6 @@ async function generateAllTTS() {
                     ttsButton.disabled = false;
                 }
             }
-        }
-        
-        // R2 저장 완료까지 대기
-        console.log('💾 모든 TTS 생성 후 R2 저장 중...');
-        try {
-            await saveToR2(currentStorybook);
-            console.log('✅ R2 저장 완료');
-        } catch (saveError) {
-            console.error('❌ R2 저장 최종 실패:', saveError);
-            // 저장 실패해도 TTS는 메모리에 있으므로 계속 진행
-            showNotification('warning', '저장 실패', 'TTS는 생성되었지만 R2 저장에 실패했습니다. 다시 저장하려면 페이지를 새로고침하지 마세요.');
         }
         
         // UI 업데이트
