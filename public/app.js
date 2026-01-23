@@ -2131,17 +2131,14 @@ function displayStorybook(storybook) {
                     }
                     
                     return availableLanguages.length > 1 ? `
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <label class="text-sm text-gray-600 font-semibold">
-                                <i class="fas fa-language mr-1"></i>언어:
-                            </label>
-                            <div id="language-tabs" class="flex gap-2">
+                        <div class="border-b border-gray-200 -mx-10 px-10 mb-6">
+                            <div class="flex gap-1">
                                 ${availableLanguages.map(lang => {
                                     const languageNames = {
                                         'ko': '🇰🇷 한국어',
                                         'en': '🇺🇸 English',
                                         'zh': '🇨🇳 中文',
-                                        'ja': '🇯🇵 日本語',
+                                        'ja': '🇯🇵 日본어',
                                         'es': '🇪🇸 Español',
                                         'fr': '🇫🇷 Français'
                                     };
@@ -2149,7 +2146,12 @@ function displayStorybook(storybook) {
                                     return `
                                         <button 
                                             onclick="switchLanguage('${lang}')"
-                                            class="px-4 py-2 rounded-lg font-semibold transition ${isActive ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}"
+                                            class="px-6 py-3 font-semibold transition-all relative ${
+                                                isActive 
+                                                ? 'text-purple-600' 
+                                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                            }"
+                                            style="${isActive ? 'border-bottom: 3px solid rgb(147, 51, 234); margin-bottom: -1px;' : ''}"
                                         >
                                             ${languageNames[lang] || lang}
                                         </button>
