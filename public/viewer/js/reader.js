@@ -82,67 +82,21 @@ function getBookId() {
 
 // 동화책 로드
 async function loadBook() {
-    const bookId = getBookId();
+    let bookId = getBookId();
     
     console.log('🔍 Debug - bookId:', bookId);
     console.log('🔍 Debug - axios available:', typeof axios !== 'undefined');
     console.log('🔍 Debug - URL:', window.location.href);
     
-    // 먼저 localStorage에서 temp_reader_book 확인
-    const tempBook = localStorage.getItem('temp_reader_book');
-    if (tempBook) {
-        try {
-            console.log('📖 Loading from temp_reader_book (author page)');
-            currentBook = JSON.parse(tempBook);
-            localStorage.removeItem('temp_reader_book'); // 사용 후 삭제
-            
-            console.log('✅ Book loaded from localStorage:', currentBook.title);
-            
-            // 페이지가 없으면 에러
-            if (!currentBook.pages || currentBook.pages.length === 0) {
-                alert('이 동화책에는 페이지가 없습니다.');
-                window.close();
-                return;
-            }
-            
-            // 표지 페이지 존재 여부 확인 (표시하지 않음, 진행률 계산용만)
-            hasCoverPage = false; // 표지를 건너뛰고 항상 첫 페이지부터 시작
-            console.log(`📖 표지 건너뛰기 - 첫 페이지부터 시작`);
-            
-            // 로딩 숨기고 리더 표시
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('reader').classList.remove('hidden');
-            
-            // 주소창 즉시 숨기기
-            hideAddressBar();
-            
-            // 헤더 숨기기 (3초 후)
-            setTimeout(() => {
-                hideHeader();
-            }, 3000);
-            
-            // 이미지 클릭 시 헤더 토글 이벤트 설정 (한 번만)
-            const imageContainer = document.getElementById('page-image-container');
-            if (imageContainer) {
-                imageContainer.addEventListener('click', (e) => {
-                    // 버튼 클릭은 무시
-                    if (e.target.closest('.nav-button')) {
-                        return;
-                    }
-                    e.stopPropagation();
-                    toggleHeader();
-                });
-            }
-            
-            // 항상 첫 페이지(0번)부터 시작
-            showPage(0);
-            return;
-        } catch (error) {
-            console.error('❌ Failed to load from temp_reader_book:', error);
-            // 실패하면 계속 진행
-        }
+    // 1. localStorage에서 temp_reader_book_id 확인 (author 페이지에서 온 경우)
+    const tempBookId = localStorage.getItem('temp_reader_book_id');
+    if (tempBookId) {
+        console.log('📖 Found temp_reader_book_id:', tempBookId);
+        bookId = tempBookId;
+        localStorage.removeItem('temp_reader_book_id'); // 사용 후 삭제
     }
     
+    // 2. 여전히 bookId가 없으면 에러
     if (!bookId) {
         alert('동화책 ID가 없습니다.');
         window.location.href = '/viewer.html';

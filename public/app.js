@@ -1807,63 +1807,65 @@ function displayStorybook(storybook) {
             </div>
             
             <!-- 언어 관리 섹션 -->
-            <div class="bg-blue-50 p-4 md:p-6 rounded-lg mt-4 md:mt-6">
-                <h3 class="text-lg md:text-xl font-bold text-blue-600 mb-4">
-                    <i class="fas fa-language mr-2"></i>다국어 번역
-                </h3>
-                
-                <!-- 현재 언어 목록 -->
-                <div class="mb-4">
-                    <label class="text-sm font-semibold text-gray-700 block mb-2">현재 언어</label>
-                    <div class="flex flex-wrap gap-2">
-                        ${getAvailableLanguages().map(lang => {
-                            const langNames = {
-                                ko: '🇰🇷 한국어',
-                                en: '🇺🇸 English',
-                                zh: '🇨🇳 中文',
-                                ja: '🇯🇵 日本語',
-                                es: '🇪🇸 Español',
-                                fr: '🇫🇷 Français'
-                            };
-                            return `<span class="inline-flex items-center px-3 py-1.5 bg-white border-2 border-blue-300 rounded-full text-sm font-medium text-blue-700">${langNames[lang] || lang}</span>`;
-                        }).join('')}
+            ${(() => {
+                try {
+                    const availableLangs = getAvailableLanguages();
+                    const langNames = {
+                        ko: '🇰🇷 한국어',
+                        en: '🇺🇸 English',
+                        zh: '🇨🇳 中文',
+                        ja: '🇯🇵 日本語',
+                        es: '🇪🇸 Español',
+                        fr: '🇫🇷 Français'
+                    };
+                    
+                    return `
+                    <div class="bg-blue-50 p-4 md:p-6 rounded-lg mt-4 md:mt-6">
+                        <h3 class="text-lg md:text-xl font-bold text-blue-600 mb-4">
+                            <i class="fas fa-language mr-2"></i>다국어 번역
+                        </h3>
+                        
+                        <!-- 현재 언어 목록 -->
+                        <div class="mb-4">
+                            <label class="text-sm font-semibold text-gray-700 block mb-2">현재 언어</label>
+                            <div class="flex flex-wrap gap-2">
+                                ${availableLangs.map(lang => 
+                                    `<span class="inline-flex items-center px-3 py-1.5 bg-white border-2 border-blue-300 rounded-full text-sm font-medium text-blue-700">${langNames[lang] || lang}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- 언어 추가 -->
+                        <div class="bg-white p-4 rounded-lg border-2 border-blue-200">
+                            <label class="text-sm font-semibold text-gray-700 block mb-2">
+                                <i class="fas fa-plus-circle mr-1"></i>언어 추가
+                            </label>
+                            <div class="flex gap-2 mb-3">
+                                <select id="add-language-select" class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-sm focus:border-blue-500 focus:outline-none">
+                                    <option value="">언어 선택...</option>
+                                    ${['en', 'zh', 'ja', 'es', 'fr'].filter(lang => !availableLangs.includes(lang)).map(lang => 
+                                        `<option value="${lang}">${langNames[lang]}</option>`
+                                    ).join('')}
+                                </select>
+                                <button 
+                                    onclick="addLanguageTranslation()"
+                                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-semibold whitespace-nowrap"
+                                >
+                                    <i class="fas fa-language mr-1"></i>번역 추가
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-600">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                언어를 선택하고 '번역 추가'를 누르면 모든 페이지 텍스트가 자동으로 번역됩니다.
+                            </p>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- 언어 추가 -->
-                <div class="bg-white p-4 rounded-lg border-2 border-blue-200">
-                    <label class="text-sm font-semibold text-gray-700 block mb-2">
-                        <i class="fas fa-plus-circle mr-1"></i>언어 추가
-                    </label>
-                    <div class="flex gap-2 mb-3">
-                        <select id="add-language-select" class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-sm focus:border-blue-500 focus:outline-none">
-                            <option value="">언어 선택...</option>
-                            ${['en', 'zh', 'ja', 'es', 'fr'].map(lang => {
-                                const langNames = {
-                                    en: '🇺🇸 English',
-                                    zh: '🇨🇳 中文',
-                                    ja: '🇯🇵 日本語',
-                                    es: '🇪🇸 Español',
-                                    fr: '🇫🇷 Français'
-                                };
-                                const available = getAvailableLanguages();
-                                if (available.includes(lang)) return '';
-                                return `<option value="${lang}">${langNames[lang]}</option>`;
-                            }).join('')}
-                        </select>
-                        <button 
-                            onclick="addLanguageTranslation()"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-semibold whitespace-nowrap"
-                        >
-                            <i class="fas fa-language mr-1"></i>번역 추가
-                        </button>
-                    </div>
-                    <p class="text-xs text-gray-600">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        언어를 선택하고 '번역 추가'를 누르면 모든 페이지 텍스트가 자동으로 번역됩니다.
-                    </p>
-                </div>
-            </div>
+                    `;
+                } catch (error) {
+                    console.error('언어 섹션 렌더링 오류:', error);
+                    return '';
+                }
+            })()}
         </div>
 
         <!-- 캐릭터 섹션 -->
@@ -6540,11 +6542,16 @@ function openReader(bookId) {
         return;
     }
     
-    // 동화책 데이터를 localStorage에 임시 저장
-    localStorage.setItem('temp_reader_book', JSON.stringify(book));
-    
-    // reader.html로 이동
-    window.open('/reader.html', '_blank');
+    // localStorage quota 문제 해결: bookId만 저장
+    try {
+        localStorage.setItem('temp_reader_book_id', bookId);
+        // reader.html로 이동
+        window.open('/reader.html', '_blank');
+    } catch (e) {
+        // localStorage 실패 시 URL 파라미터 사용
+        console.error('localStorage error:', e);
+        window.open(`/reader.html?id=${bookId}`, '_blank');
+    }
 }
 
 // 퀴즈 페이지 열기
