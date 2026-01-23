@@ -230,10 +230,16 @@ async function generatePageTTS(pageIndex) {
         console.error('TTS 생성 오류:', error);
         
         let errorMsg = 'TTS 생성 중 오류가 발생했습니다.';
-        if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-            errorMsg += ' 시간이 초과되었습니다. 텍스트가 너무 길거나 서버가 응답하지 않습니다.';
+        
+        // 할당량 초과 에러
+        if (error.response?.status === 429 || error.message.includes('quota') || error.message.includes('Quota')) {
+            errorMsg = '🚫 API 할당량 초과\n\nGemini TTS API 일일 할당량을 초과했습니다.\n\n해결 방법:\n1. 내일 다시 시도\n2. Google AI Studio에서 할당량 늘리기\n3. 청구 설정 활성화';
+        } else if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+            errorMsg += '\n\n⏱️ 시간이 초과되었습니다.\n텍스트가 너무 길거나 서버가 응답하지 않습니다.';
+        } else if (error.response?.data?.error) {
+            errorMsg += '\n\n' + error.response.data.error;
         } else {
-            errorMsg += ' ' + (error.response?.data?.error || error.message);
+            errorMsg += '\n\n' + error.message;
         }
         
         alert(errorMsg);
@@ -4356,6 +4362,27 @@ async function generateAllTTS() {
                 failCount++;
                 console.error(`❌ 페이지 ${page.pageNumber} TTS 생성 실패:`, error);
                 
+                // 에러 메시지 추출
+                let errorMessage = error.message || '알 수 없는 오류';
+                if (error.response?.data?.error) {
+                    errorMessage = error.response.data.error;
+                }
+                
+                // 할당량 초과 에러 감지
+                if (errorMessage.includes('quota') || errorMessage.includes('Quota') || error.response?.status === 429) {
+                    console.error('🚫 API 할당량 초과! 더 이상 진행할 수 없습니다.');
+                    showNotification('error', 'API 할당량 초과', 'Gemini TTS API 일일 할당량을 초과했습니다. 내일 다시 시도하거나 Google AI Studio에서 할당량을 늘려주세요.');
+                    
+                    // 버튼 복원
+                    if (translateAllBtn) {
+                        translateAllBtn.innerHTML = '<i class="fas fa-language mr-2"></i>모든 TTS 생성';
+                        translateAllBtn.disabled = false;
+                    }
+                    
+                    // 진행 중단
+                    break;
+                }
+                
                 // 버튼 복원
                 if (ttsButton) {
                     ttsButton.innerHTML = '<i class="fas fa-volume-up mr-1"></i>음성 생성';
@@ -4382,8 +4409,9 @@ async function generateAllTTS() {
         // 결과 알림
         if (successCount > 0) {
             showNotification('success', '모든 TTS 생성 완료! 🎤', `${successCount}개의 페이지 음성이 생성되었습니다.${failCount > 0 ? ` (${failCount}개 실패)` : ''}`);
-        } else {
-            showNotification('error', 'TTS 생성 실패', '모든 페이지에서 TTS 생성에 실패했습니다.');
+        } else if (failCount > 0) {
+            // 모두 실패한 경우 상세 에러 메시지
+            showNotification('error', 'TTS 생성 실패', `모든 페이지(${failCount}개)에서 TTS 생성에 실패했습니다. API 할당량을 확인해주세요.`);
         }
         
         console.log(`✅ 모든 TTS 생성 완료: 성공 ${successCount}개, 실패 ${failCount}개`);
