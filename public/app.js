@@ -2233,6 +2233,24 @@ function displayStorybook(storybook) {
                         <span>모든 TTS 생성</span>
                     </button>
                     
+                    <!-- 전체 삽화 다운로드 버튼 -->
+                    <button 
+                        onclick="downloadAllIllustrations()"
+                        class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3.5 rounded-lg hover:from-blue-600 hover:to-blue-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold text-base"
+                    >
+                        <i class="fas fa-images text-xl"></i>
+                        <span>전체 삽화 다운로드</span>
+                    </button>
+                    
+                    <!-- 전체 TTS 다운로드 버튼 -->
+                    <button 
+                        onclick="downloadAllAudio()"
+                        class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3.5 rounded-lg hover:from-green-600 hover:to-green-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold text-base"
+                    >
+                        <i class="fas fa-headphones text-xl"></i>
+                        <span>전체 TTS 다운로드</span>
+                    </button>
+                    
                     <!-- 다운로드 버튼 -->
                 </div>
 
@@ -3170,14 +3188,26 @@ async function downloadAllAudio() {
         return;
     }
     
-    const pagesWithAudio = currentStorybook.pages.filter(page => page.audioUrl);
+    // 현재 언어의 TTS가 있는 페이지만 필터링
+    const pagesWithAudio = currentStorybook.pages.filter(page => getPageTTS(page, currentLanguage));
     
     if (pagesWithAudio.length === 0) {
         alert('생성된 TTS가 없습니다. 먼저 TTS를 생성해주세요.');
         return;
     }
     
-    if (!confirm(`${pagesWithAudio.length}개의 오디오 파일을 다운로드하시겠습니까?`)) {
+    // 언어 이름 가져오기
+    const languageNames = {
+        ko: '한국어',
+        en: 'English',
+        zh: '中文',
+        ja: '日本語',
+        es: 'Español',
+        fr: 'Français'
+    };
+    const langName = languageNames[currentLanguage] || currentLanguage;
+    
+    if (!confirm(`${langName} TTS ${pagesWithAudio.length}개의 오디오 파일을 다운로드하시겠습니까?`)) {
         return;
     }
     
@@ -3185,10 +3215,11 @@ async function downloadAllAudio() {
     
     for (let i = 0; i < pagesWithAudio.length; i++) {
         const page = pagesWithAudio[i];
-        const filename = `${currentStorybook.title}_페이지_${page.pageNumber}.wav`;
+        const audioUrl = getPageTTS(page, currentLanguage);
+        const filename = `${currentStorybook.title}_${currentLanguage}_페이지_${page.pageNumber}.wav`;
         
         try {
-            await downloadAudio(page.audioUrl, filename);
+            await downloadAudio(audioUrl, filename);
             downloadCount++;
             
             // 다운로드 간 약간의 지연 (브라우저 제한 방지)
@@ -3198,7 +3229,7 @@ async function downloadAllAudio() {
         }
     }
     
-    showNotification('success', '일괄 다운로드 완료', `${downloadCount}개의 오디오 파일이 다운로드되었습니다.`);
+    showNotification('success', '일괄 다운로드 완료', `${langName} ${downloadCount}개의 오디오 파일이 다운로드되었습니다.`);
 }
 
 // 단어 업데이트 함수
