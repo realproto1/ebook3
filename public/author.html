@@ -1216,6 +1216,32 @@
         }
     </style>
 
+    <!-- 번역 진행 중 모달 -->
+    <div id="translation-progress-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div class="text-center">
+                <!-- 로딩 스피너 -->
+                <div class="relative w-24 h-24 mx-auto mb-6">
+                    <div class="absolute inset-0 border-8 border-purple-200 rounded-full"></div>
+                    <div class="absolute inset-0 border-8 border-purple-600 rounded-full border-t-transparent animate-spin"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <i class="fas fa-language text-3xl text-purple-600"></i>
+                    </div>
+                </div>
+                
+                <!-- 메시지 -->
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">번역 중...</h3>
+                <p id="translation-progress-text" class="text-gray-600 mb-4">잠시만 기다려주세요.</p>
+                
+                <!-- 진행 바 -->
+                <div class="w-full bg-gray-200 rounded-full h-3 mb-2 overflow-hidden">
+                    <div id="translation-progress-bar" class="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <p id="translation-progress-percent" class="text-sm text-gray-500">0%</p>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script src="/gemini-client.js?v=20250120-deprecated"></script>
     <script src="/app.js?v=20250123-tts-model-description"></script>

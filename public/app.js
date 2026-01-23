@@ -1710,15 +1710,47 @@ async function addLanguageFromTab(targetLang) {
         return;
     }
     
+    // 진행 중 모달 표시
+    const modal = document.getElementById('translation-progress-modal');
+    const progressText = document.getElementById('translation-progress-text');
+    const progressBar = document.getElementById('translation-progress-bar');
+    const progressPercent = document.getElementById('translation-progress-percent');
+    
+    if (modal) {
+        modal.classList.remove('hidden');
+        progressText.textContent = `${langName}로 번역 중입니다...`;
+        progressBar.style.width = '0%';
+        progressPercent.textContent = '0%';
+        
+        // 진행률 시뮬레이션 (실제 진행률이 아닌 예상 진행률)
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            if (progress < 90) {
+                progress += 5;
+                progressBar.style.width = `${progress}%`;
+                progressPercent.textContent = `${progress}%`;
+            }
+        }, estimatedTime * 1000 / 18); // 90%까지 도달하는 시간
+    }
+    
     try {
         console.log(`🌐 Starting translation to ${targetLang}...`);
-        
-        showNotification('info', '번역 중...', `${langName} 번역을 시작합니다.`);
         
         const response = await axios.post('/api/translate-storybook', {
             storybook: currentStorybook,
             targetLanguage: targetLang
+        }, {
+            timeout: 300000  // 5분 타임아웃
         });
+        
+        // 진행률 완료
+        if (progressInterval) {
+            clearInterval(progressInterval);
+        }
+        if (modal) {
+            progressBar.style.width = '100%';
+            progressPercent.textContent = '100%';
+        }
         
         if (response.data.success) {
             // translations 객체 업데이트
@@ -1750,15 +1782,45 @@ async function addLanguageFromTab(targetLang) {
             currentLanguage = targetLang;
             displayStorybook(currentStorybook);
             
-            showNotification('success', '번역 완료!', `${langName} 번역이 완료되었습니다.`);
+            // 모달 숨기기
+            if (modal) {
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    // 완료 알림
+                    alert(`✅ ${langName} 번역이 완료되었습니다!\n\n${currentStorybook.pages.length}개 페이지가 번역되었습니다.`);
+                }, 500);
+            } else {
+                alert(`✅ ${langName} 번역이 완료되었습니다!\n\n${currentStorybook.pages.length}개 페이지가 번역되었습니다.`);
+            }
             
             console.log(`✅ Translation to ${targetLang} completed`);
         } else {
             throw new Error(response.data.error || '번역 실패');
         }
     } catch (error) {
+        // 진행률 인터벌 정리
+        if (progressInterval) {
+            clearInterval(progressInterval);
+        }
+        
+        // 모달 숨기기
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+        
         console.error('❌ Translation error:', error);
-        alert('번역 중 오류가 발생했습니다: ' + (error.response?.data?.error || error.message));
+        
+        // 에러 메시지 개선
+        let errorMessage = '번역 중 오류가 발생했습니다.';
+        if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+            errorMessage = `번역 시간이 초과되었습니다.\n\n페이지 수가 많아 시간이 오래 걸립니다.\n다시 시도해주세요.`;
+        } else if (error.response?.status === 524) {
+            errorMessage = `서버 응답 시간이 초과되었습니다.\n\n페이지 수가 많은 경우 시간이 오래 걸릴 수 있습니다.\n잠시 후 다시 시도해주세요.`;
+        } else if (error.response?.data?.error) {
+            errorMessage = `번역 오류: ${error.response.data.error}`;
+        }
+        
+        alert(errorMessage);
     }
 }
 
