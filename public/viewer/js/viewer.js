@@ -146,7 +146,7 @@ function sortBooks() {
 
 // 동화책 열기
 function openBook(bookId) {
-    window.location.href = `/book.html?id=${bookId}`;
+    window.location.href = `/reader.html?id=${bookId}`;
 }
 
 // UI 헬퍼 함수
