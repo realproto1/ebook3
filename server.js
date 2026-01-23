@@ -3949,7 +3949,31 @@ app.get('/api/viewer/storybooks/:id', async (req, res) => {
       });
     }
     
-    console.log(`✅ Returned storybook: ${storybook.title}`);
+    // TTS base64 데이터 제거 (viewer는 URL만 필요)
+    if (storybook.pages && Array.isArray(storybook.pages)) {
+      storybook.pages.forEach(page => {
+        if (page.ttsAudio) {
+          // base64 데이터가 있고 URL이 없으면, URL을 base64로 설정
+          if (typeof page.ttsAudio.url === 'string' && page.ttsAudio.url.startsWith('data:audio/')) {
+            // base64 인라인 데이터는 R2에 업로드되어 있어야 하므로 제거
+            delete page.ttsAudio.url;
+          }
+          // 다국어 TTS도 동일하게 처리
+          if (page.ttsAudio.en && page.ttsAudio.en.url && page.ttsAudio.en.url.startsWith('data:audio/')) {
+            delete page.ttsAudio.en.url;
+          }
+          if (page.ttsAudio.ko && page.ttsAudio.ko.url && page.ttsAudio.ko.url.startsWith('data:audio/')) {
+            delete page.ttsAudio.ko.url;
+          }
+        }
+        // audioUrl도 base64면 제거
+        if (page.audioUrl && page.audioUrl.startsWith('data:audio/')) {
+          delete page.audioUrl;
+        }
+      });
+    }
+    
+    console.log(`✅ Returned storybook: ${storybook.title} (base64 TTS removed)`);
     
     // 캐시 방지 헤더 설정
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
