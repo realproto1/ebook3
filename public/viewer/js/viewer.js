@@ -357,5 +357,11 @@ function hideLoadingModal() {
 
 // 페이지 로드 시 실행
 window.addEventListener('DOMContentLoaded', () => {
+    // 언어 선택 모달이 열려있으면 닫기 (뒤로가기 시)
+    const languageModal = document.getElementById('language-select-modal');
+    if (languageModal && !languageModal.classList.contains('hidden')) {
+        languageModal.classList.add('hidden');
+    }
+    
     loadStorybooks();
 });
