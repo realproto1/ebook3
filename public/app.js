@@ -2115,34 +2115,50 @@ function displayStorybook(storybook) {
                 </div>
                 
                 <!-- 언어 탭 -->
-                ${storybook.languages && storybook.languages.length > 0 ? `
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <label class="text-sm text-gray-600 font-semibold">
-                            <i class="fas fa-language mr-1"></i>언어:
-                        </label>
-                        <div id="language-tabs" class="flex gap-2">
-                            ${storybook.languages.map(lang => {
-                                const languageNames = {
-                                    'ko': '🇰🇷 한국어',
-                                    'en': '🇺🇸 English',
-                                    'zh': '🇨🇳 中文',
-                                    'ja': '🇯🇵 日本語',
-                                    'es': '🇪🇸 Español',
-                                    'fr': '🇫🇷 Français'
-                                };
-                                const isActive = lang === (currentLanguage || 'ko');
-                                return `
-                                    <button 
-                                        onclick="switchLanguage('${lang}')"
-                                        class="px-4 py-2 rounded-lg font-semibold transition ${isActive ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}"
-                                    >
-                                        ${languageNames[lang] || lang}
-                                    </button>
-                                `;
-                            }).join('')}
+                ${(() => {
+                    // languages 배열이 있으면 사용, 없으면 translations에서 추출
+                    let availableLanguages = storybook.languages || [];
+                    
+                    // translations가 있으면 언어 목록에 추가
+                    if (storybook.translations && typeof storybook.translations === 'object') {
+                        const translationLangs = Object.keys(storybook.translations);
+                        availableLanguages = ['ko', ...translationLangs].filter((v, i, a) => a.indexOf(v) === i); // 중복 제거
+                    }
+                    
+                    // 언어가 2개 이상일 때만 탭 표시
+                    if (availableLanguages.length < 2) {
+                        availableLanguages = ['ko']; // 한국어만 있으면 탭 안 보임
+                    }
+                    
+                    return availableLanguages.length > 1 ? `
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <label class="text-sm text-gray-600 font-semibold">
+                                <i class="fas fa-language mr-1"></i>언어:
+                            </label>
+                            <div id="language-tabs" class="flex gap-2">
+                                ${availableLanguages.map(lang => {
+                                    const languageNames = {
+                                        'ko': '🇰🇷 한국어',
+                                        'en': '🇺🇸 English',
+                                        'zh': '🇨🇳 中文',
+                                        'ja': '🇯🇵 日本語',
+                                        'es': '🇪🇸 Español',
+                                        'fr': '🇫🇷 Français'
+                                    };
+                                    const isActive = lang === (currentLanguage || 'ko');
+                                    return `
+                                        <button 
+                                            onclick="switchLanguage('${lang}')"
+                                            class="px-4 py-2 rounded-lg font-semibold transition ${isActive ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}"
+                                        >
+                                            ${languageNames[lang] || lang}
+                                        </button>
+                                    `;
+                                }).join('')}
+                            </div>
                         </div>
-                    </div>
-                ` : ''}
+                    ` : '';
+                })()}
             </div>
             
             <!-- 액션 버튼 -->
