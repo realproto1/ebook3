@@ -119,9 +119,9 @@ async function loadBook() {
                 return;
             }
             
-            // 표지 페이지 존재 여부 확인
-            hasCoverPage = !!currentBook.coverImage;
-            console.log(`📖 표지 페이지: ${hasCoverPage ? '있음' : '없음'}`);
+            // 표지 페이지 존재 여부 확인 (표시하지 않음, 진행률 계산용만)
+            hasCoverPage = false; // 표지를 건너뛰고 항상 첫 페이지부터 시작
+            console.log(`📖 표지 건너뛰기 - 첫 페이지부터 시작`);
             
             // 로딩 숨기고 리더 표시
             document.getElementById('loading').classList.add('hidden');
@@ -148,12 +148,8 @@ async function loadBook() {
                 });
             }
             
-            // 표지 또는 첫 페이지 표시
-            if (hasCoverPage) {
-                showPage(-1); // 표지 표시
-            } else {
-                showPage(0); // 첫 페이지 표시
-            }
+            // 항상 첫 페이지(0번)부터 시작
+            showPage(0);
         }
     } catch (error) {
         console.error('❌ Failed to load storybook:', error);
