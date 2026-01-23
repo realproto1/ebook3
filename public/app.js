@@ -2467,6 +2467,18 @@ function displayStorybook(storybook) {
                         <span>모든 TTS 생성</span>
                     </button>
                     
+                    ${currentLanguage !== 'ko' ? `
+                    <!-- 모두 번역하기 버튼 -->
+                    <button 
+                        onclick="translateAllPages()"
+                        id="translate-all-btn"
+                        class="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-4 py-3.5 rounded-lg hover:from-indigo-600 hover:to-indigo-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold text-base"
+                    >
+                        <i class="fas fa-language text-xl"></i>
+                        <span>모두 번역하기</span>
+                    </button>
+                    ` : ''}
+                    
                     <!-- 전체 삽화 다운로드 버튼 -->
                     <button 
                         onclick="downloadAllIllustrations()"
@@ -6675,5 +6687,141 @@ async function translateSinglePage(pageIndex) {
             translateBtn.innerHTML = '<i class="fas fa-language mr-1"></i>번역';
         }
     }
+}
+
+// 모든 페이지 순차 번역
+async function translateAllPages() {
+    if (!currentStorybook || !currentStorybook.pages) {
+        alert('동화책이 선택되지 않았습니다.');
+        return;
+    }
+    
+    if (currentLanguage === 'ko') {
+        alert('한국어는 번역할 필요가 없습니다.');
+        return;
+    }
+    
+    const totalPages = currentStorybook.pages.length;
+    
+    if (!confirm(`모든 페이지를 ${currentLanguage}로 번역하시겠습니까?\n\n${totalPages}개 페이지가 순차적으로 번역됩니다.\n예상 소요 시간: 약 ${totalPages * 5}초`)) {
+        return;
+    }
+    
+    // 버튼 비활성화
+    const translateAllBtn = document.getElementById('translate-all-btn');
+    if (translateAllBtn) {
+        translateAllBtn.disabled = true;
+        translateAllBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-xl"></i><span>번역 중...</span>';
+    }
+    
+    let successCount = 0;
+    let failCount = 0;
+    
+    console.log(`🌐 모든 페이지 번역 시작 (${totalPages}개 페이지)`);
+    
+    for (let i = 0; i < currentStorybook.pages.length; i++) {
+        const page = currentStorybook.pages[i];
+        
+        // 이미 번역된 페이지는 건너뛰기
+        const translatedPage = currentStorybook.translations?.[currentLanguage]?.find(p => p.pageNumber === page.pageNumber);
+        if (translatedPage && translatedPage.text && translatedPage.text.trim() !== '') {
+            console.log(`⏭️ 페이지 ${page.pageNumber} 이미 번역됨, 건너뛰기`);
+            successCount++;
+            continue;
+        }
+        
+        console.log(`🌐 페이지 ${page.pageNumber}/${totalPages} 번역 중...`);
+        
+        // 버튼 업데이트
+        if (translateAllBtn) {
+            translateAllBtn.innerHTML = `<i class="fas fa-spinner fa-spin text-xl"></i><span>번역 중... (${i + 1}/${totalPages})</span>`;
+        }
+        
+        try {
+            const sourceText = page.text;
+            
+            if (!sourceText || sourceText.trim() === '') {
+                console.log(`⚠️ 페이지 ${page.pageNumber} 텍스트 없음, 건너뛰기`);
+                continue;
+            }
+            
+            const response = await axios.post('/api/translate-page', {
+                text: sourceText,
+                targetLanguage: currentLanguage,
+                context: {
+                    title: currentStorybook.title,
+                    theme: currentStorybook.theme,
+                    characters: currentStorybook.characters ? currentStorybook.characters.map(c => c.name).join(', ') : ''
+                }
+            }, {
+                timeout: 30000  // 30초
+            });
+            
+            if (response.data.success) {
+                // translations 업데이트
+                if (!currentStorybook.translations) {
+                    currentStorybook.translations = {};
+                }
+                if (!currentStorybook.translations[currentLanguage]) {
+                    currentStorybook.translations[currentLanguage] = currentStorybook.pages.map(p => ({
+                        pageNumber: p.pageNumber,
+                        text: ''
+                    }));
+                }
+                
+                // 해당 페이지 번역 텍스트 저장
+                const translationPage = currentStorybook.translations[currentLanguage].find(p => p.pageNumber === page.pageNumber);
+                if (translationPage) {
+                    translationPage.text = response.data.translatedText;
+                }
+                
+                successCount++;
+                console.log(`✅ 페이지 ${page.pageNumber} 번역 완료`);
+                
+                // 중간 저장 (5페이지마다)
+                if ((i + 1) % 5 === 0) {
+                    saveCurrentStorybook();
+                    console.log(`💾 중간 저장 완료 (${i + 1}/${totalPages})`);
+                }
+                
+            } else {
+                throw new Error(response.data.error || '번역 실패');
+            }
+            
+        } catch (error) {
+            console.error(`❌ 페이지 ${page.pageNumber} 번역 실패:`, error);
+            failCount++;
+            
+            // 에러가 발생해도 계속 진행
+            if (!confirm(`페이지 ${page.pageNumber} 번역 실패\n\n계속 진행하시겠습니까?`)) {
+                break;
+            }
+        }
+        
+        // 다음 페이지 전 짧은 대기 (API 부하 방지)
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    
+    // 최종 저장
+    saveCurrentStorybook();
+    
+    // UI 업데이트
+    displayStorybook(currentStorybook);
+    
+    // 버튼 복원
+    if (translateAllBtn) {
+        translateAllBtn.disabled = false;
+        translateAllBtn.innerHTML = '<i class="fas fa-language text-xl"></i><span>모두 번역하기</span>';
+    }
+    
+    // 완료 알림
+    if (successCount > 0) {
+        showNotification('success', '모든 번역 완료! 🌐', `${successCount}개의 페이지가 번역되었습니다.${failCount > 0 ? ` (${failCount}개 실패)` : ''}`);
+        alert(`✅ 번역 완료!\n\n성공: ${successCount}개\n실패: ${failCount}개`);
+    } else {
+        alert('번역된 페이지가 없습니다.');
+    }
+    
+    console.log(`✅ 모든 페이지 번역 완료: 성공 ${successCount}개, 실패 ${failCount}개`);
 }
 
