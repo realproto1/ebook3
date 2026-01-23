@@ -6689,11 +6689,21 @@ async function translateSinglePage(pageIndex) {
                 translationPage.text = response.data.translatedText;
             }
             
+            // ✅ 실시간 UI 업데이트 - 해당 페이지의 textarea만 업데이트 (전체 리렌더링 방지)
+            const pageTextarea = document.querySelector(`textarea[onchange*="updatePageText(${pageIndex},"]`);
+            if (pageTextarea) {
+                pageTextarea.value = response.data.translatedText;
+                console.log(`🔄 페이지 ${page.pageNumber} textarea 업데이트 완료`);
+            }
+            
             // 저장
             saveCurrentStorybook();
             
-            // UI 업데이트
-            displayStorybook(currentStorybook);
+            // 버튼 복원
+            if (translateBtn) {
+                translateBtn.disabled = false;
+                translateBtn.innerHTML = '<i class="fas fa-language mr-1"></i>번역';
+            }
             
             showNotification('success', '번역 완료', `페이지 ${page.pageNumber} 번역이 완료되었습니다.`);
         } else {
@@ -6807,6 +6817,13 @@ async function translateAllPages() {
                     translationPage.text = response.data.translatedText;
                 }
                 
+                // ✅ 실시간 UI 업데이트 - 해당 페이지의 textarea에 번역된 텍스트 표시
+                const pageTextarea = document.querySelector(`textarea[onchange*="updatePageText(${i},"]`);
+                if (pageTextarea) {
+                    pageTextarea.value = response.data.translatedText;
+                    console.log(`🔄 페이지 ${page.pageNumber} UI 업데이트 완료`);
+                }
+                
                 successCount++;
                 console.log(`✅ 페이지 ${page.pageNumber} 번역 완료`);
                 
@@ -6862,6 +6879,13 @@ async function translateAllPages() {
                         const translationPage = currentStorybook.translations[currentLanguage].find(p => p.pageNumber === page.pageNumber);
                         if (translationPage) {
                             translationPage.text = retryResponse.data.translatedText;
+                        }
+                        
+                        // ✅ 실시간 UI 업데이트 - 재시도 성공 시에도 즉시 표시
+                        const pageTextarea = document.querySelector(`textarea[onchange*="updatePageText(${i},"]`);
+                        if (pageTextarea) {
+                            pageTextarea.value = retryResponse.data.translatedText;
+                            console.log(`🔄 페이지 ${page.pageNumber} UI 업데이트 완료 (재시도)`);
                         }
                         
                         retrySuccess = true;
