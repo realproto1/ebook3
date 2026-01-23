@@ -1648,6 +1648,118 @@ async function generateStorybook() {
     }
 }
 
+// 사용 가능한 언어 목록 가져오기
+function getAvailableLanguages() {
+    if (!currentStorybook) return ['ko'];
+    
+    const langs = new Set(['ko']); // 한국어는 기본
+    
+    // languages 배열에서 가져오기
+    if (currentStorybook.languages && Array.isArray(currentStorybook.languages)) {
+        currentStorybook.languages.forEach(lang => langs.add(lang));
+    }
+    
+    // translations 객체에서 가져오기
+    if (currentStorybook.translations && typeof currentStorybook.translations === 'object') {
+        Object.keys(currentStorybook.translations).forEach(lang => langs.add(lang));
+    }
+    
+    return Array.from(langs);
+}
+
+// 언어 추가 및 번역
+async function addLanguageTranslation() {
+    const selectEl = document.getElementById('add-language-select');
+    const targetLang = selectEl.value;
+    
+    if (!targetLang) {
+        alert('번역할 언어를 선택해주세요.');
+        return;
+    }
+    
+    if (!currentStorybook || !currentStorybook.pages) {
+        alert('동화책이 선택되지 않았습니다.');
+        return;
+    }
+    
+    // 이미 번역된 언어인지 확인
+    const available = getAvailableLanguages();
+    if (available.includes(targetLang)) {
+        alert('이미 해당 언어로 번역되어 있습니다.');
+        return;
+    }
+    
+    const langNames = {
+        en: 'English',
+        zh: '中文',
+        ja: '日本語',
+        es: 'Español',
+        fr: 'Français'
+    };
+    
+    const langName = langNames[targetLang] || targetLang;
+    const estimatedTime = Math.ceil(currentStorybook.pages.length * 2);
+    
+    if (!confirm(`${langName}로 번역하시겠습니까?\n\n예상 소요 시간: 약 ${estimatedTime}초\n${currentStorybook.pages.length}개 페이지의 텍스트가 번역됩니다.`)) {
+        return;
+    }
+    
+    try {
+        // 로딩 표시
+        const button = event.target;
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>번역 중...';
+        button.disabled = true;
+        
+        console.log(`🌐 Starting translation to ${targetLang}...`);
+        
+        const response = await axios.post('/api/translate-storybook', {
+            storybook: currentStorybook,
+            targetLanguage: targetLang
+        });
+        
+        if (response.data.success) {
+            // translations 객체 업데이트
+            if (!currentStorybook.translations) {
+                currentStorybook.translations = {};
+            }
+            
+            // 번역된 페이지 저장
+            currentStorybook.translations[targetLang] = response.data.translatedPages.map((translatedText, idx) => ({
+                pageNumber: currentStorybook.pages[idx].pageNumber,
+                text: translatedText
+            }));
+            
+            // languages 배열 업데이트
+            if (!currentStorybook.languages) {
+                currentStorybook.languages = ['ko'];
+            }
+            if (!currentStorybook.languages.includes(targetLang)) {
+                currentStorybook.languages.push(targetLang);
+            }
+            
+            // 저장
+            saveCurrentStorybook();
+            
+            // UI 업데이트
+            displayStorybook(currentStorybook);
+            
+            // 새로 추가된 언어로 전환
+            currentLanguage = targetLang;
+            displayStorybook(currentStorybook);
+            
+            showNotification('success', '번역 완료!', `${langName} 번역이 완료되었습니다.`);
+            
+            console.log(`✅ Translation to ${targetLang} completed`);
+        } else {
+            throw new Error(response.data.error || '번역 실패');
+        }
+    } catch (error) {
+        console.error('❌ Translation error:', error);
+        alert('번역 중 오류가 발생했습니다: ' + (error.response?.data?.error || error.message));
+    }
+}
+
 function displayStorybook(storybook) {
     console.log('📺 displayStorybook 호출:', {
         title: storybook.title,
@@ -6457,117 +6569,5 @@ function openQuiz(bookId) {
     
     // quiz.html로 이동
     window.open('/quiz.html', '_blank');
-}
-
-// 사용 가능한 언어 목록 가져오기
-function getAvailableLanguages() {
-    if (!currentStorybook) return ['ko'];
-    
-    const langs = new Set(['ko']); // 한국어는 기본
-    
-    // languages 배열에서 가져오기
-    if (currentStorybook.languages && Array.isArray(currentStorybook.languages)) {
-        currentStorybook.languages.forEach(lang => langs.add(lang));
-    }
-    
-    // translations 객체에서 가져오기
-    if (currentStorybook.translations && typeof currentStorybook.translations === 'object') {
-        Object.keys(currentStorybook.translations).forEach(lang => langs.add(lang));
-    }
-    
-    return Array.from(langs);
-}
-
-// 언어 추가 및 번역
-async function addLanguageTranslation() {
-    const selectEl = document.getElementById('add-language-select');
-    const targetLang = selectEl.value;
-    
-    if (!targetLang) {
-        alert('번역할 언어를 선택해주세요.');
-        return;
-    }
-    
-    if (!currentStorybook || !currentStorybook.pages) {
-        alert('동화책이 선택되지 않았습니다.');
-        return;
-    }
-    
-    // 이미 번역된 언어인지 확인
-    const available = getAvailableLanguages();
-    if (available.includes(targetLang)) {
-        alert('이미 해당 언어로 번역되어 있습니다.');
-        return;
-    }
-    
-    const langNames = {
-        en: 'English',
-        zh: '中文',
-        ja: '日本語',
-        es: 'Español',
-        fr: 'Français'
-    };
-    
-    const langName = langNames[targetLang] || targetLang;
-    const estimatedTime = Math.ceil(currentStorybook.pages.length * 2);
-    
-    if (!confirm(`${langName}로 번역하시겠습니까?\n\n예상 소요 시간: 약 ${estimatedTime}초\n${currentStorybook.pages.length}개 페이지의 텍스트가 번역됩니다.`)) {
-        return;
-    }
-    
-    try {
-        // 로딩 표시
-        const button = event.target;
-        const originalText = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>번역 중...';
-        button.disabled = true;
-        
-        console.log(`🌐 Starting translation to ${targetLang}...`);
-        
-        const response = await axios.post('/api/translate-storybook', {
-            storybook: currentStorybook,
-            targetLanguage: targetLang
-        });
-        
-        if (response.data.success) {
-            // translations 객체 업데이트
-            if (!currentStorybook.translations) {
-                currentStorybook.translations = {};
-            }
-            
-            // 번역된 페이지 저장
-            currentStorybook.translations[targetLang] = response.data.translatedPages.map((translatedText, idx) => ({
-                pageNumber: currentStorybook.pages[idx].pageNumber,
-                text: translatedText
-            }));
-            
-            // languages 배열 업데이트
-            if (!currentStorybook.languages) {
-                currentStorybook.languages = ['ko'];
-            }
-            if (!currentStorybook.languages.includes(targetLang)) {
-                currentStorybook.languages.push(targetLang);
-            }
-            
-            // 저장
-            saveCurrentStorybook();
-            
-            // UI 업데이트
-            displayStorybook(currentStorybook);
-            
-            // 새로 추가된 언어로 전환
-            currentLanguage = targetLang;
-            displayStorybook(currentStorybook);
-            
-            showNotification('success', '번역 완료!', `${langName} 번역이 완료되었습니다.`);
-            
-            console.log(`✅ Translation to ${targetLang} completed`);
-        } else {
-            throw new Error(response.data.error || '번역 실패');
-        }
-    } catch (error) {
-        console.error('❌ Translation error:', error);
-        alert('번역 중 오류가 발생했습니다: ' + (error.response?.data?.error || error.message));
-    }
 }
 
