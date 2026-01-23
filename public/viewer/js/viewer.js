@@ -146,11 +146,21 @@ function sortBooks() {
 
 // 동화책 열기 (언어 선택 포함)
 async function openBook(bookId) {
+    console.log('🔍 openBook 호출됨 - bookId:', bookId);
+    
     try {
         // 동화책 데이터 로드
+        console.log('📡 API 호출 시작:', `/api/viewer/storybooks/${bookId}`);
         const response = await axios.get(`/api/viewer/storybooks/${bookId}`);
         
+        console.log('📡 API 응답:', {
+            success: response.data.success,
+            hasStorybook: !!response.data.storybook,
+            title: response.data.storybook?.title
+        });
+        
         if (!response.data.success || !response.data.storybook) {
+            console.error('❌ 동화책 로드 실패: 응답 데이터 없음');
             alert('동화책을 불러올 수 없습니다.');
             return;
         }
@@ -159,27 +169,53 @@ async function openBook(bookId) {
         
         // 사용 가능한 언어 목록 가져오기
         const availableLanguages = storybook.languages || ['ko'];
+        console.log('🌐 사용 가능한 언어:', availableLanguages);
         
         // 언어가 1개면 바로 이동, 2개 이상이면 선택 모달 표시
         if (availableLanguages.length === 1) {
+            console.log('➡️ 언어 1개 - 바로 이동:', availableLanguages[0]);
             window.location.href = `/reader.html?id=${bookId}&lang=${availableLanguages[0]}`;
         } else {
+            console.log('📋 언어 2개 이상 - 선택 모달 표시');
             showLanguageModal(bookId, storybook.title, availableLanguages);
         }
     } catch (error) {
-        console.error('동화책 로드 실패:', error);
+        console.error('❌ 동화책 로드 실패:', error);
+        console.error('❌ 에러 상세:', {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status
+        });
         alert('동화책을 불러오는 중 오류가 발생했습니다.');
     }
 }
 
 // 언어 선택 모달 표시
 function showLanguageModal(bookId, bookTitle, languages) {
+    console.log('🎨 showLanguageModal 호출:', { bookId, bookTitle, languages });
+    
     const modal = document.getElementById('language-select-modal');
     const titleEl = document.getElementById('language-modal-book-title');
     const buttonsContainer = document.getElementById('language-buttons');
     
+    if (!modal) {
+        console.error('❌ 언어 선택 모달을 찾을 수 없습니다: #language-select-modal');
+        return;
+    }
+    
+    if (!titleEl) {
+        console.error('❌ 제목 요소를 찾을 수 없습니다: #language-modal-book-title');
+        return;
+    }
+    
+    if (!buttonsContainer) {
+        console.error('❌ 버튼 컨테이너를 찾을 수 없습니다: #language-buttons');
+        return;
+    }
+    
     // 동화책 제목 표시
     titleEl.textContent = bookTitle;
+    console.log('✅ 제목 설정:', bookTitle);
     
     // 언어 이름 매핑
     const languageNames = {
@@ -192,7 +228,7 @@ function showLanguageModal(bookId, bookTitle, languages) {
     };
     
     // 언어 버튼 생성
-    buttonsContainer.innerHTML = languages.map(lang => {
+    const buttonsHTML = languages.map(lang => {
         const langInfo = languageNames[lang] || { name: lang, flag: '🌐', color: 'gray' };
         return `
             <button 
@@ -208,17 +244,25 @@ function showLanguageModal(bookId, bookTitle, languages) {
         `;
     }).join('');
     
+    buttonsContainer.innerHTML = buttonsHTML;
+    console.log('✅ 버튼 생성 완료:', languages.length, '개');
+    
     // 모달 표시
     modal.classList.remove('hidden');
+    console.log('✅ 모달 표시 완료');
 }
 
 // 언어 선택하고 동화책 열기
 function selectLanguageAndOpen(bookId, language) {
-    window.location.href = `/reader.html?id=${bookId}&lang=${language}`;
+    console.log('✅ selectLanguageAndOpen 호출:', { bookId, language });
+    const url = `/reader.html?id=${bookId}&lang=${language}`;
+    console.log('➡️ 이동할 URL:', url);
+    window.location.href = url;
 }
 
 // 언어 선택 모달 닫기
 function closeLanguageModal() {
+    console.log('❌ closeLanguageModal 호출');
     const modal = document.getElementById('language-select-modal');
     modal.classList.add('hidden');
 }
