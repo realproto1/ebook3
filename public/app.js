@@ -191,8 +191,8 @@ async function generatePageTTS(pageIndex) {
             currentStorybook.pages[pageIndex].audioUrl = response.data.audioUrl;
             saveCurrentStorybook();
             
-            // UI 즉시 업데이트 - 페이지 전체를 다시 렌더링
-            displayStorybookResult(currentStorybook);
+            // UI 즉시 업데이트 - 현재 동화책을 다시 렌더링
+            displayStorybook(currentStorybook);
             
             showNotification('success', 'TTS 생성 완료!', '음성이 생성되었습니다.');
         } else {
