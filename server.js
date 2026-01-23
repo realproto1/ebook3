@@ -486,11 +486,27 @@ app.post('/api/upload-image', upload.single('image'), async (req, res) => {
 // 1. 동화책 스토리 생성 API
 app.post('/api/generate-storybook', requireAPIKey, async (req, res) => {
   try {
-    const { title, targetAge, artStyle, referenceContent, totalPages = 10, geminiModel = 'gemini-3-pro-preview', existingCharacters } = req.body;
+    const { title, targetAge, artStyle, referenceContent, totalPages = 10, geminiModel = 'gemini-3-pro-preview', existingCharacters, languages = ['ko'] } = req.body;
     
     if (!title) {
       return res.status(400).json({ error: '동화책 제목을 입력해주세요.' });
     }
+    
+    if (!languages || languages.length === 0) {
+      return res.status(400).json({ error: '최소 1개 이상의 언어를 선택해주세요.' });
+    }
+    
+    console.log(`📚 동화책 생성 시작: "${title}" - 언어: ${languages.join(', ')}`);
+    
+    // 언어 이름 매핑
+    const languageNames = {
+      'ko': '한국어',
+      'en': 'English',
+      'zh': '中文',
+      'ja': '日本語',
+      'es': 'Español',
+      'fr': 'Français'
+    };
 
     // 연령대별 설정 (페이지 수, 단어 수, 문장 길이, 어휘 수준)
     const ageSettings = {
@@ -1456,6 +1472,121 @@ JSON만 응답하세요.`;
     storybook.targetAge = targetAge;
     storybook.artStyle = artStyle;
     storybook.createdAt = new Date().toISOString();
+    
+    // 다국어 번역 처리
+    if (languages.length > 1 || (languages.length === 1 && languages[0] !== 'ko')) {
+      console.log(`🌍 다국어 번역 시작: ${languages.join(', ')}`);
+      storybook.translations = {};
+      
+      // 한국어 저장 (기본 언어)
+      if (languages.includes('ko')) {
+        storybook.translations.ko = storybook.pages.map(page => ({
+          pageNumber: page.pageNumber,
+          text: page.text
+        }));
+      }
+      
+      // 다른 언어로 번역
+      const languageMap = {
+        'en': 'English',
+        'zh': 'Chinese',
+        'ja': 'Japanese',
+        'es': 'Spanish',
+        'fr': 'French'
+      };
+      
+      for (const lang of languages) {
+        if (lang === 'ko') continue; // 한국어는 이미 저장됨
+        
+        try {
+          const targetLang = languageMap[lang];
+          console.log(`  📝 ${targetLang} 번역 중...`);
+          
+          // 모든 페이지의 텍스트를 한 번에 번역
+          const pagesText = storybook.pages.map((page, idx) => 
+            `[PAGE ${page.pageNumber}]\n${page.text}`
+          ).join('\n\n---\n\n');
+          
+          const translatePrompt = `Translate the following children's storybook to ${targetLang}.
+
+**IMPORTANT TRANSLATION RULES:**
+1. Maintain the natural tone and style for children ages ${targetAge || '4-8'}
+2. Keep cultural context appropriate for the target language
+3. Preserve emotional nuance and storytelling rhythm
+4. Keep character names as they are (do not translate proper nouns)
+5. Adapt idioms and expressions to be culturally relevant
+6. Maintain the same reading level and vocabulary complexity
+
+**STORYBOOK TITLE:**
+${title}
+
+**THEME:**
+${storybook.theme || ''}
+
+**PAGES TO TRANSLATE:**
+${pagesText}
+
+**RESPOND IN THIS EXACT JSON FORMAT:**
+{
+  "translatedPages": [
+    {
+      "pageNumber": 1,
+      "text": "translated text for page 1"
+    },
+    {
+      "pageNumber": 2,
+      "text": "translated text for page 2"
+    }
+  ]
+}
+
+**CRITICAL:** Respond ONLY with valid JSON. No markdown, no explanation, just pure JSON.`;
+
+          const translateResponse = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${GEMINI_API_KEY}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: translatePrompt }] }],
+                generationConfig: {
+                  temperature: 0.4,
+                  topK: 40,
+                  topP: 0.95,
+                  maxOutputTokens: 8192
+                }
+              })
+            }
+          );
+          
+          if (!translateResponse.ok) {
+            throw new Error(`Translation API failed: ${translateResponse.status}`);
+          }
+          
+          const translateData = await translateResponse.json();
+          let translationText = translateData.candidates[0].content.parts[0].text;
+          
+          // JSON 추출
+          translationText = translationText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+          const translationResult = JSON.parse(translationText);
+          
+          // 번역된 페이지 저장
+          storybook.translations[lang] = translationResult.translatedPages;
+          
+          console.log(`  ✅ ${targetLang} 번역 완료: ${translationResult.translatedPages.length}페이지`);
+          
+        } catch (translateError) {
+          console.error(`  ❌ ${lang} 번역 실패:`, translateError.message);
+          // 번역 실패 시 원본 텍스트 사용
+          storybook.translations[lang] = storybook.pages.map(page => ({
+            pageNumber: page.pageNumber,
+            text: page.text + ` (번역 실패: 원본)`
+          }));
+        }
+      }
+      
+      console.log(`✅ 다국어 번역 완료: ${Object.keys(storybook.translations).join(', ')}`);
+    }
     
     // R2에 동화책 JSON 저장
     try {
