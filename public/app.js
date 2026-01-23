@@ -4373,12 +4373,6 @@ async function generateAllTTS() {
                     console.error('🚫 API 할당량 초과! 더 이상 진행할 수 없습니다.');
                     showNotification('error', 'API 할당량 초과', 'Gemini TTS API 일일 할당량을 초과했습니다. 내일 다시 시도하거나 Google AI Studio에서 할당량을 늘려주세요.');
                     
-                    // 버튼 복원
-                    if (translateAllBtn) {
-                        translateAllBtn.innerHTML = '<i class="fas fa-language mr-2"></i>모든 TTS 생성';
-                        translateAllBtn.disabled = false;
-                    }
-                    
                     // 진행 중단
                     break;
                 }
