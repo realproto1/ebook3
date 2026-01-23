@@ -6814,9 +6814,67 @@ async function translateAllPages() {
             console.error(`❌ 페이지 ${page.pageNumber} 번역 실패:`, error);
             failCount++;
             
-            // 에러가 발생해도 계속 진행
-            if (!confirm(`페이지 ${page.pageNumber} 번역 실패\n\n계속 진행하시겠습니까?`)) {
-                break;
+            // 3번 재시도
+            let retryCount = 0;
+            const maxRetries = 3;
+            let retrySuccess = false;
+            
+            while (retryCount < maxRetries && !retrySuccess) {
+                retryCount++;
+                console.log(`🔄 페이지 ${page.pageNumber} 재시도 중... (${retryCount}/${maxRetries})`);
+                
+                try {
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // 2초 대기
+                    
+                    const retryResponse = await axios.post('/api/translate-page', {
+                        text: page.text,
+                        targetLanguage: currentLanguage,
+                        context: {
+                            title: currentStorybook.title,
+                            theme: currentStorybook.theme,
+                            characters: currentStorybook.characters ? currentStorybook.characters.map(c => c.name).join(', ') : ''
+                        }
+                    }, {
+                        timeout: 30000
+                    });
+                    
+                    if (retryResponse.data.success) {
+                        if (!currentStorybook.translations) {
+                            currentStorybook.translations = {};
+                        }
+                        if (!currentStorybook.translations[currentLanguage]) {
+                            currentStorybook.translations[currentLanguage] = currentStorybook.pages.map(p => ({
+                                pageNumber: p.pageNumber,
+                                text: ''
+                            }));
+                        }
+                        
+                        const translationPage = currentStorybook.translations[currentLanguage].find(p => p.pageNumber === page.pageNumber);
+                        if (translationPage) {
+                            translationPage.text = retryResponse.data.translatedText;
+                        }
+                        
+                        retrySuccess = true;
+                        failCount--; // 재시도 성공 시 실패 카운트 감소
+                        successCount++;
+                        console.log(`✅ 페이지 ${page.pageNumber} 재시도 성공!`);
+                    }
+                } catch (retryError) {
+                    console.error(`❌ 재시도 ${retryCount} 실패:`, retryError);
+                    
+                    if (retryCount >= maxRetries) {
+                        // 모든 재시도 실패 시에만 확인 요청
+                        if (!confirm(`페이지 ${page.pageNumber} 번역이 ${maxRetries}번 모두 실패했습니다.\n\n계속 진행하시겠습니까?`)) {
+                            // 최종 저장 후 종료
+                            saveCurrentStorybook();
+                            if (translateAllBtn) {
+                                translateAllBtn.disabled = false;
+                                translateAllBtn.innerHTML = '<i class="fas fa-language text-xl"></i><span>모두 번역하기</span>';
+                            }
+                            return;
+                        }
+                    }
+                }
             }
         }
         
