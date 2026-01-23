@@ -1716,6 +1716,8 @@ async function addLanguageFromTab(targetLang) {
     const progressBar = document.getElementById('translation-progress-bar');
     const progressPercent = document.getElementById('translation-progress-percent');
     
+    let progressInterval = null; // 스코프를 함수 레벨로 이동
+    
     if (modal) {
         modal.classList.remove('hidden');
         progressText.textContent = `${langName}로 번역 중입니다...`;
@@ -1724,7 +1726,7 @@ async function addLanguageFromTab(targetLang) {
         
         // 진행률 시뮬레이션 (실제 진행률이 아닌 예상 진행률)
         let progress = 0;
-        const progressInterval = setInterval(() => {
+        progressInterval = setInterval(() => {
             if (progress < 90) {
                 progress += 5;
                 progressBar.style.width = `${progress}%`;
