@@ -158,7 +158,8 @@ async function generatePageTTS(pageIndex) {
     }
     
     const page = currentStorybook.pages[pageIndex];
-    const text = page.text;
+    // 현재 언어의 텍스트 가져오기
+    const text = getPageText(page, currentLanguage);
     
     if (!text || text.trim().length === 0) {
         alert('텍스트가 없습니다.');
@@ -177,19 +178,34 @@ async function generatePageTTS(pageIndex) {
     try {
         const response = await axios.post('/api/generate-tts', {
             text: text,
+            language: currentLanguage, // 현재 언어 정보 추가
             model: imageSettings.ttsModel,
             voiceConfig: imageSettings.ttsVoiceConfig
+        }, {
+            timeout: 180000 // 3분 타임아웃
         });
         
         if (response.data.success && response.data.audioUrl) {
-            // TTS 저장
+            // 언어별 TTS 저장
             if (!currentStorybook.pages[pageIndex].ttsAudio) {
                 currentStorybook.pages[pageIndex].ttsAudio = {};
             }
-            currentStorybook.pages[pageIndex].ttsAudio.url = response.data.audioUrl;
-            currentStorybook.pages[pageIndex].ttsAudio.model = imageSettings.ttsModel;
-            // 하위 호환성을 위해 audioUrl에도 저장
-            currentStorybook.pages[pageIndex].audioUrl = response.data.audioUrl;
+            
+            // 언어별로 TTS 저장
+            if (currentLanguage === 'ko') {
+                currentStorybook.pages[pageIndex].ttsAudio.url = response.data.audioUrl;
+                currentStorybook.pages[pageIndex].ttsAudio.model = imageSettings.ttsModel;
+                // 하위 호환성을 위해 audioUrl에도 저장
+                currentStorybook.pages[pageIndex].audioUrl = response.data.audioUrl;
+            } else {
+                // 다른 언어의 경우 ttsAudio 객체에 언어별로 저장
+                if (!currentStorybook.pages[pageIndex].ttsAudio[currentLanguage]) {
+                    currentStorybook.pages[pageIndex].ttsAudio[currentLanguage] = {};
+                }
+                currentStorybook.pages[pageIndex].ttsAudio[currentLanguage].url = response.data.audioUrl;
+                currentStorybook.pages[pageIndex].ttsAudio[currentLanguage].model = imageSettings.ttsModel;
+            }
+            
             saveCurrentStorybook();
             
             // UI 즉시 업데이트 - 현재 동화책을 다시 렌더링
@@ -201,7 +217,15 @@ async function generatePageTTS(pageIndex) {
         }
     } catch (error) {
         console.error('TTS 생성 오류:', error);
-        alert('TTS 생성 중 오류가 발생했습니다: ' + (error.response?.data?.error || error.message));
+        
+        let errorMsg = 'TTS 생성 중 오류가 발생했습니다.';
+        if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+            errorMsg += ' 시간이 초과되었습니다. 텍스트가 너무 길거나 서버가 응답하지 않습니다.';
+        } else {
+            errorMsg += ' ' + (error.response?.data?.error || error.message);
+        }
+        
+        alert(errorMsg);
         
         // 버튼 복원
         if (ttsButton) {
@@ -2210,50 +2234,6 @@ function displayStorybook(storybook) {
                     </button>
                     
                     <!-- 다운로드 버튼 -->
-                    <button 
-                        onclick="downloadAllText()"
-                        class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded-lg hover:from-blue-600 hover:to-blue-700 transition shadow-md flex items-center justify-center gap-2 font-medium"
-                    >
-                        <i class="fas fa-file-download text-lg"></i>
-                        <span>📄 전체 텍스트 다운로드</span>
-                    </button>
-                    
-                    <button 
-                        onclick="downloadAllIllustrations()"
-                        class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition shadow-md flex items-center justify-center gap-2 font-medium"
-                    >
-                        <i class="fas fa-images text-lg"></i>
-                        <span>🖼️ 전체 삽화 다운로드</span>
-                    </button>
-                    
-                    <button 
-                        onclick="downloadAllAudio()"
-                        class="w-full bg-gradient-to-r from-blue-700 to-blue-800 text-white px-4 py-3 rounded-lg hover:from-blue-800 hover:to-blue-900 transition shadow-md flex items-center justify-center gap-2 font-medium"
-                    >
-                        <i class="fas fa-headphones text-lg"></i>
-                        <span>🎧 전체 오디오 다운로드</span>
-                    </button>
-                </div>
-                    >
-                        <i class="fas fa-images text-lg"></i>
-                        <span>🖼️ 전체 삽화 다운로드</span>
-                    </button>
-                    
-                    <button 
-                        onclick="downloadAllAudio()"
-                        class="w-full bg-gradient-to-r from-blue-700 to-blue-800 text-white px-4 py-3 rounded-lg hover:from-blue-800 hover:to-blue-900 transition shadow-md flex items-center justify-center gap-2 font-medium"
-                    >
-                        <i class="fas fa-headphones text-lg"></i>
-                        <span>🎧 전체 오디오 다운로드</span>
-                    </button>
-                    
-                    <button 
-                        onclick="downloadAllImageUrls()"
-                        class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition shadow-md flex items-center justify-center gap-2 font-medium"
-                    >
-                        <i class="fas fa-link text-lg"></i>
-                        <span>🔗 전체 이미지 URL 다운로드</span>
-                    </button>
                 </div>
 
             <div id="pages-section-content" class="space-y-4 md:space-y-6">
@@ -2268,7 +2248,7 @@ function displayStorybook(storybook) {
                             </div>
                             <div class="flex gap-1.5">
                                 ${page.text ? '<div class="w-6 h-6 bg-white bg-opacity-90 rounded-full flex items-center justify-center" title="텍스트 완료"><i class="fas fa-align-left text-purple-600 text-xs"></i></div>' : ''}
-                                ${page.audioUrl ? '<div class="w-6 h-6 bg-white bg-opacity-90 rounded-full flex items-center justify-center" title="TTS 완료"><i class="fas fa-volume-up text-blue-600 text-xs"></i></div>' : ''}
+                                ${getPageTTS(page, currentLanguage) ? '<div class="w-6 h-6 bg-white bg-opacity-90 rounded-full flex items-center justify-center" title="TTS 완료"><i class="fas fa-volume-up text-blue-600 text-xs"></i></div>' : ''}
                                 ${page.illustrationImage ? '<div class="w-6 h-6 bg-white bg-opacity-90 rounded-full flex items-center justify-center" title="삽화 완료"><i class="fas fa-image text-green-600 text-xs"></i></div>' : ''}
                             </div>
                         </div>
@@ -2325,16 +2305,16 @@ function displayStorybook(storybook) {
                                     class="w-full bg-blue-600 text-white py-2.5 md:py-3 rounded-lg font-semibold hover:bg-blue-700 active:bg-blue-800 transition text-sm md:text-base shadow-md mb-2"
                                     id="tts-btn-${idx}"
                                 >
-                                    <i class="fas fa-microphone mr-2"></i>${page.audioUrl || page.ttsAudio?.url ? 'TTS 재생성' : 'TTS 생성'}
+                                    <i class="fas fa-microphone mr-2"></i>${getPageTTS(page, currentLanguage) ? 'TTS 재생성' : 'TTS 생성'}
                                 </button>
                                 
-                                ${page.audioUrl || page.ttsAudio?.url ? `
+                                ${getPageTTS(page, currentLanguage) ? `
                                 <div class="space-y-2">
                                     <audio controls class="w-full h-10 md:h-12">
-                                        <source src="${page.audioUrl || page.ttsAudio?.url}" type="audio/wav">
+                                        <source src="${getPageTTS(page, currentLanguage)}" type="audio/wav">
                                     </audio>
                                     <button 
-                                        onclick="downloadAudio('${page.audioUrl || page.ttsAudio?.url}', '${storybook.title}_페이지_${page.pageNumber}.wav')"
+                                        onclick="downloadAudio('${getPageTTS(page, currentLanguage)}', '${storybook.title}_${currentLanguage}_페이지_${page.pageNumber}.wav')"
                                         class="w-full bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 active:bg-green-800 transition text-xs md:text-sm shadow"
                                     >
                                         <i class="fas fa-download mr-1"></i>오디오 다운로드
@@ -6321,6 +6301,17 @@ function getPageText(page, lang) {
 
 // 현재 언어에 해당하는 TTS URL 가져오기
 function getPageTTS(page, lang) {
-    // 아직 구현 안됨 - 나중에 언어별 TTS 추가
-    return page.audioUrl || page.ttsAudioUrl || page.ttsAudio?.url || null;
+    if (!page) return null;
+    
+    // 한국어인 경우
+    if (lang === 'ko') {
+        return page.audioUrl || page.ttsAudio?.url || null;
+    }
+    
+    // 다른 언어인 경우
+    if (page.ttsAudio && page.ttsAudio[lang]) {
+        return page.ttsAudio[lang].url || null;
+    }
+    
+    return null;
 }
