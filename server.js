@@ -2573,7 +2573,7 @@ app.post('/api/generate-tts', requireAPIKey, async (req, res) => {
     }
     
     // 오디오를 찾지 못한 경우
-    console.log('Full Gemini response:', JSON.stringify(response, null, 2));
+    console.error('❌ Gemini TTS API에서 오디오를 찾을 수 없습니다.');
     throw new Error('Gemini TTS API에서 오디오를 찾을 수 없습니다.');
     
   } catch (error) {

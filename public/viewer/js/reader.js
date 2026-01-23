@@ -446,7 +446,7 @@ async function playTTS() {
     // 디버깅: 페이지 데이터 확인
     console.log('🔍 TTS Debug - Page:', currentPage + 1);
     console.log('  Language:', currentLanguage);
-    console.log('  audioUrl:', audioUrl);
+    console.log('  audioUrl:', audioUrl ? `${audioUrl.substring(0, 50)}...` : 'null');
     
     if (audioUrl) {
         try {
