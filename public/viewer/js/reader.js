@@ -587,3 +587,87 @@ setTimeout(() => {
         window.toggleControls();
     }
 }, 5000);
+
+// ========================================
+// 전체화면 관련 함수들
+// ========================================
+
+// 전체화면 토글
+async function toggleFullscreen() {
+    const readerContainer = document.getElementById('reader');
+    const fullscreenIcon = document.getElementById('fullscreen-icon');
+    
+    try {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            // 전체화면 진입
+            if (readerContainer.requestFullscreen) {
+                await readerContainer.requestFullscreen();
+            } else if (readerContainer.webkitRequestFullscreen) {
+                // iOS Safari 지원
+                readerContainer.webkitRequestFullscreen();
+            } else if (readerContainer.mozRequestFullScreen) {
+                // Firefox
+                await readerContainer.mozRequestFullScreen();
+            } else if (readerContainer.msRequestFullscreen) {
+                // IE/Edge
+                await readerContainer.msRequestFullscreen();
+            }
+            
+            // 아이콘 변경
+            fullscreenIcon.classList.remove('fa-expand');
+            fullscreenIcon.classList.add('fa-compress');
+            
+            console.log('✅ 전체화면 진입');
+        } else {
+            // 전체화면 종료
+            if (document.exitFullscreen) {
+                await document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+            
+            // 아이콘 변경
+            fullscreenIcon.classList.remove('fa-compress');
+            fullscreenIcon.classList.add('fa-expand');
+            
+            console.log('✅ 전체화면 종료');
+        }
+    } catch (error) {
+        console.error('❌ 전체화면 오류:', error);
+        
+        // 전체화면이 지원되지 않는 경우 알림
+        if (error.name === 'TypeError' || error.message.includes('not supported')) {
+            alert('이 브라우저에서는 전체화면이 지원되지 않습니다.\n\nPWA로 설치하시거나, Chrome/Safari 최신 버전을 사용해주세요.');
+        }
+    }
+}
+
+// 전체화면 상태 변경 감지
+document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+function handleFullscreenChange() {
+    const fullscreenIcon = document.getElementById('fullscreen-icon');
+    
+    if (document.fullscreenElement || document.webkitFullscreenElement || 
+        document.mozFullScreenElement || document.msFullscreenElement) {
+        // 전체화면 상태
+        fullscreenIcon.classList.remove('fa-expand');
+        fullscreenIcon.classList.add('fa-compress');
+        console.log('📺 전체화면 활성화');
+    } else {
+        // 일반 화면 상태
+        fullscreenIcon.classList.remove('fa-compress');
+        fullscreenIcon.classList.add('fa-expand');
+        console.log('📺 전체화면 비활성화');
+    }
+}
+
+// 전역으로 노출
+window.toggleFullscreen = toggleFullscreen;
