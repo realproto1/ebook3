@@ -5725,25 +5725,87 @@ function toggleKeyObjectReference(pageIndex, objIndex) {
 }
 
 // Key Object 추가
-function addNewKeyObject() {
+async function addNewKeyObject() {
     if (!currentStorybook.key_objects) {
         currentStorybook.key_objects = [];
     }
     
+    // 사물 이름 입력받기
+    const objectName = prompt('핵심 사물의 이름을 입력하세요 (예: 사과, 호랑이, 성)\n\n⚠️ 반드시 명사(동물/물건)를 입력하세요.\n동사, 형용사, 추상적 개념은 안됩니다.');
+    
+    if (!objectName || objectName.trim() === '') {
+        return; // 취소
+    }
+    
+    const trimmedName = objectName.trim();
+    
+    // 임시 객체 추가 (로딩 중)
     const newKeyObject = {
-        name: "New Object",
-        korean: "새 사물",
+        name: trimmedName,
+        korean: trimmedName,
         size: "medium",
         sizeCm: 100,
-        description: "이 사물의 상세한 시각적 설명을 입력하세요.",
-        example: "이 사물이 등장하는 예시 문장을 입력하세요."
+        description: "🔄 설명 생성 중...",
+        example: "🔄 예문 생성 중..."
     };
     
     currentStorybook.key_objects.push(newKeyObject);
     saveCurrentStorybook();
     displayStorybook(currentStorybook);
     
-    alert('새 Key Object가 추가되었습니다!');
+    // 동화 텍스트 수집
+    const storyText = currentStorybook.pages.map(p => p.text || '').join('\n\n');
+    
+    if (!storyText || storyText.trim().length === 0) {
+        alert('동화 텍스트가 없어서 설명을 자동 생성할 수 없습니다.\n수동으로 설명과 예문을 입력해주세요.');
+        newKeyObject.description = "이 사물의 상세한 시각적 설명을 입력하세요.";
+        newKeyObject.example = "이 사물이 등장하는 예시 문장을 입력하세요.";
+        saveCurrentStorybook();
+        displayStorybook(currentStorybook);
+        return;
+    }
+    
+    try {
+        console.log(`🔍 핵심 사물 설명 자동 생성: ${trimmedName}`);
+        
+        // API 호출로 설명과 예문 생성
+        const response = await axios.post('/api/generate-keyobject-description', {
+            objectName: trimmedName,
+            storyText: storyText
+        }, {
+            headers: {
+                'X-API-Key': getAPIKey()
+            }
+        });
+        
+        if (response.data.success) {
+            // 생성된 설명과 예문 적용
+            const objIndex = currentStorybook.key_objects.length - 1;
+            currentStorybook.key_objects[objIndex].description = response.data.description;
+            currentStorybook.key_objects[objIndex].example = response.data.example;
+            
+            saveCurrentStorybook();
+            displayStorybook(currentStorybook);
+            
+            showNotification('success', '핵심 사물 추가 완료!', `"${trimmedName}"의 설명과 예문이 자동 생성되었습니다.`);
+            console.log(`✅ 설명: ${response.data.description}`);
+            console.log(`✅ 예문: ${response.data.example}`);
+        } else {
+            throw new Error(response.data.error || '설명 생성 실패');
+        }
+        
+    } catch (error) {
+        console.error('설명 생성 오류:', error);
+        alert(`설명 자동 생성에 실패했습니다.\n수동으로 설명과 예문을 입력해주세요.\n\n오류: ${error.message}`);
+        
+        // 실패 시 기본값으로 설정
+        const objIndex = currentStorybook.key_objects.length - 1;
+        currentStorybook.key_objects[objIndex].description = "이 사물의 상세한 시각적 설명을 입력하세요.";
+        currentStorybook.key_objects[objIndex].example = "이 사물이 등장하는 예시 문장을 입력하세요.";
+        
+        saveCurrentStorybook();
+        displayStorybook(currentStorybook);
+    }
 }
 
 // Key Object 삭제

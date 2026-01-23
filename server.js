@@ -2655,6 +2655,111 @@ ${text}`
   }
 });
 
+// 핵심 사물 설명/예문 자동 생성 API
+app.post('/api/generate-keyobject-description', requireAPIKey, async (req, res) => {
+  try {
+    const { objectName, storyText } = req.body;
+    
+    if (!objectName) {
+      return res.status(400).json({ 
+        success: false, 
+        error: '사물 이름이 필요합니다.' 
+      });
+    }
+    
+    if (!storyText || storyText.trim().length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        error: '동화 텍스트가 필요합니다.' 
+      });
+    }
+    
+    console.log(`🔍 핵심 사물 설명 생성 시작: ${objectName}`);
+    console.log(`📖 동화 텍스트 길이: ${storyText.length}자`);
+    
+    // Gemini API로 설명과 예문 생성
+    const prompt = `You are a children's storybook assistant. Analyze the story text and generate a description and example sentence for the key object.
+
+**Story Text:**
+${storyText}
+
+**Key Object:** ${objectName}
+
+**Instructions:**
+1. This object must be a CONCRETE NOUN (animal or physical object), not abstract concepts or actions
+2. Find how this object appears in the story
+3. Generate a simple, visual description suitable for 4-8 year old children
+4. Find an example sentence from the story where this object appears
+5. If the object doesn't appear in the story, create a relevant description and example
+
+**Output Format (JSON only, no markdown):**
+{
+  "description": "Simple visual description of the object in Korean (20-50 characters)",
+  "example": "Example sentence from the story in Korean (no quotes needed)"
+}
+
+**Important:** 
+- Ensure the object is a concrete noun (명사) - animals, objects, things you can see/touch
+- NOT allowed: emotions (행복), actions (웃음), abstract concepts (사랑)
+- Description should focus on visual appearance
+- Example should be a natural sentence from the story context`;
+
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 500
+        }
+      },
+      {
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+    
+    if (!response.data || !response.data.candidates || response.data.candidates.length === 0) {
+      throw new Error('Gemini API에서 응답을 받지 못했습니다.');
+    }
+    
+    const generatedText = response.data.candidates[0].content.parts[0].text;
+    console.log(`📝 Generated text: ${generatedText}`);
+    
+    // JSON 추출 (마크다운 코드 블록 제거)
+    let jsonText = generatedText.trim();
+    if (jsonText.startsWith('```json')) {
+      jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    } else if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/```\n?/g, '').trim();
+    }
+    
+    const result = JSON.parse(jsonText);
+    
+    console.log(`✅ 핵심 사물 설명 생성 완료`);
+    console.log(`  - Description: ${result.description}`);
+    console.log(`  - Example: ${result.example}`);
+    
+    res.json({
+      success: true,
+      description: result.description,
+      example: result.example
+    });
+
+  } catch (error) {
+    console.error('핵심 사물 설명 생성 실패:', error);
+    res.status(500).json({
+      success: false,
+      error: '핵심 사물 설명 생성 실패: ' + error.message
+    });
+  }
+});
+
 // ===== 동화책 관리 API (R2 저장소) =====
 
 // 동화책 목록 조회 (R2에서)

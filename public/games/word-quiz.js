@@ -1,5 +1,6 @@
 // 단어 퀴즈 게임 (Word Quiz)
 // 3가지 문제 유형: 뜻 맞히기, 단어 맞히기, 그림 보고 맞히기
+// ✨ 핵심 사물(key_objects)을 사용하여 퀴즈 생성
 
 // URL에서 스토리 ID 추출
 const urlParams = new URLSearchParams(window.location.search);
@@ -7,7 +8,7 @@ const storyId = urlParams.get('story');
 
 // 게임 상태
 let storyData = null;
-let vocabulary = [];
+let keyObjects = []; // vocabulary 대신 key_objects 사용
 let questions = [];
 let currentQuestionIndex = 0;
 let correctAnswers = 0;
@@ -37,11 +38,11 @@ async function init() {
         // 제목 표시
         document.getElementById('story-title').textContent = storyData.title || '동화책';
 
-        // 학습 단어 추출
-        vocabulary = storyData.educational_content?.vocabulary || [];
+        // 핵심 사물 추출
+        keyObjects = storyData.key_objects || [];
         
-        if (vocabulary.length === 0) {
-            alert('❌ 학습 단어가 없습니다.');
+        if (keyObjects.length === 0) {
+            alert('❌ 핵심 사물이 없습니다.\n저작 도구에서 핵심 사물을 추가해주세요.');
             goBack();
             return;
         }
@@ -63,18 +64,21 @@ async function init() {
 function generateQuestions() {
     questions = [];
 
-    // 단어 셔플
-    const shuffled = shuffle([...vocabulary]);
+    // 핵심 사물 셔플
+    const shuffled = shuffle([...keyObjects]);
 
     // 최대 8개 문제
     const questionCount = Math.min(8, shuffled.length);
 
     for (let i = 0; i < questionCount; i++) {
-        const word = shuffled[i];
+        const obj = shuffled[i];
         
-        // 이미지가 있는 단어만 IMAGE 타입 가능
+        // 이미지가 있는 사물만 IMAGE 타입 가능
         let availableTypes = [QUESTION_TYPES.MEANING, QUESTION_TYPES.WORD];
-        if (word.image || word.imageUrl) {
+        
+        // keyObjectImages 또는 직접 imageUrl 확인
+        const objImage = storyData.keyObjectImages && storyData.keyObjectImages[i];
+        if (objImage?.imageUrl || obj.imageUrl) {
             availableTypes.push(QUESTION_TYPES.IMAGE);
         }
         
@@ -82,7 +86,7 @@ function generateQuestions() {
         const typeIndex = i % availableTypes.length;
         const type = availableTypes[typeIndex];
         
-        const question = createQuestion(word, type);
+        const question = createQuestion(obj, type, i);
         questions.push(question);
     }
 
@@ -96,32 +100,35 @@ function generateQuestions() {
 }
 
 // 문제 생성 (유형별)
-function createQuestion(word, type) {
+function createQuestion(obj, type, objIndex) {
     const question = {
-        word: word,
+        object: obj,
+        objIndex: objIndex,
         type: type,
         correctAnswer: '',
         options: []
     };
 
     if (type === QUESTION_TYPES.MEANING) {
-        // 단어 → 뜻 선택
-        question.text = `"${word.korean}"의 뜻은?`;
-        question.correctAnswer = word.definition;
-        question.options = generateOptions(word.definition, vocabulary.map(v => v.definition));
+        // 사물 이름 → 설명 선택
+        question.text = `"${obj.name || obj.korean}"은(는) 무엇인가요?`;
+        question.correctAnswer = obj.description;
+        question.options = generateOptions(obj.description, keyObjects.map(o => o.description));
 
     } else if (type === QUESTION_TYPES.WORD) {
-        // 뜻 → 단어 선택
-        question.text = `"${word.definition}"에 해당하는 단어는?`;
-        question.correctAnswer = word.korean;
-        question.options = generateOptions(word.korean, vocabulary.map(v => v.korean));
+        // 설명 → 사물 이름 선택
+        question.text = `"${obj.description}"에 해당하는 것은?`;
+        question.correctAnswer = obj.name || obj.korean;
+        question.options = generateOptions(obj.name || obj.korean, keyObjects.map(o => o.name || o.korean));
 
     } else if (type === QUESTION_TYPES.IMAGE) {
-        // 그림 → 단어 선택 (이미지가 있을 때만 이 타입 사용됨)
-        question.text = `그림이 나타내는 단어는?`;
-        question.imageUrl = word.image || word.imageUrl || null;
-        question.correctAnswer = word.korean;
-        question.options = generateOptions(word.korean, vocabulary.map(v => v.korean));
+        // 그림 → 사물 이름 선택 (이미지가 있을 때만 이 타입 사용됨)
+        question.text = `그림이 나타내는 것은?`;
+        // keyObjectImages 또는 obj.imageUrl 사용
+        const objImage = storyData.keyObjectImages && storyData.keyObjectImages[objIndex];
+        question.imageUrl = objImage?.imageUrl || obj.imageUrl || null;
+        question.correctAnswer = obj.name || obj.korean;
+        question.options = generateOptions(obj.name || obj.korean, keyObjects.map(o => o.name || o.korean));
     }
 
     return question;
