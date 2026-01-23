@@ -2748,6 +2748,107 @@ ${i === 0 ? `{
   }
 });
 
+// 단일 페이지 번역 API
+app.post('/api/translate-page', requireAPIKey, async (req, res) => {
+  try {
+    const { text, targetLanguage, context } = req.body;
+    
+    if (!text || !targetLanguage) {
+      return res.status(400).json({
+        success: false,
+        error: '텍스트와 타겟 언어가 필요합니다.'
+      });
+    }
+    
+    const languageMap = {
+      'en': 'English',
+      'ja': 'Japanese',
+      'zh': 'Chinese',
+      'es': 'Spanish',
+      'fr': 'French',
+      'de': 'German',
+      'vi': 'Vietnamese',
+      'th': 'Thai'
+    };
+    
+    const targetLang = languageMap[targetLanguage] || 'English';
+    
+    console.log(`\n🌍 Translating single page to ${targetLang}`);
+    
+    const contextInfo = context ? `
+**STORY CONTEXT:**
+Title: ${context.title || ''}
+Theme: ${context.theme || ''}
+Characters: ${context.characters || ''}
+` : '';
+    
+    const prompt = `Translate the following children's storybook page to ${targetLang}.
+
+**IMPORTANT TRANSLATION RULES:**
+1. Maintain the natural tone and style for children
+2. Keep cultural context appropriate for the target language
+3. Preserve emotional nuance and storytelling rhythm
+4. Keep character names as they are (do not translate proper nouns)
+5. Adapt idioms and expressions to be culturally relevant
+6. Maintain the same reading level and vocabulary complexity
+
+${contextInfo}
+
+**TEXT TO TRANSLATE:**
+${text}
+
+**RESPOND WITH ONLY THE TRANSLATED TEXT. NO JSON, NO EXPLANATION, JUST THE TRANSLATED TEXT.**`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.4,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 2048
+          }
+        })
+      }
+    );
+    
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    const translatedText = data.candidates[0].content.parts[0].text.trim();
+    
+    console.log(`✅ Page translation complete`);
+    
+    res.json({
+      success: true,
+      translatedText: translatedText
+    });
+
+  } catch (error) {
+    console.error('페이지 번역 실패:', error);
+    res.status(500).json({
+      success: false,
+      error: '번역 실패: ' + error.message
+    });
+  }
+});
+
 // TTS 생성 API
 app.post('/api/generate-tts', requireAPIKey, async (req, res) => {
   try {

@@ -1704,126 +1704,40 @@ async function addLanguageFromTab(targetLang) {
     };
     
     const langName = langNames[targetLang] || targetLang;
-    const estimatedTime = Math.ceil(currentStorybook.pages.length * 2);
     
-    if (!confirm(`${langName}로 번역하시겠습니까?\n\n예상 소요 시간: 약 ${estimatedTime}초\n${currentStorybook.pages.length}개 페이지의 텍스트가 번역됩니다.`)) {
+    if (!confirm(`${langName} 언어를 추가하시겠습니까?\n\n빈 페이지가 생성되고, 각 페이지별로 개별 번역할 수 있습니다.`)) {
         return;
     }
     
-    // 진행 중 모달 표시
-    const modal = document.getElementById('translation-progress-modal');
-    const progressText = document.getElementById('translation-progress-text');
-    const progressBar = document.getElementById('translation-progress-bar');
-    const progressPercent = document.getElementById('translation-progress-percent');
-    
-    let progressInterval = null; // 스코프를 함수 레벨로 이동
-    
-    if (modal) {
-        modal.classList.remove('hidden');
-        progressText.textContent = `${langName}로 번역 중입니다...`;
-        progressBar.style.width = '0%';
-        progressPercent.textContent = '0%';
-        
-        // 진행률 시뮬레이션 (실제 진행률이 아닌 예상 진행률)
-        let progress = 0;
-        progressInterval = setInterval(() => {
-            if (progress < 90) {
-                progress += 5;
-                progressBar.style.width = `${progress}%`;
-                progressPercent.textContent = `${progress}%`;
-            }
-        }, estimatedTime * 1000 / 18); // 90%까지 도달하는 시간
+    // 1. 즉시 빈 페이지 생성
+    if (!currentStorybook.translations) {
+        currentStorybook.translations = {};
     }
     
-    try {
-        console.log(`🌐 Starting translation to ${targetLang}...`);
-        
-        const response = await axios.post('/api/translate-storybook', {
-            storybook: currentStorybook,
-            targetLanguage: targetLang
-        }, {
-            timeout: 300000  // 5분 타임아웃
-        });
-        
-        // 진행률 완료
-        if (progressInterval) {
-            clearInterval(progressInterval);
-        }
-        if (modal) {
-            progressBar.style.width = '100%';
-            progressPercent.textContent = '100%';
-        }
-        
-        if (response.data.success) {
-            // translations 객체 업데이트
-            if (!currentStorybook.translations) {
-                currentStorybook.translations = {};
-            }
-            
-            // 번역된 페이지 저장
-            currentStorybook.translations[targetLang] = response.data.translatedPages.map((translatedText, idx) => ({
-                pageNumber: currentStorybook.pages[idx].pageNumber,
-                text: translatedText
-            }));
-            
-            // languages 배열 업데이트
-            if (!currentStorybook.languages) {
-                currentStorybook.languages = ['ko'];
-            }
-            if (!currentStorybook.languages.includes(targetLang)) {
-                currentStorybook.languages.push(targetLang);
-            }
-            
-            // 저장
-            saveCurrentStorybook();
-            
-            // UI 업데이트
-            displayStorybook(currentStorybook);
-            
-            // 새로 추가된 언어로 전환
-            currentLanguage = targetLang;
-            displayStorybook(currentStorybook);
-            
-            // 모달 숨기기
-            if (modal) {
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                    // 완료 알림
-                    alert(`✅ ${langName} 번역이 완료되었습니다!\n\n${currentStorybook.pages.length}개 페이지가 번역되었습니다.`);
-                }, 500);
-            } else {
-                alert(`✅ ${langName} 번역이 완료되었습니다!\n\n${currentStorybook.pages.length}개 페이지가 번역되었습니다.`);
-            }
-            
-            console.log(`✅ Translation to ${targetLang} completed`);
-        } else {
-            throw new Error(response.data.error || '번역 실패');
-        }
-    } catch (error) {
-        // 진행률 인터벌 정리
-        if (progressInterval) {
-            clearInterval(progressInterval);
-        }
-        
-        // 모달 숨기기
-        if (modal) {
-            modal.classList.add('hidden');
-        }
-        
-        console.error('❌ Translation error:', error);
-        
-        // 에러 메시지 개선
-        let errorMessage = '번역 중 오류가 발생했습니다.';
-        if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-            errorMessage = `번역 시간이 초과되었습니다.\n\n페이지 수가 많아 시간이 오래 걸립니다.\n다시 시도해주세요.`;
-        } else if (error.response?.status === 524) {
-            errorMessage = `서버 응답 시간이 초과되었습니다.\n\n페이지 수가 많은 경우 시간이 오래 걸릴 수 있습니다.\n잠시 후 다시 시도해주세요.`;
-        } else if (error.response?.data?.error) {
-            errorMessage = `번역 오류: ${error.response.data.error}`;
-        }
-        
-        alert(errorMessage);
+    // 빈 텍스트로 페이지 초기화
+    currentStorybook.translations[targetLang] = currentStorybook.pages.map(page => ({
+        pageNumber: page.pageNumber,
+        text: ''  // 빈 텍스트
+    }));
+    
+    // languages 배열 업데이트
+    if (!currentStorybook.languages) {
+        currentStorybook.languages = ['ko'];
     }
+    if (!currentStorybook.languages.includes(targetLang)) {
+        currentStorybook.languages.push(targetLang);
+    }
+    
+    // 저장
+    saveCurrentStorybook();
+    
+    // 새 언어로 전환
+    currentLanguage = targetLang;
+    
+    // UI 업데이트
+    displayStorybook(currentStorybook);
+    
+    alert(`✅ ${langName} 언어가 추가되었습니다!\n\n각 페이지의 [번역] 버튼을 눌러 개별 번역하세요.`);
 }
 
 // 언어 추가 및 번역
@@ -2594,9 +2508,20 @@ function displayStorybook(storybook) {
                         <div class="p-3 md:p-6 space-y-4 md:space-y-5">
                             <!-- 1️⃣ 텍스트 섹션 -->
                             <div class="bg-purple-50 border-2 border-purple-200 rounded-lg p-3 md:p-4">
-                                <h5 class="font-bold text-purple-700 mb-3 text-sm md:text-base flex items-center">
-                                    <span class="bg-purple-600 text-white w-6 h-6 rounded-full flex items-center justify-center mr-2 text-xs">1</span>
-                                    텍스트
+                                <h5 class="font-bold text-purple-700 mb-3 text-sm md:text-base flex items-center justify-between">
+                                    <span class="flex items-center">
+                                        <span class="bg-purple-600 text-white w-6 h-6 rounded-full flex items-center justify-center mr-2 text-xs">1</span>
+                                        텍스트
+                                    </span>
+                                    ${currentLanguage !== 'ko' ? `
+                                    <button 
+                                        onclick="translateSinglePage(${idx})"
+                                        data-translate-page="${idx}"
+                                        class="bg-purple-600 text-white px-3 py-1.5 rounded-lg hover:bg-purple-700 transition text-xs"
+                                    >
+                                        <i class="fas fa-language mr-1"></i>번역
+                                    </button>
+                                    ` : ''}
                                 </h5>
                                 <textarea 
                                     id="text-${idx}" 
@@ -6670,5 +6595,85 @@ function openQuiz(bookId) {
     
     // quiz.html로 이동
     window.open('/quiz.html', '_blank');
+}
+
+// 페이지별 번역 함수
+async function translateSinglePage(pageIndex) {
+    if (!currentStorybook || !currentStorybook.pages[pageIndex]) {
+        alert('페이지를 찾을 수 없습니다.');
+        return;
+    }
+    
+    if (currentLanguage === 'ko') {
+        alert('한국어는 번역할 필요가 없습니다.');
+        return;
+    }
+    
+    const page = currentStorybook.pages[pageIndex];
+    const sourceText = page.text;
+    
+    if (!sourceText || sourceText.trim() === '') {
+        alert('번역할 텍스트가 없습니다.');
+        return;
+    }
+    
+    // 번역 버튼 찾기
+    const translateBtn = document.querySelector(`[data-translate-page="${pageIndex}"]`);
+    if (translateBtn) {
+        translateBtn.disabled = true;
+        translateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>번역 중...';
+    }
+    
+    try {
+        const response = await axios.post('/api/translate-page', {
+            text: sourceText,
+            targetLanguage: currentLanguage,
+            context: {
+                title: currentStorybook.title,
+                theme: currentStorybook.theme,
+                characters: currentStorybook.characters ? currentStorybook.characters.map(c => c.name).join(', ') : ''
+            }
+        }, {
+            timeout: 30000  // 30초
+        });
+        
+        if (response.data.success) {
+            // translations 업데이트
+            if (!currentStorybook.translations) {
+                currentStorybook.translations = {};
+            }
+            if (!currentStorybook.translations[currentLanguage]) {
+                currentStorybook.translations[currentLanguage] = currentStorybook.pages.map(p => ({
+                    pageNumber: p.pageNumber,
+                    text: ''
+                }));
+            }
+            
+            // 해당 페이지 번역 텍스트 저장
+            const translationPage = currentStorybook.translations[currentLanguage].find(p => p.pageNumber === page.pageNumber);
+            if (translationPage) {
+                translationPage.text = response.data.translatedText;
+            }
+            
+            // 저장
+            saveCurrentStorybook();
+            
+            // UI 업데이트
+            displayStorybook(currentStorybook);
+            
+            showNotification('success', '번역 완료', `페이지 ${page.pageNumber} 번역이 완료되었습니다.`);
+        } else {
+            throw new Error(response.data.error || '번역 실패');
+        }
+    } catch (error) {
+        console.error('페이지 번역 실패:', error);
+        alert(`번역 실패: ${error.response?.data?.error || error.message}`);
+        
+        // 버튼 복원
+        if (translateBtn) {
+            translateBtn.disabled = false;
+            translateBtn.innerHTML = '<i class="fas fa-language mr-1"></i>번역';
+        }
+    }
 }
 
