@@ -117,6 +117,12 @@ async function loadBook() {
             }
         });
         
+        console.log('🔍 Debug - API response:', {
+            success: response.data.success,
+            hasStorybook: !!response.data.storybook,
+            pageCount: response.data.storybook?.pages?.length
+        });
+        
         if (response.data.success) {
             currentBook = response.data.storybook;
             console.log('✅ Storybook loaded:', currentBook.title);
@@ -186,6 +192,11 @@ async function loadBook() {
 
 // 페이지 표시
 function showPage(pageIndex) {
+    if (!currentBook || !currentBook.pages) {
+        console.error('❌ currentBook is not loaded in showPage');
+        return;
+    }
+    
     currentPage = pageIndex;
     
     // TTS 버튼 표시/숨김
@@ -347,6 +358,11 @@ function updateNavigationButtons() {
 
 // 다음 페이지
 function nextPage() {
+    if (!currentBook || !currentBook.pages) {
+        console.error('❌ currentBook is not loaded');
+        return;
+    }
+    
     const lastPage = currentBook.pages.length - 1;
     
     if (currentPage < lastPage) {
@@ -361,6 +377,11 @@ function nextPage() {
 
 // 이전 페이지
 function previousPage() {
+    if (!currentBook || !currentBook.pages) {
+        console.error('❌ currentBook is not loaded');
+        return;
+    }
+    
     const firstPage = hasCoverPage ? -1 : 0;
     
     if (currentPage > firstPage) {
