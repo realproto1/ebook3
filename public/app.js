@@ -6740,13 +6740,23 @@ async function translateAllPages() {
     let failCount = 0;
     
     console.log(`🌐 모든 페이지 번역 시작 (${totalPages}개 페이지)`);
+    console.log('📋 번역 데이터 구조:', {
+        hasTranslations: !!currentStorybook.translations,
+        hasCurrentLang: !!currentStorybook.translations?.[currentLanguage],
+        translationCount: currentStorybook.translations?.[currentLanguage]?.length || 0,
+        currentLanguage: currentLanguage
+    });
     
     for (let i = 0; i < currentStorybook.pages.length; i++) {
         const page = currentStorybook.pages[i];
         
         // 이미 번역된 페이지는 건너뛰기
         const translatedPage = currentStorybook.translations?.[currentLanguage]?.find(p => p.pageNumber === page.pageNumber);
-        if (translatedPage && translatedPage.text && translatedPage.text.trim() !== '') {
+        const hasTranslation = translatedPage && translatedPage.text && translatedPage.text.trim() !== '';
+        
+        console.log(`📄 페이지 ${page.pageNumber}: 번역=${hasTranslation}, 텍스트=${translatedPage?.text?.substring(0, 50)}...`);
+        
+        if (hasTranslation) {
             console.log(`⏭️ 페이지 ${page.pageNumber} 이미 번역됨, 건너뛰기`);
             successCount++;
             continue;
@@ -6800,9 +6810,9 @@ async function translateAllPages() {
                 successCount++;
                 console.log(`✅ 페이지 ${page.pageNumber} 번역 완료`);
                 
-                // 중간 저장 (5페이지마다)
+                // 중간 저장 (5페이지마다) - await 추가하여 저장 완료 대기
                 if ((i + 1) % 5 === 0) {
-                    saveCurrentStorybook();
+                    await saveToR2(currentStorybook);
                     console.log(`💾 중간 저장 완료 (${i + 1}/${totalPages})`);
                 }
                 
@@ -6866,7 +6876,8 @@ async function translateAllPages() {
                         // 모든 재시도 실패 시에만 확인 요청
                         if (!confirm(`페이지 ${page.pageNumber} 번역이 ${maxRetries}번 모두 실패했습니다.\n\n계속 진행하시겠습니까?`)) {
                             // 최종 저장 후 종료
-                            saveCurrentStorybook();
+                            console.log('💾 중단 전 저장 중...');
+                            await saveToR2(currentStorybook);
                             if (translateAllBtn) {
                                 translateAllBtn.disabled = false;
                                 translateAllBtn.innerHTML = '<i class="fas fa-language text-xl"></i><span>모두 번역하기</span>';
@@ -6882,8 +6893,10 @@ async function translateAllPages() {
         await new Promise(resolve => setTimeout(resolve, 500));
     }
     
-    // 최종 저장
-    saveCurrentStorybook();
+    // 최종 저장 - R2에 확실히 저장될 때까지 대기
+    console.log('💾 최종 저장 중...');
+    await saveToR2(currentStorybook);
+    console.log('✅ 최종 저장 완료');
     
     // UI 업데이트
     displayStorybook(currentStorybook);
