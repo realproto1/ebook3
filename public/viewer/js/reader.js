@@ -595,83 +595,214 @@ window.showRotateHint = showRotateHint;
 window.closeRotateHint = closeRotateHint;
 
 // ========================================
-// 전체화면 관련 함수들
+// 전체화면 관련 함수들 (iOS 호환)
 // ========================================
 
-// 전체화면 토글
+let isImageFullscreen = false;
+
+// 전체화면 토글 - iOS 호환 오버레이 방식
 async function toggleFullscreen() {
-    const readerContainer = document.getElementById('reader');
     const fullscreenIcon = document.getElementById('fullscreen-icon');
     
-    try {
-        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-            // 전체화면 진입
-            if (readerContainer.requestFullscreen) {
-                await readerContainer.requestFullscreen();
-            } else if (readerContainer.webkitRequestFullscreen) {
-                // iOS Safari 지원
-                readerContainer.webkitRequestFullscreen();
-            } else if (readerContainer.mozRequestFullScreen) {
-                // Firefox
-                await readerContainer.mozRequestFullScreen();
-            } else if (readerContainer.msRequestFullscreen) {
-                // IE/Edge
-                await readerContainer.msRequestFullscreen();
-            }
-            
-            // 아이콘 변경
-            fullscreenIcon.classList.remove('fa-expand');
-            fullscreenIcon.classList.add('fa-compress');
-            
-            console.log('✅ 전체화면 진입');
-        } else {
-            // 전체화면 종료
-            if (document.exitFullscreen) {
-                await document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            } else if (document.mozCancelFullScreen) {
-                document.mozCancelFullScreen();
-            } else if (document.msExitFullscreen) {
-                document.msExitFullscreen();
-            }
-            
-            // 아이콘 변경
-            fullscreenIcon.classList.remove('fa-compress');
-            fullscreenIcon.classList.add('fa-expand');
-            
-            console.log('✅ 전체화면 종료');
-        }
-    } catch (error) {
-        console.error('❌ 전체화면 오류:', error);
-        
-        // 전체화면이 지원되지 않는 경우 알림
-        if (error.name === 'TypeError' || error.message.includes('not supported')) {
-            alert('이 브라우저에서는 전체화면이 지원되지 않습니다.\n\nPWA로 설치하시거나, Chrome/Safari 최신 버전을 사용해주세요.');
-        }
+    if (!isImageFullscreen) {
+        // 전체화면 진입
+        await enterImageFullscreen();
+        fullscreenIcon.classList.remove('fa-expand');
+        fullscreenIcon.classList.add('fa-compress');
+    } else {
+        // 전체화면 종료
+        exitImageFullscreen();
+        fullscreenIcon.classList.remove('fa-compress');
+        fullscreenIcon.classList.add('fa-expand');
     }
 }
 
-// 전체화면 상태 변경 감지
-document.addEventListener('fullscreenchange', handleFullscreenChange);
-document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-
-function handleFullscreenChange() {
-    const fullscreenIcon = document.getElementById('fullscreen-icon');
+// 이미지 전체화면 진입 (오버레이 방식)
+async function enterImageFullscreen() {
+    isImageFullscreen = true;
     
-    if (document.fullscreenElement || document.webkitFullscreenElement || 
-        document.mozFullScreenElement || document.msFullscreenElement) {
-        // 전체화면 상태
-        fullscreenIcon.classList.remove('fa-expand');
-        fullscreenIcon.classList.add('fa-compress');
-        console.log('📺 전체화면 활성화');
-    } else {
-        // 일반 화면 상태
+    // 현재 페이지 정보
+    const pageImage = document.getElementById('page-image');
+    const pageText = document.getElementById('page-text');
+    
+    if (!pageImage || !pageImage.src) {
+        console.error('❌ 이미지가 없습니다');
+        return;
+    }
+    
+    // 전체화면 오버레이 생성
+    const overlay = document.createElement('div');
+    overlay.id = 'fullscreen-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #000000;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        animation: fadeIn 0.3s ease-in;
+    `;
+    
+    // 닫기 버튼
+    const closeBtn = document.createElement('button');
+    closeBtn.style.cssText = `
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 44px;
+        height: 44px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 100001;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        font-size: 1.25rem;
+    `;
+    closeBtn.innerHTML = '<i class="fas fa-compress"></i>';
+    closeBtn.onclick = () => {
+        exitImageFullscreen();
+        const fullscreenIcon = document.getElementById('fullscreen-icon');
         fullscreenIcon.classList.remove('fa-compress');
         fullscreenIcon.classList.add('fa-expand');
-        console.log('📺 전체화면 비활성화');
+    };
+    
+    // 이미지 컨테이너
+    const imageContainer = document.createElement('div');
+    imageContainer.style.cssText = `
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        position: relative;
+    `;
+    
+    // 이미지
+    const fullImage = document.createElement('img');
+    fullImage.src = pageImage.src;
+    fullImage.alt = pageImage.alt;
+    fullImage.style.cssText = `
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        object-position: center;
+        display: block;
+    `;
+    
+    // 텍스트 오버레이
+    const textOverlay = document.createElement('div');
+    textOverlay.style.cssText = `
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 2rem 1.5rem 1.5rem 1.5rem;
+        background: linear-gradient(
+            to top, 
+            rgba(0, 0, 0, 0.9) 0%, 
+            rgba(0, 0, 0, 0.7) 25%,
+            rgba(0, 0, 0, 0.4) 50%,
+            transparent 100%
+        );
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color: white;
+        font-size: 1.25rem;
+        line-height: 1.8;
+        text-align: center;
+        text-shadow: 
+            0 1px 2px rgba(0, 0, 0, 0.8),
+            0 2px 8px rgba(0, 0, 0, 0.6);
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        word-break: keep-all;
+    `;
+    textOverlay.textContent = pageText ? pageText.textContent : '';
+    
+    // 조립
+    imageContainer.appendChild(fullImage);
+    imageContainer.appendChild(textOverlay);
+    overlay.appendChild(closeBtn);
+    overlay.appendChild(imageContainer);
+    
+    // DOM에 추가
+    document.body.appendChild(overlay);
+    
+    // iOS에서 주소창 숨기기 시도 (스크롤 트릭)
+    setTimeout(() => {
+        window.scrollTo(0, 1);
+        window.scrollTo(0, 0);
+    }, 100);
+    
+    // API 기반 전체화면도 시도 (Chrome/Android에서 주소창까지 숨김)
+    try {
+        if (overlay.requestFullscreen) {
+            await overlay.requestFullscreen();
+            console.log('✅ Fullscreen API 성공');
+        } else if (overlay.webkitRequestFullscreen) {
+            overlay.webkitRequestFullscreen();
+            console.log('✅ WebKit Fullscreen 시도');
+        }
+    } catch (error) {
+        // iOS에서는 실패할 수 있지만 오버레이는 이미 표시됨
+        console.log('ℹ️ Fullscreen API 실패 (오버레이로 대체):', error.message);
+    }
+    
+    console.log('📺 이미지 전체화면 진입 (오버레이 방식)');
+}
+
+// 이미지 전체화면 종료
+function exitImageFullscreen() {
+    isImageFullscreen = false;
+    
+    const overlay = document.getElementById('fullscreen-overlay');
+    if (overlay) {
+        overlay.style.animation = 'fadeOut 0.3s ease-out';
+        setTimeout(() => {
+            overlay.remove();
+        }, 300);
+    }
+    
+    // Fullscreen API 종료
+    try {
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        } else if (document.webkitFullscreenElement) {
+            document.webkitExitFullscreen();
+        }
+    } catch (error) {
+        console.log('ℹ️ Fullscreen API 종료 실패:', error.message);
+    }
+    
+    console.log('📺 이미지 전체화면 종료');
+}
+
+// Fullscreen API 상태 변경 감지 (Chrome/Android)
+document.addEventListener('fullscreenchange', handleFullscreenAPIChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenAPIChange);
+
+function handleFullscreenAPIChange() {
+    // Fullscreen API가 사용자 제스처(ESC)로 종료된 경우
+    if (!document.fullscreenElement && !document.webkitFullscreenElement && isImageFullscreen) {
+        exitImageFullscreen();
+        const fullscreenIcon = document.getElementById('fullscreen-icon');
+        if (fullscreenIcon) {
+            fullscreenIcon.classList.remove('fa-compress');
+            fullscreenIcon.classList.add('fa-expand');
+        }
     }
 }
 
