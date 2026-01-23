@@ -2134,7 +2134,7 @@ function displayStorybook(storybook) {
             </div>
             
             <!-- 액션 버튼 -->
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-6 gap-3 mb-4">
                     <!-- 삽화 생성 버튼 -->
                     <div class="relative">
                         <button 
@@ -2170,6 +2170,15 @@ function displayStorybook(storybook) {
                         </button>
                     </div>
                     
+                    <!-- 모든 TTS 생성 버튼 -->
+                    <button 
+                        onclick="generateAllTTS()"
+                        class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-3.5 rounded-lg hover:from-purple-600 hover:to-purple-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold text-base"
+                    >
+                        <i class="fas fa-microphone text-xl"></i>
+                        <span>모든 TTS 생성</span>
+                    </button>
+                    
                     <!-- 다운로드 버튼 -->
                     <button 
                         onclick="downloadAllText()"
@@ -2182,6 +2191,19 @@ function displayStorybook(storybook) {
                     <button 
                         onclick="downloadAllIllustrations()"
                         class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition shadow-md flex items-center justify-center gap-2 font-medium"
+                    >
+                        <i class="fas fa-images text-lg"></i>
+                        <span>🖼️ 전체 삽화 다운로드</span>
+                    </button>
+                    
+                    <button 
+                        onclick="downloadAllAudio()"
+                        class="w-full bg-gradient-to-r from-blue-700 to-blue-800 text-white px-4 py-3 rounded-lg hover:from-blue-800 hover:to-blue-900 transition shadow-md flex items-center justify-center gap-2 font-medium"
+                    >
+                        <i class="fas fa-headphones text-lg"></i>
+                        <span>🎧 전체 오디오 다운로드</span>
+                    </button>
+                </div>
                     >
                         <i class="fas fa-images text-lg"></i>
                         <span>🖼️ 전체 삽화 다운로드</span>
@@ -3867,6 +3889,108 @@ async function generateAllIllustrationsSequential() {
     } catch (error) {
         console.error('Batch generation error:', error);
         alert('배치 생성 중 오류가 발생했습니다: ' + error.message);
+        displayStorybook(currentStorybook);
+    }
+}
+
+// 모든 TTS 생성 (순차적)
+async function generateAllTTS() {
+    if (!currentStorybook || !currentStorybook.pages || currentStorybook.pages.length === 0) {
+        alert('동화책 페이지가 없습니다.');
+        return;
+    }
+    
+    // TTS가 없는 페이지 필터링
+    const pagesToGenerate = currentStorybook.pages.filter(page => !page.audioUrl && !page.ttsAudio?.url);
+    
+    if (pagesToGenerate.length === 0) {
+        alert('이미 모든 페이지의 TTS가 생성되었습니다.');
+        return;
+    }
+    
+    const estimatedTime = pagesToGenerate.length * 3; // 페이지당 약 3초
+    if (!confirm(`${pagesToGenerate.length}개의 페이지 TTS를 생성하시겠습니까?\n\n음성: ${imageSettings.ttsModel}\n예상 소요 시간: 약 ${estimatedTime}초`)) {
+        return;
+    }
+    
+    try {
+        let successCount = 0;
+        let failCount = 0;
+        const totalPages = pagesToGenerate.length;
+        
+        console.log(`🎤 모든 TTS 생성 시작 (${totalPages}개 페이지)`);
+        
+        // 순차적으로 페이지별 TTS 생성
+        for (let i = 0; i < currentStorybook.pages.length; i++) {
+            const page = currentStorybook.pages[i];
+            
+            // 이미 TTS가 있으면 건너뛰기
+            if (page.audioUrl || page.ttsAudio?.url) {
+                continue;
+            }
+            
+            // 버튼 업데이트
+            const ttsButton = document.getElementById(`tts-btn-${i}`);
+            if (ttsButton) {
+                ttsButton.innerHTML = `<i class="fas fa-spinner fa-spin mr-1"></i>생성중 (${successCount + failCount + 1}/${totalPages})`;
+                ttsButton.disabled = true;
+            }
+            
+            try {
+                console.log(`🎤 페이지 ${page.pageNumber} TTS 생성 중...`);
+                
+                // TTS 생성 API 호출
+                const response = await axios.post('/api/generate-tts', {
+                    text: page.text,
+                    model: imageSettings.ttsModel,
+                    voiceConfig: imageSettings.ttsVoiceConfig
+                });
+                
+                if (response.data.success && response.data.audioUrl) {
+                    // TTS 저장
+                    if (!currentStorybook.pages[i].ttsAudio) {
+                        currentStorybook.pages[i].ttsAudio = {};
+                    }
+                    currentStorybook.pages[i].ttsAudio.url = response.data.audioUrl;
+                    currentStorybook.pages[i].ttsAudio.model = imageSettings.ttsModel;
+                    currentStorybook.pages[i].audioUrl = response.data.audioUrl;
+                    
+                    successCount++;
+                    console.log(`✅ 페이지 ${page.pageNumber} TTS 생성 완료`);
+                } else {
+                    throw new Error('TTS 생성 실패');
+                }
+                
+            } catch (error) {
+                failCount++;
+                console.error(`❌ 페이지 ${page.pageNumber} TTS 생성 실패:`, error);
+                
+                // 버튼 복원
+                if (ttsButton) {
+                    ttsButton.innerHTML = '<i class="fas fa-volume-up mr-1"></i>음성 생성';
+                    ttsButton.disabled = false;
+                }
+            }
+        }
+        
+        // 저장
+        saveCurrentStorybook();
+        
+        // UI 업데이트
+        displayStorybook(currentStorybook);
+        
+        // 결과 알림
+        if (successCount > 0) {
+            showNotification('success', '모든 TTS 생성 완료! 🎤', `${successCount}개의 페이지 음성이 생성되었습니다.${failCount > 0 ? ` (${failCount}개 실패)` : ''}`);
+        } else {
+            showNotification('error', 'TTS 생성 실패', '모든 페이지에서 TTS 생성에 실패했습니다.');
+        }
+        
+        console.log(`✅ 모든 TTS 생성 완료: 성공 ${successCount}개, 실패 ${failCount}개`);
+        
+    } catch (error) {
+        console.error('TTS 배치 생성 오류:', error);
+        alert('TTS 생성 중 오류가 발생했습니다: ' + error.message);
         displayStorybook(currentStorybook);
     }
 }
