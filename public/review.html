@@ -174,10 +174,10 @@
                 
                 return `
                     <div class="language-content ${idx === 0 ? 'active' : ''}" data-lang="${lang}">
-                        <div id="pages-container-${lang}" class="space-y-4">
+                        <div id="pages-container-${lang}" class="space-y-2">
                             ${pages.map((page, pageIdx) => `
                                 <div 
-                                    class="page-item bg-white border-2 border-gray-200 rounded-lg p-4 hover:border-purple-300"
+                                    class="page-item bg-white border-2 border-gray-200 rounded-lg p-3 hover:border-purple-300"
                                     data-lang="${lang}"
                                     data-page-idx="${pageIdx}"
                                     draggable="true"
@@ -186,41 +186,41 @@
                                     ondrop="handleDrop(event)"
                                     ondragend="handleDragEnd(event)"
                                 >
-                                    <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center justify-between mb-2">
                                         <div class="flex items-center gap-2">
-                                            <i class="fas fa-grip-vertical text-gray-400 cursor-move"></i>
-                                            <h3 class="text-lg font-bold text-gray-700">
-                                                <i class="fas fa-file-alt mr-2 text-purple-600"></i>
+                                            <i class="fas fa-grip-vertical text-gray-400 cursor-move text-sm"></i>
+                                            <h3 class="text-base font-bold text-gray-700">
+                                                <i class="fas fa-file-alt mr-1 text-purple-600 text-sm"></i>
                                                 페이지 ${page.pageNumber || pageIdx + 1}
                                             </h3>
                                         </div>
                                         <button 
                                             onclick="deletePage('${lang}', ${pageIdx})"
-                                            class="text-red-600 hover:text-red-700 px-3 py-1 rounded hover:bg-red-50 transition"
+                                            class="text-red-600 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50 transition text-sm"
                                         >
                                             <i class="fas fa-trash mr-1"></i>삭제
                                         </button>
                                     </div>
                                     <textarea
                                         id="page-text-${lang}-${pageIdx}"
-                                        class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition resize-none"
-                                        rows="4"
+                                        class="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition resize-y text-sm"
+                                        rows="2"
                                         onchange="updatePageText('${lang}', ${pageIdx}, this.value)"
                                         placeholder="페이지 텍스트를 입력하세요..."
                                     >${page.text || ''}</textarea>
-                                    <p class="text-xs text-gray-500 mt-2">
+                                    <p class="text-[10px] text-gray-400 mt-1">
                                         <i class="fas fa-info-circle mr-1"></i>
-                                        텍스트 수정 후 다른 곳을 클릭하면 자동 저장됩니다
+                                        텍스트 수정 후 다른 곳 클릭 시 자동 저장
                                     </p>
                                 </div>
                             `).join('')}
                         </div>
                         
                         <!-- 페이지 추가 버튼 -->
-                        <div class="mt-6">
+                        <div class="mt-4">
                             <button 
                                 onclick="addNewPage('${lang}')"
-                                class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-600 transition shadow-md"
+                                class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-600 transition shadow-md text-sm"
                             >
                                 <i class="fas fa-plus mr-2"></i>
                                 새 페이지 추가
