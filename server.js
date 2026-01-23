@@ -3578,6 +3578,11 @@ app.get('/api/viewer/storybooks/:id', async (req, res) => {
     
     console.log(`✅ Returned storybook: ${storybook.title}`);
     
+    // 캐시 방지 헤더 설정
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     res.json({
       success: true,
       storybook: storybook

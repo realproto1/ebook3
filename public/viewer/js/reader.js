@@ -97,10 +97,16 @@ async function loadBook() {
     try {
         console.log(`📖 Loading storybook ${bookId} for reading...`);
         
-        const apiUrl = `/api/viewer/storybooks/${bookId}`;
+        // 캐시 무효화를 위한 타임스탬프 추가
+        const apiUrl = `/api/viewer/storybooks/${bookId}?t=${Date.now()}`;
         console.log('🔍 Debug - API URL:', apiUrl);
         
-        const response = await axios.get(apiUrl);
+        const response = await axios.get(apiUrl, {
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        });
         
         if (response.data.success) {
             currentBook = response.data.storybook;
@@ -379,6 +385,13 @@ async function playTTS() {
     
     // TTS 오디오 URL 찾기 (여러 필드 지원)
     const audioUrl = page.ttsAudioUrl || page.audioUrl || page.ttsAudio?.url;
+    
+    // 디버깅: 페이지 데이터 확인
+    console.log('🔍 TTS Debug - Page:', currentPage + 1);
+    console.log('  ttsAudioUrl:', page.ttsAudioUrl);
+    console.log('  audioUrl:', page.audioUrl);
+    console.log('  ttsAudio:', page.ttsAudio);
+    console.log('  Final audioUrl:', audioUrl);
     
     if (audioUrl) {
         try {
