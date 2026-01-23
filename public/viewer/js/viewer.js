@@ -147,16 +147,32 @@ function sortBooks() {
 // 동화책 열기 (언어 선택 포함)
 async function openBook(bookId) {
     console.log('🔍 openBook 호출됨 - bookId:', bookId);
+    console.log('🔍 axios 사용 가능:', typeof axios !== 'undefined');
+    
+    if (typeof axios === 'undefined') {
+        console.error('❌ axios가 로드되지 않았습니다!');
+        alert('필수 라이브러리를 불러오는 중 오류가 발생했습니다. 페이지를 새로고침해주세요.');
+        return;
+    }
     
     try {
         // 동화책 데이터 로드
         console.log('📡 API 호출 시작:', `/api/viewer/storybooks/${bookId}`);
-        const response = await axios.get(`/api/viewer/storybooks/${bookId}`);
         
-        console.log('📡 API 응답:', {
+        const response = await axios.get(`/api/viewer/storybooks/${bookId}`, {
+            timeout: 10000, // 10초 타임아웃
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        });
+        
+        console.log('📡 API 응답 받음:', response);
+        console.log('📡 API 응답 데이터:', {
             success: response.data.success,
             hasStorybook: !!response.data.storybook,
-            title: response.data.storybook?.title
+            title: response.data.storybook?.title,
+            languages: response.data.storybook?.languages
         });
         
         if (!response.data.success || !response.data.storybook) {
@@ -181,12 +197,25 @@ async function openBook(bookId) {
         }
     } catch (error) {
         console.error('❌ 동화책 로드 실패:', error);
-        console.error('❌ 에러 상세:', {
-            message: error.message,
-            response: error.response?.data,
-            status: error.response?.status
-        });
-        alert('동화책을 불러오는 중 오류가 발생했습니다.');
+        console.error('❌ 에러 이름:', error.name);
+        console.error('❌ 에러 메시지:', error.message);
+        
+        if (error.code === 'ECONNABORTED') {
+            console.error('⏱️ 타임아웃 발생');
+            alert('요청 시간이 초과되었습니다. 다시 시도해주세요.');
+        } else if (error.response) {
+            console.error('❌ 서버 응답:', {
+                status: error.response.status,
+                data: error.response.data
+            });
+            alert('동화책을 불러오는 중 서버 오류가 발생했습니다.');
+        } else if (error.request) {
+            console.error('❌ 요청 전송 실패:', error.request);
+            alert('서버에 연결할 수 없습니다. 네트워크를 확인해주세요.');
+        } else {
+            console.error('❌ 알 수 없는 오류');
+            alert('동화책을 불러오는 중 오류가 발생했습니다.');
+        }
     }
 }
 
