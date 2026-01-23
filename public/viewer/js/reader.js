@@ -1,6 +1,7 @@
 // 전역 변수
 let currentBook = null;
 let currentPage = -1; // -1은 표지, 0부터는 본문
+let currentLanguage = 'ko'; // 현재 선택된 언어
 let isAutoPlaying = false;
 let autoPlayInterval = null;
 let currentAudio = null;
@@ -80,11 +81,19 @@ function getBookId() {
     return urlParams.get('id');
 }
 
+// URL에서 언어 파라미터 가져오기
+function getLanguageParam() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('lang') || 'ko'; // 기본값은 한국어
+}
+
 // 동화책 로드
 async function loadBook() {
     let bookId = getBookId();
+    const selectedLanguage = getLanguageParam();
     
     console.log('🔍 Debug - bookId:', bookId);
+    console.log('🔍 Debug - selectedLanguage:', selectedLanguage);
     console.log('🔍 Debug - axios available:', typeof axios !== 'undefined');
     console.log('🔍 Debug - URL:', window.location.href);
     
@@ -133,6 +142,10 @@ async function loadBook() {
                 window.history.back();
                 return;
             }
+            
+            // 선택된 언어 적용
+            currentLanguage = selectedLanguage;
+            console.log('🌐 Language set to:', currentLanguage);
             
             // 표지 페이지 존재 여부 확인 (표시하지 않음, 진행률 계산용만)
             hasCoverPage = false; // 표지를 건너뛰고 항상 첫 페이지부터 시작
@@ -283,7 +296,10 @@ function showPage(pageIndex) {
             imageEl.src = '';
             imageEl.alt = '이미지 없음';
         }
-        textEl.textContent = page.text || '텍스트가 없습니다.';
+        
+        // 현재 언어에 맞는 텍스트 표시
+        const pageText = getPageText(page, currentLanguage);
+        textEl.textContent = pageText || '텍스트가 없습니다.';
         
         // 위치 초기화 (오른쪽에서 시작)
         imageEl.style.transform = 'translateX(100px)';
@@ -409,15 +425,13 @@ async function playTTS() {
         return;
     }
     
-    // TTS 오디오 URL 찾기 (여러 필드 지원)
-    const audioUrl = page.ttsAudioUrl || page.audioUrl || page.ttsAudio?.url;
+    // TTS 오디오 URL 찾기 - 현재 언어에 맞는 TTS 사용
+    const audioUrl = getPageTTS(page, currentLanguage);
     
     // 디버깅: 페이지 데이터 확인
     console.log('🔍 TTS Debug - Page:', currentPage + 1);
-    console.log('  ttsAudioUrl:', page.ttsAudioUrl);
-    console.log('  audioUrl:', page.audioUrl);
-    console.log('  ttsAudio:', page.ttsAudio);
-    console.log('  Final audioUrl:', audioUrl);
+    console.log('  Language:', currentLanguage);
+    console.log('  audioUrl:', audioUrl);
     
     if (audioUrl) {
         try {
@@ -818,6 +832,45 @@ function exitImageFullscreen() {
     }
     
     console.log('📺 이미지 전체화면 종료');
+}
+
+// 현재 언어에 맞는 페이지 텍스트 가져오기
+function getPageText(page, lang) {
+    if (!currentBook || !currentBook.translations) {
+        return page.text || '';
+    }
+    
+    // 한국어는 기본 텍스트 사용
+    if (lang === 'ko') {
+        return page.text || '';
+    }
+    
+    // 번역된 텍스트 찾기
+    const translations = currentBook.translations[lang];
+    if (!translations || !Array.isArray(translations)) {
+        return page.text || '';
+    }
+    
+    // 페이지 번호로 찾기
+    const translatedPage = translations.find(p => p.pageNumber === page.pageNumber);
+    return translatedPage ? translatedPage.text : (page.text || '');
+}
+
+// 현재 언어에 맞는 TTS URL 가져오기
+function getPageTTS(page, lang) {
+    if (!page) return null;
+    
+    // 한국어인 경우
+    if (lang === 'ko') {
+        return page.audioUrl || page.ttsAudio?.url || null;
+    }
+    
+    // 다른 언어인 경우
+    if (page.ttsAudio && page.ttsAudio[lang]) {
+        return page.ttsAudio[lang].url || null;
+    }
+    
+    return null;
 }
 
 // Fullscreen API 상태 변경 감지 (Chrome/Android)

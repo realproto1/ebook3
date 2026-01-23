@@ -144,9 +144,83 @@ function sortBooks() {
     renderBooks();
 }
 
-// 동화책 열기
-function openBook(bookId) {
-    window.location.href = `/reader.html?id=${bookId}`;
+// 동화책 열기 (언어 선택 포함)
+async function openBook(bookId) {
+    try {
+        // 동화책 데이터 로드
+        const response = await axios.get(`/api/viewer/storybooks/${bookId}`);
+        
+        if (!response.data.success || !response.data.storybook) {
+            alert('동화책을 불러올 수 없습니다.');
+            return;
+        }
+        
+        const storybook = response.data.storybook;
+        
+        // 사용 가능한 언어 목록 가져오기
+        const availableLanguages = storybook.languages || ['ko'];
+        
+        // 언어가 1개면 바로 이동, 2개 이상이면 선택 모달 표시
+        if (availableLanguages.length === 1) {
+            window.location.href = `/reader.html?id=${bookId}&lang=${availableLanguages[0]}`;
+        } else {
+            showLanguageModal(bookId, storybook.title, availableLanguages);
+        }
+    } catch (error) {
+        console.error('동화책 로드 실패:', error);
+        alert('동화책을 불러오는 중 오류가 발생했습니다.');
+    }
+}
+
+// 언어 선택 모달 표시
+function showLanguageModal(bookId, bookTitle, languages) {
+    const modal = document.getElementById('language-select-modal');
+    const titleEl = document.getElementById('language-modal-book-title');
+    const buttonsContainer = document.getElementById('language-buttons');
+    
+    // 동화책 제목 표시
+    titleEl.textContent = bookTitle;
+    
+    // 언어 이름 매핑
+    const languageNames = {
+        'ko': { name: '한국어', flag: '🇰🇷', color: 'blue' },
+        'en': { name: 'English', flag: '🇺🇸', color: 'green' },
+        'zh': { name: '中文', flag: '🇨🇳', color: 'red' },
+        'ja': { name: '日本語', flag: '🇯🇵', color: 'pink' },
+        'es': { name: 'Español', flag: '🇪🇸', color: 'yellow' },
+        'fr': { name: 'Français', flag: '🇫🇷', color: 'indigo' }
+    };
+    
+    // 언어 버튼 생성
+    buttonsContainer.innerHTML = languages.map(lang => {
+        const langInfo = languageNames[lang] || { name: lang, flag: '🌐', color: 'gray' };
+        return `
+            <button 
+                onclick="selectLanguageAndOpen('${bookId}', '${lang}')"
+                class="w-full flex items-center justify-between p-4 rounded-xl border-2 border-${langInfo.color}-200 bg-gradient-to-r from-${langInfo.color}-50 to-white hover:from-${langInfo.color}-100 hover:to-${langInfo.color}-50 hover:border-${langInfo.color}-400 transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+            >
+                <div class="flex items-center">
+                    <span class="text-3xl mr-3">${langInfo.flag}</span>
+                    <span class="text-lg font-bold text-gray-800">${langInfo.name}</span>
+                </div>
+                <i class="fas fa-chevron-right text-${langInfo.color}-600"></i>
+            </button>
+        `;
+    }).join('');
+    
+    // 모달 표시
+    modal.classList.remove('hidden');
+}
+
+// 언어 선택하고 동화책 열기
+function selectLanguageAndOpen(bookId, language) {
+    window.location.href = `/reader.html?id=${bookId}&lang=${language}`;
+}
+
+// 언어 선택 모달 닫기
+function closeLanguageModal() {
+    const modal = document.getElementById('language-select-modal');
+    modal.classList.add('hidden');
 }
 
 // UI 헬퍼 함수
