@@ -517,76 +517,82 @@ window.addEventListener('touchend', () => {
     }, 300);
 }, { passive: true });
 
-// 컨트롤 표시/숨김 토글 (텍스트는 항상 표시)
-let controlsVisible = true;
-let hideControlsTimeout = null;
+// ========================================
+// 세로 모드 전환 힌트
+// ========================================
 
-window.toggleControls = function() {
-    console.log('🔄 toggleControls 호출됨');
-    console.log('현재 controlsVisible:', controlsVisible);
-    
-    const header = document.querySelector('header');
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
-    
-    console.log('🔍 요소 찾기:', {
-        header: !!header,
-        prevBtn: !!prevBtn,
-        nextBtn: !!nextBtn
-    });
-    
-    if (!header || !prevBtn || !nextBtn) {
-        console.error('❌ 요소를 찾을 수 없음:', { header, prevBtn, nextBtn });
+function showRotateHint() {
+    // 이미 알림이 표시 중이면 중복 방지
+    if (document.getElementById('rotate-hint')) {
         return;
     }
     
-    controlsVisible = !controlsVisible;
-    console.log('변경된 controlsVisible:', controlsVisible);
+    // 힌트 오버레이 생성
+    const hint = document.createElement('div');
+    hint.id = 'rotate-hint';
+    hint.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        padding: 2rem;
+        animation: fadeIn 0.3s ease-in;
+    `;
     
-    if (controlsVisible) {
-        // 컨트롤 표시 (헤더 + 버튼만)
-        console.log('✅ 컨트롤 표시');
-        header.classList.remove('controls-hidden');
-        prevBtn.classList.remove('controls-hidden');
-        nextBtn.classList.remove('controls-hidden');
-        
-        console.log('🎨 클래스 제거 후:', {
-            headerClasses: header.className,
-            prevBtnClasses: prevBtn.className,
-            nextBtnClasses: nextBtn.className
-        });
-        
-        // 3초 후 자동 숨김
-        clearTimeout(hideControlsTimeout);
-        hideControlsTimeout = setTimeout(() => {
-            console.log('⏰ 3초 타이머 실행');
-            if (controlsVisible) {
-                window.toggleControls();
-            }
-        }, 3000);
-    } else {
-        // 컨트롤 숨김 (헤더 + 버튼만)
-        console.log('❌ 컨트롤 숨김');
-        header.classList.add('controls-hidden');
-        prevBtn.classList.add('controls-hidden');
-        nextBtn.classList.add('controls-hidden');
-        
-        console.log('🎨 클래스 추가 후:', {
-            headerClasses: header.className,
-            prevBtnClasses: prevBtn.className,
-            nextBtnClasses: nextBtn.className
-        });
-        
-        clearTimeout(hideControlsTimeout);
-    }
-};
+    hint.innerHTML = `
+        <div style="text-align: center; max-width: 400px;">
+            <i class="fas fa-mobile-alt" style="font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.9;"></i>
+            <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">
+                📱 기기를 세로로 회전해주세요
+            </h3>
+            <p style="font-size: 1rem; opacity: 0.8; line-height: 1.6;">
+                세로 모드에서 더 편하게<br>동화책을 감상하실 수 있습니다
+            </p>
+            <button 
+                onclick="closeRotateHint()"
+                style="
+                    margin-top: 2rem;
+                    padding: 0.75rem 2rem;
+                    background: white;
+                    color: black;
+                    border: none;
+                    border-radius: 2rem;
+                    font-weight: bold;
+                    cursor: pointer;
+                    font-size: 1rem;
+                "
+            >
+                확인
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(hint);
+    
+    console.log('📱 세로 모드 전환 힌트 표시');
+}
 
-// 초기 상태: 컨트롤 표시, 5초 후 자동 숨김
-setTimeout(() => {
-    if (controlsVisible && document.getElementById('prev-btn')) {
-        window.toggleControls();
+function closeRotateHint() {
+    const hint = document.getElementById('rotate-hint');
+    if (hint) {
+        hint.style.animation = 'fadeOut 0.3s ease-out';
+        setTimeout(() => {
+            hint.remove();
+        }, 300);
     }
-}, 5000);
+}
+
+// 전역으로 노출
+window.showRotateHint = showRotateHint;
+window.closeRotateHint = closeRotateHint;
 
 // ========================================
 // 전체화면 관련 함수들
