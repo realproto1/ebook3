@@ -146,6 +146,13 @@ async function loadBook() {
             // 선택된 언어 적용
             currentLanguage = selectedLanguage;
             console.log('🌐 Language set to:', currentLanguage);
+            console.log('📚 동화책 데이터:', {
+                title: currentBook.title,
+                pages: currentBook.pages.length,
+                languages: currentBook.languages,
+                hasTranslations: !!currentBook.translations,
+                translationKeys: Object.keys(currentBook.translations || {})
+            });
             
             // 표지 페이지 존재 여부 확인 (표시하지 않음, 진행률 계산용만)
             hasCoverPage = false; // 표지를 건너뛰고 항상 첫 페이지부터 시작
@@ -299,6 +306,14 @@ function showPage(pageIndex) {
         
         // 현재 언어에 맞는 텍스트 표시
         const pageText = getPageText(page, currentLanguage);
+        console.log(`📝 페이지 ${pageIndex + 1} 텍스트:`, {
+            currentLanguage,
+            pageNumber: page.pageNumber,
+            hasTranslations: !!currentBook.translations,
+            hasCurrentLangTranslation: !!currentBook.translations?.[currentLanguage],
+            originalText: page.text?.substring(0, 30),
+            translatedText: pageText?.substring(0, 30)
+        });
         textEl.textContent = pageText || '텍스트가 없습니다.';
         
         // 위치 초기화 (오른쪽에서 시작)
@@ -836,24 +851,37 @@ function exitImageFullscreen() {
 
 // 현재 언어에 맞는 페이지 텍스트 가져오기
 function getPageText(page, lang) {
+    console.log('🔍 getPageText 호출:', {
+        pageNumber: page.pageNumber,
+        lang,
+        hasCurrentBook: !!currentBook,
+        hasTranslations: !!currentBook?.translations,
+        translationLangs: Object.keys(currentBook?.translations || {})
+    });
+    
     if (!currentBook || !currentBook.translations) {
+        console.log('⚠️ translations 없음, 기본 텍스트 반환');
         return page.text || '';
     }
     
     // 한국어는 기본 텍스트 사용
     if (lang === 'ko') {
+        console.log('🇰🇷 한국어 - 기본 텍스트 사용');
         return page.text || '';
     }
     
     // 번역된 텍스트 찾기
     const translations = currentBook.translations[lang];
     if (!translations || !Array.isArray(translations)) {
+        console.log(`⚠️ ${lang} 번역 없음, 기본 텍스트 반환`);
         return page.text || '';
     }
     
     // 페이지 번호로 찾기
     const translatedPage = translations.find(p => p.pageNumber === page.pageNumber);
-    return translatedPage ? translatedPage.text : (page.text || '');
+    const result = translatedPage ? translatedPage.text : (page.text || '');
+    console.log(`✅ ${lang} 번역 찾음:`, result?.substring(0, 50));
+    return result;
 }
 
 // 현재 언어에 맞는 TTS URL 가져오기
