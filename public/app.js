@@ -208,8 +208,13 @@ async function generatePageTTS(pageIndex) {
             
             // R2 저장 완료까지 대기
             console.log('💾 TTS 생성 후 R2 저장 중...');
-            await saveToR2(currentStorybook);
-            console.log('✅ R2 저장 완료');
+            try {
+                await saveToR2(currentStorybook);
+                console.log('✅ R2 저장 완료');
+            } catch (saveError) {
+                console.error('❌ R2 저장 최종 실패:', saveError);
+                // 저장 실패해도 TTS는 메모리에 있으므로 계속 진행
+            }
             
             // UI 즉시 업데이트 - 현재 동화책을 다시 렌더링
             displayStorybook(currentStorybook);
@@ -4340,8 +4345,14 @@ async function generateAllTTS() {
         
         // R2 저장 완료까지 대기
         console.log('💾 모든 TTS 생성 후 R2 저장 중...');
-        await saveToR2(currentStorybook);
-        console.log('✅ R2 저장 완료');
+        try {
+            await saveToR2(currentStorybook);
+            console.log('✅ R2 저장 완료');
+        } catch (saveError) {
+            console.error('❌ R2 저장 최종 실패:', saveError);
+            // 저장 실패해도 TTS는 메모리에 있으므로 계속 진행
+            showNotification('warning', '저장 실패', 'TTS는 생성되었지만 R2 저장에 실패했습니다. 다시 저장하려면 페이지를 새로고침하지 마세요.');
+        }
         
         // UI 업데이트
         displayStorybook(currentStorybook);
@@ -4573,12 +4584,19 @@ function saveCurrentStorybook() {
     });
 }
 
-// R2에 동화책 저장 (서버 API 호출)
-async function saveToR2(storybook) {
+// R2에 동화책 저장 (서버 API 호출) - 재시도 로직 포함
+async function saveToR2(storybook, retryCount = 0) {
+    const maxRetries = 3;
+    
     try {
-        console.log(`💾 R2 저장 시작: ${storybook.title}`);
+        console.log(`💾 R2 저장 시작: ${storybook.title}${retryCount > 0 ? ` (재시도 ${retryCount}/${maxRetries})` : ''}`);
         
-        const response = await axios.post('/api/storybooks', storybook);
+        const response = await axios.post('/api/storybooks', storybook, {
+            timeout: 60000, // 60초 타임아웃
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
         
         if (response.data.success) {
             console.log(`✅ R2 저장 완료: ${storybook.title}`);
@@ -4595,12 +4613,35 @@ async function saveToR2(storybook) {
                     console.warn('⚠️ 뷰어 메타데이터 업데이트 실패:', metaError.message);
                 }
             }
+            
+            return true; // 성공
         } else {
             console.error('R2 저장 실패:', response.data.error);
+            throw new Error(response.data.error || 'R2 저장 실패');
         }
     } catch (error) {
-        console.error('R2 저장 오류:', error);
-        // 에러가 발생해도 로컬 저장은 완료되었으므로 사용자에게 알리지 않음
+        console.error(`❌ R2 저장 오류 (시도 ${retryCount + 1}/${maxRetries + 1}):`, error.message);
+        
+        // 524 에러 또는 타임아웃인 경우 재시도
+        const shouldRetry = (
+            error.response?.status === 524 || 
+            error.code === 'ECONNABORTED' || 
+            error.message.includes('timeout')
+        ) && retryCount < maxRetries;
+        
+        if (shouldRetry) {
+            const waitTime = Math.min(2000 * Math.pow(2, retryCount), 10000); // 지수 백오프: 2초, 4초, 8초 (최대 10초)
+            console.log(`⏳ ${waitTime/1000}초 후 재시도...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+            return saveToR2(storybook, retryCount + 1); // 재귀 호출
+        } else {
+            // 최대 재시도 횟수 초과 또는 재시도 불가능한 에러
+            if (retryCount >= maxRetries) {
+                console.error('❌ 최대 재시도 횟수 초과');
+                showNotification('error', 'R2 저장 실패', `${maxRetries + 1}번의 시도 후에도 저장에 실패했습니다. 나중에 다시 시도해주세요.`);
+            }
+            throw error; // 에러 전파
+        }
     }
 }
 
