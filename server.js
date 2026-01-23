@@ -2613,94 +2613,130 @@ app.post('/api/translate-storybook', requireAPIKey, async (req, res) => {
     console.log(`\n🌍 Translating storybook to ${targetLang}`);
     console.log(`Pages to translate: ${storybook.pages.length}`);
     
-    // 모든 페이지의 텍스트를 한 번에 번역
-    const pagesText = storybook.pages.map((page, idx) => 
-      `[PAGE ${page.pageNumber}]\n${page.text}`
-    ).join('\n\n---\n\n');
+    // 5페이지씩 나눠서 번역 (타임아웃 방지)
+    const CHUNK_SIZE = 5;
+    const allTranslatedPages = [];
+    let translatedTitle = storybook.title;
+    let translatedTheme = storybook.theme || '';
     
-    const prompt = `Translate the following children's storybook to ${targetLang}.
-
-**IMPORTANT TRANSLATION RULES:**
-1. Maintain the natural tone and style for children ages ${storybook.targetAge || 4-8}
-2. Keep cultural context appropriate for the target language
-3. Preserve emotional nuance and storytelling rhythm
-4. Keep character names as they are (do not translate proper nouns)
-5. Adapt idioms and expressions to be culturally relevant
-6. Maintain the same reading level and vocabulary complexity
-
+    for (let i = 0; i < storybook.pages.length; i += CHUNK_SIZE) {
+      const chunk = storybook.pages.slice(i, i + CHUNK_SIZE);
+      console.log(`📄 Translating pages ${i + 1} to ${Math.min(i + CHUNK_SIZE, storybook.pages.length)}...`);
+      
+      const pagesText = chunk.map((page) => 
+        `[PAGE ${page.pageNumber}]\n${page.text}`
+      ).join('\n\n---\n\n');
+      
+      // 첫 번째 청크에서만 제목과 주제 번역
+      const titleThemeSection = i === 0 ? `
 **STORYBOOK TITLE:**
 ${storybook.title}
 
 **THEME:**
 ${storybook.theme || ''}
 
+Translate the title and theme as well.
+` : '';
+      
+      const prompt = `Translate the following children's storybook pages to ${targetLang}.
+
+**IMPORTANT TRANSLATION RULES:**
+1. Maintain the natural tone and style for children ages ${storybook.targetAge || '4-8'}
+2. Keep cultural context appropriate for the target language
+3. Preserve emotional nuance and storytelling rhythm
+4. Keep character names as they are (do not translate proper nouns)
+5. Adapt idioms and expressions to be culturally relevant
+6. Maintain the same reading level and vocabulary complexity
+
+${titleThemeSection}
+
 **PAGES TO TRANSLATE:**
 ${pagesText}
 
 **RESPOND IN THIS EXACT JSON FORMAT:**
-{
+${i === 0 ? `{
   "translatedTitle": "translated title",
   "translatedTheme": "translated theme",
   "translatedPages": [
     {
       "pageNumber": 1,
       "text": "translated text for page 1"
-    },
-    {
-      "pageNumber": 2,
-      "text": "translated text for page 2"
     }
   ]
-}
+}` : `{
+  "translatedPages": [
+    {
+      "pageNumber": ${chunk[0].pageNumber},
+      "text": "translated text"
+    }
+  ]
+}`}
 
 **CRITICAL:** Respond ONLY with valid JSON. No markdown, no explanation, just pure JSON.`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt
-                }
-              ]
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: prompt
+                  }
+                ]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.4,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 8192
             }
-          ],
-          generationConfig: {
-            temperature: 0.4,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 8192
-          }
-        })
+          })
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
       }
-    );
-    
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      
+      const data = await response.json();
+      let translationText = data.candidates[0].content.parts[0].text;
+      
+      // JSON 추출
+      translationText = translationText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      
+      const translationData = JSON.parse(translationText);
+      
+      // 첫 번째 청크에서 제목과 주제 저장
+      if (i === 0 && translationData.translatedTitle) {
+        translatedTitle = translationData.translatedTitle;
+        translatedTheme = translationData.translatedTheme || storybook.theme;
+      }
+      
+      // 번역된 페이지 추가
+      allTranslatedPages.push(...translationData.translatedPages);
+      
+      console.log(`✅ Chunk ${Math.floor(i / CHUNK_SIZE) + 1} complete (${translationData.translatedPages.length} pages)`);
     }
     
-    const data = await response.json();
-    let translationText = data.candidates[0].content.parts[0].text;
+    console.log(`✅ Translation complete for all ${allTranslatedPages.length} pages`);
     
-    // JSON 추출
-    translationText = translationText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    
-    const translationData = JSON.parse(translationText);
-    
-    console.log(`✅ Translation complete for ${translationData.translatedPages.length} pages`);
+    // translatedPages를 텍스트 배열로 변환 (pageNumber 순서대로)
+    const translatedPagesText = allTranslatedPages
+      .sort((a, b) => a.pageNumber - b.pageNumber)
+      .map(p => p.text);
     
     res.json({
       success: true,
-      translatedTitle: translationData.translatedTitle,
-      translatedTheme: translationData.translatedTheme || storybook.theme,
-      translatedPages: translationData.translatedPages
+      translatedTitle: translatedTitle,
+      translatedTheme: translatedTheme,
+      translatedPages: translatedPagesText  // 텍스트 배열로 반환
     });
 
   } catch (error) {
