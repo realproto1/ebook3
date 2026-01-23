@@ -377,12 +377,14 @@ async function playTTS() {
         return;
     }
     
-    // TTS 오디오 URL이 있으면 재생
-    if (page.ttsAudioUrl) {
+    // TTS 오디오 URL 찾기 (여러 필드 지원)
+    const audioUrl = page.ttsAudioUrl || page.audioUrl || page.ttsAudio?.url;
+    
+    if (audioUrl) {
         try {
             buttonText.textContent = '재생 중...';
             button.classList.add('playing');
-            currentAudio = new Audio(page.ttsAudioUrl);
+            currentAudio = new Audio(audioUrl);
             
             currentAudio.addEventListener('ended', () => {
                 currentAudio = null;
