@@ -132,6 +132,16 @@ function updateTTSModel(value) {
     console.log('✅ TTS 모델 변경:', value);
 }
 
+// TTS 모델 설명 업데이트 (설정 모달용)
+function updateTTSModelDescription(value) {
+    const modelInfo = TTS_MODELS.find(m => m.value === value);
+    const descElement = document.getElementById('ttsModelDescription');
+    if (descElement && modelInfo) {
+        descElement.innerHTML = `<i class="fas fa-info-circle mr-1 text-teal-500"></i>${modelInfo.description}`;
+    }
+}
+
+
 // TTS 음성 설정 변경
 function updateTTSVoiceConfig(value) {
     imageSettings.ttsVoiceConfig = value;
@@ -823,6 +833,13 @@ function openSettings() {
     document.getElementById('illustrationModelSelect').value = imageSettings.illustrationModel || 'gemini-3-pro-image-preview';
     document.getElementById('vocabularyModelSelect').value = imageSettings.vocabularyModel || 'gemini-3-pro-image-preview';
     
+    // TTS 모델 선택값 복원
+    const ttsModelSelect = document.getElementById('ttsModelSelect');
+    if (ttsModelSelect) {
+        ttsModelSelect.value = imageSettings.ttsModel || 'Puck';
+        updateTTSModelDescription(ttsModelSelect.value);
+    }
+    
     // API 키 로드 (localStorage에서)
     const savedApiKey = localStorage.getItem('gemini_api_key') || '';
     document.getElementById('geminiApiKey').value = savedApiKey;
@@ -848,6 +865,12 @@ function saveSettings() {
     imageSettings.keyObjectModel = document.getElementById('keyObjectModelSelect').value;
     imageSettings.illustrationModel = document.getElementById('illustrationModelSelect').value;
     imageSettings.vocabularyModel = document.getElementById('vocabularyModelSelect').value;
+    
+    // TTS 모델 설정 저장
+    const ttsModelSelect = document.getElementById('ttsModelSelect');
+    if (ttsModelSelect) {
+        imageSettings.ttsModel = ttsModelSelect.value;
+    }
     
     console.log('💾 이미지 설정 저장:', imageSettings);
     
