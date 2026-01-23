@@ -1667,6 +1667,101 @@ function getAvailableLanguages() {
     return Array.from(langs);
 }
 
+// 언어 추가 드롭다운 토글
+function toggleAddLanguageDropdown() {
+    const dropdown = document.getElementById('add-language-dropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('hidden');
+    }
+}
+
+// 탭에서 언어 추가
+async function addLanguageFromTab(targetLang) {
+    // 드롭다운 닫기
+    const dropdown = document.getElementById('add-language-dropdown');
+    if (dropdown) {
+        dropdown.classList.add('hidden');
+    }
+    
+    if (!currentStorybook || !currentStorybook.pages) {
+        alert('동화책이 선택되지 않았습니다.');
+        return;
+    }
+    
+    // 이미 번역된 언어인지 확인
+    const available = getAvailableLanguages();
+    if (available.includes(targetLang)) {
+        alert('이미 해당 언어로 번역되어 있습니다.');
+        return;
+    }
+    
+    const langNames = {
+        en: 'English',
+        zh: '中文',
+        ja: '日本語',
+        es: 'Español',
+        fr: 'Français'
+    };
+    
+    const langName = langNames[targetLang] || targetLang;
+    const estimatedTime = Math.ceil(currentStorybook.pages.length * 2);
+    
+    if (!confirm(`${langName}로 번역하시겠습니까?\n\n예상 소요 시간: 약 ${estimatedTime}초\n${currentStorybook.pages.length}개 페이지의 텍스트가 번역됩니다.`)) {
+        return;
+    }
+    
+    try {
+        console.log(`🌐 Starting translation to ${targetLang}...`);
+        
+        showNotification('info', '번역 중...', `${langName} 번역을 시작합니다.`);
+        
+        const response = await axios.post('/api/translate-storybook', {
+            storybook: currentStorybook,
+            targetLanguage: targetLang
+        });
+        
+        if (response.data.success) {
+            // translations 객체 업데이트
+            if (!currentStorybook.translations) {
+                currentStorybook.translations = {};
+            }
+            
+            // 번역된 페이지 저장
+            currentStorybook.translations[targetLang] = response.data.translatedPages.map((translatedText, idx) => ({
+                pageNumber: currentStorybook.pages[idx].pageNumber,
+                text: translatedText
+            }));
+            
+            // languages 배열 업데이트
+            if (!currentStorybook.languages) {
+                currentStorybook.languages = ['ko'];
+            }
+            if (!currentStorybook.languages.includes(targetLang)) {
+                currentStorybook.languages.push(targetLang);
+            }
+            
+            // 저장
+            saveCurrentStorybook();
+            
+            // UI 업데이트
+            displayStorybook(currentStorybook);
+            
+            // 새로 추가된 언어로 전환
+            currentLanguage = targetLang;
+            displayStorybook(currentStorybook);
+            
+            showNotification('success', '번역 완료!', `${langName} 번역이 완료되었습니다.`);
+            
+            console.log(`✅ Translation to ${targetLang} completed`);
+        } else {
+            throw new Error(response.data.error || '번역 실패');
+        }
+    } catch (error) {
+        console.error('❌ Translation error:', error);
+        alert('번역 중 오류가 발생했습니다: ' + (error.response?.data?.error || error.message));
+    }
+}
+
 // 언어 추가 및 번역
 async function addLanguageTranslation() {
     const selectEl = document.getElementById('add-language-select');
@@ -1807,68 +1902,68 @@ function displayStorybook(storybook) {
             </div>
         </div>
 
-        <!-- 언어 관리 섹션 -->
-        <div class="bg-white rounded-3xl shadow-2xl p-4 md:p-10 mb-8">
-            ${(() => {
-                try {
-                    const availableLangs = getAvailableLanguages();
-                    const langNames = {
-                        ko: '🇰🇷 한국어',
-                        en: '🇺🇸 English',
-                        zh: '🇨🇳 中文',
-                        ja: '🇯🇵 日本語',
-                        es: '🇪🇸 Español',
-                        fr: '🇫🇷 Français'
-                    };
-                    
-                    return `
-                    <div class="bg-blue-50 p-4 md:p-6 rounded-lg">
-                        <h3 class="text-lg md:text-xl font-bold text-blue-600 mb-4">
-                            <i class="fas fa-language mr-2"></i>다국어 번역
-                        </h3>
-                        
-                        <!-- 현재 언어 목록 -->
-                        <div class="mb-4">
-                            <label class="text-sm font-semibold text-gray-700 block mb-2">현재 언어</label>
-                            <div class="flex flex-wrap gap-2">
-                                ${availableLangs.map(lang => 
-                                    `<span class="inline-flex items-center px-3 py-1.5 bg-white border-2 border-blue-300 rounded-full text-sm font-medium text-blue-700">${langNames[lang] || lang}</span>`
-                                ).join('')}
-                            </div>
-                        </div>
-                        
-                        <!-- 언어 추가 -->
-                        <div class="bg-white p-4 rounded-lg border-2 border-blue-200">
-                            <label class="text-sm font-semibold text-gray-700 block mb-2">
-                                <i class="fas fa-plus-circle mr-1"></i>언어 추가
-                            </label>
-                            <div class="flex gap-2 mb-3">
-                                <select id="add-language-select" class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-sm focus:border-blue-500 focus:outline-none">
-                                    <option value="">언어 선택...</option>
-                                    ${['en', 'zh', 'ja', 'es', 'fr'].filter(lang => !availableLangs.includes(lang)).map(lang => 
-                                        `<option value="${lang}">${langNames[lang]}</option>`
-                                    ).join('')}
-                                </select>
-                                <button 
-                                    onclick="addLanguageTranslation()"
-                                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-semibold whitespace-nowrap"
-                                >
-                                    <i class="fas fa-language mr-1"></i>번역 추가
-                                </button>
-                            </div>
-                            <p class="text-xs text-gray-600">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                언어를 선택하고 '번역 추가'를 누르면 모든 페이지 텍스트가 자동으로 번역됩니다.
-                            </p>
-                        </div>
-                    </div>
-                    `;
-                } catch (error) {
-                    console.error('언어 섹션 렌더링 오류:', error);
-                    return '<p class="text-red-500">언어 섹션 로드 오류</p>';
-                }
-            })()}
-        </div>
+//         <!-- 언어 관리 섹션 -->
+//         <div class="bg-white rounded-3xl shadow-2xl p-4 md:p-10 mb-8">
+//             ${(() => {
+//                 try {
+//                     const availableLangs = getAvailableLanguages();
+//                     const langNames = {
+//                         ko: '🇰🇷 한국어',
+//                         en: '🇺🇸 English',
+//                         zh: '🇨🇳 中文',
+//                         ja: '🇯🇵 日本語',
+//                         es: '🇪🇸 Español',
+//                         fr: '🇫🇷 Français'
+//                     };
+//                     
+//                     return `
+//                     <div class="bg-blue-50 p-4 md:p-6 rounded-lg">
+//                         <h3 class="text-lg md:text-xl font-bold text-blue-600 mb-4">
+//                             <i class="fas fa-language mr-2"></i>다국어 번역
+//                         </h3>
+//                         
+//                         <!-- 현재 언어 목록 -->
+//                         <div class="mb-4">
+//                             <label class="text-sm font-semibold text-gray-700 block mb-2">현재 언어</label>
+//                             <div class="flex flex-wrap gap-2">
+//                                 ${availableLangs.map(lang => 
+//                                     `<span class="inline-flex items-center px-3 py-1.5 bg-white border-2 border-blue-300 rounded-full text-sm font-medium text-blue-700">${langNames[lang] || lang}</span>`
+//                                 ).join('')}
+//                             </div>
+//                         </div>
+//                         
+//                         <!-- 언어 추가 -->
+//                         <div class="bg-white p-4 rounded-lg border-2 border-blue-200">
+//                             <label class="text-sm font-semibold text-gray-700 block mb-2">
+//                                 <i class="fas fa-plus-circle mr-1"></i>언어 추가
+//                             </label>
+//                             <div class="flex gap-2 mb-3">
+//                                 <select id="add-language-select" class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-sm focus:border-blue-500 focus:outline-none">
+//                                     <option value="">언어 선택...</option>
+//                                     ${['en', 'zh', 'ja', 'es', 'fr'].filter(lang => !availableLangs.includes(lang)).map(lang => 
+//                                         `<option value="${lang}">${langNames[lang]}</option>`
+//                                     ).join('')}
+//                                 </select>
+//                                 <button 
+//                                     onclick="addLanguageTranslation()"
+//                                     class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-semibold whitespace-nowrap"
+//                                 >
+//                                     <i class="fas fa-language mr-1"></i>번역 추가
+//                                 </button>
+//                             </div>
+//                             <p class="text-xs text-gray-600">
+//                                 <i class="fas fa-info-circle mr-1"></i>
+//                                 언어를 선택하고 '번역 추가'를 누르면 모든 페이지 텍스트가 자동으로 번역됩니다.
+//                             </p>
+//                         </div>
+//                     </div>
+//                     `;
+//                 } catch (error) {
+//                     console.error('언어 섹션 렌더링 오류:', error);
+//                     return '<p class="text-red-500">언어 섹션 로드 오류</p>';
+//                 }
+//             })()}
+//         </div>
 
         <!-- 캐릭터 섹션 -->
         <div class="bg-white rounded-3xl shadow-2xl p-4 md:p-10 mb-8">
@@ -2338,20 +2433,20 @@ function displayStorybook(storybook) {
                         availableLanguages = ['ko', ...translationLangs].filter((v, i, a) => a.indexOf(v) === i); // 중복 제거
                     }
                     
-                    // 언어가 2개 이상일 때만 탭 표시
-                    if (availableLanguages.length < 2) {
-                        availableLanguages = ['ko']; // 한국어만 있으면 탭 안 보임
+                    // 언어가 없으면 한국어 기본
+                    if (availableLanguages.length === 0) {
+                        availableLanguages = ['ko'];
                     }
                     
-                    return availableLanguages.length > 1 ? `
+                    return `
                         <div class="border-b border-gray-200 -mx-10 px-10 mb-6">
-                            <div class="flex gap-1">
+                            <div class="flex items-center gap-1">
                                 ${availableLanguages.map(lang => {
                                     const languageNames = {
                                         'ko': '🇰🇷 한국어',
                                         'en': '🇺🇸 English',
                                         'zh': '🇨🇳 中文',
-                                        'ja': '🇯🇵 日본어',
+                                        'ja': '🇯🇵 日本어',
                                         'es': '🇪🇸 Español',
                                         'fr': '🇫🇷 Français'
                                     };
@@ -2370,9 +2465,45 @@ function displayStorybook(storybook) {
                                         </button>
                                     `;
                                 }).join('')}
+                                
+                                <!-- 언어 추가 버튼 -->
+                                <div class="relative ml-2">
+                                    <button 
+                                        onclick="toggleAddLanguageDropdown()"
+                                        class="px-4 py-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all font-semibold text-sm border-2 border-dashed border-gray-300 hover:border-purple-400"
+                                        title="언어 추가"
+                                    >
+                                        <i class="fas fa-plus mr-1"></i>언어 추가
+                                    </button>
+                                    
+                                    <!-- 드롭다운 메뉴 -->
+                                    <div id="add-language-dropdown" class="hidden absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 min-w-[200px]">
+                                        <div class="p-3">
+                                            <p class="text-xs text-gray-600 mb-2">추가할 언어 선택</p>
+                                            ${['en', 'zh', 'ja', 'es', 'fr'].filter(lang => !availableLanguages.includes(lang)).map(lang => {
+                                                const langNames = {
+                                                    en: '🇺🇸 English',
+                                                    zh: '🇨🇳 中文',
+                                                    ja: '🇯🇵 日本어',
+                                                    es: '🇪🇸 Español',
+                                                    fr: '🇫🇷 Français'
+                                                };
+                                                return `
+                                                    <button 
+                                                        onclick="addLanguageFromTab('${lang}')"
+                                                        class="w-full text-left px-3 py-2 hover:bg-purple-50 rounded text-sm transition"
+                                                    >
+                                                        ${langNames[lang]}
+                                                    </button>
+                                                `;
+                                            }).join('')}
+                                            ${availableLanguages.length >= 6 ? '<p class="text-xs text-gray-500 p-2">모든 언어가 추가되었습니다</p>' : ''}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    ` : '';
+                    `;
                 })()}
             </div>
             
