@@ -1805,8 +1805,10 @@ function displayStorybook(storybook) {
                 </h3>
                 <p class="text-sm md:text-base text-gray-700">${storybook.theme}</p>
             </div>
-            
-            <!-- 언어 관리 섹션 -->
+        </div>
+
+        <!-- 언어 관리 섹션 -->
+        <div class="bg-white rounded-3xl shadow-2xl p-4 md:p-10 mb-8">
             ${(() => {
                 try {
                     const availableLangs = getAvailableLanguages();
@@ -1820,7 +1822,7 @@ function displayStorybook(storybook) {
                     };
                     
                     return `
-                    <div class="bg-blue-50 p-4 md:p-6 rounded-lg mt-4 md:mt-6">
+                    <div class="bg-blue-50 p-4 md:p-6 rounded-lg">
                         <h3 class="text-lg md:text-xl font-bold text-blue-600 mb-4">
                             <i class="fas fa-language mr-2"></i>다국어 번역
                         </h3>
@@ -1863,7 +1865,7 @@ function displayStorybook(storybook) {
                     `;
                 } catch (error) {
                     console.error('언어 섹션 렌더링 오류:', error);
-                    return '';
+                    return '<p class="text-red-500">언어 섹션 로드 오류</p>';
                 }
             })()}
         </div>
