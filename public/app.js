@@ -1902,70 +1902,6 @@ function displayStorybook(storybook) {
             </div>
         </div>
 
-//         <!-- 언어 관리 섹션 -->
-//         <div class="bg-white rounded-3xl shadow-2xl p-4 md:p-10 mb-8">
-//             ${(() => {
-//                 try {
-//                     const availableLangs = getAvailableLanguages();
-//                     const langNames = {
-//                         ko: '🇰🇷 한국어',
-//                         en: '🇺🇸 English',
-//                         zh: '🇨🇳 中文',
-//                         ja: '🇯🇵 日本語',
-//                         es: '🇪🇸 Español',
-//                         fr: '🇫🇷 Français'
-//                     };
-//                     
-//                     return `
-//                     <div class="bg-blue-50 p-4 md:p-6 rounded-lg">
-//                         <h3 class="text-lg md:text-xl font-bold text-blue-600 mb-4">
-//                             <i class="fas fa-language mr-2"></i>다국어 번역
-//                         </h3>
-//                         
-//                         <!-- 현재 언어 목록 -->
-//                         <div class="mb-4">
-//                             <label class="text-sm font-semibold text-gray-700 block mb-2">현재 언어</label>
-//                             <div class="flex flex-wrap gap-2">
-//                                 ${availableLangs.map(lang => 
-//                                     `<span class="inline-flex items-center px-3 py-1.5 bg-white border-2 border-blue-300 rounded-full text-sm font-medium text-blue-700">${langNames[lang] || lang}</span>`
-//                                 ).join('')}
-//                             </div>
-//                         </div>
-//                         
-//                         <!-- 언어 추가 -->
-//                         <div class="bg-white p-4 rounded-lg border-2 border-blue-200">
-//                             <label class="text-sm font-semibold text-gray-700 block mb-2">
-//                                 <i class="fas fa-plus-circle mr-1"></i>언어 추가
-//                             </label>
-//                             <div class="flex gap-2 mb-3">
-//                                 <select id="add-language-select" class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-sm focus:border-blue-500 focus:outline-none">
-//                                     <option value="">언어 선택...</option>
-//                                     ${['en', 'zh', 'ja', 'es', 'fr'].filter(lang => !availableLangs.includes(lang)).map(lang => 
-//                                         `<option value="${lang}">${langNames[lang]}</option>`
-//                                     ).join('')}
-//                                 </select>
-//                                 <button 
-//                                     onclick="addLanguageTranslation()"
-//                                     class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-semibold whitespace-nowrap"
-//                                 >
-//                                     <i class="fas fa-language mr-1"></i>번역 추가
-//                                 </button>
-//                             </div>
-//                             <p class="text-xs text-gray-600">
-//                                 <i class="fas fa-info-circle mr-1"></i>
-//                                 언어를 선택하고 '번역 추가'를 누르면 모든 페이지 텍스트가 자동으로 번역됩니다.
-//                             </p>
-//                         </div>
-//                     </div>
-//                     `;
-//                 } catch (error) {
-//                     console.error('언어 섹션 렌더링 오류:', error);
-//                     return '<p class="text-red-500">언어 섹션 로드 오류</p>';
-//                 }
-//             })()}
-//         </div>
-
-        <!-- 캐릭터 섹션 -->
         <div class="bg-white rounded-3xl shadow-2xl p-4 md:p-10 mb-8">
             <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0 mb-4 md:mb-6">
                 <div class="flex-1">
@@ -3324,7 +3260,7 @@ function openCharacterUploadModal(charIndex) {
 }
 
 // 표지 업로드 모달 열기
-function openCoverUploadModal() {
+function openCoverImageUploadModal() {
     currentUploadPageIndex = null;
     currentUploadCharIndex = null;
     currentUploadType = 'cover';
@@ -5552,45 +5488,6 @@ ${noTextPrompt}`;
 let currentCharacterUploadIndex = null;
 let currentCharacterUploadTab = 'file';
 
-function openCharacterUploadModal(charIndex) {
-    currentCharacterUploadIndex = charIndex;
-    currentCharacterUploadTab = 'file';
-    document.getElementById('characterUploadModal').classList.remove('hidden');
-    switchCharacterUploadTab('file');
-}
-
-function closeCharacterUploadModal() {
-    document.getElementById('characterUploadModal').classList.add('hidden');
-    document.getElementById('characterFileInput').value = '';
-    document.getElementById('characterUrlInput').value = '';
-    currentCharacterUploadIndex = null;
-}
-
-function switchCharacterUploadTab(tab) {
-    currentCharacterUploadTab = tab;
-    
-    // 탭 버튼 스타일
-    const fileTab = document.getElementById('characterFileTab');
-    const urlTab = document.getElementById('characterUrlTab');
-    
-    if (tab === 'file') {
-        fileTab.classList.add('border-purple-600', 'text-purple-600');
-        fileTab.classList.remove('border-transparent', 'text-gray-500');
-        urlTab.classList.remove('border-purple-600', 'text-purple-600');
-        urlTab.classList.add('border-transparent', 'text-gray-500');
-        
-        document.getElementById('characterFileUploadArea').classList.remove('hidden');
-        document.getElementById('characterUrlUploadArea').classList.add('hidden');
-    } else {
-        urlTab.classList.add('border-purple-600', 'text-purple-600');
-        urlTab.classList.remove('border-transparent', 'text-gray-500');
-        fileTab.classList.remove('border-purple-600', 'text-purple-600');
-        fileTab.classList.add('border-transparent', 'text-gray-500');
-        
-        document.getElementById('characterUrlUploadArea').classList.remove('hidden');
-        document.getElementById('characterFileUploadArea').classList.add('hidden');
-    }
-}
 
 async function uploadCharacter() {
     if (!currentStorybook || currentCharacterUploadIndex === null) return;
