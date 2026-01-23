@@ -6219,7 +6219,7 @@ async function completeReviewFromModal() {
         
         // UI 업데이트
         displayStorybook(currentStorybook);
-        renderStorybookList();
+        renderBookList();
         
         showNotification('✅ 동화책이 저장되었습니다!', 'success');
         
