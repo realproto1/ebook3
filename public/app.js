@@ -2255,8 +2255,10 @@ function displayStorybook(storybook) {
                                     class="w-full p-2.5 md:p-3 border-2 border-purple-300 rounded-lg text-xs md:text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white"
                                     rows="4"
                                     onchange="updatePageText(${idx}, this.value)"
+                                    onblur="updatePageText(${idx}, this.value)"
+                                    oninput="debouncedUpdatePageText(${idx}, this.value)"
                                     placeholder="이 페이지의 스토리를 작성하세요..."
-                                >${page.text}</textarea>
+                                >${page.text || ''}</textarea>
                             </div>
 
                             <!-- 2️⃣ TTS 섹션 -->
@@ -2814,8 +2816,24 @@ function updatePageText(pageIndex, newText) {
     if (newText.trim()) {
         currentStorybook.pages[pageIndex].text = newText.trim();
         saveCurrentStorybook();
+        console.log(`✅ 페이지 ${pageIndex + 1} 텍스트 저장됨`);
     }
 }
+
+// 디바운스된 텍스트 업데이트 (타이핑 중 자동 저장)
+let textUpdateTimeouts = {};
+function debouncedUpdatePageText(pageIndex, newText) {
+    // 기존 타이머 취소
+    if (textUpdateTimeouts[pageIndex]) {
+        clearTimeout(textUpdateTimeouts[pageIndex]);
+    }
+    
+    // 1초 후 저장
+    textUpdateTimeouts[pageIndex] = setTimeout(() => {
+        updatePageText(pageIndex, newText);
+    }, 1000);
+}
+
 
 // 장면 통합 설명 업데이트
 function updateSceneCombined(pageIndex, combinedText) {
