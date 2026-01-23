@@ -178,9 +178,12 @@ async function generatePageTTS(pageIndex) {
     try {
         const response = await axios.post('/api/generate-tts', {
             text: text,
-            language: currentLanguage, // 현재 언어 정보 추가
+            language: currentLanguage,
             model: imageSettings.ttsModel,
-            voiceConfig: imageSettings.ttsVoiceConfig
+            voiceConfig: imageSettings.ttsVoiceConfig,
+            storybookId: currentStorybook?.id,
+            storybookTitle: currentStorybook?.title,
+            pageNumber: currentStorybook.pages[pageIndex].pageNumber
         }, {
             timeout: 180000 // 3분 타임아웃
         });
@@ -4301,8 +4304,14 @@ async function generateAllTTS() {
                 // TTS 생성 API 호출
                 const response = await axios.post('/api/generate-tts', {
                     text: pageText,
+                    language: currentLanguage,
                     model: imageSettings.ttsModel,
-                    voiceConfig: imageSettings.ttsVoiceConfig
+                    voiceConfig: imageSettings.ttsVoiceConfig,
+                    storybookId: currentStorybook?.id,
+                    storybookTitle: currentStorybook?.title,
+                    pageNumber: page.pageNumber
+                }, {
+                    timeout: 180000 // 3분 타임아웃
                 });
                 
                 if (response.data.success && response.data.audioUrl) {

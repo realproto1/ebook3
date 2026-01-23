@@ -2455,7 +2455,7 @@ JSON만 응답하세요. 다른 텍스트는 포함하지 마세요.`;
 // TTS 생성 API
 app.post('/api/generate-tts', requireAPIKey, async (req, res) => {
   try {
-    const { text, voiceConfig, model } = req.body;
+    const { text, voiceConfig, model, storybookId, storybookTitle, pageNumber, language } = req.body;
     
     if (!text || !text.trim()) {
       return res.status(400).json({
@@ -2467,6 +2467,7 @@ app.post('/api/generate-tts', requireAPIKey, async (req, res) => {
     console.log(`\n🎙️ Generating TTS for text: "${text.substring(0, 50)}..."`);
     console.log(`Voice config: ${voiceConfig}`);
     console.log(`Model: ${model}`);
+    console.log(`Language: ${language || 'ko'}`);
     
     // GoogleGenerativeAI 인스턴스 생성
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -2558,9 +2559,33 @@ app.post('/api/generate-tts', requireAPIKey, async (req, res) => {
               audioBuffer = pcmData;
             }
             
-            // Base64로 인코딩하여 데이터 URL 생성
-            const base64Audio = audioBuffer.toString('base64');
-            const audioUrl = `data:audio/wav;base64,${base64Audio}`;
+            // R2에 업로드 (storybookId와 pageNumber가 있는 경우)
+            let audioUrl;
+            if (storybookId && pageNumber && language) {
+              const timestamp = Date.now();
+              const safeLang = language || 'ko';
+              const safeTitle = (storybookTitle || 'storybook').replace(/[^a-zA-Z0-9가-힣]/g, '-');
+              const filename = `${storybookId}-${safeTitle}-tts-page${pageNumber}-${safeLang}-${timestamp}.wav`;
+              
+              console.log(`📤 Uploading TTS to R2: ${filename}`);
+              
+              const { PutObjectCommand } = await import('@aws-sdk/client-s3');
+              const putCommand = new PutObjectCommand({
+                Bucket: R2_BUCKET_NAME,
+                Key: filename,
+                Body: audioBuffer,
+                ContentType: 'audio/wav'
+              });
+              
+              await r2Client.send(putCommand);
+              audioUrl = `${R2_PUBLIC_URL}/${filename}`;
+              console.log(`✅ TTS uploaded to R2: ${audioUrl}`);
+            } else {
+              // storybookId가 없으면 base64로 반환 (하위 호환성)
+              const base64Audio = audioBuffer.toString('base64');
+              audioUrl = `data:audio/wav;base64,${base64Audio}`;
+              console.log(`⚠️ TTS returned as base64 (no storybookId provided)`);
+            }
             
             return res.json({
               success: true,
