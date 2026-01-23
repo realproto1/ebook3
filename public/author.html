@@ -1111,6 +1111,111 @@
         </div>
     </div>
 
+    <!-- Review 모달 -->
+    <div id="reviewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <!-- 모달 헤더 -->
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold flex items-center gap-2">
+                            <i class="fas fa-check-circle"></i>
+                            동화책 텍스트 검토
+                        </h2>
+                        <p class="text-purple-100 text-sm mt-1">생성된 텍스트를 검토하고 완료 버튼을 눌러주세요</p>
+                    </div>
+                    <button 
+                        onclick="closeReviewModal()"
+                        class="text-white hover:bg-white hover:bg-opacity-20 w-10 h-10 rounded-lg transition flex items-center justify-center"
+                    >
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 모달 본문 (스크롤 가능) -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- 동화책 제목 -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 mb-6">
+                    <h3 id="reviewStoryTitle" class="text-xl font-bold text-gray-800 mb-2"></h3>
+                    <div class="flex items-center gap-4 text-sm text-gray-600">
+                        <span><i class="fas fa-users mr-1"></i><span id="reviewTargetAge"></span></span>
+                        <span><i class="fas fa-book-open mr-1"></i><span id="reviewTotalPages"></span></span>
+                    </div>
+                </div>
+
+                <!-- 언어 탭 -->
+                <div id="reviewLanguageTabs" class="flex gap-2 flex-wrap mb-4">
+                    <!-- 동적 생성 -->
+                </div>
+
+                <!-- 언어별 콘텐츠 -->
+                <div id="reviewLanguageContents">
+                    <!-- 동적 생성 -->
+                </div>
+            </div>
+
+            <!-- 모달 푸터 -->
+            <div class="border-t border-gray-200 p-6 bg-gray-50">
+                <div class="flex justify-end gap-3">
+                    <button 
+                        onclick="closeReviewModal()"
+                        class="bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition"
+                    >
+                        <i class="fas fa-times mr-2"></i>
+                        취소
+                    </button>
+                    <button 
+                        id="reviewCompleteBtn"
+                        onclick="completeReviewFromModal()"
+                        class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-3 rounded-lg font-bold hover:from-green-700 hover:to-emerald-700 transition shadow-lg"
+                    >
+                        <i class="fas fa-check mr-2"></i>
+                        검토 완료 및 저장
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Review 모달 스타일 */
+        #reviewModal .tab-button {
+            transition: all 0.3s ease;
+        }
+        #reviewModal .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+        }
+        #reviewModal .language-content {
+            display: none;
+        }
+        #reviewModal .language-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #reviewModal .page-item {
+            transition: all 0.2s ease;
+            cursor: move;
+        }
+        #reviewModal .page-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        #reviewModal .page-item.dragging {
+            opacity: 0.5;
+            transform: rotate(2deg);
+        }
+        #reviewModal .page-item.drag-over {
+            border-top: 4px solid #667eea;
+        }
+    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script src="/gemini-client.js?v=20250120-deprecated"></script>
     <script src="/app.js?v=20250123-tts-model-description"></script>

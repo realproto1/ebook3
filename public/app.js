@@ -1576,16 +1576,18 @@ async function generateStorybook() {
         });
 
         if (response.data.success) {
-            // 임시로 localStorage에 저장
+            // 동화책 데이터 준비
             const tempStorybook = response.data.storybook;
             tempStorybook.languages = selectedLanguages;
-            localStorage.setItem('temp_storybook', JSON.stringify(tempStorybook));
             
             console.log('✅ 동화책 생성 성공:', tempStorybook.title);
             console.log('📝 선택된 언어:', selectedLanguages);
             
-            // review 페이지로 이동
-            window.location.href = '/review.html';
+            // 생성 폼 숨기기
+            document.getElementById('createForm').style.display = 'none';
+            
+            // Review 모달 열기
+            openReviewModal(tempStorybook);
         } else {
             alert(response.data.error || '동화책 생성에 실패했습니다.');
             document.getElementById('createForm').style.display = 'block';
@@ -5882,4 +5884,341 @@ function downloadVocabularyTxt() {
     document.body.removeChild(a);
     
     console.log(`✅ Vocabulary TXT downloaded: ${vocabulary.length} words`);
+}
+
+// ========================================
+// Review 모달 관련 함수들
+// ========================================
+
+let reviewStorybookData = null;
+let reviewSelectedLanguages = [];
+let reviewDraggedElement = null;
+let reviewDraggedLang = null;
+let reviewDraggedPageIdx = null;
+
+// Review 모달 열기
+function openReviewModal(storybookData) {
+    reviewStorybookData = storybookData;
+    reviewSelectedLanguages = storybookData.languages || ['ko', 'en'];
+    
+    // UI 렌더링
+    renderReviewHeader();
+    renderReviewLanguageTabs();
+    renderReviewLanguageContents();
+    
+    // 모달 표시
+    const modal = document.getElementById('reviewModal');
+    modal.style.display = 'flex';
+    modal.classList.remove('hidden');
+    
+    console.log('📖 Review 모달 열림:', storybookData.title);
+}
+
+// Review 모달 닫기
+function closeReviewModal() {
+    const modal = document.getElementById('reviewModal');
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+    
+    console.log('📖 Review 모달 닫힘');
+}
+
+// Review 헤더 렌더링
+function renderReviewHeader() {
+    document.getElementById('reviewStoryTitle').textContent = reviewStorybookData.title;
+    document.getElementById('reviewTargetAge').textContent = `${reviewStorybookData.targetAge}세 대상`;
+    document.getElementById('reviewTotalPages').textContent = `${reviewStorybookData.pages?.length || 0}페이지`;
+}
+
+// Review 언어 탭 렌더링
+function renderReviewLanguageTabs() {
+    const tabsContainer = document.getElementById('reviewLanguageTabs');
+    const languageNames = {
+        'ko': '🇰🇷 한국어',
+        'en': '🇺🇸 English',
+        'zh': '🇨🇳 中文',
+        'ja': '🇯🇵 日本語',
+        'es': '🇪🇸 Español',
+        'fr': '🇫🇷 Français'
+    };
+
+    tabsContainer.innerHTML = reviewSelectedLanguages.map((lang, idx) => `
+        <button 
+            class="tab-button px-4 py-2 rounded-lg font-semibold border-2 border-purple-300 text-sm ${idx === 0 ? 'active' : ''}"
+            onclick="switchReviewLanguage('${lang}')"
+            data-lang="${lang}"
+        >
+            ${languageNames[lang] || lang}
+        </button>
+    `).join('');
+}
+
+// Review 언어별 콘텐츠 렌더링
+function renderReviewLanguageContents() {
+    const contentsContainer = document.getElementById('reviewLanguageContents');
+    
+    contentsContainer.innerHTML = reviewSelectedLanguages.map((lang, idx) => {
+        // translations[lang] 또는 기본 pages 사용
+        const pages = reviewStorybookData.translations?.[lang] || reviewStorybookData.pages || [];
+        
+        return `
+            <div class="language-content ${idx === 0 ? 'active' : ''}" data-lang="${lang}">
+                <div id="review-pages-container-${lang}" class="space-y-2">
+                    ${pages.map((page, pageIdx) => `
+                        <div 
+                            class="page-item bg-white border-2 border-gray-200 rounded-lg p-3 hover:border-purple-300"
+                            data-lang="${lang}"
+                            data-page-idx="${pageIdx}"
+                            draggable="true"
+                            ondragstart="handleReviewDragStart(event)"
+                            ondragover="handleReviewDragOver(event)"
+                            ondrop="handleReviewDrop(event)"
+                            ondragend="handleReviewDragEnd(event)"
+                        >
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-grip-vertical text-gray-400 cursor-move text-sm"></i>
+                                    <h4 class="text-sm font-bold text-gray-700">
+                                        <i class="fas fa-file-alt mr-1 text-purple-600 text-xs"></i>
+                                        페이지 ${page.pageNumber || pageIdx + 1}
+                                    </h4>
+                                </div>
+                                <button 
+                                    onclick="deleteReviewPage('${lang}', ${pageIdx})"
+                                    class="text-red-600 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50 transition text-xs"
+                                >
+                                    <i class="fas fa-trash mr-1"></i>삭제
+                                </button>
+                            </div>
+                            <textarea
+                                id="review-page-text-${lang}-${pageIdx}"
+                                class="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition resize-y text-sm"
+                                rows="2"
+                                onchange="updateReviewPageText('${lang}', ${pageIdx}, this.value)"
+                            >${page.text || ''}</textarea>
+                            <p class="text-[10px] text-gray-400 mt-1">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                텍스트 수정 후 다른 곳 클릭 시 자동 저장
+                            </p>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <!-- 페이지 추가 버튼 -->
+                <div class="mt-3">
+                    <button 
+                        onclick="addReviewNewPage('${lang}')"
+                        class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-2 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-600 transition shadow-md text-sm"
+                    >
+                        <i class="fas fa-plus mr-2"></i>
+                        새 페이지 추가
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Review 언어 전환
+function switchReviewLanguage(lang) {
+    // 탭 활성화
+    document.querySelectorAll('#reviewLanguageTabs .tab-button').forEach(btn => {
+        if (btn.dataset.lang === lang) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    // 콘텐츠 표시
+    document.querySelectorAll('#reviewLanguageContents .language-content').forEach(content => {
+        if (content.dataset.lang === lang) {
+            content.classList.add('active');
+        } else {
+            content.classList.remove('active');
+        }
+    });
+}
+
+// Review 페이지 텍스트 업데이트
+function updateReviewPageText(lang, pageIdx, newText) {
+    // 데이터 업데이트
+    if (!reviewStorybookData.translations) {
+        reviewStorybookData.translations = {};
+    }
+    if (!reviewStorybookData.translations[lang]) {
+        reviewStorybookData.translations[lang] = reviewStorybookData.pages || [];
+    }
+    
+    reviewStorybookData.translations[lang][pageIdx].text = newText.trim();
+    
+    console.log(`✅ Review 페이지 ${pageIdx + 1} (${lang}) 텍스트 업데이트됨`);
+}
+
+// Review 페이지 삭제
+function deleteReviewPage(lang, pageIdx) {
+    const pages = reviewStorybookData.translations?.[lang] || reviewStorybookData.pages || [];
+    const pageNumber = pages[pageIdx]?.pageNumber || pageIdx + 1;
+    
+    if (!confirm(`페이지 ${pageNumber}을(를) 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
+        return;
+    }
+    
+    // 데이터에서 삭제
+    if (reviewStorybookData.translations && reviewStorybookData.translations[lang]) {
+        reviewStorybookData.translations[lang].splice(pageIdx, 1);
+        
+        // 페이지 번호 재정렬
+        reviewStorybookData.translations[lang].forEach((page, idx) => {
+            page.pageNumber = idx + 1;
+        });
+    }
+    
+    // UI 재렌더링
+    renderReviewLanguageContents();
+    
+    console.log(`✅ Review 페이지 ${pageNumber} (${lang}) 삭제됨`);
+}
+
+// Review 새 페이지 추가
+function addReviewNewPage(lang) {
+    const pages = reviewStorybookData.translations?.[lang] || reviewStorybookData.pages || [];
+    const newPageNumber = pages.length + 1;
+    
+    const newPage = {
+        pageNumber: newPageNumber,
+        text: ''
+    };
+    
+    // 데이터 업데이트
+    if (!reviewStorybookData.translations) {
+        reviewStorybookData.translations = {};
+    }
+    if (!reviewStorybookData.translations[lang]) {
+        reviewStorybookData.translations[lang] = [];
+    }
+    
+    reviewStorybookData.translations[lang].push(newPage);
+    
+    // UI 재렌더링
+    renderReviewLanguageContents();
+    
+    // 새로 추가된 페이지로 스크롤
+    setTimeout(() => {
+        const newPageElement = document.querySelector(`#reviewLanguageContents [data-lang="${lang}"][data-page-idx="${pages.length}"]`);
+        if (newPageElement) {
+            newPageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            newPageElement.querySelector('textarea')?.focus();
+        }
+    }, 100);
+    
+    console.log(`✅ Review 새 페이지 ${newPageNumber} (${lang}) 추가됨`);
+}
+
+// Review 드래그 시작
+function handleReviewDragStart(event) {
+    reviewDraggedElement = event.target.closest('.page-item');
+    reviewDraggedLang = reviewDraggedElement.dataset.lang;
+    reviewDraggedPageIdx = parseInt(reviewDraggedElement.dataset.pageIdx);
+    
+    reviewDraggedElement.classList.add('dragging');
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/html', reviewDraggedElement.innerHTML);
+}
+
+// Review 드래그 오버
+function handleReviewDragOver(event) {
+    if (event.preventDefault) {
+        event.preventDefault();
+    }
+    event.dataTransfer.dropEffect = 'move';
+    
+    const target = event.target.closest('.page-item');
+    if (target && target !== reviewDraggedElement) {
+        target.classList.add('drag-over');
+    }
+    
+    return false;
+}
+
+// Review 드롭
+function handleReviewDrop(event) {
+    if (event.stopPropagation) {
+        event.stopPropagation();
+    }
+    
+    const targetElement = event.target.closest('.page-item');
+    if (!targetElement || targetElement === reviewDraggedElement) {
+        return false;
+    }
+    
+    const targetLang = targetElement.dataset.lang;
+    const targetPageIdx = parseInt(targetElement.dataset.pageIdx);
+    
+    // 같은 언어 내에서만 순서 변경 가능
+    if (reviewDraggedLang !== targetLang) {
+        alert('같은 언어 내에서만 순서를 변경할 수 있습니다.');
+        return false;
+    }
+    
+    // 데이터 순서 변경
+    const pages = reviewStorybookData.translations?.[reviewDraggedLang] || reviewStorybookData.pages || [];
+    const [movedPage] = pages.splice(reviewDraggedPageIdx, 1);
+    pages.splice(targetPageIdx, 0, movedPage);
+    
+    // 페이지 번호 재정렬
+    pages.forEach((page, idx) => {
+        page.pageNumber = idx + 1;
+    });
+    
+    // UI 재렌더링
+    renderReviewLanguageContents();
+    
+    console.log(`✅ Review 페이지 순서 변경: ${reviewDraggedPageIdx + 1} → ${targetPageIdx + 1}`);
+    
+    return false;
+}
+
+// Review 드래그 종료
+function handleReviewDragEnd(event) {
+    const allItems = document.querySelectorAll('#reviewLanguageContents .page-item');
+    allItems.forEach(item => {
+        item.classList.remove('dragging', 'drag-over');
+    });
+}
+
+// Review 검토 완료 (모달에서)
+async function completeReviewFromModal() {
+    if (!confirm('검토를 완료하고 저장하시겠습니까?')) {
+        return;
+    }
+
+    // 로딩 표시
+    const btn = document.getElementById('reviewCompleteBtn');
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>저장 중...';
+
+    try {
+        // currentStorybook 업데이트
+        currentStorybook = reviewStorybookData;
+        
+        // R2에 저장
+        await saveCurrentStorybook();
+        
+        // 모달 닫기
+        closeReviewModal();
+        
+        // UI 업데이트
+        renderCurrentStorybook();
+        
+        showNotification('✅ 동화책이 저장되었습니다!', 'success');
+        
+        console.log('✅ Review 완료 및 저장됨');
+    } catch (error) {
+        console.error('Review 저장 오류:', error);
+        alert(`❌ 저장에 실패했습니다.\n${error.message}`);
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+    }
 }
