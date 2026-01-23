@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>탱고북 - 이미지 생성 프롬프트 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .section {
+            scroll-margin-top: 80px;
+        }
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+        }
+        .prompt-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        .variable {
+            color: #4ec9b0;
+            font-weight: bold;
+        }
+        .keyword {
+            color: #c586c0;
+            font-weight: bold;
+        }
+        .string {
+            color: #ce9178;
+        }
+        .comment {
+            color: #6a9955;
+            font-style: italic;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .highlight-box {
+            border-left: 4px solid;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 네비게이션 -->
+    <nav class="bg-white/90 py-4 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-magic text-3xl text-purple-600"></i>
+                    <h1 class="text-2xl font-bold text-gray-800">탱고북 프롬프트 가이드</h1>
+                </div>
+                <div class="flex gap-6 text-sm">
+                    <a href="#cover" class="hover:text-purple-600">표지</a>
+                    <a href="#character" class="hover:text-purple-600">캐릭터</a>
+                    <a href="#illustration" class="hover:text-purple-600">페이지 삽화</a>
+                    <a href="#tips" class="hover:text-purple-600">팁</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- 헤더 -->
+        <div class="gradient-bg text-white rounded-2xl p-12 mb-12 shadow-2xl">
+            <div class="text-center">
+                <div class="mb-6">
+                    <i class="fas fa-palette text-6xl"></i>
+                </div>
+                <h1 class="text-5xl font-bold mb-4">이미지 생성 프롬프트 가이드</h1>
+                <h2 class="text-3xl mb-4">AI 동화책 이미지를 위한 완벽한 프롬프트</h2>
+                <p class="text-xl opacity-90">표지, 캐릭터, 페이지 삽화 생성을 위한 상세 가이드</p>
+            </div>
+        </div>
+
+        <!-- 개요 -->
+        <section class="bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-info-circle text-blue-600"></i>
+                프롬프트 시스템 개요
+            </h2>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-purple-50 border-2 border-purple-300 rounded-lg p-6">
+                    <div class="text-3xl mb-3">📖</div>
+                    <h3 class="text-xl font-bold text-purple-800 mb-2">표지 프롬프트</h3>
+                    <p class="text-sm text-gray-700">동화책의 매력적인 표지 이미지를 생성합니다.</p>
+                    <div class="mt-3">
+                        <span class="badge bg-purple-200 text-purple-800">buildCoverPrompt()</span>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 border-2 border-blue-300 rounded-lg p-6">
+                    <div class="text-3xl mb-3">👤</div>
+                    <h3 class="text-xl font-bold text-blue-800 mb-2">캐릭터 프롬프트</h3>
+                    <p class="text-sm text-gray-700">일관된 캐릭터 레퍼런스 시트를 생성합니다.</p>
+                    <div class="mt-3">
+                        <span class="badge bg-blue-200 text-blue-800">buildCharacterPrompt()</span>
+                    </div>
+                </div>
+
+                <div class="bg-green-50 border-2 border-green-300 rounded-lg p-6">
+                    <div class="text-3xl mb-3">🎨</div>
+                    <h3 class="text-xl font-bold text-green-800 mb-2">삽화 프롬프트</h3>
+                    <p class="text-sm text-gray-700">페이지별 스토리 삽화를 생성합니다.</p>
+                    <div class="mt-3">
+                        <span class="badge bg-green-200 text-green-800">buildIllustrationPrompt()</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-lg border-2 border-yellow-300">
+                <h3 class="font-bold text-lg text-orange-900 mb-3 flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    핵심 원칙
+                </h3>
+                <ul class="space-y-2 text-gray-700">
+                    <li><strong>✅ NO TEXT:</strong> 모든 이미지에 텍스트 절대 금지 (순수 일러스트레이션)</li>
+                    <li><strong>✅ 일관성:</strong> 캐릭터 외형, 아트 스타일, 색상 팔레트 유지</li>
+                    <li><strong>✅ 타겟 연령:</strong> 4-8세 어린이 적합 디자인</li>
+                    <li><strong>✅ 고품질:</strong> 전문적인 어린이 책 일러스트레이션 수준</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 1. 표지 프롬프트 -->
+        <section id="cover" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-book text-purple-600"></i>
+                1. 표지 이미지 프롬프트
+            </h2>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-gray-700 mb-3">함수 시그니처</h3>
+                <div class="prompt-box">
+<span class="keyword">function</span> <span class="variable">buildCoverPrompt</span>(storybook) {
+  <span class="comment">// 표지 이미지 생성을 위한 프롬프트 반환</span>
+  <span class="keyword">return</span> prompt;
+}
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-gray-700 mb-3">입력 파라미터</h3>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <ul class="space-y-2 text-sm">
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">storybook.title</code> - 동화책 제목</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">storybook.theme</code> - 테마/주제</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">storybook.artStyle</code> - 그림체 스타일</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">storybook.characters</code> - 캐릭터 배열</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-gray-700 mb-3">프롬프트 구조</h3>
+                <div class="prompt-box">
+Create a beautiful, professional book cover illustration for a children's storybook.
+
+<span class="variable">**Book Title:**</span> <span class="string">${title}</span>
+<span class="variable">**Theme:**</span> <span class="string">${theme}</span>
+<span class="variable">**Art Style:**</span> <span class="string">${artStyle}</span>
+
+<span class="variable">**Main Characters:**</span> <span class="string">${characters}</span>
+
+<span class="variable">**Cover Requirements:**</span>
+- Eye-catching, vibrant illustration that captures the story's essence
+- Show the main characters in an engaging scene
+- Magical, inviting atmosphere suitable for children ages 4-8
+- Professional book cover quality
+- Composition suitable for a vertical book cover layout
+
+<span class="variable">**DO NOT include:**</span>
+- Any text, title, or letters on the cover
+- Book spine or binding elements
+- Just pure illustration
+
+Create a captivating cover illustration that makes children want to read this story!
+                </div>
+            </div>
+
+            <div class="highlight-box bg-purple-50 border-purple-500">
+                <h3 class="font-bold text-purple-800 mb-2 flex items-center gap-2">
+                    <i class="fas fa-lightbulb"></i>
+                    핵심 포인트
+                </h3>
+                <ul class="space-y-1 text-sm text-gray-700">
+                    <li>✅ <strong>세로 레이아웃</strong> - 책 표지 형식</li>
+                    <li>✅ <strong>캐릭터 등장</strong> - 주요 캐릭터 모두 표시</li>
+                    <li>✅ <strong>텍스트 금지</strong> - 제목, 글자 일체 포함 안 됨</li>
+                    <li>✅ <strong>매력적인 장면</strong> - 어린이의 호기심 자극</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 2. 캐릭터 프롬프트 -->
+        <section id="character" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-user-circle text-blue-600"></i>
+                2. 캐릭터 레퍼런스 시트 프롬프트
+            </h2>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-gray-700 mb-3">함수 시그니처</h3>
+                <div class="prompt-box">
+<span class="keyword">function</span> <span class="variable">buildCharacterPrompt</span>(
+  description, 
+  artStyle, 
+  settings, 
+  isRegeneration = <span class="keyword">false</span>
+) {
+  <span class="comment">// 캐릭터 레퍼런스 시트 생성 프롬프트</span>
+  <span class="keyword">return</span> prompt;
+}
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-gray-700 mb-3">입력 파라미터</h3>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <ul class="space-y-2 text-sm">
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">description</code> - 캐릭터 설명 (외형, 의상, 특징)</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">artStyle</code> - 그림체 스타일</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">settings.aspectRatio</code> - 이미지 비율</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">settings.enforceNoText</code> - 텍스트 강제 금지</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">settings.additionalPrompt</code> - 추가 지침</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">isRegeneration</code> - 재생성 모드 (기존 이미지 있을 때)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-gray-700 mb-3">프롬프트 구조</h3>
+                <div class="prompt-box">
+Create a professional character design reference sheet for a children's storybook character.
+
+<span class="variable">**Character Description:**</span> <span class="string">${description}</span>
+
+<span class="variable">**Art Style:**</span> <span class="string">${artStyle}</span> style for children's book illustration, suitable for ages 4-8.
+
+<span class="variable">**Reference Sheet Layout:**</span>
+1. <span class="keyword">**Center (Front View):**</span> Full-body front view in a neutral standing pose
+2. <span class="keyword">**Side Views:**</span> Three-quarter view and side profile
+3. <span class="keyword">**Expressions:**</span> Three different facial expressions (happy, surprised, thoughtful)
+4. <span class="keyword">**Details:**</span> Clear, consistent details of clothing, colors, and distinctive features
+
+<span class="variable">**Background:**</span> Clean white background with subtle grid or guidelines
+
+<span class="variable">**Art Quality:**</span> High-detail, professional children's book illustration quality
+
+<span class="variable">**Image Aspect Ratio:**</span> <span class="string">${settings.aspectRatio}</span>
+
+<span class="variable">**NO TEXT:**</span> Do NOT include any text, labels, words, letters, or captions
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-gray-700 mb-3">재생성 모드 (isRegeneration = true)</h3>
+                <div class="highlight-box bg-yellow-50 border-yellow-500">
+                    <h4 class="font-bold text-yellow-800 mb-2">🔄 Regeneration Mode</h4>
+                    <p class="text-sm text-gray-700 mb-3">기존 캐릭터 이미지가 있을 때 일관성을 유지하면서 수정</p>
+                    <div class="prompt-box text-xs">
+<span class="variable">**🔄 REGENERATION MODE - CRITICAL INSTRUCTIONS:**</span>
+
+<span class="keyword">STEP 1:</span> CAREFULLY ANALYZE the reference image
+  - Current character design, facial features, body proportions
+  - Exact colors (clothing, hair, skin tone, accessories)
+  - Art style, line work, and shading technique
+
+<span class="keyword">STEP 2:</span> MAINTAIN these exact elements
+  - Core character design and recognizability
+  - Color palette (unless explicitly changed)
+  - Art style consistency
+
+<span class="keyword">STEP 3:</span> ONLY modify what is explicitly mentioned in the updated description
+
+<span class="variable">**Priority Order:**</span>
+1st: Reference Image (base design)
+2nd: Updated Character Description (modifications only)
+3rd: Art Style (already established in reference)
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box bg-blue-50 border-blue-500">
+                <h3 class="font-bold text-blue-800 mb-2 flex items-center gap-2">
+                    <i class="fas fa-star"></i>
+                    레퍼런스 시트가 중요한 이유
+                </h3>
+                <ul class="space-y-1 text-sm text-gray-700">
+                    <li>✅ <strong>일관성 보장</strong> - 모든 페이지에서 동일한 캐릭터 외형</li>
+                    <li>✅ <strong>다각도 뷰</strong> - 정면, 측면, 3/4 뷰로 완전한 이해</li>
+                    <li>✅ <strong>표정 다양성</strong> - 다양한 감정 표현 가능</li>
+                    <li>✅ <strong>디테일 정확성</strong> - 의상, 색상, 특징 명확히 기록</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 3. 페이지 삽화 프롬프트 -->
+        <section id="illustration" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-image text-green-600"></i>
+                3. 페이지 삽화 프롬프트 (가장 복잡)
+            </h2>
+
+            <div class="bg-gradient-to-r from-green-50 to-teal-50 p-6 rounded-lg mb-6 border-2 border-green-300">
+                <h3 class="font-bold text-lg text-green-900 mb-2">🎨 가장 정교한 프롬프트 시스템</h3>
+                <p class="text-gray-700">페이지 삽화는 스토리 맥락, 캐릭터 일관성, 장면 구조를 모두 고려하는 가장 복잡한 프롬프트입니다.</p>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-gray-700 mb-3">함수 시그니처</h3>
+                <div class="prompt-box">
+<span class="keyword">function</span> <span class="variable">buildIllustrationPrompt</span>(
+  page, 
+  artStyle, 
+  characterReferences, 
+  settings, 
+  editNote = <span class="string">''</span>
+) {
+  <span class="comment">// 페이지 삽화 생성 프롬프트</span>
+  <span class="comment">// 자동 캐릭터 필터링, 스토리 컨텍스트, 재생성 모드 지원</span>
+  <span class="keyword">return</span> prompt;
+}
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-gray-700 mb-3">입력 파라미터</h3>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <ul class="space-y-2 text-sm">
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">page.pageNumber</code> - 페이지 번호</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">page.text</code> - 페이지 텍스트</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">page.scene_description</code> - 장면 설명</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">page.scene_structure</code> - 장면 구조 (캐릭터, 배경, 분위기)</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">page.illustrationImage</code> - 기존 이미지 (재생성 시)</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">artStyle</code> - 그림체 스타일</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">characterReferences</code> - 캐릭터 레퍼런스 배열</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">settings</code> - 이미지 설정</li>
+                        <li><code class="bg-gray-200 px-2 py-1 rounded">editNote</code> - 수정 요청 (선택)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-gray-700 mb-3">🎯 핵심 기능</h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-indigo-50 border-2 border-indigo-300 rounded-lg p-4">
+                        <h4 class="font-bold text-indigo-800 mb-2">1. 자동 캐릭터 필터링</h4>
+                        <div class="prompt-box text-xs">
+<span class="comment">// 페이지에 등장하는 캐릭터만 자동 감지</span>
+<span class="keyword">const</span> allText = <span class="string">`${pageText} ${sceneCharacters} ${editNote}`</span>;
+<span class="keyword">const</span> relevantCharacters = characterReferences.<span class="variable">filter</span>(char => {
+  <span class="keyword">return</span> allText.includes(char.name.toLowerCase());
+});
+
+console.log(<span class="string">`전체 ${characterReferences.length}명 → 등장 ${filteredCharacters.length}명`</span>);
+                        </div>
+                    </div>
+
+                    <div class="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+                        <h4 class="font-bold text-purple-800 mb-2">2. 스토리 컨텍스트</h4>
+                        <div class="text-xs text-gray-700">
+                            <ul class="space-y-1">
+                                <li>• <strong>최근 3페이지 포함</strong> - 타임아웃 방지</li>
+                                <li>• <strong>이전 페이지 참조</strong> - 시각적 일관성</li>
+                                <li>• <strong>현재 페이지 강조</strong> - 컨텍스트 제공</li>
+                                <li>• <strong>재생성 시 생략</strong> - editNote 있을 때</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                        <h4 class="font-bold text-green-800 mb-2">3. 캐릭터 일관성</h4>
+                        <div class="text-xs text-gray-700">
+                            <ul class="space-y-1">
+                                <li>• <strong>PIXEL-FOR-PIXEL</strong> - 레퍼런스 정확히 재현</li>
+                                <li>• <strong>얼굴 특징</strong> - 완벽한 매칭</li>
+                                <li>• <strong>의상/색상</strong> - 동일하게 유지</li>
+                                <li>• <strong>비율/자세</strong> - 일관된 표현</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
+                        <h4 class="font-bold text-orange-800 mb-2">4. 재생성 모드</h4>
+                        <div class="text-xs text-gray-700">
+                            <ul class="space-y-1">
+                                <li>• <strong>수정 요청 우선</strong> - editNote 기반</li>
+                                <li>• <strong>레퍼런스 유지</strong> - 캐릭터 외형</li>
+                                <li>• <strong>스타일 일관성</strong> - 아트 스타일</li>
+                                <li>• <strong>비율 고정</strong> - aspect ratio 유지</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-gray-700 mb-3">프롬프트 구조 (기본 모드)</h3>
+                <div class="prompt-box">
+Create a beautiful, professional illustration for a children's storybook page.
+
+<span class="variable">**RECENT STORY CONTEXT:**</span>
+<span class="comment">// 최근 3페이지 텍스트</span>
+Page 1: <span class="string">${page1Text}</span>
+Page 2: <span class="string">${page2Text}</span>
+Page 3: <span class="string">${page3Text}</span>
+
+<span class="variable">**CURRENT PAGE ${pageNumber}:**</span> <span class="string">${currentPageText}</span>
+
+<span class="variable">**🎨 PREVIOUS PAGE REFERENCE:**</span>
+I have provided the illustration from the immediately previous page as a reference image.
+Use it to maintain visual continuity and art style.
+
+<span class="variable">**Main Scene Description:**</span> <span class="string">${sceneDescription}</span>
+
+<span class="variable">**Scene Structure:**</span>
+- <span class="keyword">Characters & Actions:</span> <span class="string">${characters}</span>
+- <span class="keyword">Background Setting:</span> <span class="string">${background}</span>
+- <span class="keyword">Mood & Atmosphere:</span> <span class="string">${atmosphere}</span>
+
+<span class="variable">**Character References (MUST FOLLOW EXACTLY):**</span>
+<span class="comment">// 필터링된 캐릭터만 포함</span>
+1. <span class="keyword">Character Name:</span> <span class="string">${description}</span>
+   - <span class="keyword">CRITICAL:</span> Use reference image to ensure ABSOLUTE PIXEL-PERFECT consistency
+
+<span class="variable">**Art Style:**</span> <span class="string">${artStyle}</span> style for children's book illustration
+
+<span class="variable">**Image Aspect Ratio:**</span> <span class="string">${aspectRatio}</span>
+
+<span class="variable">**Composition:**</span> Warm, inviting scene suitable for a storybook spread
+
+<span class="variable">**🎯 DIRECTIONAL CONSISTENCY:**</span>
+Analyze the previous page's character positions and maintain consistent left-right orientation
+
+<span class="variable">**Lighting & Atmosphere:**</span> Soft, warm lighting with gentle shadows
+
+<span class="variable">**Color Palette:**</span> Vibrant, cheerful colors appropriate for children ages 4-8
+
+<span class="variable">**Art Quality:**</span> High-detail, professional quality with painterly texture
+
+<span class="variable">**Target Audience:**</span> Children ages 4-8
+
+<span class="variable">**CRITICAL - NO TEXT:**</span> Do NOT include ANY text, labels, words, letters, captions, 
+titles, speech bubbles, or text overlays. Absolutely NO TEXT of any kind.
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-gray-700 mb-3">재생성 모드 (editNote 있음)</h3>
+                <div class="highlight-box bg-red-50 border-red-500">
+                    <h4 class="font-bold text-red-800 mb-2">🔄 Regeneration with Modification</h4>
+                    <div class="prompt-box text-xs">
+<span class="variable">**🔄 REGENERATION MODE - CRITICAL INSTRUCTIONS:**</span>
+
+<span class="keyword">STEP 1 - ANALYZE REFERENCE IMAGES:</span>
+1. Current illustration (what it looks like now)
+2. Character reference sheets (how characters should look)
+3. Selected reference pages (additional context)
+
+<span class="keyword">STEP 2 - READ MODIFICATION REQUEST:</span>
+User's modification request: <span class="string">"${editNote}"</span>
+
+<span class="variable">**YOUR TASK:**</span>
+- CREATE the scene based on this modification request
+- USE the reference images to maintain:
+  • Character visual consistency
+  • Art style and color palette
+  • Overall composition quality
+- <span class="keyword">IGNORE</span> the original scene description
+- <span class="keyword">FOCUS</span> on what the user wants to see
+
+<span class="variable">**⚠️ CRITICAL REQUIREMENTS:**</span>
+• Characters MUST be visually IDENTICAL to reference sheets
+• Follow the modification request (not the original scene description)
+• Reference images are for VISUAL STYLE only, not for scene content
+
+<span class="variable">**Priority Order for REGENERATION:**</span>
+1st: User's Modification Request (what to create)
+2nd: Character Reference Sheets (how characters look)
+3rd: Reference Images (visual style guide)
+4th: Art Style (maintain consistency)
+
+<span class="variable">**IGNORE these during regeneration:**</span>
+❌ Original scene description (shown below for reference only)
+❌ Original scene structure (outdated)
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box bg-green-50 border-green-500">
+                <h3 class="font-bold text-green-800 mb-2 flex items-center gap-2">
+                    <i class="fas fa-check-circle"></i>
+                    페이지 삽화 프롬프트의 장점
+                </h3>
+                <ul class="space-y-1 text-sm text-gray-700">
+                    <li>✅ <strong>자동 최적화</strong> - 페이지에 등장하는 캐릭터만 포함 (토큰 절약)</li>
+                    <li>✅ <strong>스토리 연속성</strong> - 이전 페이지와 자연스럽게 연결</li>
+                    <li>✅ <strong>시각적 일관성</strong> - 캐릭터 레퍼런스로 픽셀 단위 정확도</li>
+                    <li>✅ <strong>유연한 수정</strong> - editNote로 특정 부분만 변경 가능</li>
+                    <li>✅ <strong>타임아웃 방지</strong> - 재생성 시 불필요한 컨텍스트 생략</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 4. 설정 옵션 -->
+        <section class="bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-sliders-h text-orange-600"></i>
+                4. 이미지 설정 옵션 (settings)
+            </h2>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-gray-50 p-6 rounded-lg border-2 border-gray-300">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">기본 설정</h3>
+                    <div class="prompt-box text-xs">
+<span class="keyword">let</span> imageSettings = {
+  <span class="variable">aspectRatio</span>: <span class="string">'16:9'</span>,
+  <span class="variable">enforceNoText</span>: <span class="keyword">true</span>,
+  <span class="variable">enforceCharacterConsistency</span>: <span class="keyword">true</span>,
+  <span class="variable">additionalPrompt</span>: <span class="string">''</span>,
+  <span class="variable">imageQuality</span>: <span class="string">'high'</span>,
+  
+  <span class="comment">// 모델 선택</span>
+  <span class="variable">characterModel</span>: <span class="string">'gemini-3-pro-image-preview'</span>,
+  <span class="variable">keyObjectModel</span>: <span class="string">'gemini-3-pro-image-preview'</span>,
+  <span class="variable">illustrationModel</span>: <span class="string">'gemini-3-pro-image-preview'</span>,
+  <span class="variable">vocabularyModel</span>: <span class="string">'gemini-3-pro-image-preview'</span>,
+  <span class="variable">coverModel</span>: <span class="string">'gemini-3-pro-image-preview'</span>
+};
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                        <h4 class="font-bold text-blue-800 mb-2">aspectRatio</h4>
+                        <p class="text-sm text-gray-700">이미지 비율 (16:9, 4:3, 1:1 등)</p>
+                    </div>
+
+                    <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                        <h4 class="font-bold text-red-800 mb-2">enforceNoText</h4>
+                        <p class="text-sm text-gray-700"><strong>true:</strong> 텍스트 강력 금지<br><strong>false:</strong> 일반 텍스트 금지</p>
+                    </div>
+
+                    <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
+                        <h4 class="font-bold text-purple-800 mb-2">enforceCharacterConsistency</h4>
+                        <p class="text-sm text-gray-700"><strong>true:</strong> 픽셀 단위 캐릭터 일관성<br><strong>false:</strong> 기본 일관성</p>
+                    </div>
+
+                    <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                        <h4 class="font-bold text-green-800 mb-2">additionalPrompt</h4>
+                        <p class="text-sm text-gray-700">추가 지침 (선택 사항)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 팁 & 베스트 프랙티스 -->
+        <section id="tips" class="section bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-lightbulb text-yellow-600"></i>
+                5. 프롬프트 작성 팁 & 베스트 프랙티스
+            </h2>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="highlight-box bg-green-50 border-green-500">
+                    <h3 class="font-bold text-green-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-check-circle"></i>
+                        DO (권장 사항)
+                    </h3>
+                    <ul class="space-y-2 text-sm text-gray-700">
+                        <li>✅ <strong>명확한 설명:</strong> 캐릭터/장면을 구체적으로 설명</li>
+                        <li>✅ <strong>일관성 유지:</strong> 모든 이미지에 동일한 아트 스타일</li>
+                        <li>✅ <strong>레퍼런스 사용:</strong> 캐릭터는 반드시 레퍼런스 시트 생성</li>
+                        <li>✅ <strong>컨텍스트 제공:</strong> 스토리 흐름을 프롬프트에 포함</li>
+                        <li>✅ <strong>연령 적합성:</strong> 4-8세 어린이 타겟 명시</li>
+                        <li>✅ <strong>감정 표현:</strong> 분위기, 조명, 색상으로 감정 전달</li>
+                        <li>✅ <strong>방향성 일관성:</strong> 캐릭터 위치/방향 유지</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box bg-red-50 border-red-500">
+                    <h3 class="font-bold text-red-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-times-circle"></i>
+                        DON'T (피해야 할 것)
+                    </h3>
+                    <ul class="space-y-2 text-sm text-gray-700">
+                        <li>❌ <strong>텍스트 포함:</strong> 절대로 글자/제목/라벨 허용 안 함</li>
+                        <li>❌ <strong>모호한 설명:</strong> "예쁜", "좋은" 같은 추상적 표현</li>
+                        <li>❌ <strong>레퍼런스 없음:</strong> 캐릭터 일관성 보장 불가</li>
+                        <li>❌ <strong>너무 긴 프롬프트:</strong> 타임아웃 발생 위험</li>
+                        <li>❌ <strong>상충되는 지침:</strong> 모순된 요구사항</li>
+                        <li>❌ <strong>부적절한 내용:</strong> 어린이 부적합 요소</li>
+                        <li>❌ <strong>비율 무시:</strong> 재생성 시 aspect ratio 변경</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-lg border-2 border-indigo-300">
+                <h3 class="font-bold text-lg text-indigo-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-trophy"></i>
+                    프로 팁
+                </h3>
+                <div class="grid md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <h4 class="font-bold text-indigo-800 mb-2">1. 캐릭터 필터링 활용</h4>
+                        <p class="text-gray-700">등장하지 않는 캐릭터는 자동으로 제외되어 토큰 절약</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-indigo-800 mb-2">2. 이전 페이지 참조</h4>
+                        <p class="text-gray-700">바로 전 페이지 이미지를 레퍼런스로 제공해 일관성 극대화</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-indigo-800 mb-2">3. 재생성 모드 활용</h4>
+                        <p class="text-gray-700">editNote로 특정 부분만 수정해 효율적인 재생성</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-indigo-800 mb-2">4. 타임아웃 방지</h4>
+                        <p class="text-gray-700">재생성 시 스토리 컨텍스트 자동 생략으로 빠른 처리</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. 실전 예시 -->
+        <section class="bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-code text-indigo-600"></i>
+                6. 실전 사용 예시
+            </h2>
+
+            <div class="space-y-6">
+                <div class="border-2 border-purple-300 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-purple-800 mb-3">예시 1: 표지 생성</h3>
+                    <div class="prompt-box text-xs">
+<span class="keyword">const</span> storybook = {
+  title: <span class="string">'어린 왕자'</span>,
+  theme: <span class="string">'우정과 모험'</span>,
+  artStyle: <span class="string">'수채화 스타일'</span>,
+  characters: [
+    { name: <span class="string">'어린 왕자'</span> },
+    { name: <span class="string">'여우'</span> }
+  ]
+};
+
+<span class="keyword">const</span> coverPrompt = buildCoverPrompt(storybook);
+<span class="comment">// → "Create a beautiful, professional book cover...</span>
+<span class="comment">//    Book Title: 어린 왕자</span>
+<span class="comment">//    Theme: 우정과 모험...</span>
+                    </div>
+                </div>
+
+                <div class="border-2 border-blue-300 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-blue-800 mb-3">예시 2: 캐릭터 레퍼런스 생성</h3>
+                    <div class="prompt-box text-xs">
+<span class="keyword">const</span> characterPrompt = buildCharacterPrompt(
+  <span class="string">'금발 소년, 파란색 왕자 옷, 호기심 많은 표정'</span>,
+  <span class="string">'수채화 스타일'</span>,
+  {
+    aspectRatio: <span class="string">'16:9'</span>,
+    enforceNoText: <span class="keyword">true</span>,
+    additionalPrompt: <span class="string">'별이 반짝이는 배경'</span>
+  },
+  <span class="keyword">false</span> <span class="comment">// 첫 생성</span>
+);
+                    </div>
+                </div>
+
+                <div class="border-2 border-green-300 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-green-800 mb-3">예시 3: 페이지 삽화 생성</h3>
+                    <div class="prompt-box text-xs">
+<span class="keyword">const</span> page = {
+  pageNumber: <span class="number">5</span>,
+  text: <span class="string">'어린 왕자는 여우를 만났습니다.'</span>,
+  scene_description: <span class="string">'사막에서 어린 왕자와 여우가 만나는 장면'</span>,
+  scene_structure: {
+    characters: <span class="string">'어린 왕자, 여우'</span>,
+    background: <span class="string">'황금빛 사막, 석양'</span>,
+    atmosphere: <span class="string">'따뜻하고 감동적인'</span>
+  }
+};
+
+<span class="keyword">const</span> illustrationPrompt = buildIllustrationPrompt(
+  page,
+  <span class="string">'수채화 스타일'</span>,
+  characterReferences,
+  imageSettings,
+  <span class="string">''</span> <span class="comment">// editNote 없음</span>
+);
+
+<span class="comment">// 자동으로:</span>
+<span class="comment">// - 어린 왕자, 여우 캐릭터만 필터링</span>
+<span class="comment">// - 최근 3페이지 컨텍스트 포함</span>
+<span class="comment">// - 이전 페이지 이미지 참조</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-8 rounded-xl">
+            <div class="text-center">
+                <div class="text-2xl font-bold mb-2">
+                    <i class="fas fa-magic mr-2"></i>
+                    탱고북 프롬프트 가이드
+                </div>
+                <p class="text-gray-400">AI 동화책 이미지를 위한 완벽한 프롬프트 시스템</p>
+                <p class="text-gray-500 text-sm mt-4">작성일: 2025-01-22 | 버전: 1.0.0</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // 스무스 스크롤
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 네비게이션 하이라이트
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('nav a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('text-purple-600', 'font-bold');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('text-purple-600', 'font-bold');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

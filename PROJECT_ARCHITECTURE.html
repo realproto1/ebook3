@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>탱고북 저작도구 - 프로젝트 아키텍처 문서</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .meta-info {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .meta-item {
+            text-align: center;
+        }
+        
+        .meta-item strong {
+            display: block;
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .meta-item span {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+        
+        nav {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            border-bottom: 3px solid #667eea;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        nav a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        nav a:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        section {
+            margin-bottom: 60px;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h2 {
+            color: #667eea;
+            font-size: 2.2em;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        h2::before {
+            content: '📚';
+            font-size: 1.2em;
+        }
+        
+        h3 {
+            color: #764ba2;
+            font-size: 1.6em;
+            margin: 30px 0 20px 0;
+            padding-left: 15px;
+            border-left: 5px solid #764ba2;
+        }
+        
+        h4 {
+            color: #555;
+            font-size: 1.3em;
+            margin: 20px 0 15px 0;
+            font-weight: 600;
+        }
+        
+        .tree {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            border: 2px solid #e0e0e0;
+            margin: 20px 0;
+        }
+        
+        .tree pre {
+            margin: 0;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+        
+        .card-header {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .badge-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .badge-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .badge-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .badge-info {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .function-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .function-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+        
+        .function-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .function-name {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #764ba2;
+            margin-bottom: 8px;
+        }
+        
+        .function-desc {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+        
+        .api-endpoint {
+            background: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+        
+        .api-method {
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .method-get { background: #10b981; color: white; }
+        .method-post { background: #3b82f6; color: white; }
+        .method-put { background: #f59e0b; color: white; }
+        .method-delete { background: #ef4444; color: white; }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box strong {
+            color: #92400e;
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 40px;
+            margin-top: 60px;
+        }
+        
+        footer p {
+            opacity: 0.8;
+            margin: 10px 0;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .function-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 탱고북 저작도구</h1>
+            <p>AI 기반 어린이 동화책 생성 플랫폼 - 프로젝트 아키텍처</p>
+            
+            <div class="meta-info">
+                <div class="meta-item">
+                    <strong>버전</strong>
+                    <span>v12.0.0</span>
+                </div>
+                <div class="meta-item">
+                    <strong>기술 스택</strong>
+                    <span>Node.js + Express</span>
+                </div>
+                <div class="meta-item">
+                    <strong>AI 모델</strong>
+                    <span>Gemini 2.5 Flash</span>
+                </div>
+                <div class="meta-item">
+                    <strong>스토리지</strong>
+                    <span>Cloudflare R2</span>
+                </div>
+            </div>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="#overview">개요</a></li>
+                <li><a href="#architecture">아키텍처</a></li>
+                <li><a href="#file-structure">파일 구조</a></li>
+                <li><a href="#backend">백엔드</a></li>
+                <li><a href="#frontend">프론트엔드</a></li>
+                <li><a href="#api">API 명세</a></li>
+                <li><a href="#deployment">배포</a></li>
+            </ul>
+        </nav>
+
+        <div class="content">
+            <!-- 1. 프로젝트 개요 -->
+            <section id="overview">
+                <h2>프로젝트 개요</h2>
+                
+                <div class="card">
+                    <div class="card-header">🎯 프로젝트 목적</div>
+                    <p>AI를 활용하여 어린이를 위한 맞춤형 동화책을 자동으로 생성하는 저작 도구입니다. 교육자와 부모가 손쉽게 교육용 콘텐츠를 제작하고, 어린이들이 학습 게임을 통해 즐겁게 배울 수 있는 통합 플랫폼을 제공합니다.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">✨ 주요 기능</div>
+                    <ul style="list-style-position: inside; padding-left: 20px;">
+                        <li><strong>동화책 자동 생성</strong>: AI가 스토리, 캐릭터, 삽화를 자동 생성</li>
+                        <li><strong>캐릭터 레퍼런스</strong>: 일관된 캐릭터 이미지 생성 및 관리</li>
+                        <li><strong>다국어 번역</strong>: 한국어 → 영어 자동 번역 지원</li>
+                        <li><strong>TTS 음성 생성</strong>: 페이지별 자동 음성 나레이션</li>
+                        <li><strong>교육 콘텐츠</strong>: 어휘 학습 및 퀴즈 자동 생성</li>
+                        <li><strong>학습 게임</strong>: 5가지 인터랙티브 게임 제공</li>
+                        <li><strong>뷰어 모드</strong>: 공개 동화책 열람 및 읽기</li>
+                        <li><strong>클라우드 저장</strong>: Cloudflare R2 기반 자동 백업</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">🛠️ 기술 스택</div>
+                    <table>
+                        <tr>
+                            <th>분류</th>
+                            <th>기술</th>
+                            <th>설명</th>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-primary">백엔드</span></td>
+                            <td>Node.js, Express.js</td>
+                            <td>REST API 서버</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-primary">프론트엔드</span></td>
+                            <td>Vanilla JavaScript, TailwindCSS</td>
+                            <td>SPA 구조, 반응형 디자인</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-success">AI 모델</span></td>
+                            <td>Google Gemini 2.5 Flash</td>
+                            <td>이미지 생성, 텍스트 생성, 번역</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-success">스토리지</span></td>
+                            <td>Cloudflare R2</td>
+                            <td>S3 호환 오브젝트 스토리지</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-info">배포</span></td>
+                            <td>Vercel, Railway</td>
+                            <td>서버리스 배포</td>
+                        </tr>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 2. 시스템 아키텍처 -->
+            <section id="architecture">
+                <h2>시스템 아키텍처</h2>
+                
+                <div class="highlight-box">
+                    <strong>🏗️ 아키텍처 패턴</strong>
+                    <p>MVC (Model-View-Controller) 패턴을 기반으로 한 <strong>레이어드 아키텍처</strong>를 사용합니다.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">📐 시스템 구조</div>
+                    <pre style="background: white; color: #333; border: 2px solid #e0e0e0; padding: 30px;">
+┌─────────────────────────────────────────────────────────┐
+│                    프론트엔드 (SPA)                      │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │  저작도구     │  │  뷰어 모드    │  │  학습 게임    │  │
+│  │ (author.html)│  │(viewer.html) │  │ (games.html) │  │
+│  └──────────────┘  └──────────────┘  └──────────────┘  │
+└─────────────────────────────────────────────────────────┘
+                            │
+                   REST API (JSON)
+                            │
+┌─────────────────────────────────────────────────────────┐
+│                 백엔드 (Express.js)                      │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │              API Routes Layer                     │  │
+│  │  /api/generate-storybook                         │  │
+│  │  /api/generate-character-image                   │  │
+│  │  /api/generate-illustration                      │  │
+│  │  /api/storybooks (CRUD)                         │  │
+│  └───────────────────────────────────────────────────┘  │
+│                            │                            │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │            Business Logic Layer                   │  │
+│  │  - Gemini Service (AI 이미지/텍스트)              │  │
+│  │  - R2 Service (파일 업로드/다운로드)              │  │
+│  │  - Metadata Management (인덱싱)                  │  │
+│  └───────────────────────────────────────────────────┘  │
+│                            │                            │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │           Data Access Layer                       │  │
+│  │  - R2 Client (@aws-sdk/client-s3)                │  │
+│  │  - Gemini Client (@google/generative-ai)         │  │
+│  └───────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────┘
+                            │
+         ┌──────────────────┴──────────────────┐
+         │                                     │
+┌────────────────┐                  ┌──────────────────┐
+│  Cloudflare R2 │                  │  Google Gemini   │
+│   (Storage)    │                  │   (AI Model)     │
+└────────────────┘                  └──────────────────┘</pre>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">🔄 데이터 흐름</div>
+                    <ol style="list-style-position: inside; padding-left: 20px; line-height: 2;">
+                        <li><strong>사용자 요청</strong> → 프론트엔드 (author.html)</li>
+                        <li><strong>API 호출</strong> → Express 서버 (server.js)</li>
+                        <li><strong>AI 처리</strong> → Gemini API (이미지/텍스트 생성)</li>
+                        <li><strong>파일 저장</strong> → R2 Storage (영구 저장)</li>
+                        <li><strong>메타데이터 저장</strong> → R2 JSON (인덱싱)</li>
+                        <li><strong>응답 반환</strong> → 프론트엔드 UI 업데이트</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- 3. 파일 구조 -->
+            <section id="file-structure">
+                <h2>파일 구조</h2>
+                
+                <div class="tree">
+<pre>webapp/
+├── 📁 src/                          # 리팩토링된 모듈 (부분 적용)
+│   ├── 📁 config/
+│   │   └── index.js                # 환경 설정 (Gemini, R2 키 관리)
+│   ├── 📁 services/
+│   │   ├── gemini.js               # Gemini AI 서비스
+│   │   └── r2.js                   # Cloudflare R2 서비스
+│   ├── 📁 middleware/
+│   │   └── auth.js                 # API 키 인증 미들웨어
+│   ├── 📁 routes/                  # (빈 디렉토리 - 미사용)
+│   ├── 📁 commands/                # (빈 디렉토리 - 미사용)
+│   ├── 📁 factories/               # (빈 디렉토리 - 미사용)
+│   └── 📁 utils/                   # (빈 디렉토리 - 미사용)
+│
+├── 📁 public/                       # 프론트엔드 정적 파일
+│   ├── 📄 author.html              # 저작도구 메인 페이지
+│   ├── 📄 app.js                   # 저작도구 핵심 로직 (4000+ 줄)
+│   ├── 📄 gemini-client.js         # Gemini API 클라이언트
+│   ├── 📄 image-compressor.js      # 이미지 압축 유틸
+│   │
+│   ├── 📄 viewer.html              # 동화책 목록 페이지
+│   ├── 📄 book.html                # 동화책 상세 페이지
+│   ├── 📄 reader.html              # 동화책 읽기 페이지
+│   ├── 📄 games.html               # 학습 게임 메인
+│   │
+│   ├── 📁 viewer/js/
+│   │   ├── viewer.js               # 목록 페이지 로직
+│   │   ├── book.js                 # 상세 페이지 로직
+│   │   ├── reader.js               # 읽기 페이지 로직 (표지 지원)
+│   │   └── games.js                # 게임 목록 로직
+│   │
+│   └── 📁 games/                   # 개별 게임 파일
+│       ├── 📄 memory-match.html    # 그림 짝 맞추기
+│       ├── 📄 word-quiz.html       # 단어 퀴즈
+│       ├── 📄 word-builder.html    # 단어 만들기
+│       ├── 📄 word-tracing.html    # 글자 따라쓰기
+│       └── 📄 story-quiz.html      # 이야기 퀴즈
+│
+├── 📄 server.js                    # Express 서버 (3600+ 줄)
+├── 📄 package.json                 # 프로젝트 설정
+├── 📄 ecosystem.config.cjs         # PM2 설정
+├── 📄 vercel.json                  # Vercel 배포 설정
+└── 📄 .env                         # 환경 변수 (Git 제외)</pre>
+                </div>
+
+                <div class="highlight-box">
+                    <strong>⚠️ 리팩토링 상태</strong>
+                    <p><code>src/</code> 디렉토리는 부분적으로만 사용됩니다. 대부분의 로직은 여전히 <code>server.js</code>와 <code>app.js</code>에 집중되어 있습니다.</p>
+                </div>
+            </section>
+
+            <!-- 4. 백엔드 상세 -->
+            <section id="backend">
+                <h2>백엔드 아키텍처</h2>
+                
+                <h3>📄 server.js (메인 서버)</h3>
+                <div class="card">
+                    <div class="card-header">핵심 책임</div>
+                    <ul style="list-style-position: inside; padding-left: 20px;">
+                        <li>Express 서버 설정 및 미들웨어 구성</li>
+                        <li>REST API 엔드포인트 정의 (40+ 개)</li>
+                        <li>Gemini AI 이미지/텍스트 생성</li>
+                        <li>Cloudflare R2 파일 업로드/다운로드</li>
+                        <li>동화책 CRUD 및 메타데이터 관리</li>
+                        <li>뷰어 메타데이터 자동 동기화</li>
+                    </ul>
+                </div>
+
+                <h4>🔧 주요 유틸 함수</h4>
+                <div class="function-list">
+                    <div class="function-item">
+                        <div class="function-name">requireAPIKey(req, res, next)</div>
+                        <div class="function-desc">API 키 검증 미들웨어</div>
+                    </div>
+                    <div class="function-item">
+                        <div class="function-name">uploadImageToR2(imageUrl, filename)</div>
+                        <div class="function-desc">URL에서 이미지를 다운로드하여 R2에 업로드</div>
+                    </div>
+                    <div class="function-item">
+                        <div class="function-name">uploadBase64ToR2(base64Data, filename)</div>
+                        <div class="function-desc">Base64 이미지를 R2에 업로드</div>
+                    </div>
+                    <div class="function-item">
+                        <div class="function-name">uploadBufferToR2(buffer, filename, contentType)</div>
+                        <div class="function-desc">Buffer를 R2에 업로드</div>
+                    </div>
+                    <div class="function-item">
+                        <div class="function-name">uploadJSONToR2(jsonData, filename)</div>
+                        <div class="function-desc">JSON 데이터를 R2에 저장</div>
+                    </div>
+                    <div class="function-item">
+                        <div class="function-name">generateImage(prompt, referenceImages, retryCount)</div>
+                        <div class="function-desc">Gemini API로 이미지 생성 (재시도 로직 포함)</div>
+                    </div>
+                    <div class="function-item">
+                        <div class="function-name">updateStorybooksIndex(storybook)</div>
+                        <div class="function-desc">storybooks-index.json 업데이트</div>
+                    </div>
+                    <div class="function-item">
+                        <div class="function-name">removeFromStorybooksIndex(storybookId)</div>
+                        <div class="function-desc">인덱스에서 동화책 제거</div>
+                    </div>
+                    <div class="function-item">
+                        <div class="function-name">updateViewerMetadata()</div>
+                        <div class="function-desc">viewer-metadata.json 재생성 (공개 동화책 목록)</div>
+                    </div>
+                    <div class="function-item">
+                        <div class="function-name">cleanupOldHistoryImage(imageUrl)</div>
+                        <div class="function-desc">오래된 히스토리 이미지 삭제</div>
+                    </div>
+                </div>
+
+                <h3>📁 src/config/index.js</h3>
+                <div class="card">
+                    <div class="card-header">환경 설정 관리</div>
+                    <pre style="background: #2d2d2d;">export const config = {
+  PORT: process.env.PORT || 3000,
+  NODE_ENV: process.env.NODE_ENV,
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+  R2: {
+    ACCOUNT_ID: process.env.R2_ACCOUNT_ID,
+    ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
+    SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
+    BUCKET_NAME: process.env.R2_BUCKET_NAME,
+    PUBLIC_URL: process.env.R2_PUBLIC_URL,
+    ENDPOINT: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
+  }
+};</pre>
+                </div>
+
+                <h3>📁 src/services/gemini.js</h3>
+                <div class="card">
+                    <div class="card-header">Gemini AI 서비스</div>
+                    <div class="function-list">
+                        <div class="function-item">
+                            <div class="function-name">generateImage(prompt, referenceImages, retryCount, maxRetries)</div>
+                            <div class="function-desc">
+                                - 텍스트 프롬프트와 레퍼런스 이미지로 새 이미지 생성<br>
+                                - Base64/URL 이미지 자동 처리<br>
+                                - 500 에러 시 자동 재시도 (최대 3회)
+                            </div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">translateText(text, targetLanguage)</div>
+                            <div class="function-desc">
+                                - Gemini로 텍스트 번역<br>
+                                - 기본 목표: 영어 (이미지 생성용)<br>
+                                - 실패 시 원본 텍스트 반환
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>📁 src/services/r2.js</h3>
+                <div class="card">
+                    <div class="card-header">Cloudflare R2 스토리지 서비스</div>
+                    <div class="function-list">
+                        <div class="function-item">
+                            <div class="function-name">uploadFile(buffer, key, contentType)</div>
+                            <div class="function-desc">R2에 파일 업로드</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">getFile(key)</div>
+                            <div class="function-desc">R2에서 파일 다운로드</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">deleteFile(key)</div>
+                            <div class="function-desc">R2에서 파일 삭제</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">listFiles(prefix)</div>
+                            <div class="function-desc">R2에서 파일 목록 조회 (prefix 필터)</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. API 명세 -->
+            <section id="api">
+                <h2>API 엔드포인트</h2>
+                
+                <h3>🎨 동화책 생성 API</h3>
+                
+                <div class="api-endpoint">
+                    <span class="api-method method-post">POST</span>
+                    <code>/api/generate-storybook</code>
+                    <p><strong>설명:</strong> AI가 동화책을 자동 생성 (스토리 + 캐릭터)</p>
+                    <p><strong>입력:</strong> <code>{ title, targetAge, artStyle, storyRequest, pageCount }</code></p>
+                    <p><strong>출력:</strong> <code>{ success, storybook: {...} }</code></p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="api-method method-post">POST</span>
+                    <code>/api/generate-character-image</code>
+                    <p><strong>설명:</strong> 캐릭터 레퍼런스 이미지 생성</p>
+                    <p><strong>입력:</strong> <code>{ name, description, artStyle, height }</code></p>
+                    <p><strong>출력:</strong> <code>{ success, imageUrl }</code></p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="api-method method-post">POST</span>
+                    <code>/api/generate-illustration</code>
+                    <p><strong>설명:</strong> 페이지 삽화 생성 (캐릭터 레퍼런스 활용)</p>
+                    <p><strong>입력:</strong> <code>{ sceneDescription, characterReferences, artStyle }</code></p>
+                    <p><strong>출력:</strong> <code>{ success, imageUrl }</code></p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="api-method method-post">POST</span>
+                    <code>/api/generate-cover</code>
+                    <p><strong>설명:</strong> 표지 이미지 생성</p>
+                    <p><strong>입력:</strong> <code>{ title, prompt, characterReferences, aspectRatio }</code></p>
+                    <p><strong>출력:</strong> <code>{ success, imageUrl }</code></p>
+                </div>
+
+                <h3>📚 동화책 관리 API (CRUD)</h3>
+                
+                <div class="api-endpoint">
+                    <span class="api-method method-get">GET</span>
+                    <code>/api/storybooks</code>
+                    <p><strong>설명:</strong> 모든 동화책 목록 조회 (인덱스 기반)</p>
+                    <p><strong>출력:</strong> <code>{ success, storybooks: [{id, title, coverImage, ...}] }</code></p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="api-method method-get">GET</span>
+                    <code>/api/storybooks/:id</code>
+                    <p><strong>설명:</strong> 특정 동화책 상세 조회</p>
+                    <p><strong>출력:</strong> <code>{ success, storybook: {...} }</code></p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="api-method method-post">POST</span>
+                    <code>/api/storybooks</code>
+                    <p><strong>설명:</strong> 동화책 생성/수정 (R2에 저장)</p>
+                    <p><strong>입력:</strong> 전체 동화책 JSON</p>
+                    <p><strong>출력:</strong> <code>{ success, message }</code></p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="api-method method-delete">DELETE</span>
+                    <code>/api/storybooks/:id</code>
+                    <p><strong>설명:</strong> 동화책 삭제 (이미지 파일 포함)</p>
+                    <p><strong>출력:</strong> <code>{ success, message }</code></p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="api-method method-put">PUT</span>
+                    <code>/api/storybooks/:id/public</code>
+                    <p><strong>설명:</strong> 동화책 공개 상태 변경</p>
+                    <p><strong>입력:</strong> <code>{ isPublic: true/false }</code></p>
+                    <p><strong>출력:</strong> <code>{ success, isPublic, publishedAt }</code></p>
+                </div>
+
+                <h3>👀 뷰어 API (공개 동화책)</h3>
+                
+                <div class="api-endpoint">
+                    <span class="api-method method-get">GET</span>
+                    <code>/api/viewer/storybooks</code>
+                    <p><strong>설명:</strong> 공개된 동화책 목록 (viewer-metadata.json)</p>
+                    <p><strong>출력:</strong> <code>{ success, storybooks: [...] }</code></p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="api-method method-get">GET</span>
+                    <code>/api/viewer/storybooks/:id</code>
+                    <p><strong>설명:</strong> 공개 동화책 상세 (권한 체크)</p>
+                    <p><strong>출력:</strong> <code>{ success, storybook: {...} }</code></p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="api-method method-post">POST</span>
+                    <code>/api/viewer/refresh-metadata</code>
+                    <p><strong>설명:</strong> 뷰어 메타데이터 수동 갱신 (표지 동기화용)</p>
+                    <p><strong>출력:</strong> <code>{ success, message }</code></p>
+                </div>
+
+                <h3>🎓 교육 콘텐츠 API</h3>
+                
+                <div class="api-endpoint">
+                    <span class="api-method method-post">POST</span>
+                    <code>/api/generate-vocabulary-images</code>
+                    <p><strong>설명:</strong> 어휘 학습용 이미지 일괄 생성</p>
+                    <p><strong>입력:</strong> <code>{ words: [{word, meaning}], artStyle }</code></p>
+                    <p><strong>출력:</strong> <code>{ success, results: [{word, imageUrl}] }</code></p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="api-method method-post">POST</span>
+                    <code>/api/generate-quiz</code>
+                    <p><strong>설명:</strong> 이야기 이해 퀴즈 자동 생성</p>
+                    <p><strong>입력:</strong> <code>{ pages: [...] }</code></p>
+                    <p><strong>출력:</strong> <code>{ success, questions: [...] }</code></p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="api-method method-post">POST</span>
+                    <code>/api/generate-tts</code>
+                    <p><strong>설명:</strong> TTS 음성 생성 (Google TTS)</p>
+                    <p><strong>입력:</strong> <code>{ text, voiceConfig }</code></p>
+                    <p><strong>출력:</strong> <code>{ success, audioUrl }</code></p>
+                </div>
+
+                <h3>🔧 유틸리티 API</h3>
+                
+                <div class="api-endpoint">
+                    <span class="api-method method-post">POST</span>
+                    <code>/api/upload-image</code>
+                    <p><strong>설명:</strong> 이미지 파일 직접 업로드</p>
+                    <p><strong>입력:</strong> Multipart form-data (image file)</p>
+                    <p><strong>출력:</strong> <code>{ success, imageUrl }</code></p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="api-method method-delete">DELETE</span>
+                    <code>/api/cleanup-image</code>
+                    <p><strong>설명:</strong> R2에서 이미지 삭제</p>
+                    <p><strong>입력:</strong> <code>{ imageUrl }</code></p>
+                    <p><strong>출력:</strong> <code>{ success }</code></p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="api-method method-get">GET</span>
+                    <code>/api/download-image</code>
+                    <p><strong>설명:</strong> 이미지 다운로드 프록시 (CORS 우회)</p>
+                    <p><strong>쿼리:</strong> <code>?url=...&filename=...</code></p>
+                </div>
+            </section>
+
+            <!-- 6. 프론트엔드 -->
+            <section id="frontend">
+                <h2>프론트엔드 아키텍처</h2>
+                
+                <h3>📄 author.html + app.js (저작도구)</h3>
+                <div class="card">
+                    <div class="card-header">핵심 기능 (4000+ 줄)</div>
+                    <p><strong>주요 책임:</strong> 동화책 생성, 편집, 관리의 모든 UI 및 로직</p>
+                </div>
+
+                <h4>🎯 핵심 함수 그룹</h4>
+                
+                <div class="card">
+                    <div class="card-header">1️⃣ 동화책 관리</div>
+                    <div class="function-list">
+                        <div class="function-item">
+                            <div class="function-name">loadStorybooks()</div>
+                            <div class="function-desc">R2에서 모든 동화책 로드</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">saveToR2(storybook)</div>
+                            <div class="function-desc">R2에 저장 + 공개 시 메타데이터 갱신</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">selectStorybook(id)</div>
+                            <div class="function-desc">동화책 선택 및 UI 표시</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">deleteStorybook(id)</div>
+                            <div class="function-desc">동화책 삭제 (확인 후 API 호출)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">duplicateStorybookById(id)</div>
+                            <div class="function-desc">동화책 복사 (R2 자동 저장)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">updateBookTitleInList(id, newTitle)</div>
+                            <div class="function-desc">제목 수정 (R2 자동 저장)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">togglePublicStatus(storybookId)</div>
+                            <div class="function-desc">공개/비공개 전환</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">2️⃣ 동화책 생성</div>
+                    <div class="function-list">
+                        <div class="function-item">
+                            <div class="function-name">generateStorybook()</div>
+                            <div class="function-desc">AI 동화책 자동 생성</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">displayStorybook(storybook)</div>
+                            <div class="function-desc">전체 UI 렌더링 (3000+ 줄 HTML)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">3️⃣ 캐릭터 관리</div>
+                    <div class="function-list">
+                        <div class="function-item">
+                            <div class="function-name">generateCharacterReference(charIndex)</div>
+                            <div class="function-desc">개별 캐릭터 이미지 생성</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">generateAllCharacterReferences()</div>
+                            <div class="function-desc">모든 캐릭터 이미지 일괄 생성</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">renderCharacterImageWithHistory(charIndex)</div>
+                            <div class="function-desc">캐릭터 이미지 + 히스토리 UI 업데이트</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">selectCharacterImageFromHistory(charIndex, histIdx)</div>
+                            <div class="function-desc">히스토리에서 이미지 선택 (교체)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">updateCharacterName(charIndex, newName)</div>
+                            <div class="function-desc">캐릭터 이름 수정</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">updateCharacterHeight(charIndex, height)</div>
+                            <div class="function-desc">캐릭터 키 설정 (tall/short)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">deleteCharacter(charIndex)</div>
+                            <div class="function-desc">캐릭터 삭제</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">addNewCharacter()</div>
+                            <div class="function-desc">새 캐릭터 추가</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">4️⃣ 페이지/삽화 관리</div>
+                    <div class="function-list">
+                        <div class="function-item">
+                            <div class="function-name">generateAllIllustrationsParallel()</div>
+                            <div class="function-desc">모든 삽화 병렬 생성 (5개씩 배치)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">generateSingleIllustration(pageIndex)</div>
+                            <div class="function-desc">개별 삽화 생성</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">regenerateSingleIllustration(pageIndex)</div>
+                            <div class="function-desc">삽화 재생성 (히스토리 저장)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">renderPageImageWithHistory(pageIndex)</div>
+                            <div class="function-desc">삽화 + 히스토리 UI 업데이트</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">selectPageImageFromHistory(pageIndex, histIdx)</div>
+                            <div class="function-desc">히스토리에서 이미지 선택</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">updatePageText(pageIndex, newText)</div>
+                            <div class="function-desc">페이지 텍스트 수정</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">updateSceneCombined(pageIndex, combinedText)</div>
+                            <div class="function-desc">장면 설명 (통합) 수정</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">togglePageCharacterRef(pageIndex, charIdx, checked)</div>
+                            <div class="function-desc">페이지별 캐릭터 레퍼런스 토글</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">5️⃣ 표지 관리</div>
+                    <div class="function-list">
+                        <div class="function-item">
+                            <div class="function-name">generateCoverImage()</div>
+                            <div class="function-desc">표지 생성 (히스토리 저장, 뷰어 동기화)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">updateCoverImageDisplay()</div>
+                            <div class="function-desc">표지 UI만 부분 업데이트 (섹션 유지)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">selectCoverImageFromHistory(historyIndex)</div>
+                            <div class="function-desc">히스토리에서 표지 선택 (중복 방지)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">buildCoverPrompt(storybook)</div>
+                            <div class="function-desc">표지 프롬프트 자동 생성</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">toggleCoverCharacterRef(charIndex, checked)</div>
+                            <div class="function-desc">표지 캐릭터 레퍼런스 토글</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">uploadCover()</div>
+                            <div class="function-desc">표지 이미지 직접 업로드</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">6️⃣ 교육 콘텐츠</div>
+                    <div class="function-list">
+                        <div class="function-item">
+                            <div class="function-name">generateVocabularyImages()</div>
+                            <div class="function-desc">어휘 이미지 일괄 생성</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">generateSingleVocabularyImage(wordIndex)</div>
+                            <div class="function-desc">개별 어휘 이미지 생성</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">updateVocabularyWord(wordIndex, newValue, field)</div>
+                            <div class="function-desc">어휘 단어/뜻 수정</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">generateQuiz()</div>
+                            <div class="function-desc">이해 퀴즈 자동 생성</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">7️⃣ TTS 음성</div>
+                    <div class="function-list">
+                        <div class="function-item">
+                            <div class="function-name">generatePageTTS(pageIndex)</div>
+                            <div class="function-desc">페이지별 TTS 생성</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">generateAllTTS()</div>
+                            <div class="function-desc">전체 TTS 일괄 생성</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">downloadAllAudio()</div>
+                            <div class="function-desc">전체 음성 파일 ZIP 다운로드</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">8️⃣ UI 유틸리티</div>
+                    <div class="function-list">
+                        <div class="function-item">
+                            <div class="function-name">renderBookList()</div>
+                            <div class="function-desc">사이드바 동화책 목록 렌더링</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">toggleSection(sectionId)</div>
+                            <div class="function-desc">섹션 펼침/접기</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">showNotification(type, title, message)</div>
+                            <div class="function-desc">알림 토스트 표시</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">handleDragStart/Drop/End</div>
+                            <div class="function-desc">드래그 앤 드롭으로 순서 변경</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>👀 뷰어 모드 (viewer.html, book.html, reader.html)</h3>
+                
+                <div class="card">
+                    <div class="card-header">viewer.js (동화책 목록)</div>
+                    <div class="function-list">
+                        <div class="function-item">
+                            <div class="function-name">loadStorybooks()</div>
+                            <div class="function-desc">공개 동화책 목록 로드 (viewer-metadata.json)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">renderBooks()</div>
+                            <div class="function-desc">동화책 카드 그리드 렌더링</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">filterByAge(age)</div>
+                            <div class="function-desc">연령대 필터링</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">sortBooks()</div>
+                            <div class="function-desc">정렬 (최신순/오래된순/제목순)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">book.js (동화책 상세)</div>
+                    <div class="function-list">
+                        <div class="function-item">
+                            <div class="function-name">loadBook()</div>
+                            <div class="function-desc">특정 동화책 로드 (공개 여부 확인)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">renderBook()</div>
+                            <div class="function-desc">표지, 캐릭터, 첫 페이지 미리보기</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">startReading()</div>
+                            <div class="function-desc">읽기 모드로 이동 (reader.html)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">startGames()</div>
+                            <div class="function-desc">학습 게임 시작 (games.html)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">reader.js (동화책 읽기)</div>
+                    <div class="function-list">
+                        <div class="function-item">
+                            <div class="function-name">loadBook()</div>
+                            <div class="function-desc">동화책 로드 (표지 페이지 지원)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">showPage(pageIndex)</div>
+                            <div class="function-desc">페이지 표시 (-1=표지, 0~=본문) + 애니메이션</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">nextPage() / previousPage()</div>
+                            <div class="function-desc">페이지 이동 (표지 포함)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">toggleHeader()</div>
+                            <div class="function-desc">헤더 토글 (5초 자동 숨김)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">playTTS()</div>
+                            <div class="function-desc">TTS 재생/중지 (표지에서는 비활성)</div>
+                        </div>
+                        <div class="function-item">
+                            <div class="function-name">updateProgress()</div>
+                            <div class="function-desc">진행률 업데이트 (표지 포함 계산)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>🎮 학습 게임 (games.html + games/*.html)</h3>
+                
+                <div class="card">
+                    <div class="card-header">5가지 인터랙티브 게임</div>
+                    <table>
+                        <tr>
+                            <th>게임</th>
+                            <th>파일</th>
+                            <th>설명</th>
+                        </tr>
+                        <tr>
+                            <td>그림 짝 맞추기</td>
+                            <td>memory-match.html</td>
+                            <td>어휘 카드 뒤집기 게임</td>
+                        </tr>
+                        <tr>
+                            <td>단어 퀴즈</td>
+                            <td>word-quiz.html</td>
+                            <td>4지선다 어휘 퀴즈</td>
+                        </tr>
+                        <tr>
+                            <td>단어 만들기</td>
+                            <td>word-builder.html</td>
+                            <td>글자 조합 게임</td>
+                        </tr>
+                        <tr>
+                            <td>글자 따라쓰기</td>
+                            <td>word-tracing.html</td>
+                            <td>Canvas 기반 필기 연습</td>
+                        </tr>
+                        <tr>
+                            <td>이야기 퀴즈</td>
+                            <td>story-quiz.html</td>
+                            <td>동화 이해도 확인</td>
+                        </tr>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 7. 배포 -->
+            <section id="deployment">
+                <h2>배포 및 운영</h2>
+                
+                <div class="card">
+                    <div class="card-header">🚀 배포 플랫폼</div>
+                    <table>
+                        <tr>
+                            <th>플랫폼</th>
+                            <th>설정 파일</th>
+                            <th>용도</th>
+                        </tr>
+                        <tr>
+                            <td>Vercel</td>
+                            <td>vercel.json</td>
+                            <td>프로덕션 배포 (서버리스)</td>
+                        </tr>
+                        <tr>
+                            <td>Railway</td>
+                            <td>railway.json</td>
+                            <td>대안 배포 (컨테이너)</td>
+                        </tr>
+                        <tr>
+                            <td>PM2 (로컬)</td>
+                            <td>ecosystem.config.cjs</td>
+                            <td>개발/테스트 환경</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">🔑 환경 변수 (.env)</div>
+                    <pre style="background: #2d2d2d;">GEMINI_API_KEY=your_gemini_api_key
+R2_ACCOUNT_ID=your_r2_account_id
+R2_ACCESS_KEY_ID=your_r2_access_key
+R2_SECRET_ACCESS_KEY=your_r2_secret_key
+R2_BUCKET_NAME=storybook-images
+R2_PUBLIC_URL=https://pub-xxx.r2.dev
+PORT=3000
+NODE_ENV=production</pre>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">📦 PM2 설정 (ecosystem.config.cjs)</div>
+                    <pre style="background: #2d2d2d;">module.exports = {
+  apps: [{
+    name: 'storybook-generator',
+    script: './server.js',
+    instances: 1,
+    exec_mode: 'fork',
+    watch: false,
+    env: {
+      NODE_ENV: 'development',
+      PORT: 3000
+    }
+  }]
+};</pre>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">🌐 Vercel 설정 (vercel.json)</div>
+                    <pre style="background: #2d2d2d;">{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "public/$1"
+    }
+  ]
+}</pre>
+                </div>
+
+                <h3>📋 배포 체크리스트</h3>
+                <div class="card">
+                    <ol style="list-style-position: inside; padding-left: 20px; line-height: 2.5;">
+                        <li>✅ <strong>환경 변수 설정</strong>: Vercel 대시보드에서 모든 키 등록</li>
+                        <li>✅ <strong>Gemini API 키 발급</strong>: Google AI Studio에서 생성</li>
+                        <li>✅ <strong>Cloudflare R2 버킷 생성</strong>: storybook-images</li>
+                        <li>✅ <strong>R2 CORS 설정</strong>: 모든 도메인 허용</li>
+                        <li>✅ <strong>Git 저장소 연결</strong>: Vercel <> GitHub 통합</li>
+                        <li>✅ <strong>빌드 테스트</strong>: <code>npm install && npm start</code></li>
+                        <li>✅ <strong>배포 확인</strong>: /health 엔드포인트 체크</li>
+                        <li>✅ <strong>API 테스트</strong>: Postman으로 주요 API 확인</li>
+                    </ol>
+                </div>
+
+                <h3>🔧 운영 명령어</h3>
+                <div class="card">
+                    <pre style="background: #2d2d2d;"># 로컬 개발
+npm start
+
+# PM2로 실행
+pm2 start ecosystem.config.cjs
+pm2 logs storybook-generator
+pm2 restart storybook-generator
+
+# 포트 정리
+npm run clean-port
+
+# 헬스 체크
+curl http://localhost:3000/health</pre>
+                </div>
+            </section>
+
+            <!-- 8. 개선 방향 -->
+            <section>
+                <h2>🔮 향후 개선 방향</h2>
+                
+                <div class="highlight-box">
+                    <strong>⚠️ 현재 리팩토링 상태</strong>
+                    <p><code>src/</code> 디렉토리가 부분적으로만 구현되어 있습니다. 완전한 모듈화를 위해 다음 작업이 필요합니다.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">1️⃣ 백엔드 리팩토링</div>
+                    <ul style="list-style-position: inside; padding-left: 20px;">
+                        <li><strong>Routes 분리</strong>: <code>server.js</code>의 API 엔드포인트를 <code>src/routes/</code>로 이동</li>
+                        <li><strong>Controllers 추가</strong>: 비즈니스 로직을 Controller 레이어로 분리</li>
+                        <li><strong>Services 확장</strong>: TTS, Quiz, Vocabulary 등 서비스 모듈화</li>
+                        <li><strong>TypeScript 마이그레이션</strong>: 타입 안정성 확보</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">2️⃣ 프론트엔드 리팩토링</div>
+                    <ul style="list-style-position: inside; padding-left: 20px;">
+                        <li><strong>모듈 분리</strong>: <code>app.js</code> 4000줄을 기능별 모듈로 분리</li>
+                        <li><strong>상태 관리</strong>: Redux/MobX 또는 경량 상태 관리 도입</li>
+                        <li><strong>컴포넌트화</strong>: 재사용 가능한 UI 컴포넌트 추출</li>
+                        <li><strong>빌드 시스템</strong>: Webpack/Vite로 번들링 최적화</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">3️⃣ 성능 최적화</div>
+                    <ul style="list-style-position: inside; padding-left: 20px;">
+                        <li><strong>이미지 최적화</strong>: WebP 변환, 썸네일 생성</li>
+                        <li><strong>캐싱 전략</strong>: CDN + 브라우저 캐싱 활용</li>
+                        <li><strong>Lazy Loading</strong>: 이미지 및 섹션 지연 로딩</li>
+                        <li><strong>Batch API</strong>: 일괄 생성 시 병렬 처리 개선</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">4️⃣ 기능 추가</div>
+                    <ul style="list-style-position: inside; padding-left: 20px;">
+                        <li><strong>협업 기능</strong>: 여러 사용자가 동시에 편집</li>
+                        <li><strong>버전 관리</strong>: 동화책 변경 이력 추적</li>
+                        <li><strong>템플릿 시스템</strong>: 미리 정의된 템플릿 제공</li>
+                        <li><strong>AI 음성 다양화</strong>: 캐릭터별 다른 목소리</li>
+                        <li><strong>AR/VR 연동</strong>: 3D 동화책 경험</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <h3>📚 탱고북 저작도구</h3>
+            <p>AI 기반 어린이 동화책 생성 플랫폼</p>
+            <p>Version 12.0.0 | Node.js + Express + Gemini 2.5 Flash + Cloudflare R2</p>
+            <p style="margin-top: 20px; opacity: 0.6;">이 문서는 2025년 1월 22일 기준으로 작성되었습니다.</p>
+        </footer>
+    </div>
+</body>
+</html>

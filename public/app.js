@@ -177,24 +177,12 @@ async function generatePageTTS(pageIndex) {
             }
             currentStorybook.pages[pageIndex].ttsAudio.url = response.data.audioUrl;
             currentStorybook.pages[pageIndex].ttsAudio.model = imageSettings.ttsModel;
+            // 하위 호환성을 위해 audioUrl에도 저장
+            currentStorybook.pages[pageIndex].audioUrl = response.data.audioUrl;
             saveCurrentStorybook();
             
-            // 플레이어 표시
-            if (ttsPlayer) {
-                ttsPlayer.innerHTML = `
-                    <audio controls class="w-full">
-                        <source src="${response.data.audioUrl}" type="audio/mpeg">
-                        브라우저가 오디오를 지원하지 않습니다.
-                    </audio>
-                `;
-                ttsPlayer.classList.remove('hidden');
-            }
-            
-            // 버튼 업데이트
-            if (ttsButton) {
-                ttsButton.innerHTML = '<i class="fas fa-redo mr-1"></i>재생성';
-                ttsButton.disabled = false;
-            }
+            // UI 즉시 업데이트 - 페이지 전체를 다시 렌더링
+            displayStorybookResult(currentStorybook);
             
             showNotification('success', 'TTS 생성 완료!', '음성이 생성되었습니다.');
         } else {
@@ -2260,16 +2248,16 @@ function displayStorybook(storybook) {
                                     class="w-full bg-blue-600 text-white py-2.5 md:py-3 rounded-lg font-semibold hover:bg-blue-700 active:bg-blue-800 transition text-sm md:text-base shadow-md mb-2"
                                     id="tts-btn-${idx}"
                                 >
-                                    <i class="fas fa-microphone mr-2"></i>${page.audioUrl ? 'TTS 재생성' : 'TTS 생성'}
+                                    <i class="fas fa-microphone mr-2"></i>${page.audioUrl || page.ttsAudio?.url ? 'TTS 재생성' : 'TTS 생성'}
                                 </button>
                                 
-                                ${page.audioUrl ? `
+                                ${page.audioUrl || page.ttsAudio?.url ? `
                                 <div class="space-y-2">
                                     <audio controls class="w-full h-10 md:h-12">
-                                        <source src="${page.audioUrl}" type="audio/wav">
+                                        <source src="${page.audioUrl || page.ttsAudio?.url}" type="audio/wav">
                                     </audio>
                                     <button 
-                                        onclick="downloadAudio('${page.audioUrl}', '${storybook.title}_페이지_${page.pageNumber}.wav')"
+                                        onclick="downloadAudio('${page.audioUrl || page.ttsAudio?.url}', '${storybook.title}_페이지_${page.pageNumber}.wav')"
                                         class="w-full bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 active:bg-green-800 transition text-xs md:text-sm shadow"
                                     >
                                         <i class="fas fa-download mr-1"></i>오디오 다운로드
