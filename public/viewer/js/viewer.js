@@ -155,8 +155,11 @@ async function openBook(bookId) {
         return;
     }
     
+    // 1. 즉시 로딩 모달 표시
+    showLoadingModal();
+    
     try {
-        // 동화책 데이터 로드
+        // 2. 동화책 데이터 로드
         console.log('📡 API 호출 시작:', `/api/viewer/storybooks/${bookId}`);
         
         const response = await axios.get(`/api/viewer/storybooks/${bookId}`, {
@@ -175,6 +178,9 @@ async function openBook(bookId) {
             languages: response.data.storybook?.languages
         });
         
+        // 3. 로딩 모달 숨기기
+        hideLoadingModal();
+        
         if (!response.data.success || !response.data.storybook) {
             console.error('❌ 동화책 로드 실패: 응답 데이터 없음');
             alert('동화책을 불러올 수 없습니다.');
@@ -183,11 +189,11 @@ async function openBook(bookId) {
         
         const storybook = response.data.storybook;
         
-        // 사용 가능한 언어 목록 가져오기
+        // 4. 사용 가능한 언어 목록 가져오기
         const availableLanguages = storybook.languages || ['ko'];
         console.log('🌐 사용 가능한 언어:', availableLanguages);
         
-        // 언어가 1개면 바로 이동, 2개 이상이면 선택 모달 표시
+        // 5. 언어가 1개면 바로 이동, 2개 이상이면 선택 모달 표시
         if (availableLanguages.length === 1) {
             console.log('➡️ 언어 1개 - 바로 이동:', availableLanguages[0]);
             window.location.href = `/reader.html?id=${bookId}&lang=${availableLanguages[0]}`;
@@ -196,6 +202,9 @@ async function openBook(bookId) {
             showLanguageModal(bookId, storybook.title, availableLanguages);
         }
     } catch (error) {
+        // 에러 시에도 로딩 모달 숨기기
+        hideLoadingModal();
+        
         console.error('❌ 동화책 로드 실패:', error);
         console.error('❌ 에러 이름:', error.name);
         console.error('❌ 에러 메시지:', error.message);
@@ -326,6 +335,24 @@ function showError(message) {
 function openGamesFromViewer(bookId) {
     // games.html로 이동 (URL 파라미터로 bookId 전달)
     window.open(`/games.html?id=${bookId}`, '_blank');
+}
+
+// 로딩 모달 표시
+function showLoadingModal() {
+    const modal = document.getElementById('loading-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        console.log('⏳ 로딩 모달 표시');
+    }
+}
+
+// 로딩 모달 숨기기
+function hideLoadingModal() {
+    const modal = document.getElementById('loading-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        console.log('✅ 로딩 모달 숨김');
+    }
 }
 
 // 페이지 로드 시 실행
