@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>동화책 텍스트 검토 - 탱고북</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+        }
+        .language-content {
+            display: none;
+        }
+        .language-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- 헤더 -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                        동화책 텍스트 검토
+                    </h1>
+                    <p class="text-gray-600 mt-2">생성된 텍스트를 검토하고 완료 버튼을 눌러주세요</p>
+                </div>
+                <button 
+                    onclick="window.location.href='/author.html'"
+                    class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition"
+                >
+                    <i class="fas fa-times mr-2"></i>취소
+                </button>
+            </div>
+        </div>
+
+        <!-- 동화책 제목 -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+            <h2 id="storyTitle" class="text-2xl font-bold text-gray-800 mb-2"></h2>
+            <div class="flex items-center gap-4 text-sm text-gray-600">
+                <span><i class="fas fa-users mr-1"></i><span id="targetAge"></span></span>
+                <span><i class="fas fa-book-open mr-1"></i><span id="totalPages"></span></span>
+            </div>
+        </div>
+
+        <!-- 언어 탭 -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+            <div id="languageTabs" class="flex gap-2 flex-wrap mb-6">
+                <!-- 동적 생성 -->
+            </div>
+
+            <!-- 언어별 콘텐츠 -->
+            <div id="languageContents">
+                <!-- 동적 생성 -->
+            </div>
+        </div>
+
+        <!-- 완료 버튼 -->
+        <div class="flex justify-center gap-4">
+            <button 
+                onclick="window.history.back()"
+                class="bg-gray-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-600 transition"
+            >
+                <i class="fas fa-arrow-left mr-2"></i>
+                뒤로 가기
+            </button>
+            <button 
+                id="completeBtn"
+                onclick="completeReview()"
+                class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-green-700 hover:to-emerald-700 transition shadow-lg"
+            >
+                <i class="fas fa-check mr-2"></i>
+                검토 완료 및 저장
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <script>
+        let storybookData = null;
+        let selectedLanguages = [];
+
+        // 초기화
+        async function init() {
+            // localStorage에서 임시 저장된 동화책 데이터 로드
+            const tempData = localStorage.getItem('temp_storybook');
+            if (!tempData) {
+                alert('❌ 동화책 데이터가 없습니다.');
+                window.location.href = '/author.html';
+                return;
+            }
+
+            storybookData = JSON.parse(tempData);
+            selectedLanguages = storybookData.languages || ['ko', 'en'];
+
+            // UI 렌더링
+            renderHeader();
+            renderLanguageTabs();
+            renderLanguageContents();
+        }
+
+        // 헤더 렌더링
+        function renderHeader() {
+            document.getElementById('storyTitle').textContent = storybookData.title;
+            document.getElementById('targetAge').textContent = `${storybookData.targetAge}세 대상`;
+            document.getElementById('totalPages').textContent = `${storybookData.pages?.length || 0}페이지`;
+        }
+
+        // 언어 탭 렌더링
+        function renderLanguageTabs() {
+            const tabsContainer = document.getElementById('languageTabs');
+            const languageNames = {
+                'ko': '🇰🇷 한국어',
+                'en': '🇺🇸 English',
+                'zh': '🇨🇳 中文',
+                'ja': '🇯🇵 日本語',
+                'es': '🇪🇸 Español',
+                'fr': '🇫🇷 Français'
+            };
+
+            tabsContainer.innerHTML = selectedLanguages.map((lang, idx) => `
+                <button 
+                    class="tab-button px-6 py-3 rounded-lg font-semibold border-2 border-purple-300 ${idx === 0 ? 'active' : ''}"
+                    onclick="switchLanguage('${lang}')"
+                    data-lang="${lang}"
+                >
+                    ${languageNames[lang] || lang}
+                </button>
+            `).join('');
+        }
+
+        // 언어별 콘텐츠 렌더링
+        function renderLanguageContents() {
+            const contentsContainer = document.getElementById('languageContents');
+            
+            contentsContainer.innerHTML = selectedLanguages.map((lang, idx) => {
+                // translations[lang] 또는 기본 pages 사용
+                const pages = storybookData.translations?.[lang] || storybookData.pages || [];
+                
+                return `
+                    <div class="language-content ${idx === 0 ? 'active' : ''}" data-lang="${lang}">
+                        <div class="space-y-4">
+                            ${pages.map((page, pageIdx) => `
+                                <div class="bg-gray-50 border-2 border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h3 class="text-lg font-bold text-gray-700">
+                                            <i class="fas fa-file-alt mr-2 text-purple-600"></i>
+                                            페이지 ${page.pageNumber || pageIdx + 1}
+                                        </h3>
+                                        <button 
+                                            onclick="editPageText('${lang}', ${pageIdx})"
+                                            class="text-blue-600 hover:text-blue-700 text-sm"
+                                        >
+                                            <i class="fas fa-edit mr-1"></i>수정
+                                        </button>
+                                    </div>
+                                    <div 
+                                        id="page-text-${lang}-${pageIdx}"
+                                        class="text-gray-800 leading-relaxed whitespace-pre-wrap"
+                                    >${page.text || '텍스트 없음'}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 언어 전환
+        function switchLanguage(lang) {
+            // 탭 활성화
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                if (btn.dataset.lang === lang) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // 콘텐츠 표시
+            document.querySelectorAll('.language-content').forEach(content => {
+                if (content.dataset.lang === lang) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+        }
+
+        // 페이지 텍스트 수정
+        function editPageText(lang, pageIdx) {
+            const textElement = document.getElementById(`page-text-${lang}-${pageIdx}`);
+            const currentText = textElement.textContent;
+            
+            const newText = prompt('텍스트를 수정하세요:', currentText);
+            if (newText !== null && newText.trim() !== '') {
+                textElement.textContent = newText.trim();
+                
+                // 데이터 업데이트
+                if (!storybookData.translations) {
+                    storybookData.translations = {};
+                }
+                if (!storybookData.translations[lang]) {
+                    storybookData.translations[lang] = storybookData.pages || [];
+                }
+                storybookData.translations[lang][pageIdx].text = newText.trim();
+                
+                // 임시 저장
+                localStorage.setItem('temp_storybook', JSON.stringify(storybookData));
+            }
+        }
+
+        // 검토 완료
+        async function completeReview() {
+            if (!confirm('검토를 완료하고 저장하시겠습니까?\n저장 후 author 페이지로 이동합니다.')) {
+                return;
+            }
+
+            // 로딩 표시
+            const btn = document.getElementById('completeBtn');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>저장 중...';
+
+            try {
+                // 서버에 저장
+                const response = await axios.post('/api/storybooks', storybookData);
+                
+                if (response.data.success || response.data.id) {
+                    // 임시 데이터 삭제
+                    localStorage.removeItem('temp_storybook');
+                    
+                    // author 페이지로 이동 (동화책 ID 포함)
+                    const storybookId = response.data.id || storybookData.id;
+                    alert('✅ 동화책이 저장되었습니다!');
+                    window.location.href = `/author.html?id=${storybookId}`;
+                } else {
+                    throw new Error(response.data.error || '저장 실패');
+                }
+            } catch (error) {
+                console.error('저장 오류:', error);
+                alert(`❌ 저장에 실패했습니다.\n${error.message}`);
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+
+        // 페이지 로드 시 초기화
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

@@ -1524,6 +1524,15 @@ async function generateStorybook() {
     const artStyleCustom = document.getElementById('artStyleCustom').value.trim();
     const referenceContent = document.getElementById('referenceContent').value.trim();
     
+    // 선택된 언어 수집
+    const selectedLanguages = Array.from(document.querySelectorAll('input[name="languages"]:checked'))
+        .map(checkbox => checkbox.value);
+    
+    if (selectedLanguages.length === 0) {
+        alert('최소 1개 이상의 언어를 선택해주세요.');
+        return;
+    }
+    
     // 이미지 AI 모델 선택 (동화책 생성 폼에서)
     const imageModelSelect = document.getElementById('imageModelSelect');
     if (imageModelSelect) {
@@ -1562,34 +1571,21 @@ async function generateStorybook() {
             totalPages,
             geminiModel, // AI 모델 전달
             artStyle,
+            languages: selectedLanguages, // 선택된 언어 전달
             referenceContent: referenceContent || null
         });
 
         if (response.data.success) {
-            currentStorybook = response.data.storybook;
+            // 임시로 localStorage에 저장
+            const tempStorybook = response.data.storybook;
+            tempStorybook.languages = selectedLanguages;
+            localStorage.setItem('temp_storybook', JSON.stringify(tempStorybook));
             
-            console.log('✅ 동화책 생성 성공:', currentStorybook.title, 'ID:', currentStorybook.id);
+            console.log('✅ 동화책 생성 성공:', tempStorybook.title);
+            console.log('📝 선택된 언어:', selectedLanguages);
             
-            // undefined/null 항목 제거
-            storybooks = storybooks.filter(b => b && b.id);
-            
-            // 목록에 추가
-            const index = storybooks.findIndex(b => b && b.id === currentStorybook.id);
-            if (index !== -1) {
-                console.log('📝 기존 동화책 업데이트:', index);
-                storybooks[index] = currentStorybook;
-            } else {
-                console.log('➕ 새 동화책 추가');
-                storybooks.push(currentStorybook);
-            }
-            
-            console.log('💾 저장 전 목록 개수:', storybooks.length);
-            saveStorybooks();
-            console.log('🎨 목록 렌더링 시작');
-            renderBookList();
-            console.log('📚 현재 목록:', storybooks.filter(b => b && b.title).map(b => b.title));
-            
-            displayStorybook(currentStorybook);
+            // review 페이지로 이동
+            window.location.href = '/review.html';
         } else {
             alert(response.data.error || '동화책 생성에 실패했습니다.');
             document.getElementById('createForm').style.display = 'block';
