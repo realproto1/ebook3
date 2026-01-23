@@ -87,9 +87,9 @@ function renderBooks() {
                         <i class="fas fa-book-open mr-2"></i>
                         보기
                     </button>
-                    <button onclick="openQuizFromViewer('${book.id}')" class="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold py-3 rounded-lg transition">
-                        <i class="fas fa-question-circle mr-2"></i>
-                        퀴즈
+                    <button onclick="openGamesFromViewer('${book.id}')" class="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold py-3 rounded-lg transition">
+                        <i class="fas fa-gamepad mr-2"></i>
+                        게임
                     </button>
                 </div>
             </div>
@@ -175,39 +175,10 @@ function showError(message) {
     alert(message);
 }
 
-// 퀴즈 페이지 열기
-async function openQuizFromViewer(bookId) {
-    // TODO: 퀴즈 페이지 구현 후 활성화
-    alert('퀴즈 기능은 곧 제공될 예정입니다! 🎯');
-    
-    /*
-    try {
-        // API에서 동화책 데이터 가져오기
-        const response = await axios.get(`/api/viewer/storybooks/${bookId}`);
-        
-        if (!response.data.success) {
-            alert('동화책을 불러올 수 없습니다.');
-            return;
-        }
-        
-        const book = response.data.storybook;
-        
-        // 퀴즈가 없으면 안내
-        if (!book.comprehensionQuestions || book.comprehensionQuestions.length === 0) {
-            alert('이 동화책에는 아직 퀴즈가 없습니다.');
-            return;
-        }
-        
-        // localStorage에 bookId 저장
-        localStorage.setItem('temp_quiz_book_id', bookId);
-        
-        // 퀴즈 페이지 열기
-        window.open('/quiz.html', '_blank');
-    } catch (error) {
-        console.error('퀴즈 열기 실패:', error);
-        alert('퀴즈를 여는 데 실패했습니다.');
-    }
-    */
+// 게임 페이지 열기
+function openGamesFromViewer(bookId) {
+    // games.html로 이동 (URL 파라미터로 bookId 전달)
+    window.open(`/games.html?id=${bookId}`, '_blank');
 }
 
 // 페이지 로드 시 실행
