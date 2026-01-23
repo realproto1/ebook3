@@ -4240,8 +4240,14 @@ async function generateAllTTS() {
         return;
     }
     
-    // TTS가 없는 페이지 필터링
-    const pagesToGenerate = currentStorybook.pages.filter(page => !page.audioUrl && !page.ttsAudio?.url);
+    // 현재 언어의 TTS가 없는 페이지 필터링
+    const pagesToGenerate = currentStorybook.pages.filter(page => {
+        const pageText = getPageText(page, currentLanguage);
+        const pageTTS = getPageTTS(page, currentLanguage);
+        
+        // 텍스트가 있고 TTS가 없는 경우
+        return pageText && pageText.trim() !== '' && !pageTTS;
+    });
     
     if (pagesToGenerate.length === 0) {
         alert('이미 모든 페이지의 TTS가 생성되었습니다.');
@@ -4249,7 +4255,7 @@ async function generateAllTTS() {
     }
     
     const estimatedTime = pagesToGenerate.length * 3; // 페이지당 약 3초
-    if (!confirm(`${pagesToGenerate.length}개의 페이지 TTS를 생성하시겠습니까?\n\n음성: ${imageSettings.ttsModel}\n예상 소요 시간: 약 ${estimatedTime}초`)) {
+    if (!confirm(`${pagesToGenerate.length}개의 페이지 TTS를 생성하시겠습니까?\n\n언어: ${currentLanguage}\n음성: ${imageSettings.ttsModel}\n예상 소요 시간: 약 ${estimatedTime}초`)) {
         return;
     }
     
@@ -4258,14 +4264,16 @@ async function generateAllTTS() {
         let failCount = 0;
         const totalPages = pagesToGenerate.length;
         
-        console.log(`🎤 모든 TTS 생성 시작 (${totalPages}개 페이지)`);
+        console.log(`🎤 모든 TTS 생성 시작 (${totalPages}개 페이지, 언어: ${currentLanguage})`);
         
         // 순차적으로 페이지별 TTS 생성
         for (let i = 0; i < currentStorybook.pages.length; i++) {
             const page = currentStorybook.pages[i];
+            const pageText = getPageText(page, currentLanguage);
+            const pageTTS = getPageTTS(page, currentLanguage);
             
-            // 이미 TTS가 있으면 건너뛰기
-            if (page.audioUrl || page.ttsAudio?.url) {
+            // 텍스트가 없거나 이미 TTS가 있으면 건너뛰기
+            if (!pageText || pageText.trim() === '' || pageTTS) {
                 continue;
             }
             
@@ -4277,26 +4285,37 @@ async function generateAllTTS() {
             }
             
             try {
-                console.log(`🎤 페이지 ${page.pageNumber} TTS 생성 중...`);
+                console.log(`🎤 페이지 ${page.pageNumber} TTS 생성 중... (${currentLanguage})`);
                 
                 // TTS 생성 API 호출
                 const response = await axios.post('/api/generate-tts', {
-                    text: page.text,
+                    text: pageText,
                     model: imageSettings.ttsModel,
                     voiceConfig: imageSettings.ttsVoiceConfig
                 });
                 
                 if (response.data.success && response.data.audioUrl) {
-                    // TTS 저장
+                    // TTS 저장 (언어별로 저장)
                     if (!currentStorybook.pages[i].ttsAudio) {
                         currentStorybook.pages[i].ttsAudio = {};
                     }
-                    currentStorybook.pages[i].ttsAudio.url = response.data.audioUrl;
-                    currentStorybook.pages[i].ttsAudio.model = imageSettings.ttsModel;
-                    currentStorybook.pages[i].audioUrl = response.data.audioUrl;
+                    
+                    if (currentLanguage === 'ko') {
+                        // 한국어는 기본 위치에 저장
+                        currentStorybook.pages[i].ttsAudio.url = response.data.audioUrl;
+                        currentStorybook.pages[i].ttsAudio.model = imageSettings.ttsModel;
+                        currentStorybook.pages[i].audioUrl = response.data.audioUrl;
+                    } else {
+                        // 다른 언어는 언어 코드로 저장
+                        if (!currentStorybook.pages[i].ttsAudio[currentLanguage]) {
+                            currentStorybook.pages[i].ttsAudio[currentLanguage] = {};
+                        }
+                        currentStorybook.pages[i].ttsAudio[currentLanguage].url = response.data.audioUrl;
+                        currentStorybook.pages[i].ttsAudio[currentLanguage].model = imageSettings.ttsModel;
+                    }
                     
                     successCount++;
-                    console.log(`✅ 페이지 ${page.pageNumber} TTS 생성 완료`);
+                    console.log(`✅ 페이지 ${page.pageNumber} TTS 생성 완료 (${currentLanguage})`);
                 } else {
                     throw new Error('TTS 생성 실패');
                 }
