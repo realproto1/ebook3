@@ -1,6 +1,7 @@
 // 전역 변수
 let storybooks = [];
 let currentStorybook = null;
+let currentLanguage = 'ko'; // 현재 표시 중인 언어 (기본: 한국어)
 let imageSettings = {
     aspectRatio: '16:9',
     enforceNoText: true,
@@ -2105,30 +2106,43 @@ function displayStorybook(storybook) {
             </h3>
             
             <!-- 설정 옵션 -->
-            <div class="mb-4 flex items-center gap-4 flex-wrap">
-                <div class="flex items-center gap-2">
-                    <label class="text-sm text-gray-600">이미지 모델:</label>
-                    ${createModelSelect('illustration', imageSettings.illustrationModel || 'gemini-3-pro-image-preview')}
+            <div class="mb-6 space-y-4">
+                <div class="flex items-center gap-4 flex-wrap">
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-gray-600">이미지 모델:</label>
+                        ${createModelSelect('illustration', imageSettings.illustrationModel || 'gemini-3-pro-image-preview')}
+                    </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <label class="text-sm text-gray-600">번역 언어:</label>
-                    <select id="translationLanguage" class="border border-gray-300 rounded px-3 py-1.5 text-sm">
-                        <option value="en">English</option>
-                        <option value="ja">日本語</option>
-                        <option value="zh">中文</option>
-                        <option value="es">Español</option>
-                        <option value="fr">Français</option>
-                        <option value="de">Deutsch</option>
-                        <option value="vi">Tiếng Việt</option>
-                        <option value="th">ไทย</option>
-                    </select>
-                    <button 
-                        onclick="translateAllText()"
-                        class="bg-teal-600 text-white px-4 py-1.5 rounded hover:bg-teal-700 transition text-sm"
-                    >
-                        <i class="fas fa-language mr-1"></i>번역
-                    </button>
-                </div>
+                
+                <!-- 언어 탭 -->
+                ${storybook.languages && storybook.languages.length > 0 ? `
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <label class="text-sm text-gray-600 font-semibold">
+                            <i class="fas fa-language mr-1"></i>언어:
+                        </label>
+                        <div id="language-tabs" class="flex gap-2">
+                            ${storybook.languages.map(lang => {
+                                const languageNames = {
+                                    'ko': '🇰🇷 한국어',
+                                    'en': '🇺🇸 English',
+                                    'zh': '🇨🇳 中文',
+                                    'ja': '🇯🇵 日本語',
+                                    'es': '🇪🇸 Español',
+                                    'fr': '🇫🇷 Français'
+                                };
+                                const isActive = lang === (currentLanguage || 'ko');
+                                return `
+                                    <button 
+                                        onclick="switchLanguage('${lang}')"
+                                        class="px-4 py-2 rounded-lg font-semibold transition ${isActive ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}"
+                                    >
+                                        ${languageNames[lang] || lang}
+                                    </button>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                ` : ''}
             </div>
             
             <!-- 액션 버튼 -->
@@ -2256,7 +2270,7 @@ function displayStorybook(storybook) {
                                     onblur="updatePageText(${idx}, this.value)"
                                     oninput="debouncedUpdatePageText(${idx}, this.value)"
                                     placeholder="이 페이지의 스토리를 작성하세요..."
-                                >${page.text || ''}</textarea>
+                                >${getPageText(page, currentLanguage)}</textarea>
                             </div>
 
                             <!-- 2️⃣ TTS 섹션 -->
@@ -2812,9 +2826,33 @@ function addNewCharacter() {
 
 function updatePageText(pageIndex, newText) {
     if (newText.trim()) {
-        currentStorybook.pages[pageIndex].text = newText.trim();
+        const text = newText.trim();
+        
+        // 현재 언어가 한국어면 기본 text에 저장
+        if (currentLanguage === 'ko') {
+            currentStorybook.pages[pageIndex].text = text;
+        } else {
+            // 다른 언어면 translations에 저장
+            if (!currentStorybook.translations) {
+                currentStorybook.translations = {};
+            }
+            if (!currentStorybook.translations[currentLanguage]) {
+                // 기존 pages를 복사해서 translations 초기화
+                currentStorybook.translations[currentLanguage] = currentStorybook.pages.map(p => ({
+                    pageNumber: p.pageNumber,
+                    text: p.text || ''
+                }));
+            }
+            
+            // 해당 페이지의 번역 텍스트 업데이트
+            const translatedPage = currentStorybook.translations[currentLanguage].find(p => p.pageNumber === currentStorybook.pages[pageIndex].pageNumber);
+            if (translatedPage) {
+                translatedPage.text = text;
+            }
+        }
+        
         saveCurrentStorybook();
-        console.log(`✅ 페이지 ${pageIndex + 1} 텍스트 저장됨`);
+        console.log(`✅ 페이지 ${pageIndex + 1} 텍스트 저장됨 (${currentLanguage})`);
     }
 }
 
@@ -6230,4 +6268,41 @@ async function completeReviewFromModal() {
         btn.disabled = false;
         btn.innerHTML = originalHtml;
     }
+}
+
+// ========================================
+// 언어 전환 관련 함수들
+// ========================================
+
+// 언어 전환
+function switchLanguage(lang) {
+    currentLanguage = lang;
+    console.log(`🌐 언어 전환: ${lang}`);
+    
+    // 페이지 다시 렌더링
+    if (currentStorybook) {
+        displayStorybook(currentStorybook);
+    }
+}
+
+// 현재 언어에 해당하는 페이지 텍스트 가져오기
+function getPageText(page, lang) {
+    if (!currentStorybook || !currentStorybook.translations) {
+        return page.text || '';
+    }
+    
+    const translations = currentStorybook.translations[lang];
+    if (!translations || !Array.isArray(translations)) {
+        return page.text || '';
+    }
+    
+    // 페이지 번호로 찾기
+    const translatedPage = translations.find(p => p.pageNumber === page.pageNumber);
+    return translatedPage ? translatedPage.text : (page.text || '');
+}
+
+// 현재 언어에 해당하는 TTS URL 가져오기
+function getPageTTS(page, lang) {
+    // 아직 구현 안됨 - 나중에 언어별 TTS 추가
+    return page.audioUrl || page.ttsAudioUrl || page.ttsAudio?.url || null;
 }
