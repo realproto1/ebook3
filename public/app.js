@@ -4328,13 +4328,16 @@ async function generateAllTTS() {
                     successCount++;
                     console.log(`✅ 페이지 ${page.pageNumber} TTS 생성 완료 (${currentLanguage})`);
                     
-                    // 즉시 R2에 저장 (각 TTS 생성마다)
-                    try {
-                        await saveToR2(currentStorybook);
-                        console.log(`💾 페이지 ${page.pageNumber} R2 저장 완료`);
-                    } catch (saveError) {
-                        console.error(`⚠️ 페이지 ${page.pageNumber} R2 저장 실패 (TTS는 메모리에 유지):`, saveError.message);
-                        // 저장 실패해도 계속 진행
+                    // 5페이지마다 R2에 저장
+                    if (successCount % 5 === 0) {
+                        try {
+                            console.log(`💾 중간 저장 중... (${successCount}개 완료)`);
+                            await saveToR2(currentStorybook);
+                            console.log(`✅ 중간 저장 완료 (${successCount}개)`);
+                        } catch (saveError) {
+                            console.error(`⚠️ 중간 저장 실패 (TTS는 메모리에 유지):`, saveError.message);
+                            // 저장 실패해도 계속 진행
+                        }
                     }
                 } else {
                     throw new Error('TTS 생성 실패');
@@ -4349,6 +4352,18 @@ async function generateAllTTS() {
                     ttsButton.innerHTML = '<i class="fas fa-volume-up mr-1"></i>음성 생성';
                     ttsButton.disabled = false;
                 }
+            }
+        }
+        
+        // 최종 저장
+        if (successCount > 0) {
+            try {
+                console.log('💾 최종 저장 중...');
+                await saveToR2(currentStorybook);
+                console.log('✅ 최종 저장 완료');
+            } catch (saveError) {
+                console.error('❌ 최종 저장 실패:', saveError);
+                showNotification('warning', '저장 실패', 'TTS는 생성되었지만 최종 저장에 실패했습니다.');
             }
         }
         
@@ -4590,7 +4605,7 @@ async function saveToR2(storybook, retryCount = 0) {
         console.log(`💾 R2 저장 시작: ${storybook.title}${retryCount > 0 ? ` (재시도 ${retryCount}/${maxRetries})` : ''}`);
         
         const response = await axios.post('/api/storybooks', storybook, {
-            timeout: 60000, // 60초 타임아웃
+            timeout: 300000, // 300초 타임아웃 (5분)
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -4628,7 +4643,7 @@ async function saveToR2(storybook, retryCount = 0) {
         ) && retryCount < maxRetries;
         
         if (shouldRetry) {
-            const waitTime = Math.min(2000 * Math.pow(2, retryCount), 10000); // 지수 백오프: 2초, 4초, 8초 (최대 10초)
+            const waitTime = Math.min(5000 * Math.pow(2, retryCount), 30000); // 지수 백오프: 5초, 10초, 20초 (최대 30초)
             console.log(`⏳ ${waitTime/1000}초 후 재시도...`);
             await new Promise(resolve => setTimeout(resolve, waitTime));
             return saveToR2(storybook, retryCount + 1); // 재귀 호출
