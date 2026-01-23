@@ -4245,6 +4245,9 @@ async function generateAllTTS() {
         const pageText = getPageText(page, currentLanguage);
         const pageTTS = getPageTTS(page, currentLanguage);
         
+        // 디버깅 로그
+        console.log(`📄 Page ${page.pageNumber}: text=${!!pageText && pageText.trim() !== ''}, tts=${!!pageTTS}`);
+        
         // 텍스트가 있고 TTS가 없는 경우
         return pageText && pageText.trim() !== '' && !pageTTS;
     });
