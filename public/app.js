@@ -102,7 +102,7 @@ function updateVocabularyModel(value) {
 // TTS 모델 선택 HTML 생성 (설명 포함)
 function createTTSModelSelect(currentModel, pageIndex) {
     const modelOptions = TTS_MODELS.map(model => 
-        `<option value="${model.value}" ${currentModel === model.value ? 'selected' : ''}>${model.label}</option>`
+        `<option value="${model.value}" data-description="${model.description}" ${currentModel === model.value ? 'selected' : ''}>${model.label} - ${model.description}</option>`
     ).join('');
     
     // 현재 선택된 모델의 설명 찾기
@@ -114,11 +114,11 @@ function createTTSModelSelect(currentModel, pageIndex) {
             <select 
                 id="tts-model-select-${pageIndex}"
                 onchange="updatePageTTSModelDescription(${pageIndex}, this.value)"
-                class="text-xs md:text-sm border border-gray-300 rounded px-2 py-1.5 bg-white"
+                class="text-xs md:text-sm border-2 border-blue-300 rounded-lg px-3 py-2 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
             >
                 ${modelOptions}
             </select>
-            <p id="tts-model-desc-${pageIndex}" class="text-[10px] md:text-xs text-gray-600 italic">
+            <p id="tts-model-desc-${pageIndex}" class="text-[10px] md:text-xs text-gray-600 italic bg-blue-50 p-2 rounded border border-blue-200">
                 <i class="fas fa-info-circle mr-1 text-blue-500"></i>${description}
             </p>
         </div>

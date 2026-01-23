@@ -491,12 +491,12 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-user-alt mr-2 text-teal-500"></i>기본 음성
                         </label>
-                        <select id="ttsModelSelect" onchange="updateTTSModelDescription(this.value)" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm mb-2">
-                            <option value="Puck" selected>Puck ⭐ (여성)</option>
-                            <option value="Charon">Charon (남성)</option>
-                            <option value="Kore">Kore (여성)</option>
-                            <option value="Fenrir">Fenrir (남성)</option>
-                            <option value="Aoede">Aoede (여성)</option>
+                        <select id="ttsModelSelect" onchange="updateTTSModelDescription(this.value)" class="w-full px-4 py-2 border-2 border-teal-300 rounded-lg text-sm mb-2 focus:border-teal-500 focus:ring-2 focus:ring-teal-200">
+                            <option value="Puck" data-description="자연스럽고 부드러운 여성 목소리" selected>Puck ⭐ (여성) - 자연스럽고 부드러운 여성 목소리</option>
+                            <option value="Charon" data-description="깊고 안정적인 남성 목소리">Charon (남성) - 깊고 안정적인 남성 목소리</option>
+                            <option value="Kore" data-description="밝고 경쾌한 여성 목소리">Kore (여성) - 밝고 경쾌한 여성 목소리</option>
+                            <option value="Fenrir" data-description="차분하고 따뜻한 남성 목소리">Fenrir (남성) - 차분하고 따뜻한 남성 목소리</option>
+                            <option value="Aoede" data-description="우아한 여성 목소리">Aoede (여성) - 우아한 여성 목소리</option>
                         </select>
                         <p id="ttsModelDescription" class="text-xs text-gray-600 italic bg-white p-2 rounded border border-teal-200">
                             <i class="fas fa-info-circle mr-1 text-teal-500"></i>자연스럽고 부드러운 여성 목소리
@@ -1036,6 +1036,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script src="/gemini-client.js?v=20250120-deprecated"></script>
-    <script src="/app.js?v=20250122-viewer-sync"></script>
+    <script src="/app.js?v=20250123-tts-model-description"></script>
 </body>
 </html>
