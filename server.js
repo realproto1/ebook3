@@ -3178,7 +3178,33 @@ app.get('/api/storybooks/:id', async (req, res) => {
       // Stream을 문자열로 변환
       const bodyContents = await getResult.Body.transformToString();
       const storybook = JSON.parse(bodyContents);
-      console.log(`✅ [API] 동화책 로드 완료:`, storybook.title, `(페이지: ${storybook.pages?.length || 0}, 캐릭터: ${storybook.characters?.length || 0})`);
+      
+      // TTS base64 데이터 제거 (응답 크기 최적화)
+      if (storybook.pages && Array.isArray(storybook.pages)) {
+        storybook.pages.forEach(page => {
+          if (page.ttsAudio) {
+            // base64 인라인 데이터 체크 및 제거
+            if (typeof page.ttsAudio.url === 'string' && page.ttsAudio.url.startsWith('data:audio/')) {
+              // R2 URL이 있다면 유지, 없으면 제거
+              delete page.ttsAudio.url;
+            }
+            // 다국어 TTS도 동일하게 처리
+            Object.keys(page.ttsAudio).forEach(lang => {
+              if (typeof page.ttsAudio[lang] === 'object' && page.ttsAudio[lang].url) {
+                if (page.ttsAudio[lang].url.startsWith('data:audio/')) {
+                  delete page.ttsAudio[lang].url;
+                }
+              }
+            });
+          }
+          // audioUrl도 base64면 제거
+          if (page.audioUrl && page.audioUrl.startsWith('data:audio/')) {
+            delete page.audioUrl;
+          }
+        });
+      }
+      
+      console.log(`✅ [API] 동화책 로드 완료:`, storybook.title, `(페이지: ${storybook.pages?.length || 0}, 캐릭터: ${storybook.characters?.length || 0}, base64 TTS removed)`);
     
       res.json(storybook);
     } catch (getError) {
