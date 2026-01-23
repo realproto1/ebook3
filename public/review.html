@@ -26,6 +26,26 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .page-item {
+            transition: all 0.2s ease;
+            cursor: move;
+        }
+        .page-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .page-item.dragging {
+            opacity: 0.5;
+            transform: rotate(2deg);
+        }
+        .page-item.drag-over {
+            border-top: 4px solid #667eea;
+        }
+        textarea:focus {
+            outline: none;
+            ring: 2px;
+            ring-color: #667eea;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100 min-h-screen">
@@ -154,31 +174,64 @@
                 
                 return `
                     <div class="language-content ${idx === 0 ? 'active' : ''}" data-lang="${lang}">
-                        <div class="space-y-4">
+                        <div id="pages-container-${lang}" class="space-y-4">
                             ${pages.map((page, pageIdx) => `
-                                <div class="bg-gray-50 border-2 border-gray-200 rounded-lg p-4">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <h3 class="text-lg font-bold text-gray-700">
-                                            <i class="fas fa-file-alt mr-2 text-purple-600"></i>
-                                            페이지 ${page.pageNumber || pageIdx + 1}
-                                        </h3>
+                                <div 
+                                    class="page-item bg-white border-2 border-gray-200 rounded-lg p-4 hover:border-purple-300"
+                                    data-lang="${lang}"
+                                    data-page-idx="${pageIdx}"
+                                    draggable="true"
+                                    ondragstart="handleDragStart(event)"
+                                    ondragover="handleDragOver(event)"
+                                    ondrop="handleDrop(event)"
+                                    ondragend="handleDragEnd(event)"
+                                >
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-grip-vertical text-gray-400 cursor-move"></i>
+                                            <h3 class="text-lg font-bold text-gray-700">
+                                                <i class="fas fa-file-alt mr-2 text-purple-600"></i>
+                                                페이지 ${page.pageNumber || pageIdx + 1}
+                                            </h3>
+                                        </div>
                                         <button 
-                                            onclick="editPageText('${lang}', ${pageIdx})"
-                                            class="text-blue-600 hover:text-blue-700 text-sm"
+                                            onclick="deletePage('${lang}', ${pageIdx})"
+                                            class="text-red-600 hover:text-red-700 px-3 py-1 rounded hover:bg-red-50 transition"
                                         >
-                                            <i class="fas fa-edit mr-1"></i>수정
+                                            <i class="fas fa-trash mr-1"></i>삭제
                                         </button>
                                     </div>
-                                    <div 
+                                    <textarea
                                         id="page-text-${lang}-${pageIdx}"
-                                        class="text-gray-800 leading-relaxed whitespace-pre-wrap"
-                                    >${page.text || '텍스트 없음'}</div>
+                                        class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition resize-none"
+                                        rows="4"
+                                        onchange="updatePageText('${lang}', ${pageIdx}, this.value)"
+                                        placeholder="페이지 텍스트를 입력하세요..."
+                                    >${page.text || ''}</textarea>
+                                    <p class="text-xs text-gray-500 mt-2">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        텍스트 수정 후 다른 곳을 클릭하면 자동 저장됩니다
+                                    </p>
                                 </div>
                             `).join('')}
+                        </div>
+                        
+                        <!-- 페이지 추가 버튼 -->
+                        <div class="mt-6">
+                            <button 
+                                onclick="addNewPage('${lang}')"
+                                class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-600 transition shadow-md"
+                            >
+                                <i class="fas fa-plus mr-2"></i>
+                                새 페이지 추가
+                            </button>
                         </div>
                     </div>
                 `;
             }).join('');
+            
+            // 드래그 앤 드롭 이벤트 다시 바인딩
+            initializeDragAndDrop();
         }
 
         // 언어 전환
@@ -202,27 +255,173 @@
             });
         }
 
-        // 페이지 텍스트 수정
-        function editPageText(lang, pageIdx) {
-            const textElement = document.getElementById(`page-text-${lang}-${pageIdx}`);
-            const currentText = textElement.textContent;
-            
-            const newText = prompt('텍스트를 수정하세요:', currentText);
-            if (newText !== null && newText.trim() !== '') {
-                textElement.textContent = newText.trim();
-                
-                // 데이터 업데이트
-                if (!storybookData.translations) {
-                    storybookData.translations = {};
-                }
-                if (!storybookData.translations[lang]) {
-                    storybookData.translations[lang] = storybookData.pages || [];
-                }
-                storybookData.translations[lang][pageIdx].text = newText.trim();
-                
-                // 임시 저장
-                localStorage.setItem('temp_storybook', JSON.stringify(storybookData));
+        // 페이지 텍스트 업데이트
+        function updatePageText(lang, pageIdx, newText) {
+            // 데이터 업데이트
+            if (!storybookData.translations) {
+                storybookData.translations = {};
             }
+            if (!storybookData.translations[lang]) {
+                storybookData.translations[lang] = storybookData.pages || [];
+            }
+            
+            storybookData.translations[lang][pageIdx].text = newText.trim();
+            
+            // 임시 저장
+            localStorage.setItem('temp_storybook', JSON.stringify(storybookData));
+            
+            console.log(`✅ 페이지 ${pageIdx + 1} (${lang}) 텍스트 업데이트됨`);
+        }
+
+        // 페이지 삭제
+        function deletePage(lang, pageIdx) {
+            const pages = storybookData.translations?.[lang] || storybookData.pages || [];
+            const pageNumber = pages[pageIdx]?.pageNumber || pageIdx + 1;
+            
+            if (!confirm(`페이지 ${pageNumber}을(를) 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
+                return;
+            }
+            
+            // 데이터에서 삭제
+            if (storybookData.translations && storybookData.translations[lang]) {
+                storybookData.translations[lang].splice(pageIdx, 1);
+                
+                // 페이지 번호 재정렬
+                storybookData.translations[lang].forEach((page, idx) => {
+                    page.pageNumber = idx + 1;
+                });
+            }
+            
+            // 임시 저장
+            localStorage.setItem('temp_storybook', JSON.stringify(storybookData));
+            
+            // UI 재렌더링
+            renderLanguageContents();
+            
+            console.log(`✅ 페이지 ${pageNumber} (${lang}) 삭제됨`);
+        }
+
+        // 새 페이지 추가
+        function addNewPage(lang) {
+            const pages = storybookData.translations?.[lang] || storybookData.pages || [];
+            const newPageNumber = pages.length + 1;
+            
+            const newPage = {
+                pageNumber: newPageNumber,
+                text: ''
+            };
+            
+            // 데이터 업데이트
+            if (!storybookData.translations) {
+                storybookData.translations = {};
+            }
+            if (!storybookData.translations[lang]) {
+                storybookData.translations[lang] = [];
+            }
+            
+            storybookData.translations[lang].push(newPage);
+            
+            // 임시 저장
+            localStorage.setItem('temp_storybook', JSON.stringify(storybookData));
+            
+            // UI 재렌더링
+            renderLanguageContents();
+            
+            // 새로 추가된 페이지로 스크롤
+            setTimeout(() => {
+                const newPageElement = document.querySelector(`[data-lang="${lang}"][data-page-idx="${pages.length}"]`);
+                if (newPageElement) {
+                    newPageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    newPageElement.querySelector('textarea')?.focus();
+                }
+            }, 100);
+            
+            console.log(`✅ 새 페이지 ${newPageNumber} (${lang}) 추가됨`);
+        }
+
+        // 드래그 앤 드롭 관련 변수
+        let draggedElement = null;
+        let draggedLang = null;
+        let draggedPageIdx = null;
+
+        // 드래그 앤 드롭 초기화
+        function initializeDragAndDrop() {
+            // 이미 이벤트 리스너가 HTML에 인라인으로 추가되어 있음
+        }
+
+        // 드래그 시작
+        function handleDragStart(event) {
+            draggedElement = event.target.closest('.page-item');
+            draggedLang = draggedElement.dataset.lang;
+            draggedPageIdx = parseInt(draggedElement.dataset.pageIdx);
+            
+            draggedElement.classList.add('dragging');
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/html', draggedElement.innerHTML);
+        }
+
+        // 드래그 오버
+        function handleDragOver(event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            }
+            event.dataTransfer.dropEffect = 'move';
+            
+            const target = event.target.closest('.page-item');
+            if (target && target !== draggedElement) {
+                target.classList.add('drag-over');
+            }
+            
+            return false;
+        }
+
+        // 드롭
+        function handleDrop(event) {
+            if (event.stopPropagation) {
+                event.stopPropagation();
+            }
+            
+            const targetElement = event.target.closest('.page-item');
+            if (!targetElement || targetElement === draggedElement) {
+                return false;
+            }
+            
+            const targetLang = targetElement.dataset.lang;
+            const targetPageIdx = parseInt(targetElement.dataset.pageIdx);
+            
+            // 같은 언어 내에서만 순서 변경 가능
+            if (draggedLang !== targetLang) {
+                alert('같은 언어 내에서만 순서를 변경할 수 있습니다.');
+                return false;
+            }
+            
+            // 데이터 순서 변경
+            const pages = storybookData.translations?.[draggedLang] || storybookData.pages || [];
+            const [movedPage] = pages.splice(draggedPageIdx, 1);
+            pages.splice(targetPageIdx, 0, movedPage);
+            
+            // 페이지 번호 재정렬
+            pages.forEach((page, idx) => {
+                page.pageNumber = idx + 1;
+            });
+            
+            // 임시 저장
+            localStorage.setItem('temp_storybook', JSON.stringify(storybookData));
+            
+            // UI 재렌더링
+            renderLanguageContents();
+            
+            console.log(`✅ 페이지 순서 변경: ${draggedPageIdx + 1} → ${targetPageIdx + 1}`);
+            
+            return false;
+        }
+
+        // 드래그 종료
+        function handleDragEnd(event) {
+            const allItems = document.querySelectorAll('.page-item');
+            allItems.forEach(item => {
+                item.classList.remove('dragging', 'drag-over');
+            });
         }
 
         // 검토 완료
