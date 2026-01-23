@@ -6203,14 +6203,23 @@ async function completeReviewFromModal() {
         // currentStorybook 업데이트
         currentStorybook = reviewStorybookData;
         
-        // R2에 저장
-        await saveCurrentStorybook();
+        // 동화책 목록에서 찾아서 업데이트
+        const index = storybooks.findIndex(s => s && s.id === currentStorybook.id);
+        if (index !== -1) {
+            storybooks[index] = currentStorybook;
+        } else {
+            storybooks.push(currentStorybook);
+        }
+        
+        // localStorage에 저장
+        saveStorybooks();
         
         // 모달 닫기
         closeReviewModal();
         
         // UI 업데이트
-        renderCurrentStorybook();
+        displayStorybook(currentStorybook);
+        renderStorybookList();
         
         showNotification('✅ 동화책이 저장되었습니다!', 'success');
         
