@@ -13,7 +13,7 @@ let imageSettings = {
     illustrationModel: 'gemini-3-pro-image-preview',  // 페이지 삽화 모델
     vocabularyModel: 'gemini-3-pro-image-preview',  // 8단어 학습 모델
     coverModel: 'gemini-3-pro-image-preview',  // 표지 모델
-    ttsModel: 'Puck',  // TTS 모델 (Gemini TTS Voice)
+    ttsModel: 'Aoede',  // TTS 모델 (Gemini TTS Voice) - 여성 목소리
     ttsVoiceConfig: '여성 목소리, 부드럽고 따뜻한 톤, 동화 낭독 스타일, 적당한 속도로 또박또박, 어린이가 이해하기 쉽게'  // TTS 음성 설정
 };
 
@@ -44,11 +44,11 @@ const IMAGE_MODELS = [
 
 // TTS 모델 목록 (Gemini TTS Voices)
 const TTS_MODELS = [
-    { value: 'Puck', label: 'Puck ⭐', description: '자연스럽고 부드러운 여성 목소리' },
-    { value: 'Charon', label: 'Charon', description: '깊고 안정적인 남성 목소리' },
+    { value: 'Aoede', label: 'Aoede ⭐', description: '우아하고 부드러운 여성 목소리 (권장)' },
     { value: 'Kore', label: 'Kore', description: '밝고 경쾌한 여성 목소리' },
-    { value: 'Fenrir', label: 'Fenrir', description: '차분하고 따뜻한 남성 목소리' },
-    { value: 'Aoede', label: 'Aoede', description: '우아한 여성 목소리' }
+    { value: 'Puck', label: 'Puck', description: '명랑하고 활기찬 남성 목소리' },
+    { value: 'Charon', label: 'Charon', description: '깊고 안정적인 남성 목소리' },
+    { value: 'Fenrir', label: 'Fenrir', description: '차분하고 따뜻한 남성 목소리' }
 ];
 
 // 모델 선택 HTML 생성 함수

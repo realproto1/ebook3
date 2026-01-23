@@ -492,12 +492,15 @@
                             <i class="fas fa-user-alt mr-2 text-teal-500"></i>기본 음성
                         </label>
                         <select id="ttsModelSelect" onchange="updateTTSModelDescription(this.value)" class="w-full px-4 py-2 border-2 border-teal-300 rounded-lg text-sm mb-2 focus:border-teal-500 focus:ring-2 focus:ring-teal-200">
-                            <option value="Puck" data-description="자연스럽고 부드러운 여성 목소리" selected>Puck ⭐ (여성) - 자연스럽고 부드러운 여성 목소리</option>
-                            <option value="Charon" data-description="깊고 안정적인 남성 목소리">Charon (남성) - 깊고 안정적인 남성 목소리</option>
+                            <option value="Aoede" data-description="우아하고 부드러운 여성 목소리 (권장)" selected>Aoede ⭐ (여성) - 우아하고 부드러운 여성 목소리</option>
                             <option value="Kore" data-description="밝고 경쾌한 여성 목소리">Kore (여성) - 밝고 경쾌한 여성 목소리</option>
+                            <option value="Puck" data-description="명랑하고 활기찬 남성 목소리">Puck (남성) - 명랑하고 활기찬 남성 목소리</option>
+                            <option value="Charon" data-description="깊고 안정적인 남성 목소리">Charon (남성) - 깊고 안정적인 남성 목소리</option>
                             <option value="Fenrir" data-description="차분하고 따뜻한 남성 목소리">Fenrir (남성) - 차분하고 따뜻한 남성 목소리</option>
-                            <option value="Aoede" data-description="우아한 여성 목소리">Aoede (여성) - 우아한 여성 목소리</option>
                         </select>
+                        <p id="ttsModelDescription" class="text-xs text-gray-600 italic bg-white p-2 rounded border border-teal-200">
+                            <i class="fas fa-info-circle mr-1 text-teal-500"></i>우아하고 부드러운 여성 목소리 (권장)
+                        </p>
                         <p id="ttsModelDescription" class="text-xs text-gray-600 italic bg-white p-2 rounded border border-teal-200">
                             <i class="fas fa-info-circle mr-1 text-teal-500"></i>자연스럽고 부드러운 여성 목소리
                         </p>
@@ -506,11 +509,11 @@
                     <div class="flex items-start gap-2 text-xs text-gray-600 mt-3 bg-white p-3 rounded">
                         <i class="fas fa-info-circle mt-0.5 text-teal-500"></i>
                         <div>
-                            <p class="mb-1"><strong>Puck:</strong> 자연스럽고 부드러운 여성 목소리 (권장)</p>
-                            <p class="mb-1"><strong>Charon:</strong> 깊고 안정적인 남성 목소리</p>
+                            <p class="mb-1"><strong>Aoede:</strong> 우아하고 부드러운 여성 목소리 (권장 ⭐)</p>
                             <p class="mb-1"><strong>Kore:</strong> 밝고 경쾌한 여성 목소리</p>
-                            <p class="mb-1"><strong>Fenrir:</strong> 차분하고 따뜻한 남성 목소리</p>
-                            <p><strong>Aoede:</strong> 우아한 여성 목소리</p>
+                            <p class="mb-1"><strong>Puck:</strong> 명랑하고 활기찬 남성 목소리</p>
+                            <p class="mb-1"><strong>Charon:</strong> 깊고 안정적인 남성 목소리</p>
+                            <p><strong>Fenrir:</strong> 차분하고 따뜻한 남성 목소리</p>
                         </div>
                     </div>
                 </div>
