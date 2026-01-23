@@ -206,7 +206,10 @@ async function generatePageTTS(pageIndex) {
                 currentStorybook.pages[pageIndex].ttsAudio[currentLanguage].model = imageSettings.ttsModel;
             }
             
-            saveCurrentStorybook();
+            // R2 저장 완료까지 대기
+            console.log('💾 TTS 생성 후 R2 저장 중...');
+            await saveToR2(currentStorybook);
+            console.log('✅ R2 저장 완료');
             
             // UI 즉시 업데이트 - 현재 동화책을 다시 렌더링
             displayStorybook(currentStorybook);
@@ -4335,8 +4338,10 @@ async function generateAllTTS() {
             }
         }
         
-        // 저장
-        saveCurrentStorybook();
+        // R2 저장 완료까지 대기
+        console.log('💾 모든 TTS 생성 후 R2 저장 중...');
+        await saveToR2(currentStorybook);
+        console.log('✅ R2 저장 완료');
         
         // UI 업데이트
         displayStorybook(currentStorybook);
