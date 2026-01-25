@@ -3368,13 +3368,15 @@ app.post('/api/generate-key-object', requireAPIKey, async (req, res) => {
       '\n\n**CRITICAL: NO TEXT, NO WORDS, NO LETTERS IN THE IMAGE**' : 
       '\n\n**IMPORTANT:** Do NOT include any text in the image.';
     
+    console.log('🎨 Art Style:', artStyle);
+    
     const prompt = `Create a professional illustration of a key object for a children's storybook in 4:3 aspect ratio (standard horizontal format).
+
+**CRITICAL ART STYLE:** ${artStyle} style - This is MANDATORY. The entire illustration MUST follow ${artStyle} style consistently.
 
 **Object Name:** ${keyObject.name}
 
 **Object Description:** ${descriptionEn}
-
-**Art Style:** ${artStyle} style for children's book illustration.
 
 **CRITICAL IMAGE DIMENSIONS:** Create the image in 4:3 aspect ratio. The composition must fit perfectly in standard horizontal format (4:3).
 
@@ -3385,13 +3387,19 @@ app.post('/api/generate-key-object', requireAPIKey, async (req, res) => {
 - Focus on the distinctive features described above
 - Make it recognizable and memorable
 - Composition designed specifically for 4:3 format
+- MUST follow ${artStyle} style exactly
 ${noTextPrompt}
 ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}
 
-Create a single, clear, professional illustration of this key object in 4:3 format.`;
+Create a single, clear, professional illustration of this key object in ${artStyle} style and 4:3 format.`;
     
-    console.log('🎨 Generating key object image with settings:', { aspectRatio, enforceNoText });
-    console.log('📋 Prompt (first 200 chars):', prompt.substring(0, 200));
+    console.log('🎨 Generating key object image with settings:', { 
+      artStyle, 
+      aspectRatio, 
+      enforceNoText,
+      objectName: keyObject.name
+    });
+    console.log('📋 Prompt (first 300 chars):', prompt.substring(0, 300));
 
     const imageUrl = await generateImage(prompt);
     
