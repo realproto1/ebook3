@@ -2468,14 +2468,14 @@ app.post('/api/generate-tts', requireAPIKey, async (req, res) => {
     console.log(`Voice config: ${voiceConfig}`);
     console.log(`Voice: ${model}`);
     console.log(`📥 Received geminiModel parameter: ${geminiModel}`);
-    console.log(`🔧 Will use Gemini Model: ${geminiModel || 'gemini-2.5-flash-tts'} (default if null)`);
+    console.log(`🔧 Will use Gemini Model: ${geminiModel || 'gemini-2.0-flash-exp'} (default if null)`);
     console.log(`Language: ${language || 'ko'}`);
     
     // GoogleGenerativeAI 인스턴스 생성
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     
     // TTS 모델 설정 - 클라이언트에서 받은 모델 또는 기본값
-    const ttsModelName = geminiModel || "gemini-2.5-flash-tts";
+    const ttsModelName = geminiModel || "gemini-2.0-flash-exp";
     
     console.log(`✅ Final TTS Model Name: ${ttsModelName}`);
     
