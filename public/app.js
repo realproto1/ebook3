@@ -14,7 +14,7 @@ let imageSettings = {
     illustrationModel: 'gemini-3-pro-image-preview',  // 페이지 삽화 모델
     vocabularyModel: 'gemini-3-pro-image-preview',  // 8단어 학습 모델
     coverModel: 'gemini-3-pro-image-preview',  // 표지 모델
-    geminiTTSModel: 'gemini-2.0-flash-exp',  // Gemini TTS 생성 모델 (기본값)
+    geminiTTSModel: 'gemini-2.5-flash-preview-tts',  // Gemini TTS 생성 모델 (기본값)
     ttsModel: 'Aoede',  // TTS Voice (Gemini TTS Voice) - 여성 목소리
     ttsVoiceConfig: '여성 목소리, 부드럽고 따뜻한 톤, 동화 낭독 스타일, 적당한 속도로 또박또박, 어린이가 이해하기 쉽게'  // TTS 음성 설정
 };
@@ -40,7 +40,8 @@ function getAPIKey() {
 const IMAGE_MODELS = [
     { value: 'gemini-3-pro-image-preview', label: 'Nano Banana Pro (Gemini 3 Pro) ⭐', description: '최고 품질, 네이티브 이미지 생성' },
     { value: 'gemini-2.5-flash-image', label: 'Gemini 2.5 Flash Image', description: '빠르고 저렴한 이미지 생성' },
-    { value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash (실험)', description: '무료 테스트용' },
+    { value: 'gemini-2.5-flash-preview-tts', label: 'Gemini 2.5 Flash TTS (무료)', description: '무료 플랜: 10회/일, 3회/분' },
+    { value: 'gemini-2.5-pro-preview-tts', label: 'Gemini 2.5 Pro TTS (유료)', description: '유료 플랜 전용, 더 고품질' },
     { value: 'imagen-4', label: 'Imagen 4', description: '전문 이미지, 텍스트 렌더링 우수' }
 ];
 
@@ -180,7 +181,7 @@ async function generatePageTTS(pageIndex) {
         const response = await axios.post('/api/generate-tts', {
             text: text,
             language: currentLanguage,
-            geminiModel: imageSettings.geminiTTSModel || 'gemini-2.0-flash-exp',  // Gemini TTS 생성 모델
+            geminiModel: imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts',  // Gemini TTS 생성 모델
             model: imageSettings.ttsModel || 'Aoede',  // TTS Voice (Puck, Kore 등)
             voiceConfig: imageSettings.ttsVoiceConfig,
             storybookId: currentStorybook?.id,
@@ -2519,7 +2520,8 @@ function displayStorybook(storybook) {
                             onchange="updatePageGeminiTTSModel(this.value)"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                         >
-                            <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (실험, TTS 지원)</option>
+                            <option value="gemini-2.5-flash-preview-tts">Gemini 2.5 Flash TTS (무료)</option>
+                            <option value="gemini-2.5-pro-preview-tts">Gemini 2.5 Pro TTS (유료)</option>
                         </select>
                         <p class="text-xs text-gray-500 mt-2">
                             <i class="fas fa-info-circle mr-1"></i>
@@ -2965,7 +2967,7 @@ function displayStorybook(storybook) {
     // Gemini TTS 모델 select 초기화
     const geminiTTSModelSelect = document.getElementById('page-gemini-tts-model-select');
     if (geminiTTSModelSelect) {
-        geminiTTSModelSelect.value = imageSettings.geminiTTSModel || 'gemini-2.0-flash-exp';
+        geminiTTSModelSelect.value = imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts';
     }
     
     // TTS 음성 select 초기화
@@ -4244,7 +4246,7 @@ async function generateAllTTS() {
                 const response = await axios.post('/api/generate-tts', {
                     text: pageText,
                     language: currentLanguage,
-                    geminiModel: imageSettings.geminiTTSModel || 'gemini-2.0-flash-exp',  // Gemini TTS 생성 모델
+                    geminiModel: imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts',  // Gemini TTS 생성 모델
                     model: imageSettings.ttsModel || 'Aoede',  // TTS Voice (Puck, Kore 등)
                     voiceConfig: imageSettings.ttsVoiceConfig,
                     storybookId: currentStorybook?.id,
