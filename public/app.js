@@ -180,8 +180,8 @@ async function generatePageTTS(pageIndex) {
         const response = await axios.post('/api/generate-tts', {
             text: text,
             language: currentLanguage,
-            geminiModel: imageSettings.geminiTTSModel,  // Gemini TTS 생성 모델
-            model: imageSettings.ttsModel,  // TTS Voice (Puck, Kore 등)
+            geminiModel: imageSettings.geminiTTSModel || 'gemini-2.0-flash-exp',  // Gemini TTS 생성 모델
+            model: imageSettings.ttsModel || 'Aoede',  // TTS Voice (Puck, Kore 등)
             voiceConfig: imageSettings.ttsVoiceConfig,
             storybookId: currentStorybook?.id,
             storybookTitle: currentStorybook?.title,
@@ -4206,7 +4206,8 @@ async function generateAllTTS() {
     }
     
     const estimatedTime = pagesToGenerate.length * 3; // 페이지당 약 3초
-    const geminiModelDisplay = imageSettings.geminiTTSModel.replace('gemini-', 'Gemini ').replace('-tts', ' TTS');
+    const geminiModel = imageSettings.geminiTTSModel || 'gemini-2.0-flash-exp';
+    const geminiModelDisplay = geminiModel.replace('gemini-', 'Gemini ').replace('-exp', ' Exp').replace('-tts', ' TTS');
     if (!confirm(`${pagesToGenerate.length}개의 페이지 TTS를 생성하시겠습니까?\n\n모델: ${geminiModelDisplay}\n음성: ${imageSettings.ttsModel}\n언어: ${currentLanguage}\n예상 소요 시간: 약 ${estimatedTime}초`)) {
         return;
     }
@@ -4243,8 +4244,8 @@ async function generateAllTTS() {
                 const response = await axios.post('/api/generate-tts', {
                     text: pageText,
                     language: currentLanguage,
-                    geminiModel: imageSettings.geminiTTSModel,  // Gemini TTS 생성 모델
-                    model: imageSettings.ttsModel,  // TTS Voice (Puck, Kore 등)
+                    geminiModel: imageSettings.geminiTTSModel || 'gemini-2.0-flash-exp',  // Gemini TTS 생성 모델
+                    model: imageSettings.ttsModel || 'Aoede',  // TTS Voice (Puck, Kore 등)
                     voiceConfig: imageSettings.ttsVoiceConfig,
                     storybookId: currentStorybook?.id,
                     storybookTitle: currentStorybook?.title,
