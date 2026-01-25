@@ -3421,9 +3421,11 @@ app.post('/api/generate-cover', requireAPIKey, async (req, res) => {
     const { title, artStyle, characterReferences = [], settings = {}, customPrompt = '', storybookId = '' } = req.body;
     
     // 설정값 기본값
-    const aspectRatio = settings.aspectRatio || '16:9';  // 표지 기본 비율: 16:9
+    const aspectRatio = settings.aspectRatio || '4:3';  // 표지 기본 비율: 4:3 (책 표지에 적합)
     const enforceNoText = settings.enforceNoText !== false;
     const additionalPrompt = settings.additionalPrompt || '';
+    
+    console.log('📐 Cover aspect ratio:', aspectRatio);
     
     // customPrompt를 영어로 번역 (한글인 경우)
     let promptEn = customPrompt;
@@ -3460,32 +3462,44 @@ app.post('/api/generate-cover', requireAPIKey, async (req, res) => {
       '\n\n**CRITICAL - NO TEXT:** Do NOT include the book title, author name, or ANY text, labels, words, letters in the image. Absolutely NO TEXT of any kind. Pure illustration only.' : 
       '\n\n**IMPORTANT:** Do NOT include the book title or any text in the image.';
     
-    const prompt = promptEn || `Create a captivating children's storybook cover illustration.
+    // 비율에 따른 설명 추가
+    const aspectRatioDescription = {
+      '16:9': 'wide horizontal format (16:9 aspect ratio)',
+      '4:3': 'standard horizontal format (4:3 aspect ratio) - ideal for book covers',
+      '1:1': 'square format (1:1 aspect ratio)',
+      '3:4': 'standard vertical format (3:4 aspect ratio) - portrait orientation',
+      '9:16': 'tall vertical format (9:16 aspect ratio) - portrait orientation'
+    }[aspectRatio] || `${aspectRatio} aspect ratio`;
+    
+    const prompt = promptEn || `Create a captivating children's storybook cover illustration in ${aspectRatioDescription}.
 
 **Book Title (for context only, DO NOT display in image):** ${title}
 
 **Art Style:** ${artStyle} style for children's book cover.
 
-**Image Aspect Ratio:** ${aspectRatio}
+**CRITICAL IMAGE DIMENSIONS:** Create the image in ${aspectRatio} aspect ratio. The composition must fit perfectly in ${aspectRatioDescription}.
 
 **Requirements:**
 - Eye-catching and attractive cover design
 - Vibrant colors that appeal to children
 - Professional children's book cover quality
 - Create an engaging scene that represents the story
+- Composition must be designed specifically for ${aspectRatio} format
 - Leave space for title text overlay (but do not include the title in the image)
 ${noTextPrompt}
 ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}
 
-Create a professional, captivating cover illustration.`;
+Create a professional, captivating cover illustration in ${aspectRatio} format.`;
     
-    console.log('Generating cover image with settings:', { 
+    console.log('🎨 Generating cover image with settings:', { 
       aspectRatio, 
       enforceNoText, 
       characterReferences: characterReferences.length,
       customPromptProvided: !!customPrompt,
       promptLength: prompt.length
     });
+    
+    console.log('📋 Final prompt (first 200 chars):', prompt.substring(0, 200));
 
     const imageUrl = await generateImage(prompt, characterReferences);
     

@@ -460,12 +460,14 @@ async function generateCoverImage() {
         return;
     }
     
-    // 선택된 비율 가져오기 (기본값: 16:9)
+    // 선택된 비율 가져오기 (기본값: 4:3)
     const aspectRatioSelect = document.getElementById('cover-aspect-ratio');
-    const aspectRatio = aspectRatioSelect ? aspectRatioSelect.value : '16:9';
+    const aspectRatio = aspectRatioSelect ? aspectRatioSelect.value : '4:3';
     
     // 선택된 비율 저장
     currentStorybook.coverAspectRatio = aspectRatio;
+    
+    console.log(`📐 표지 비율: ${aspectRatio}`);
     
     const coverDisplay = document.getElementById('cover-image-display');
     coverDisplay.innerHTML = '<div class="flex flex-col items-center justify-center h-full p-6"><div class="animate-spin rounded-full h-16 w-16 border-b-4 border-white mb-3"></div><p class="text-white text-sm font-semibold">AI가 표지를 생성하는 중...</p><p class="text-white text-xs opacity-75 mt-1">실패 시 자동으로 재시도합니다</p></div>';
@@ -2174,14 +2176,14 @@ function displayStorybook(storybook) {
                             id="cover-aspect-ratio" 
                             class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         >
-                            <option value="16:9" ${!storybook.coverAspectRatio || storybook.coverAspectRatio === '16:9' ? 'selected' : ''}>16:9 (가로 와이드)</option>
-                            <option value="4:3" ${storybook.coverAspectRatio === '4:3' ? 'selected' : ''}>4:3 (가로 표준)</option>
+                            <option value="4:3" ${!storybook.coverAspectRatio || storybook.coverAspectRatio === '4:3' ? 'selected' : ''}>4:3 (가로 표준) - 권장</option>
+                            <option value="16:9" ${storybook.coverAspectRatio === '16:9' ? 'selected' : ''}>16:9 (가로 와이드)</option>
                             <option value="1:1" ${storybook.coverAspectRatio === '1:1' ? 'selected' : ''}>1:1 (정사각형)</option>
                             <option value="3:4" ${storybook.coverAspectRatio === '3:4' ? 'selected' : ''}>3:4 (세로 표준)</option>
                             <option value="9:16" ${storybook.coverAspectRatio === '9:16' ? 'selected' : ''}>9:16 (세로 와이드)</option>
                         </select>
                         <p class="text-xs text-gray-500 mt-2">
-                            <i class="fas fa-info-circle mr-1"></i>기본값: 16:9 (가로로 넓은 표지)
+                            <i class="fas fa-info-circle mr-1"></i>기본값: 4:3 (책 표지에 적합)
                         </p>
                     </div>
                     
