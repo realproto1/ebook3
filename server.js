@@ -2663,15 +2663,23 @@ ${storybook.theme || ''}
 Translate the title and theme as well.
 ` : '';
       
+      // 중국어 번역 시 특별 규칙
+      const isChineseTranslation = targetLanguage === 'zh';
+      
+      const characterNameRule = isChineseTranslation 
+        ? '4. Translate ALL text including character names to natural Chinese - use appropriate Chinese names or transliterate Korean names into Chinese characters (汉字)'
+        : '4. Keep character names as they are (do not translate proper nouns unless it\'s Chinese translation)';
+      
       const prompt = `Translate the following children's storybook pages to ${targetLang}.
 
 **IMPORTANT TRANSLATION RULES:**
 1. Maintain the natural tone and style for children ages ${storybook.targetAge || '4-8'}
 2. Keep cultural context appropriate for the target language
 3. Preserve emotional nuance and storytelling rhythm
-4. Keep character names as they are (do not translate proper nouns)
+${characterNameRule}
 5. Adapt idioms and expressions to be culturally relevant
 6. Maintain the same reading level and vocabulary complexity
+7. The ENTIRE output MUST be in ${targetLang} only - no mixing with Korean or other languages
 
 ${titleThemeSection}
 
@@ -2680,24 +2688,26 @@ ${pagesText}
 
 **RESPOND IN THIS EXACT JSON FORMAT:**
 ${i === 0 ? `{
-  "translatedTitle": "translated title",
-  "translatedTheme": "translated theme",
+  "translatedTitle": "translated title in ${targetLang}",
+  "translatedTheme": "translated theme in ${targetLang}",
   "translatedPages": [
     {
       "pageNumber": 1,
-      "text": "translated text for page 1"
+      "text": "translated text for page 1 in pure ${targetLang}"
     }
   ]
 }` : `{
   "translatedPages": [
     {
       "pageNumber": ${chunk[0].pageNumber},
-      "text": "translated text"
+      "text": "translated text in pure ${targetLang}"
     }
   ]
 }`}
 
-**CRITICAL:** Respond ONLY with valid JSON. No markdown, no explanation, just pure JSON.`;
+**CRITICAL:** 
+- Respond ONLY with valid JSON. No markdown, no explanation, just pure JSON.
+- ALL translated text MUST be in ${targetLang.toUpperCase()} only - absolutely NO Korean or mixed languages.`;
 
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${GEMINI_API_KEY}`,
@@ -2807,22 +2817,30 @@ Theme: ${context.theme || ''}
 Characters: ${context.characters || ''}
 ` : '';
     
+    // 중국어 번역 시 특별 규칙
+    const isChineseTranslation = targetLanguage === 'zh';
+    
+    const characterNameRule = isChineseTranslation 
+      ? '4. Translate ALL text including character names to natural Chinese - use appropriate Chinese names or transliterate Korean names into Chinese characters (汉字)'
+      : '4. Keep character names as they are (do not translate proper nouns unless it\'s Chinese translation)';
+    
     const prompt = `Translate the following children's storybook page to ${targetLang}.
 
 **IMPORTANT TRANSLATION RULES:**
 1. Maintain the natural tone and style for children
 2. Keep cultural context appropriate for the target language
 3. Preserve emotional nuance and storytelling rhythm
-4. Keep character names as they are (do not translate proper nouns)
+${characterNameRule}
 5. Adapt idioms and expressions to be culturally relevant
 6. Maintain the same reading level and vocabulary complexity
+7. The ENTIRE output MUST be in ${targetLang} only - no mixing with Korean or other languages
 
 ${contextInfo}
 
 **TEXT TO TRANSLATE:**
 ${text}
 
-**RESPOND WITH ONLY THE TRANSLATED TEXT. NO JSON, NO EXPLANATION, JUST THE TRANSLATED TEXT.**`;
+**RESPOND WITH ONLY THE TRANSLATED TEXT IN ${targetLang.toUpperCase()}. NO JSON, NO EXPLANATION, NO MIXED LANGUAGES, JUST THE PURE ${targetLang.toUpperCase()} TRANSLATION.**`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`,
