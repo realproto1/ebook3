@@ -4186,7 +4186,7 @@ async function generateAllTTS() {
                     successCount++;
                     console.log(`✅ 페이지 ${page.pageNumber} TTS 생성 완료 (${currentLanguage})`);
                     
-                    // 5페이지마다 R2에 저장
+                    // 5페이지마다 중간 저장 및 1분 휴식
                     if (successCount % 5 === 0) {
                         try {
                             console.log(`💾 중간 저장 중... (${successCount}개 완료)`);
@@ -4195,6 +4195,17 @@ async function generateAllTTS() {
                         } catch (saveError) {
                             console.error(`⚠️ 중간 저장 실패 (TTS는 메모리에 유지):`, saveError.message);
                             // 저장 실패해도 계속 진행
+                        }
+                        
+                        // API 할당량 보호를 위해 1분 휴식
+                        if (successCount < totalPages) {
+                            console.log(`⏸️ API 할당량 보호: 60초 대기 중... (${successCount}/${totalPages})`);
+                            showNotification('info', '잠시 대기 중...', `API 할당량 보호를 위해 60초 대기합니다. (${successCount}/${totalPages} 완료)`);
+                            
+                            // 60초 대기
+                            await new Promise(resolve => setTimeout(resolve, 60000));
+                            
+                            console.log(`✅ 대기 완료, 계속 진행합니다.`);
                         }
                     }
                 } else {
