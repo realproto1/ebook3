@@ -14,7 +14,8 @@ let imageSettings = {
     illustrationModel: 'gemini-3-pro-image-preview',  // 페이지 삽화 모델
     vocabularyModel: 'gemini-3-pro-image-preview',  // 8단어 학습 모델
     coverModel: 'gemini-3-pro-image-preview',  // 표지 모델
-    ttsModel: 'Aoede',  // TTS 모델 (Gemini TTS Voice) - 여성 목소리
+    geminiTTSModel: 'gemini-2.5-flash-preview-tts',  // Gemini TTS 생성 모델
+    ttsModel: 'Aoede',  // TTS Voice (Gemini TTS Voice) - 여성 목소리
     ttsVoiceConfig: '여성 목소리, 부드럽고 따뜻한 톤, 동화 낭독 스타일, 적당한 속도로 또박또박, 어린이가 이해하기 쉽게'  // TTS 음성 설정
 };
 
@@ -179,7 +180,8 @@ async function generatePageTTS(pageIndex) {
         const response = await axios.post('/api/generate-tts', {
             text: text,
             language: currentLanguage,
-            model: imageSettings.ttsModel,
+            geminiModel: imageSettings.geminiTTSModel,  // Gemini TTS 생성 모델
+            model: imageSettings.ttsModel,  // TTS Voice (Puck, Kore 등)
             voiceConfig: imageSettings.ttsVoiceConfig,
             storybookId: currentStorybook?.id,
             storybookTitle: currentStorybook?.title,
@@ -2506,16 +2508,37 @@ function displayStorybook(storybook) {
                         </button>
                     </div>
                     
-                    <!-- TTS 모델 선택 -->
+                    <!-- Gemini TTS 모델 선택 -->
                     <div class="bg-white p-4 rounded-lg shadow-md border-2 border-purple-200">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-microphone mr-2 text-purple-600"></i>
-                            TTS 음성 모델
+                            <i class="fas fa-brain mr-2 text-purple-600"></i>
+                            Gemini TTS 모델
+                        </label>
+                        <select 
+                            id="page-gemini-tts-model-select"
+                            onchange="updatePageGeminiTTSModel(this.value)"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        >
+                            <option value="gemini-2.5-flash-preview-tts">Gemini 2.5 Flash Preview TTS</option>
+                            <option value="gemini-2.0-flash-exp-tts">Gemini 2.0 Flash Exp TTS</option>
+                            <option value="gemini-1.5-flash-tts">Gemini 1.5 Flash TTS</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-2">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            TTS 생성에 사용할 Gemini 모델
+                        </p>
+                    </div>
+                    
+                    <!-- TTS 음성 모델 선택 -->
+                    <div class="bg-white p-4 rounded-lg shadow-md border-2 border-blue-200">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-microphone mr-2 text-blue-600"></i>
+                            TTS 음성 (Voice)
                         </label>
                         <select 
                             id="page-tts-model-select"
                             onchange="updatePageTTSModel(this.value)"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                         >
                             <option value="Puck">Puck (남성, 밝고 활기찬 목소리)</option>
                             <option value="Charon">Charon (남성, 차분하고 신중한 목소리)</option>
@@ -2525,7 +2548,7 @@ function displayStorybook(storybook) {
                         </select>
                         <p class="text-xs text-gray-500 mt-2">
                             <i class="fas fa-info-circle mr-1"></i>
-                            선택한 모델로 모든 TTS가 생성됩니다
+                            선택한 음성으로 TTS가 생성됩니다
                         </p>
                     </div>
                     
@@ -2941,7 +2964,13 @@ function displayStorybook(storybook) {
     resultDiv.innerHTML = html;
     resultDiv.classList.remove('hidden');
     
-    // 전체 페이지용 TTS 모델 select 초기화
+    // Gemini TTS 모델 select 초기화
+    const geminiTTSModelSelect = document.getElementById('page-gemini-tts-model-select');
+    if (geminiTTSModelSelect) {
+        geminiTTSModelSelect.value = imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts';
+    }
+    
+    // TTS 음성 select 초기화
     const pageTTSModelSelect = document.getElementById('page-tts-model-select');
     if (pageTTSModelSelect) {
         pageTTSModelSelect.value = imageSettings.ttsModel || 'Puck';
@@ -3100,13 +3129,23 @@ function updateTTSConfig(pageIndex, config) {
     console.log(`✅ 페이지 ${pageIndex + 1} TTS 설정 업데이트: ${config}`);
 }
 
-// 전체 페이지용 TTS 모델 업데이트 (모든 TTS 생성 시 사용)
-function updatePageTTSModel(value) {
-    imageSettings.ttsModel = value;
-    console.log(`✅ 전체 페이지 TTS 모델 변경:`, value);
+// 전체 페이지용 Gemini TTS 모델 업데이트
+function updatePageGeminiTTSModel(value) {
+    imageSettings.geminiTTSModel = value;
+    console.log(`✅ Gemini TTS 모델 변경:`, value);
     
     // 알림 표시
-    showNotification(`TTS 모델이 ${value}로 변경되었습니다`, 'success');
+    const modelName = value.replace('gemini-', 'Gemini ').replace('-tts', ' TTS');
+    showNotification(`Gemini TTS 모델이 ${modelName}로 변경되었습니다`, 'success');
+}
+
+// 전체 페이지용 TTS 음성 업데이트 (모든 TTS 생성 시 사용)
+function updatePageTTSModel(value) {
+    imageSettings.ttsModel = value;
+    console.log(`✅ 전체 페이지 TTS 음성 변경:`, value);
+    
+    // 알림 표시
+    showNotification(`TTS 음성이 ${value}로 변경되었습니다`, 'success');
 }
 
 // 페이지별 TTS 모델 업데이트 (설명 동적 업데이트)
@@ -4169,7 +4208,8 @@ async function generateAllTTS() {
     }
     
     const estimatedTime = pagesToGenerate.length * 3; // 페이지당 약 3초
-    if (!confirm(`${pagesToGenerate.length}개의 페이지 TTS를 생성하시겠습니까?\n\n언어: ${currentLanguage}\n음성: ${imageSettings.ttsModel}\n예상 소요 시간: 약 ${estimatedTime}초`)) {
+    const geminiModelDisplay = imageSettings.geminiTTSModel.replace('gemini-', 'Gemini ').replace('-tts', ' TTS');
+    if (!confirm(`${pagesToGenerate.length}개의 페이지 TTS를 생성하시겠습니까?\n\n모델: ${geminiModelDisplay}\n음성: ${imageSettings.ttsModel}\n언어: ${currentLanguage}\n예상 소요 시간: 약 ${estimatedTime}초`)) {
         return;
     }
     
@@ -4205,7 +4245,8 @@ async function generateAllTTS() {
                 const response = await axios.post('/api/generate-tts', {
                     text: pageText,
                     language: currentLanguage,
-                    model: imageSettings.ttsModel,
+                    geminiModel: imageSettings.geminiTTSModel,  // Gemini TTS 생성 모델
+                    model: imageSettings.ttsModel,  // TTS Voice (Puck, Kore 등)
                     voiceConfig: imageSettings.ttsVoiceConfig,
                     storybookId: currentStorybook?.id,
                     storybookTitle: currentStorybook?.title,
