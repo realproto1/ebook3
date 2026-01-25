@@ -914,17 +914,29 @@ function closeSettings(event) {
 }
 
 function saveSettings() {
-    imageSettings.aspectRatio = document.getElementById('imageAspectRatio').value;
-    imageSettings.enforceNoText = document.getElementById('enforceNoText').checked;
-    imageSettings.enforceCharacterConsistency = document.getElementById('enforceCharacterConsistency').checked;
-    imageSettings.additionalPrompt = document.getElementById('additionalPrompt').value;
-    imageSettings.imageQuality = document.getElementById('imageQuality').value;
+    // 기본 이미지 설정 저장 (null 체크)
+    const aspectRatioEl = document.getElementById('imageAspectRatio');
+    const enforceNoTextEl = document.getElementById('enforceNoText');
+    const enforceCharacterEl = document.getElementById('enforceCharacterConsistency');
+    const additionalPromptEl = document.getElementById('additionalPrompt');
+    const imageQualityEl = document.getElementById('imageQuality');
     
-    // 각 섹션별 모델 설정 저장
-    imageSettings.characterModel = document.getElementById('characterModelSelect').value;
-    imageSettings.keyObjectModel = document.getElementById('keyObjectModelSelect').value;
-    imageSettings.illustrationModel = document.getElementById('illustrationModelSelect').value;
-    imageSettings.vocabularyModel = document.getElementById('vocabularyModelSelect').value;
+    if (aspectRatioEl) imageSettings.aspectRatio = aspectRatioEl.value;
+    if (enforceNoTextEl) imageSettings.enforceNoText = enforceNoTextEl.checked;
+    if (enforceCharacterEl) imageSettings.enforceCharacterConsistency = enforceCharacterEl.checked;
+    if (additionalPromptEl) imageSettings.additionalPrompt = additionalPromptEl.value;
+    if (imageQualityEl) imageSettings.imageQuality = imageQualityEl.value;
+    
+    // 각 섹션별 모델 설정 저장 (null 체크)
+    const characterModelEl = document.getElementById('characterModelSelect');
+    const keyObjectModelEl = document.getElementById('keyObjectModelSelect');
+    const illustrationModelEl = document.getElementById('illustrationModelSelect');
+    const vocabularyModelEl = document.getElementById('vocabularyModelSelect');
+    
+    if (characterModelEl) imageSettings.characterModel = characterModelEl.value;
+    if (keyObjectModelEl) imageSettings.keyObjectModel = keyObjectModelEl.value;
+    if (illustrationModelEl) imageSettings.illustrationModel = illustrationModelEl.value;
+    if (vocabularyModelEl) imageSettings.vocabularyModel = vocabularyModelEl.value;
     
     // TTS 모델 설정 저장
     const ttsModelSelect = document.getElementById('ttsModelSelect');
@@ -934,8 +946,9 @@ function saveSettings() {
     
     console.log('💾 이미지 설정 저장:', imageSettings);
     
-    // API 키 저장 (localStorage에)
-    const apiKey = document.getElementById('geminiApiKey').value.trim();
+    // API 키 저장 (localStorage에, null 체크)
+    const geminiApiKeyEl = document.getElementById('geminiApiKey');
+    const apiKey = geminiApiKeyEl ? geminiApiKeyEl.value.trim() : '';
     if (apiKey) {
         localStorage.setItem('gemini_api_key', apiKey);
         // gemini-client.js의 GEMINI_API_KEY 업데이트
