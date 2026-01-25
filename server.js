@@ -3326,10 +3326,12 @@ app.post('/api/generate-key-object', requireAPIKey, async (req, res) => {
   try {
     const { keyObject, artStyle, settings = {}, storybookId = '', storybookTitle = '' } = req.body;
     
-    // 설정값 기본값
-    const aspectRatio = settings.aspectRatio || '1:1';
+    // 설정값 - Key Object는 항상 4:3 비율로 고정
+    const aspectRatio = '4:3';  // 고정값: 4:3 (주요 사물 일러스트에 적합)
     const enforceNoText = settings.enforceNoText !== false;
     const additionalPrompt = settings.additionalPrompt || '';
+    
+    console.log('📐 Key Object aspect ratio (fixed):', aspectRatio);
     
     // keyObject.description을 영어로 번역 (한글인 경우)
     let descriptionEn = keyObject.description;
@@ -3366,7 +3368,7 @@ app.post('/api/generate-key-object', requireAPIKey, async (req, res) => {
       '\n\n**CRITICAL: NO TEXT, NO WORDS, NO LETTERS IN THE IMAGE**' : 
       '\n\n**IMPORTANT:** Do NOT include any text in the image.';
     
-    const prompt = `Create a professional illustration of a key object for a children's storybook.
+    const prompt = `Create a professional illustration of a key object for a children's storybook in 4:3 aspect ratio (standard horizontal format).
 
 **Object Name:** ${keyObject.name}
 
@@ -3374,7 +3376,7 @@ app.post('/api/generate-key-object', requireAPIKey, async (req, res) => {
 
 **Art Style:** ${artStyle} style for children's book illustration.
 
-**Image Aspect Ratio:** ${aspectRatio}
+**CRITICAL IMAGE DIMENSIONS:** Create the image in 4:3 aspect ratio. The composition must fit perfectly in standard horizontal format (4:3).
 
 **Requirements:**
 - Clean white or simple background
@@ -3382,12 +3384,14 @@ app.post('/api/generate-key-object', requireAPIKey, async (req, res) => {
 - Professional, high-quality illustration
 - Focus on the distinctive features described above
 - Make it recognizable and memorable
+- Composition designed specifically for 4:3 format
 ${noTextPrompt}
 ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}
 
-Create a single, clear, professional illustration of this key object.`;
+Create a single, clear, professional illustration of this key object in 4:3 format.`;
     
-    console.log('Generating key object image with settings:', { aspectRatio, enforceNoText });
+    console.log('🎨 Generating key object image with settings:', { aspectRatio, enforceNoText });
+    console.log('📋 Prompt (first 200 chars):', prompt.substring(0, 200));
 
     const imageUrl = await generateImage(prompt);
     
