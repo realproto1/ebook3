@@ -387,6 +387,24 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
 
     const data = await response.json();
     console.log('Gemini API response received');
+    console.log('Response structure:', JSON.stringify(data, null, 2).substring(0, 1000));
+    
+    // finishReason 확인
+    if (data.candidates && data.candidates[0]) {
+      const finishReason = data.candidates[0].finishReason;
+      console.log('🔍 Finish Reason:', finishReason);
+      
+      if (finishReason === 'OTHER') {
+        console.error('❌ Image generation blocked by Gemini API (finishReason: OTHER)');
+        console.error('Possible reasons: Safety policy, too many/large reference images, or quota exceeded');
+        throw new Error('이미지 생성이 차단되었습니다. 참조 이미지를 제거하거나 프롬프트를 수정해보세요.');
+      }
+      
+      if (finishReason && finishReason !== 'STOP') {
+        console.error('❌ Image generation blocked. Finish Reason:', finishReason);
+        throw new Error(`Image generation blocked: ${finishReason}`);
+      }
+    }
     
     // 응답에서 이미지 데이터 추출
     if (data.candidates && data.candidates[0] && data.candidates[0].content) {
@@ -395,6 +413,7 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
       // parts가 배열인지 확인
       if (!Array.isArray(parts)) {
         console.error('❌ parts is not an array:', typeof parts, parts);
+        console.error('Full response:', JSON.stringify(data, null, 2));
         throw new Error('Invalid response structure: parts is not an array');
       }
       
