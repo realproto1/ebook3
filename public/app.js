@@ -38,8 +38,9 @@ function getAPIKey() {
 
 // 이미지 모델 목록
 const IMAGE_MODELS = [
-    { value: 'gemini-3-pro-image-preview', label: 'Nano Banana Pro (Gemini 3 Pro) ⭐', description: '최고 품질, 네이티브 이미지 생성' },
-    { value: 'imagen-4', label: 'Imagen 4', description: '전문 이미지, 텍스트 렌더링 우수' }
+    { value: 'gemini-3-pro-image-preview', label: 'Nano Banana Pro (Gemini 3 Pro) ⭐', description: '최고 품질, 최대 14개 참조 이미지 지원' },
+    { value: 'gemini-2.5-flash-image', label: 'Nano Banana (Gemini 2.5 Flash)', description: '빠른 생성, 낮은 지연시간' },
+    { value: 'imagen-4', label: 'Imagen 4', description: 'Google 전문 이미지 모델, 텍스트 렌더링 우수' }
 ];
 
 // TTS 모델 목록 (Gemini TTS Voices)
