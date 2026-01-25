@@ -3472,9 +3472,17 @@ app.post('/api/generate-cover', requireAPIKey, async (req, res) => {
     console.log('🤖 Cover model:', modelName);
     console.log('='.repeat(60));
     
+    // 프롬프트: 사용자가 입력한 텍스트만 사용
+    if (!customPrompt || !customPrompt.trim()) {
+      return res.status(400).json({ 
+        success: false,
+        error: '표지 프롬프트를 입력해주세요.'
+      });
+    }
+    
     // customPrompt를 영어로 번역 (한글인 경우)
-    let promptEn = customPrompt;
-    if (customPrompt && /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(customPrompt)) {
+    let prompt = customPrompt.trim();
+    if (/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(customPrompt)) {
       console.log('Translating cover prompt to English...');
       const translateUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
       const translateResponse = await fetch(translateUrl, {
@@ -3483,7 +3491,7 @@ app.post('/api/generate-cover', requireAPIKey, async (req, res) => {
         body: JSON.stringify({
           contents: [{ 
             parts: [{ 
-              text: `Translate the following Korean cover image description to English for image generation. Keep it detailed and visual:\n\n${customPrompt}` 
+              text: `Translate the following Korean text to English briefly and concisely (max 500 words):\n\n${customPrompt}` 
             }] 
           }]
         })
@@ -3496,56 +3504,27 @@ app.post('/api/generate-cover', requireAPIKey, async (req, res) => {
             translateData.candidates[0].content && 
             translateData.candidates[0].content.parts && 
             translateData.candidates[0].content.parts[0]) {
-          promptEn = translateData.candidates[0].content.parts[0].text.trim();
-          console.log('Translated cover prompt:', promptEn);
+          prompt = translateData.candidates[0].content.parts[0].text.trim();
+          console.log('Translated cover prompt (length:', prompt.length, ')');
         }
       }
     }
     
-    // 텍스트 제거 강조
-    const noTextPrompt = enforceNoText ? 
-      '\n\n**CRITICAL - NO TEXT:** Do NOT include the book title, author name, or ANY text, labels, words, letters in the image. Absolutely NO TEXT of any kind. Pure illustration only.' : 
-      '\n\n**IMPORTANT:** Do NOT include the book title or any text in the image.';
-    
-    // 비율에 따른 설명 추가
-    const aspectRatioDescription = {
-      '16:9': 'wide horizontal format (16:9 aspect ratio)',
-      '4:3': 'standard horizontal format (4:3 aspect ratio) - ideal for book covers',
-      '1:1': 'square format (1:1 aspect ratio)',
-      '3:4': 'standard vertical format (3:4 aspect ratio) - portrait orientation',
-      '9:16': 'tall vertical format (9:16 aspect ratio) - portrait orientation'
-    }[aspectRatio] || `${aspectRatio} aspect ratio`;
-    
-    const prompt = promptEn || `Create a captivating children's storybook cover illustration in ${aspectRatioDescription}.
-
-**Book Title (for context only, DO NOT display in image):** ${title}
-
-**Art Style:** ${artStyle} style for children's book cover.
-
-**CRITICAL IMAGE DIMENSIONS:** Create the image in ${aspectRatio} aspect ratio. The composition must fit perfectly in ${aspectRatioDescription}.
-
-**Requirements:**
-- Eye-catching and attractive cover design
-- Vibrant colors that appeal to children
-- Professional children's book cover quality
-- Create an engaging scene that represents the story
-- Composition must be designed specifically for ${aspectRatio} format
-- Leave space for title text overlay (but do not include the title in the image)
-${noTextPrompt}
-${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}
-
-Create a professional, captivating cover illustration in ${aspectRatio} format.`;
+    // 프롬프트 길이 제한 (2000자로 제한)
+    if (prompt.length > 2000) {
+      console.warn('⚠️ 프롬프트가 너무 깁니다 (', prompt.length, '자). 2000자로 자릅니다.');
+      prompt = prompt.substring(0, 2000) + '...';
+    }
     
     console.log('🎨 Generating cover image with settings:', { 
       modelName,
       aspectRatio, 
       enforceNoText, 
       characterReferences: characterReferences.length,
-      customPromptProvided: !!customPrompt,
       promptLength: prompt.length
     });
     
-    console.log('📋 Final prompt (first 200 chars):', prompt.substring(0, 200));
+    console.log('📋 Final prompt (first 300 chars):', prompt.substring(0, 300));
 
     const imageUrl = await generateImage(prompt, characterReferences, 0, 3, modelName);
     
