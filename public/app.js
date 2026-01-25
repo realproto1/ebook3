@@ -2506,6 +2506,29 @@ function displayStorybook(storybook) {
                         </button>
                     </div>
                     
+                    <!-- TTS 모델 선택 -->
+                    <div class="bg-white p-4 rounded-lg shadow-md border-2 border-purple-200">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-microphone mr-2 text-purple-600"></i>
+                            TTS 음성 모델
+                        </label>
+                        <select 
+                            id="page-tts-model-select"
+                            onchange="updatePageTTSModel(this.value)"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        >
+                            <option value="Puck">Puck (남성, 밝고 활기찬 목소리)</option>
+                            <option value="Charon">Charon (남성, 차분하고 신중한 목소리)</option>
+                            <option value="Kore">Kore (여성, 따뜻하고 부드러운 목소리)</option>
+                            <option value="Fenrir">Fenrir (남성, 힘있고 권위적인 목소리)</option>
+                            <option value="Aoede">Aoede (여성, 우아하고 서정적인 목소리)</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-2">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            선택한 모델로 모든 TTS가 생성됩니다
+                        </p>
+                    </div>
+                    
                     <!-- 모든 TTS 생성 버튼 -->
                     <button 
                         onclick="generateAllTTS()"
@@ -2917,6 +2940,12 @@ function displayStorybook(storybook) {
 
     resultDiv.innerHTML = html;
     resultDiv.classList.remove('hidden');
+    
+    // 전체 페이지용 TTS 모델 select 초기화
+    const pageTTSModelSelect = document.getElementById('page-tts-model-select');
+    if (pageTTSModelSelect) {
+        pageTTSModelSelect.value = imageSettings.ttsModel || 'Puck';
+    }
 }
 
 // 캐릭터 관리 함수
@@ -3069,6 +3098,15 @@ function updateTTSConfig(pageIndex, config) {
     currentStorybook.pages[pageIndex].ttsConfig = config.trim();
     saveCurrentStorybook();
     console.log(`✅ 페이지 ${pageIndex + 1} TTS 설정 업데이트: ${config}`);
+}
+
+// 전체 페이지용 TTS 모델 업데이트 (모든 TTS 생성 시 사용)
+function updatePageTTSModel(value) {
+    imageSettings.ttsModel = value;
+    console.log(`✅ 전체 페이지 TTS 모델 변경:`, value);
+    
+    // 알림 표시
+    showNotification(`TTS 모델이 ${value}로 변경되었습니다`, 'success');
 }
 
 // 페이지별 TTS 모델 업데이트 (설명 동적 업데이트)
