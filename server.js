@@ -3450,6 +3450,18 @@ app.post('/api/generate-cover', requireAPIKey, async (req, res) => {
   try {
     const { title, artStyle, characterReferences = [], settings = {}, customPrompt = '', storybookId = '' } = req.body;
     
+    // 받은 요청 전체 로깅
+    console.log('='.repeat(60));
+    console.log('📮 /api/generate-cover 요청 받음');
+    console.log('📋 Request body:', JSON.stringify({
+      title,
+      artStyle,
+      characterReferencesCount: characterReferences.length,
+      settings,
+      customPrompt: customPrompt ? `${customPrompt.substring(0, 50)}...` : '(없음)',
+      storybookId
+    }, null, 2));
+    
     // 설정값 기본값
     const aspectRatio = settings.aspectRatio || '4:3';  // 표지 기본 비율: 4:3 (책 표지에 적합)
     const enforceNoText = settings.enforceNoText !== false;
@@ -3458,6 +3470,7 @@ app.post('/api/generate-cover', requireAPIKey, async (req, res) => {
     
     console.log('📐 Cover aspect ratio:', aspectRatio);
     console.log('🤖 Cover model:', modelName);
+    console.log('='.repeat(60));
     
     // customPrompt를 영어로 번역 (한글인 경우)
     let promptEn = customPrompt;
