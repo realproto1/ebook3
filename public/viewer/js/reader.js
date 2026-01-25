@@ -917,5 +917,233 @@ function handleFullscreenAPIChange() {
     }
 }
 
+// ========================================
+// 💬 댓글 기능
+// ========================================
+
+let commentsLoaded = false;
+
+// 댓글 패널 토글
+function toggleComments() {
+    const panel = document.getElementById('comments-panel');
+    const isOpen = !panel.classList.contains('translate-x-full');
+    
+    if (isOpen) {
+        panel.classList.add('translate-x-full');
+    } else {
+        panel.classList.remove('translate-x-full');
+        if (!commentsLoaded) {
+            loadComments();
+        }
+    }
+}
+
+// 댓글 로드
+async function loadComments() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookId = urlParams.get('id');
+        
+        if (!bookId) return;
+        
+        console.log('📖 댓글 로드 중...');
+        
+        const response = await axios.get(`/api/viewer/storybooks/${bookId}/comments`);
+        
+        if (response.data.success) {
+            const comments = response.data.comments;
+            displayComments(comments);
+            updateCommentCount(comments.length);
+            commentsLoaded = true;
+            console.log(`✅ 댓글 ${comments.length}개 로드 완료`);
+        }
+    } catch (error) {
+        console.error('❌ 댓글 로드 실패:', error);
+    }
+}
+
+// 댓글 표시
+function displayComments(comments) {
+    const commentsList = document.getElementById('comments-list');
+    
+    if (comments.length === 0) {
+        commentsList.innerHTML = `
+            <div class="text-center text-gray-400 py-8">
+                <i class="fas fa-comment-slash text-4xl mb-3"></i>
+                <p>아직 댓글이 없습니다.</p>
+                <p class="text-sm mt-1">첫 번째 댓글을 작성해보세요!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    commentsList.innerHTML = comments.map(comment => `
+        <div class="bg-gray-800 rounded-lg p-4">
+            <div class="flex items-start justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-user-circle text-purple-400 text-xl"></i>
+                    <span class="text-white font-semibold">${escapeHtml(comment.author)}</span>
+                </div>
+                <span class="text-gray-500 text-xs">${formatDate(comment.createdAt)}</span>
+            </div>
+            <p class="text-gray-300 mb-3 whitespace-pre-wrap">${escapeHtml(comment.content)}</p>
+            <button 
+                onclick="likeComment('${comment.id}')"
+                class="text-gray-400 hover:text-pink-400 transition flex items-center gap-1 text-sm"
+            >
+                <i class="fas fa-heart"></i>
+                <span id="like-count-${comment.id}">${comment.likes || 0}</span>
+            </button>
+        </div>
+    `).join('');
+}
+
+// 댓글 수 업데이트
+function updateCommentCount(count) {
+    const countEl = document.getElementById('comment-count');
+    if (countEl) {
+        countEl.textContent = `(${count})`;
+    }
+}
+
+// 댓글 작성
+async function submitComment() {
+    try {
+        const author = document.getElementById('comment-author').value.trim();
+        const content = document.getElementById('comment-content').value.trim();
+        
+        if (!author) {
+            alert('닉네임을 입력해주세요.');
+            return;
+        }
+        
+        if (!content) {
+            alert('댓글 내용을 입력해주세요.');
+            return;
+        }
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookId = urlParams.get('id');
+        
+        if (!bookId) return;
+        
+        console.log('💬 댓글 작성 중...');
+        
+        const response = await axios.post(`/api/viewer/storybooks/${bookId}/comments`, {
+            author,
+            content
+        });
+        
+        if (response.data.success) {
+            console.log('✅ 댓글 작성 완료');
+            
+            // 입력 필드 초기화
+            document.getElementById('comment-author').value = '';
+            document.getElementById('comment-content').value = '';
+            
+            // 댓글 목록 새로고침
+            loadComments();
+            
+            alert('댓글이 작성되었습니다! 🎉');
+        }
+    } catch (error) {
+        console.error('❌ 댓글 작성 실패:', error);
+        alert('댓글 작성에 실패했습니다.');
+    }
+}
+
+// 댓글 좋아요
+async function likeComment(commentId) {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookId = urlParams.get('id');
+        
+        if (!bookId) return;
+        
+        const response = await axios.post(`/api/viewer/storybooks/${bookId}/comments/${commentId}/like`);
+        
+        if (response.data.success) {
+            const likeCountEl = document.getElementById(`like-count-${commentId}`);
+            if (likeCountEl) {
+                likeCountEl.textContent = response.data.likes;
+            }
+        }
+    } catch (error) {
+        console.error('❌ 좋아요 실패:', error);
+    }
+}
+
+// 날짜 포맷팅
+function formatDate(isoString) {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diff = now - date;
+    
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (minutes < 1) return '방금 전';
+    if (minutes < 60) return `${minutes}분 전`;
+    if (hours < 24) return `${hours}시간 전`;
+    if (days < 7) return `${days}일 전`;
+    
+    return date.toLocaleDateString('ko-KR', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+}
+
+// HTML 이스케이프
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ========================================
+// 🔗 공유하기 기능
+// ========================================
+
+function shareStorybook() {
+    const url = window.location.href;
+    const title = currentBook ? currentBook.title : '탱고북 동화책';
+    const text = `${title} - 재미있는 동화책을 함께 읽어요!`;
+    
+    // 네이티브 공유 API 지원 확인
+    if (navigator.share) {
+        navigator.share({
+            title: title,
+            text: text,
+            url: url
+        }).then(() => {
+            console.log('✅ 공유 완료');
+        }).catch((error) => {
+            console.log('❌ 공유 취소:', error);
+        });
+    } else {
+        // 공유 API 미지원시 URL 복사
+        copyToClipboard(url);
+        alert('링크가 클립보드에 복사되었습니다! 📋\n친구들에게 공유해보세요! 🎉');
+    }
+}
+
+// 클립보드에 복사
+function copyToClipboard(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+}
+
 // 전역으로 노출
 window.toggleFullscreen = toggleFullscreen;
+window.toggleComments = toggleComments;
+window.submitComment = submitComment;
+window.likeComment = likeComment;
+window.shareStorybook = shareStorybook;

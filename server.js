@@ -4053,6 +4053,143 @@ app.get('/api/viewer/storybooks/:id', async (req, res) => {
   }
 });
 
+// ===== 5️⃣ 댓글 API =====
+
+// 댓글 목록 조회 (인증 불필요)
+app.get('/api/viewer/storybooks/:id/comments', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`💬 Loading comments for storybook ${id}`);
+    
+    const { GetObjectCommand } = await import('@aws-sdk/client-s3');
+    const filename = `comments-${id}.json`;
+    
+    try {
+      const getCommand = new GetObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: filename
+      });
+      
+      const response = await r2Client.send(getCommand);
+      const content = await response.Body.transformToString();
+      const data = JSON.parse(content);
+      
+      console.log(`✅ Loaded ${data.comments.length} comments`);
+      
+      res.json({
+        success: true,
+        comments: data.comments || []
+      });
+      
+    } catch (error) {
+      // 댓글 파일이 없으면 빈 배열 반환
+      if (error.name === 'NoSuchKey') {
+        console.log(`ℹ️ No comments found for ${id}, returning empty list`);
+        return res.json({
+          success: true,
+          comments: []
+        });
+      }
+      throw error;
+    }
+    
+  } catch (error) {
+    console.error('❌ 댓글 로드 실패:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: '댓글 로드 실패: ' + error.message 
+    });
+  }
+});
+
+// 댓글 작성 (인증 불필요)
+app.post('/api/viewer/storybooks/:id/comments', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nickname, content } = req.body;
+    
+    if (!nickname || !content) {
+      return res.status(400).json({ 
+        success: false, 
+        error: '별명과 내용을 입력해주세요.' 
+      });
+    }
+    
+    // 내용 길이 제한
+    if (content.length > 500) {
+      return res.status(400).json({ 
+        success: false, 
+        error: '댓글은 500자 이내로 작성해주세요.' 
+      });
+    }
+    
+    console.log(`💬 Adding comment to storybook ${id}`);
+    
+    const { GetObjectCommand, PutObjectCommand } = await import('@aws-sdk/client-s3');
+    const filename = `comments-${id}.json`;
+    
+    let comments = [];
+    
+    // 기존 댓글 불러오기
+    try {
+      const getCommand = new GetObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: filename
+      });
+      
+      const response = await r2Client.send(getCommand);
+      const existingContent = await response.Body.transformToString();
+      const data = JSON.parse(existingContent);
+      comments = data.comments || [];
+    } catch (error) {
+      if (error.name !== 'NoSuchKey') {
+        throw error;
+      }
+      // 파일이 없으면 빈 배열로 시작
+    }
+    
+    // 새 댓글 추가
+    const newComment = {
+      id: Date.now().toString(),
+      nickname: nickname.substring(0, 20), // 별명 길이 제한
+      content: content.substring(0, 500), // 내용 길이 제한
+      createdAt: new Date().toISOString()
+    };
+    
+    comments.unshift(newComment); // 최신 댓글이 먼저 오도록
+    
+    // 최대 100개까지만 보관
+    if (comments.length > 100) {
+      comments = comments.slice(0, 100);
+    }
+    
+    // R2에 저장
+    const putCommand = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: filename,
+      Body: Buffer.from(JSON.stringify({ comments }, null, 2), 'utf-8'),
+      ContentType: 'application/json',
+    });
+    
+    await r2Client.send(putCommand);
+    
+    console.log(`✅ Comment added: ${newComment.id}`);
+    
+    res.json({
+      success: true,
+      comment: newComment,
+      totalComments: comments.length
+    });
+    
+  } catch (error) {
+    console.error('❌ 댓글 작성 실패:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: '댓글 작성 실패: ' + error.message 
+    });
+  }
+});
+
 // ========================================
 // 🖼️ 기타 유틸리티 API
 // ========================================

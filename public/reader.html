@@ -419,6 +419,28 @@
                 opacity: 0;
             }
         }
+        
+        /* 댓글 패널 스타일 */
+        #comments-panel {
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        #comments-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #comments-list::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        
+        #comments-list::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 4px;
+        }
+        
+        #comments-list::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col">

@@ -869,11 +869,26 @@ function openSettings() {
     document.getElementById('additionalPrompt').value = imageSettings.additionalPrompt;
     document.getElementById('imageQuality').value = imageSettings.imageQuality;
     
-    // 각 섹션별 모델 선택값 복원
-    document.getElementById('characterModelSelect').value = imageSettings.characterModel || 'gemini-3-pro-image-preview';
-    document.getElementById('keyObjectModelSelect').value = imageSettings.keyObjectModel || 'gemini-3-pro-image-preview';
-    document.getElementById('illustrationModelSelect').value = imageSettings.illustrationModel || 'gemini-3-pro-image-preview';
-    document.getElementById('vocabularyModelSelect').value = imageSettings.vocabularyModel || 'gemini-3-pro-image-preview';
+    // 각 섹션별 모델 선택값 복원 (요소가 있을 때만)
+    const characterModelSelect = document.getElementById('characterModelSelect');
+    if (characterModelSelect) {
+        characterModelSelect.value = imageSettings.characterModel || 'gemini-3-pro-image-preview';
+    }
+    
+    const keyObjectModelSelect = document.getElementById('keyObjectModelSelect');
+    if (keyObjectModelSelect) {
+        keyObjectModelSelect.value = imageSettings.keyObjectModel || 'gemini-3-pro-image-preview';
+    }
+    
+    const illustrationModelSelect = document.getElementById('illustrationModelSelect');
+    if (illustrationModelSelect) {
+        illustrationModelSelect.value = imageSettings.illustrationModel || 'gemini-3-pro-image-preview';
+    }
+    
+    const vocabularyModelSelect = document.getElementById('vocabularyModelSelect');
+    if (vocabularyModelSelect) {
+        vocabularyModelSelect.value = imageSettings.vocabularyModel || 'gemini-3-pro-image-preview';
+    }
     
     // TTS 모델 선택값 복원
     const ttsModelSelect = document.getElementById('ttsModelSelect');
@@ -884,7 +899,10 @@ function openSettings() {
     
     // API 키 로드 (localStorage에서)
     const savedApiKey = localStorage.getItem('gemini_api_key') || '';
-    document.getElementById('geminiApiKey').value = savedApiKey;
+    const geminiApiKeyInput = document.getElementById('geminiApiKey');
+    if (geminiApiKeyInput) {
+        geminiApiKeyInput.value = savedApiKey;
+    }
     
     document.getElementById('settingsModal').classList.remove('hidden');
 }
@@ -6449,6 +6467,8 @@ async function completeReviewFromModal() {
     } catch (error) {
         console.error('Review 저장 오류:', error);
         alert(`❌ 저장에 실패했습니다.\n${error.message}`);
+    } finally {
+        // 항상 버튼 복구
         btn.disabled = false;
         btn.innerHTML = originalHtml;
     }
