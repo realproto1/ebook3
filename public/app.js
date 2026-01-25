@@ -36,11 +36,10 @@ function getAPIKey() {
     return null;
 }
 
-// 이미지 모델 목록
+// 이미지 모델 목록 (이미지 생성 전용)
 const IMAGE_MODELS = [
-    { value: 'gemini-3-pro-image-preview', label: 'Nano Banana Pro (Gemini 3 Pro) ⭐', description: '최고 품질, 최대 14개 참조 이미지 지원' },
-    { value: 'gemini-2.5-flash-image', label: 'Nano Banana (Gemini 2.5 Flash)', description: '빠른 생성, 낮은 지연시간' },
-    { value: 'imagen-4', label: 'Imagen 4', description: 'Google 전문 이미지 모델, 텍스트 렌더링 우수' }
+    { value: 'gemini-3-pro-image-preview', label: 'Nano Banana Pro (Gemini 3 Pro) ⭐', description: '최고 품질, 네이티브 이미지 생성, 최대 14개 참조 이미지 지원' },
+    { value: 'imagen-4', label: 'Imagen 4', description: 'Google 전문 이미지 생성 모델, 텍스트 렌더링 우수' }
 ];
 
 // TTS 모델 목록 (Gemini TTS Voices)
@@ -859,6 +858,21 @@ function loadImageSettings() {
     const saved = localStorage.getItem('imageSettings');
     if (saved) {
         imageSettings = JSON.parse(saved);
+        
+        // 유효하지 않은 모델 설정 자동 수정
+        const validModels = IMAGE_MODELS.map(m => m.value);
+        const invalidModels = ['gemini-2.5-flash-image', 'gemini-2.0-flash-exp', 'gemini-2.5-flash', 'gemini-2.5-pro'];
+        
+        // 각 모델 설정 검증 및 수정
+        ['coverModel', 'characterModel', 'keyObjectModel', 'illustrationModel', 'vocabularyModel'].forEach(key => {
+            if (imageSettings[key] && (invalidModels.includes(imageSettings[key]) || !validModels.includes(imageSettings[key]))) {
+                console.warn(`⚠️ 유효하지 않은 ${key} 감지: ${imageSettings[key]} → gemini-3-pro-image-preview로 자동 수정`);
+                imageSettings[key] = 'gemini-3-pro-image-preview';
+            }
+        });
+        
+        // 수정된 설정 저장
+        saveImageSettings();
     }
 }
 
