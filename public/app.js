@@ -2472,120 +2472,120 @@ function displayStorybook(storybook) {
                 })()}
             </div>
             
+            <!-- TTS 설정 -->
+            <div class="bg-gradient-to-r from-purple-50 to-blue-50 p-5 rounded-xl mb-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fas fa-cog text-purple-600"></i>
+                    <h4 class="font-bold text-gray-800">TTS 생성 설정</h4>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Gemini TTS 모델 -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-brain mr-1 text-purple-600"></i>
+                            Gemini 모델
+                        </label>
+                        <select 
+                            id="page-gemini-tts-model-select"
+                            onchange="updatePageGeminiTTSModel(this.value)"
+                            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
+                        >
+                            <option value="gemini-2.5-flash-preview-tts">Flash (무료 - 10회/일)</option>
+                            <option value="gemini-2.5-pro-preview-tts">Pro (유료 - 고품질)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- TTS 음성 -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-microphone mr-1 text-blue-600"></i>
+                            음성 선택
+                        </label>
+                        <select 
+                            id="page-tts-model-select"
+                            onchange="updatePageTTSModel(this.value)"
+                            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                        >
+                            <option value="Puck">Puck (남성, 밝고 활기찬)</option>
+                            <option value="Charon">Charon (남성, 차분하고 신중한)</option>
+                            <option value="Kore">Kore (여성, 따뜻하고 부드러운)</option>
+                            <option value="Fenrir">Fenrir (남성, 힘있고 권위적인)</option>
+                            <option value="Aoede">Aoede (여성, 우아하고 서정적인)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
             <!-- 액션 버튼 -->
-            <div class="grid grid-cols-1 md:grid-cols-6 gap-3 mb-4">
-                    <!-- 삽화 생성 버튼 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                    <!-- 삽화 생성 버튼들 -->
                     <div class="relative">
                         <button 
                             onclick="generateAllIllustrationsParallel()"
-                            class="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3.5 rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold text-base"
+                            class="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3.5 rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
                         >
-                            <i class="fas fa-bolt text-xl"></i>
-                            <span>모든 삽화 생성 (빠르게)</span>
+                            <i class="fas fa-bolt"></i>
+                            <span>삽화 생성 (빠르게)</span>
                         </button>
                         <button 
                             onclick="showGenerationModeHelp('parallel')"
-                            class="absolute top-2 right-2 bg-white text-red-600 w-6 h-6 rounded-full hover:bg-red-50 transition shadow-md flex items-center justify-center text-xs"
-                            title="병렬 생성 모드 설명"
+                            class="absolute top-2 right-2 bg-white text-red-600 w-5 h-5 rounded-full hover:bg-red-50 transition shadow-md flex items-center justify-center text-xs"
+                            title="병렬 생성 모드"
                         >
-                            <i class="fas fa-question"></i>
+                            ?
                         </button>
                     </div>
                     
                     <div class="relative">
                         <button 
                             onclick="generateAllIllustrationsSequential()"
-                            class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-3.5 rounded-lg hover:from-red-700 hover:to-red-800 transition shadow-lg flex items-center justify-center gap-2 font-semibold text-base"
+                            class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-3.5 rounded-lg hover:from-red-700 hover:to-red-800 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
                         >
-                            <i class="fas fa-layer-group text-xl"></i>
-                            <span>모든 삽화 생성 (정확하게)</span>
+                            <i class="fas fa-layer-group"></i>
+                            <span>삽화 생성 (정확하게)</span>
                         </button>
                         <button 
                             onclick="showGenerationModeHelp('sequential')"
-                            class="absolute top-2 right-2 bg-white text-red-700 w-6 h-6 rounded-full hover:bg-red-50 transition shadow-md flex items-center justify-center text-xs"
-                            title="순차 생성 모드 설명"
+                            class="absolute top-2 right-2 bg-white text-red-700 w-5 h-5 rounded-full hover:bg-red-50 transition shadow-md flex items-center justify-center text-xs"
+                            title="순차 생성 모드"
                         >
-                            <i class="fas fa-question"></i>
+                            ?
                         </button>
                     </div>
                     
-                    <!-- Gemini TTS 모델 선택 -->
-                    <div class="bg-white p-4 rounded-lg shadow-md border-2 border-purple-200">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-brain mr-2 text-purple-600"></i>
-                            Gemini TTS 모델
-                        </label>
-                        <select 
-                            id="page-gemini-tts-model-select"
-                            onchange="updatePageGeminiTTSModel(this.value)"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-                        >
-                            <option value="gemini-2.5-flash-preview-tts">Gemini 2.5 Flash TTS (무료)</option>
-                            <option value="gemini-2.5-pro-preview-tts">Gemini 2.5 Pro TTS (유료)</option>
-                        </select>
-                        <p class="text-xs text-gray-500 mt-2">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            현재 TTS를 지원하는 유일한 모델
-                        </p>
-                    </div>
-                    
-                    <!-- TTS 음성 모델 선택 -->
-                    <div class="bg-white p-4 rounded-lg shadow-md border-2 border-blue-200">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-microphone mr-2 text-blue-600"></i>
-                            TTS 음성 (Voice)
-                        </label>
-                        <select 
-                            id="page-tts-model-select"
-                            onchange="updatePageTTSModel(this.value)"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                        >
-                            <option value="Puck">Puck (남성, 밝고 활기찬 목소리)</option>
-                            <option value="Charon">Charon (남성, 차분하고 신중한 목소리)</option>
-                            <option value="Kore">Kore (여성, 따뜻하고 부드러운 목소리)</option>
-                            <option value="Fenrir">Fenrir (남성, 힘있고 권위적인 목소리)</option>
-                            <option value="Aoede">Aoede (여성, 우아하고 서정적인 목소리)</option>
-                        </select>
-                        <p class="text-xs text-gray-500 mt-2">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            선택한 음성으로 TTS가 생성됩니다
-                        </p>
-                    </div>
-                    
-                    <!-- 모든 TTS 생성 버튼 -->
+                    <!-- TTS 생성 버튼 -->
                     <button 
                         onclick="generateAllTTS()"
-                        class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-3.5 rounded-lg hover:from-purple-600 hover:to-purple-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold text-base"
+                        class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-3.5 rounded-lg hover:from-purple-600 hover:to-purple-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
                     >
-                        <i class="fas fa-microphone text-xl"></i>
+                        <i class="fas fa-microphone"></i>
                         <span>모든 TTS 생성</span>
                     </button>
                     
                     ${currentLanguage !== 'ko' ? `
-                    <!-- 모두 번역하기 버튼 -->
+                    <!-- 번역 버튼 -->
                     <button 
                         onclick="translateAllPages()"
                         id="translate-all-btn"
-                        class="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-4 py-3.5 rounded-lg hover:from-indigo-600 hover:to-indigo-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold text-base"
+                        class="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-4 py-3.5 rounded-lg hover:from-indigo-600 hover:to-indigo-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
                     >
-                        <i class="fas fa-language text-xl"></i>
+                        <i class="fas fa-language"></i>
                         <span>모두 번역하기</span>
                     </button>
                     ` : ''}
                     
-                    <!-- 전체 삽화 다운로드 버튼 -->
+                    <!-- 다운로드 버튼들 -->
                     <button 
                         onclick="downloadAllIllustrations()"
-                        class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3.5 rounded-lg hover:from-blue-600 hover:to-blue-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold text-base"
+                        class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3.5 rounded-lg hover:from-blue-600 hover:to-blue-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
                     >
-                        <i class="fas fa-images text-xl"></i>
-                        <span>전체 삽화 다운로드</span>
+                        <i class="fas fa-images"></i>
+                        <span>삽화 다운로드</span>
                     </button>
                     
-                    <!-- 전체 TTS 다운로드 버튼 -->
                     <button 
                         onclick="downloadAllAudio()"
-                        class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3.5 rounded-lg hover:from-green-600 hover:to-green-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold text-base"
+                        class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3.5 rounded-lg hover:from-green-600 hover:to-green-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
                     >
                         <i class="fas fa-headphones text-xl"></i>
                         <span>전체 TTS 다운로드</span>
