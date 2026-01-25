@@ -14,7 +14,7 @@ let imageSettings = {
     illustrationModel: 'gemini-3-pro-image-preview',  // 페이지 삽화 모델
     vocabularyModel: 'gemini-3-pro-image-preview',  // 8단어 학습 모델
     coverModel: 'gemini-3-pro-image-preview',  // 표지 모델
-    geminiTTSModel: 'gemini-2.5-flash-preview-tts',  // Gemini TTS 생성 모델
+    geminiTTSModel: 'gemini-2.5-flash-tts',  // Gemini TTS 생성 모델 (기본값)
     ttsModel: 'Aoede',  // TTS Voice (Gemini TTS Voice) - 여성 목소리
     ttsVoiceConfig: '여성 목소리, 부드럽고 따뜻한 톤, 동화 낭독 스타일, 적당한 속도로 또박또박, 어린이가 이해하기 쉽게'  // TTS 음성 설정
 };
@@ -2519,13 +2519,12 @@ function displayStorybook(storybook) {
                             onchange="updatePageGeminiTTSModel(this.value)"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                         >
-                            <option value="gemini-2.5-flash-preview-tts">Gemini 2.5 Flash Preview TTS</option>
-                            <option value="gemini-2.0-flash-exp-tts">Gemini 2.0 Flash Exp TTS</option>
-                            <option value="gemini-1.5-flash-tts">Gemini 1.5 Flash TTS</option>
+                            <option value="gemini-2.5-flash-tts">Gemini 2.5 Flash TTS (빠름, 무료 10회/일)</option>
+                            <option value="gemini-2.5-pro-tts">Gemini 2.5 Pro TTS (고품질, 유료 전용)</option>
                         </select>
                         <p class="text-xs text-gray-500 mt-2">
                             <i class="fas fa-info-circle mr-1"></i>
-                            TTS 생성에 사용할 Gemini 모델
+                            Flash: 빠르고 효율적 / Pro: 더 자연스러운 음질
                         </p>
                     </div>
                     
@@ -2967,13 +2966,13 @@ function displayStorybook(storybook) {
     // Gemini TTS 모델 select 초기화
     const geminiTTSModelSelect = document.getElementById('page-gemini-tts-model-select');
     if (geminiTTSModelSelect) {
-        geminiTTSModelSelect.value = imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts';
+        geminiTTSModelSelect.value = imageSettings.geminiTTSModel || 'gemini-2.5-flash-tts';
     }
     
     // TTS 음성 select 초기화
     const pageTTSModelSelect = document.getElementById('page-tts-model-select');
     if (pageTTSModelSelect) {
-        pageTTSModelSelect.value = imageSettings.ttsModel || 'Puck';
+        pageTTSModelSelect.value = imageSettings.ttsModel || 'Aoede';
     }
 }
 
