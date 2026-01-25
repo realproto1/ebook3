@@ -287,9 +287,10 @@ async function uploadJSONToR2(jsonData, filename) {
 
 
 // Gemini 이미지 생성 함수 (Nano Banana Pro) - 멀티모달 지원 + 자동 재시도
-async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRetries = 3) {
+async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRetries = 3, modelName = 'gemini-3-pro-image-preview') {
   try {
-    console.log(`Calling Gemini Image Generation API (Attempt ${retryCount + 1}/${maxRetries})...`);
+    console.log(`🤖 Using Model: ${modelName}`);
+    console.log(`📞 Calling Gemini Image Generation API (Attempt ${retryCount + 1}/${maxRetries})...`);
     console.log('Prompt:', prompt);
     console.log('Reference Images:', referenceImages.length);
     
@@ -350,7 +351,7 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
     
     console.log(`📊 Total parts: 1 text + ${parts.length - 1} images`);
     
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -378,7 +379,7 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
         const waitTime = 2000 * (retryCount + 1); // 2초, 4초, 6초
         console.log(`🔄 500 Error detected. Retrying in ${waitTime/1000} seconds... (Attempt ${retryCount + 2}/${maxRetries})`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
-        return generateImage(prompt, referenceImages, retryCount + 1, maxRetries);
+        return generateImage(prompt, referenceImages, retryCount + 1, maxRetries, modelName);
       }
       
       throw new Error(`Gemini API Error: ${response.status}`);
@@ -391,16 +392,24 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
     if (data.candidates && data.candidates[0] && data.candidates[0].content) {
       const parts = data.candidates[0].content.parts;
       
+      // parts가 배열인지 확인
+      if (!Array.isArray(parts)) {
+        console.error('❌ parts is not an array:', typeof parts, parts);
+        throw new Error('Invalid response structure: parts is not an array');
+      }
+      
       for (const part of parts) {
         if (part.inlineData && part.inlineData.data) {
           const mimeType = part.inlineData.mimeType || 'image/png';
           const base64Image = part.inlineData.data;
-          console.log('Image generated successfully');
+          console.log('✅ Image generated successfully');
           return `data:${mimeType};base64,${base64Image}`;
         }
       }
     }
     
+    // 응답 구조 디버깅
+    console.error('❌ No image data in response. Response structure:', JSON.stringify(data, null, 2).substring(0, 500));
     throw new Error('No image data in response');
     
   } catch (error) {
@@ -1629,6 +1638,9 @@ app.post('/api/generate-character-image', requireAPIKey, async (req, res) => {
     const aspectRatio = settings.aspectRatio || '16:9';
     const enforceNoText = settings.enforceNoText !== false;
     const additionalPrompt = settings.additionalPrompt || '';
+    const modelName = settings.characterModel || 'gemini-3-pro-image-preview';  // 캐릭터 이미지 생성 모델
+    
+    console.log('🤖 Character model:', modelName);
     
     // character.description을 영어로 번역 (한글인 경우)
     let characterDescriptionEn = character.description;
@@ -1696,9 +1708,9 @@ ${character.age ? `**Character Age:** ${character.age}` : ''}
 ${noTextPrompt}
 ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}`;
     
-    console.log('Generating character image with settings:', { aspectRatio, enforceNoText });
+    console.log('🎨 Generating character image with settings:', { modelName, aspectRatio, enforceNoText });
 
-    const imageUrl = await generateImage(prompt);
+    const imageUrl = await generateImage(prompt, [], 0, 3, modelName);
     
     // R2에 업로드 - 통일된 파일명 규칙
     const timestamp = Date.now();
@@ -1734,6 +1746,9 @@ app.post('/api/generate-illustration', requireAPIKey, async (req, res) => {
     const enforceNoText = settings.enforceNoText !== false;
     const enforceCharacterConsistency = settings.enforceCharacterConsistency !== false;
     const additionalPrompt = settings.additionalPrompt || '';
+    const modelName = settings.illustrationModel || 'gemini-3-pro-image-preview';  // 삽화 이미지 생성 모델
+    
+    console.log('🤖 Illustration model:', modelName);
     
     // editNote를 영어로 번역 (한글인 경우)
     let editNoteEn = '';
@@ -2029,10 +2044,10 @@ ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''
 
 Make the illustration emotionally engaging and visually captivating while maintaining a child-friendly, whimsical tone.`;
     
-    console.log('Generating illustration with', referenceImages.length, 'reference images');
-    console.log('Settings:', { aspectRatio, enforceNoText, enforceCharacterConsistency });
+    console.log('🎨 Generating illustration with', referenceImages.length, 'reference images');
+    console.log('⚙️ Settings:', { modelName, aspectRatio, enforceNoText, enforceCharacterConsistency });
 
-    const imageUrl = await generateImage(prompt, referenceImages);
+    const imageUrl = await generateImage(prompt, referenceImages, 0, 3, modelName);
     
     // R2에 업로드 - 통일된 파일명 규칙
     const timestamp = Date.now();
@@ -3330,8 +3345,10 @@ app.post('/api/generate-key-object', requireAPIKey, async (req, res) => {
     const aspectRatio = '4:3';  // 고정값: 4:3 (주요 사물 일러스트에 적합)
     const enforceNoText = settings.enforceNoText !== false;
     const additionalPrompt = settings.additionalPrompt || '';
+    const modelName = settings.keyObjectModel || 'gemini-3-pro-image-preview';  // Key Object 이미지 생성 모델
     
     console.log('📐 Key Object aspect ratio (fixed):', aspectRatio);
+    console.log('🤖 Key Object model:', modelName);
     
     // keyObject.description을 영어로 번역 (한글인 경우)
     let descriptionEn = keyObject.description;
@@ -3394,6 +3411,7 @@ ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''
 Create a single, clear, professional illustration of this key object in ${artStyle} style and 4:3 format.`;
     
     console.log('🎨 Generating key object image with settings:', { 
+      modelName,
       artStyle, 
       aspectRatio, 
       enforceNoText,
@@ -3401,7 +3419,7 @@ Create a single, clear, professional illustration of this key object in ${artSty
     });
     console.log('📋 Prompt (first 300 chars):', prompt.substring(0, 300));
 
-    const imageUrl = await generateImage(prompt);
+    const imageUrl = await generateImage(prompt, [], 0, 3, modelName);
     
     // R2에 업로드 - 통일된 파일명 규칙
     const timestamp = Date.now();
@@ -3436,8 +3454,10 @@ app.post('/api/generate-cover', requireAPIKey, async (req, res) => {
     const aspectRatio = settings.aspectRatio || '4:3';  // 표지 기본 비율: 4:3 (책 표지에 적합)
     const enforceNoText = settings.enforceNoText !== false;
     const additionalPrompt = settings.additionalPrompt || '';
+    const modelName = settings.coverModel || 'gemini-3-pro-image-preview';  // 표지 이미지 생성 모델
     
     console.log('📐 Cover aspect ratio:', aspectRatio);
+    console.log('🤖 Cover model:', modelName);
     
     // customPrompt를 영어로 번역 (한글인 경우)
     let promptEn = customPrompt;
@@ -3504,6 +3524,7 @@ ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''
 Create a professional, captivating cover illustration in ${aspectRatio} format.`;
     
     console.log('🎨 Generating cover image with settings:', { 
+      modelName,
       aspectRatio, 
       enforceNoText, 
       characterReferences: characterReferences.length,
@@ -3513,7 +3534,7 @@ Create a professional, captivating cover illustration in ${aspectRatio} format.`
     
     console.log('📋 Final prompt (first 200 chars):', prompt.substring(0, 200));
 
-    const imageUrl = await generateImage(prompt, characterReferences);
+    const imageUrl = await generateImage(prompt, characterReferences, 0, 3, modelName);
     
     // R2에 업로드 - 통일된 파일명 규칙
     const timestamp = Date.now();

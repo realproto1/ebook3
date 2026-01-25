@@ -499,7 +499,8 @@ async function generateCoverImage() {
             characterReferences: characterReferences,
             settings: {
                 aspectRatio: aspectRatio,  // 사용자가 선택한 비율 사용
-                enforceNoText: true
+                enforceNoText: true,
+                coverModel: imageSettings.coverModel || 'gemini-3-pro-image-preview'  // 표지 모델 전달
             },
             customPrompt: customPrompt,
             storybookId: currentStorybook.id
@@ -5927,7 +5928,8 @@ async function generateSingleKeyObjectImage(objIndex) {
             settings: {
                 aspectRatio: imageSettings.aspectRatio || '1:1',
                 enforceNoText: true,
-                additionalPrompt: imageSettings.additionalPrompt
+                additionalPrompt: imageSettings.additionalPrompt,
+                keyObjectModel: imageSettings.keyObjectModel || 'gemini-3-pro-image-preview'  // Key Object 모델 전달
             },
             storybookId: currentStorybook.id,
             storybookTitle: currentStorybook.title
