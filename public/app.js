@@ -39,9 +39,6 @@ function getAPIKey() {
 // 이미지 모델 목록
 const IMAGE_MODELS = [
     { value: 'gemini-3-pro-image-preview', label: 'Nano Banana Pro (Gemini 3 Pro) ⭐', description: '최고 품질, 네이티브 이미지 생성' },
-    { value: 'gemini-2.5-flash-image', label: 'Gemini 2.5 Flash Image', description: '빠르고 저렴한 이미지 생성' },
-    { value: 'gemini-2.5-flash-preview-tts', label: 'Gemini 2.5 Flash TTS (무료)', description: '무료 플랜: 10회/일, 3회/분' },
-    { value: 'gemini-2.5-pro-preview-tts', label: 'Gemini 2.5 Pro TTS (유료)', description: '유료 플랜 전용, 더 고품질' },
     { value: 'imagen-4', label: 'Imagen 4', description: '전문 이미지, 텍스트 렌더링 우수' }
 ];
 
