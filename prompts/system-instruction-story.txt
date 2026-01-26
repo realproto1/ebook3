@@ -218,5 +218,15 @@
       "role": "역할 (예: 주인공, 조력자, 악당)",
       "description": "캐릭터 상세 설명 (외모, 성격, 특징)"
     }
-  ]
+  ],
+  "educational_content": {
+    "vocabulary": [
+      {
+        "word": "영어 단어 (대문자 시작)",
+        "korean": "한글 뜻",
+        "definition": "아이들이 이해하기 쉬운 설명 (1-2문장)",
+        "example": "동화 내용 관련 예문"
+      }
+    ]
+  }
 }
