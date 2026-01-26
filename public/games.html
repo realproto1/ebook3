@@ -192,39 +192,32 @@
 
             <!-- 게임 선택 -->
             <div class="games-grid">
-                <!-- 1. 단어 카드 매칭 -->
+                <!-- 1. Key Object 퀴즈 게임 -->
+                <div class="game-card story-quiz" onclick="startGame('story-quiz')">
+                    <div class="game-icon">🎯</div>
+                    <div class="game-title">핵심 사물 퀴즈</div>
+                    <div class="game-desc">Key Objects를 찾아보며<br>동화 내용을 복습해요!</div>
+                </div>
+
+                <!-- 2. 카드 매칭 게임 -->
                 <div class="game-card memory-match" onclick="startGame('memory-match')">
                     <div class="game-icon">🃏</div>
-                    <div class="game-title">단어 카드 매칭</div>
-                    <div class="game-desc">카드를 뒤집어서<br>단어와 그림을 매칭해요!</div>
+                    <div class="game-title">사물 카드 매칭</div>
+                    <div class="game-desc">카드를 뒤집어서<br>같은 사물을 찾아요!</div>
                 </div>
 
-                <!-- 2. 단어 퀴즈 -->
-                <div class="game-card word-quiz" onclick="startGame('word-quiz')">
-                    <div class="game-icon">❓</div>
-                    <div class="game-title">단어 퀴즈</div>
-                    <div class="game-desc">4지선다 퀴즈로<br>단어를 배워요!</div>
+                <!-- 3. 스토리 순서 맞추기 -->
+                <div class="game-card word-builder" onclick="startGame('story-sequence')">
+                    <div class="game-icon">📚</div>
+                    <div class="game-title">스토리 순서 맞추기</div>
+                    <div class="game-desc">이야기의 순서를<br>올바르게 배열해요!</div>
                 </div>
 
-                <!-- 3. 단어 만들기 -->
-                <div class="game-card word-builder" onclick="startGame('word-builder')">
-                    <div class="game-icon">🔤</div>
-                    <div class="game-title">단어 만들기</div>
-                    <div class="game-desc">흩어진 글자를 조합해서<br>단어를 완성해요!</div>
-                </div>
-
-                <!-- 4. 단어 따라쓰기 -->
-                <div class="game-card word-tracing" onclick="startGame('word-tracing')">
-                    <div class="game-icon">✏️</div>
-                    <div class="game-title">단어 따라쓰기</div>
-                    <div class="game-desc">손으로 직접 써보며<br>단어를 익혀요!</div>
-                </div>
-
-                <!-- 5. 동화 스토리 퀴즈 -->
-                <div class="game-card story-quiz" onclick="startGame('story-quiz')">
-                    <div class="game-icon">📖</div>
-                    <div class="game-title">동화 스토리 퀴즈</div>
-                    <div class="game-desc">동화 내용을 얼마나<br>기억하고 있나요?</div>
+                <!-- 4. 캐릭터 맞히기 -->
+                <div class="game-card word-quiz" onclick="startGame('character-quiz')">
+                    <div class="game-icon">👤</div>
+                    <div class="game-title">캐릭터 맞히기</div>
+                    <div class="game-desc">누가 이 말을 했을까요?<br>캐릭터를 맞혀보세요!</div>
                 </div>
             </div>
         </div>
