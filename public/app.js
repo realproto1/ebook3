@@ -2922,56 +2922,97 @@ function displayStorybook(storybook) {
                     
                     <div id="quiz-container" class="space-y-4">
                         ${storybook.quizzes && storybook.quizzes.length > 0 ? 
-                            storybook.quizzes.map((quiz, qIdx) => `
+                            storybook.quizzes.map((quiz, qIdx) => {
+                                // Key Object 이미지 찾기
+                                let keyObjectImage = null;
+                                if (quiz.relatedKeyObject && storybook.key_objects) {
+                                    const keyObj = storybook.key_objects.find(obj => 
+                                        obj.name === quiz.relatedKeyObject || 
+                                        obj.name.toLowerCase().includes(quiz.relatedKeyObject.toLowerCase()) ||
+                                        quiz.relatedKeyObject.toLowerCase().includes(obj.name.toLowerCase())
+                                    );
+                                    if (keyObj && keyObj.imageUrl) {
+                                        keyObjectImage = keyObj.imageUrl;
+                                    }
+                                }
+                                
+                                return `
                             <div class="bg-white p-5 rounded-lg border-2 border-purple-200 shadow-sm">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div class="flex-1">
-                                        <h5 class="font-bold text-gray-800">
-                                            <span class="inline-block bg-purple-500 text-white rounded-full w-7 h-7 text-center leading-7 text-sm mr-2">
-                                                ${qIdx + 1}
-                                            </span>
-                                            ${quiz.question}
-                                        </h5>
+                                <div class="flex gap-4">
+                                    <!-- 왼쪽: Key Object 이미지 -->
+                                    ${keyObjectImage ? `
+                                    <div class="flex-shrink-0">
+                                        <div class="w-32 h-32 rounded-lg overflow-hidden border-2 border-orange-300 shadow-md">
+                                            <img 
+                                                src="${keyObjectImage}" 
+                                                alt="${quiz.relatedKeyObject || 'Key Object'}"
+                                                class="w-full h-full object-cover"
+                                                onerror="this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-200 flex items-center justify-center text-gray-400\\'>이미지 없음</div>'"
+                                            />
+                                        </div>
                                         ${quiz.relatedKeyObject ? `
-                                        <div class="mt-2 ml-9">
+                                        <div class="mt-2 text-center">
                                             <span class="inline-block bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-semibold">
                                                 <i class="fas fa-key mr-1"></i>${quiz.relatedKeyObject}
                                             </span>
                                         </div>
                                         ` : ''}
                                     </div>
-                                    <button 
-                                        onclick="deleteQuiz(${qIdx})"
-                                        class="text-red-500 hover:text-red-700 ml-2"
-                                        title="삭제"
-                                    >
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                                
-                                <div class="space-y-2 mb-3">
-                                    ${quiz.options.map((option, oIdx) => `
-                                    <div class="flex items-start p-3 rounded-lg ${oIdx === quiz.answer ? 'bg-green-50 border-2 border-green-400' : 'bg-gray-50 border border-gray-200'} cursor-pointer hover:bg-opacity-80 transition"
-                                         onclick="showQuizAnswer(${qIdx})">
-                                        <span class="inline-block ${oIdx === quiz.answer ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-700'} rounded-full w-6 h-6 text-center leading-6 text-sm mr-3 flex-shrink-0">
-                                            ${oIdx + 1}
-                                        </span>
-                                        <span class="${oIdx === quiz.answer ? 'font-semibold text-green-800' : 'text-gray-700'}">
-                                            ${option}
-                                            ${oIdx === quiz.answer ? '<i class="fas fa-check-circle ml-2 text-green-600"></i>' : ''}
-                                        </span>
+                                    ` : ''}
+                                    
+                                    <!-- 오른쪽: 퀴즈 내용 -->
+                                    <div class="flex-1">
+                                        <div class="flex justify-between items-start mb-3">
+                                            <div class="flex-1">
+                                                <h5 class="font-bold text-gray-800">
+                                                    <span class="inline-block bg-purple-500 text-white rounded-full w-7 h-7 text-center leading-7 text-sm mr-2">
+                                                        ${qIdx + 1}
+                                                    </span>
+                                                    ${quiz.question}
+                                                </h5>
+                                                ${!keyObjectImage && quiz.relatedKeyObject ? `
+                                                <div class="mt-2 ml-9">
+                                                    <span class="inline-block bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-semibold">
+                                                        <i class="fas fa-key mr-1"></i>${quiz.relatedKeyObject}
+                                                    </span>
+                                                </div>
+                                                ` : ''}
+                                            </div>
+                                            <button 
+                                                onclick="deleteQuiz(${qIdx})"
+                                                class="text-red-500 hover:text-red-700 ml-2"
+                                                title="삭제"
+                                            >
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="space-y-2 mb-3">
+                                            ${quiz.options.map((option, oIdx) => `
+                                            <div class="flex items-start p-3 rounded-lg ${oIdx === quiz.answer ? 'bg-green-50 border-2 border-green-400' : 'bg-gray-50 border border-gray-200'} cursor-pointer hover:bg-opacity-80 transition"
+                                                 onclick="showQuizAnswer(${qIdx})">
+                                                <span class="inline-block ${oIdx === quiz.answer ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-700'} rounded-full w-6 h-6 text-center leading-6 text-sm mr-3 flex-shrink-0">
+                                                    ${oIdx + 1}
+                                                </span>
+                                                <span class="${oIdx === quiz.answer ? 'font-semibold text-green-800' : 'text-gray-700'}">
+                                                    ${option}
+                                                    ${oIdx === quiz.answer ? '<i class="fas fa-check-circle ml-2 text-green-600"></i>' : ''}
+                                                </span>
+                                            </div>
+                                            `).join('')}
+                                        </div>
+                                        
+                                        <div id="quiz-explanation-${qIdx}" class="hidden mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
+                                            <p class="text-sm text-blue-800">
+                                                <i class="fas fa-lightbulb mr-1"></i>
+                                                <strong>정답 설명:</strong> ${quiz.explanation}
+                                            </p>
+                                        </div>
                                     </div>
-                                    `).join('')}
-                                </div>
-                                
-                                <div id="quiz-explanation-${qIdx}" class="hidden mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
-                                    <p class="text-sm text-blue-800">
-                                        <i class="fas fa-lightbulb mr-1"></i>
-                                        <strong>정답 설명:</strong> ${quiz.explanation}
-                                    </p>
                                 </div>
                             </div>
-                            `).join('') 
+                            `;
+                            }).join('') 
                         : 
                             `<div class="text-center py-8 text-gray-500">
                                 <i class="fas fa-question-circle text-4xl mb-3"></i>
