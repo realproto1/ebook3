@@ -2083,7 +2083,31 @@ ${previousTexts}
       '\n\n**🚫 CRITICAL - ABSOLUTELY NO TEXT 🚫:**\nDo NOT include ANY text, labels, words, letters, captions, titles, speech bubbles, dialogue boxes, or text overlays in the image.\nAbsolutely NO TEXT of any kind - not even a single letter or number.\nNO VISUAL TEXT ELEMENTS WHATSOEVER.\nPure illustration only with zero text content.' : 
       '\n\n**🚫 IMPORTANT - NO TEXT 🚫:**\nDo NOT include any text, labels, words, letters, captions, titles, speech bubbles, dialogue boxes, or text overlays in the image.\nNo visual text of any kind.\nPure illustration only.';
     
-    const prompt = `Create a beautiful, professional illustration for a children's storybook page.
+    // artStyle이 이미 완전한 프롬프트인지 확인 (길이가 200자 이상이고 영문인 경우)
+    const isFullPrompt = artStyle && artStyle.length > 200 && /[a-zA-Z]/.test(artStyle);
+    
+    let prompt;
+    if (isFullPrompt) {
+      // artStyle이 이미 완전한 프롬프트인 경우 그대로 사용
+      console.log('🎨 Using artStyle as complete prompt (length:', artStyle.length, 'chars)');
+      prompt = artStyle;
+      
+      // 필요한 경우에만 캐릭터 일관성 정보 추가
+      if (characterInfo) {
+        prompt += `\n\n${characterInfo}`;
+      }
+      
+      // 수정 요청이 있으면 추가
+      if (editNoteEn) {
+        prompt += `\n\n**Important Modification Request:** ${editNoteEn}`;
+      }
+      
+      // 텍스트 제거 강조
+      prompt += noTextPrompt;
+    } else {
+      // artStyle이 간단한 스타일 설명인 경우 기존 방식 사용
+      console.log('🎨 Building prompt from artStyle description');
+      prompt = `Create a beautiful, professional illustration for a children's storybook page.
 ${storyContext}
 
 **Main Scene Description:** ${sceneDescriptionEn}
@@ -2106,6 +2130,7 @@ ${noTextPrompt}
 ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}
 
 Make the illustration emotionally engaging and visually captivating while maintaining a child-friendly, whimsical tone.`;
+    }
     
     console.log('🎨 Generating illustration with', referenceImages.length, 'reference images');
     console.log('⚙️ Settings:', { modelName, aspectRatio, enforceNoText, enforceCharacterConsistency });
