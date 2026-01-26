@@ -375,6 +375,14 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
       const errorText = await response.text();
       console.error('Gemini API Error:', errorText);
       
+      // 503 에러(overloaded)이고 재시도 횟수가 남아있으면 재시도
+      if (response.status === 503 && retryCount < maxRetries - 1) {
+        const waitTime = 3000 * (retryCount + 1); // 3초, 6초, 9초
+        console.log(`🔄 503 Error (Model Overloaded). Retrying in ${waitTime/1000} seconds... (Attempt ${retryCount + 2}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        return generateImage(prompt, referenceImages, retryCount + 1, maxRetries, modelName);
+      }
+      
       // 500 에러이고 재시도 횟수가 남아있으면 재시도
       if (response.status === 500 && retryCount < maxRetries - 1) {
         const waitTime = 2000 * (retryCount + 1); // 2초, 4초, 6초
@@ -431,26 +439,44 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
       const parts = content.parts;
       const finishReason = data.candidates[0].finishReason;
       
-      // finishReason이 OTHER이고 content가 비어있는 경우 - 무시하고 재시도 유도
-      if (finishReason === 'OTHER' && (!parts || Object.keys(content).length === 0)) {
-        console.warn('⚠️ finishReason: OTHER with empty content - 이미지 생성 실패 (재시도 권장)');
+      // parts가 없거나 배열이 아닌 경우 - 먼저 검증
+      if (!parts) {
+        console.warn('⚠️ No parts in response');
+        console.warn('Finish Reason:', finishReason);
         console.warn('Content:', JSON.stringify(content, null, 2));
-        throw new Error('GEMINI_OTHER_ERROR: 이미지 생성 중 일시적 오류가 발생했습니다. 다시 시도해주세요.');
-      }
-      
-      // content가 비어있거나 parts가 없는 경우 (OTHER 외)
-      if (!parts || Object.keys(content).length === 0) {
-        console.error('❌ Empty content or no parts in response');
-        console.error('Content:', JSON.stringify(content, null, 2));
-        console.error('Finish Reason:', finishReason);
-        throw new Error(`Image generation failed: ${finishReason} - Empty content`);
+        
+        // finishReason이 OTHER인 경우 재시도 가능한 에러로 처리
+        if (finishReason === 'OTHER') {
+          throw new Error('GEMINI_OTHER_ERROR: 이미지 생성 중 일시적 오류가 발생했습니다. 다시 시도해주세요.');
+        }
+        
+        throw new Error(`Image generation failed: ${finishReason} - No parts in response`);
       }
       
       // parts가 배열인지 확인
       if (!Array.isArray(parts)) {
         console.error('❌ parts is not an array:', typeof parts, parts);
         console.error('Full response:', JSON.stringify(data, null, 2));
+        
+        // finishReason이 OTHER인 경우 재시도 가능한 에러로 처리
+        if (finishReason === 'OTHER') {
+          throw new Error('GEMINI_OTHER_ERROR: 이미지 생성 중 일시적 오류가 발생했습니다. 다시 시도해주세요.');
+        }
+        
         throw new Error('Invalid response structure: parts is not an array');
+      }
+      
+      // parts 배열이 비어있는 경우
+      if (parts.length === 0) {
+        console.warn('⚠️ Empty parts array');
+        console.warn('Finish Reason:', finishReason);
+        
+        // finishReason이 OTHER인 경우 재시도 가능한 에러로 처리
+        if (finishReason === 'OTHER') {
+          throw new Error('GEMINI_OTHER_ERROR: 이미지 생성 중 일시적 오류가 발생했습니다. 다시 시도해주세요.');
+        }
+        
+        throw new Error(`Image generation failed: ${finishReason} - Empty parts array`);
       }
       
       for (const part of parts) {
