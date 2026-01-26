@@ -498,7 +498,10 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
-        // 가이드 글자 그리기 (회색 반투명)
+        // 가이드 이미지 데이터 저장용
+        let guideImageData = null;
+        
+        // 가이드 글자 그리기 (회색 반투명) + 참조 이미지 생성
         function drawGuideChar(char) {
             ctx.save();
             
@@ -523,6 +526,20 @@
             ctx.fillText(char, x, y);
             
             ctx.restore();
+            
+            // 별도의 캔버스에 진한 글자로 그려서 참조 이미지 생성 (픽셀 비교용)
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            tempCtx.fillStyle = '#000000';
+            tempCtx.font = `bold ${fontSize}px 'Noto Sans KR', sans-serif`;
+            tempCtx.textAlign = 'center';
+            tempCtx.textBaseline = 'middle';
+            tempCtx.fillText(char, tempCanvas.width / 2, tempCanvas.height / 2);
+            
+            guideImageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
         }
 
         // 스토리 데이터 로드
@@ -607,7 +624,92 @@
             updateStats();
         }
 
-        // 그림 확인 (간단한 검사)
+        // 픽셀 비교를 통한 정확도 측정
+        function calculateAccuracy(userImageData, guideImageData) {
+            const userPixels = userImageData.data;
+            const guidePixels = guideImageData.data;
+            
+            let totalGuidePixels = 0;
+            let matchingPixels = 0;
+            
+            // 가이드 글자의 모든 픽셀 위치를 찾고,
+            // 사용자가 그린 부분과 얼마나 겹치는지 확인
+            for (let i = 0; i < guidePixels.length; i += 4) {
+                const guideAlpha = guidePixels[i + 3];
+                const userAlpha = userPixels[i + 3];
+                
+                // 가이드에 픽셀이 있는 위치
+                if (guideAlpha > 50) {
+                    totalGuidePixels++;
+                    
+                    // 사용자도 그 위치에 그렸으면 매칭
+                    if (userAlpha > 50) {
+                        matchingPixels++;
+                    }
+                }
+            }
+            
+            // 정확도 계산 (0~100)
+            if (totalGuidePixels === 0) return 0;
+            return (matchingPixels / totalGuidePixels) * 100;
+        }
+        
+        // 정답 피드백 표시
+        function showCorrectFeedback(callback) {
+            const feedback = document.createElement('div');
+            feedback.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(34, 197, 94, 0.95);
+                color: white;
+                padding: 30px 50px;
+                border-radius: 20px;
+                font-size: 32px;
+                font-weight: bold;
+                z-index: 10000;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            `;
+            feedback.innerHTML = '✓ 정답!';
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                feedback.remove();
+                if (callback) callback();
+            }, 1000);
+        }
+        
+        // 재시도 피드백 표시
+        function showRetryFeedback(accuracy) {
+            const feedback = document.createElement('div');
+            feedback.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(239, 68, 68, 0.95);
+                color: white;
+                padding: 30px 50px;
+                border-radius: 20px;
+                font-size: 24px;
+                font-weight: bold;
+                z-index: 10000;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                text-align: center;
+            `;
+            feedback.innerHTML = `
+                정확도: ${accuracy.toFixed(1)}%<br>
+                <span style="font-size: 18px; margin-top: 10px; display: block;">다시 시도해보세요!</span>
+            `;
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                feedback.remove();
+            }, 1500);
+        }
+        
+        // 그림 확인 (픽셀 비교)
         function checkDrawing() {
             totalAttempts++;
 
@@ -628,19 +730,34 @@
                 return;
             }
 
-            // 간단한 피드백 (실제로는 AI 모델이 필요하지만, 여기서는 간단히 처리)
-            const confirmed = confirm('잘 그렸어요! 다음 글자로 넘어갈까요?');
+            // 픽셀 비교로 정확도 측정
+            if (!guideImageData) {
+                alert('가이드 데이터가 없습니다.');
+                return;
+            }
             
-            if (confirmed) {
+            const accuracy = calculateAccuracy(imageData, guideImageData);
+            const threshold = 70; // 70% 이상이면 정답
+            
+            console.log(`정확도: ${accuracy.toFixed(1)}%`);
+            
+            if (accuracy >= threshold) {
+                // 정답! 자동으로 다음 글자로
                 correctChars++;
                 document.getElementById('correctCount').textContent = correctChars;
                 
-                currentCharIndex++;
-                if (currentCharIndex < characters.length) {
-                    renderChar();
-                } else {
-                    showResults();
-                }
+                // 간단한 정답 표시
+                showCorrectFeedback(() => {
+                    currentCharIndex++;
+                    if (currentCharIndex < characters.length) {
+                        renderChar();
+                    } else {
+                        showResults();
+                    }
+                });
+            } else {
+                // 다시 시도
+                showRetryFeedback(accuracy);
             }
         }
 
