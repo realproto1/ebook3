@@ -3,164 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✍️ 단어 따라 써보기 - 탱고북</title>
+    <title>단어 따라 써보기 - 탱고북</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Noto Sans KR', sans-serif;
-            background: linear-gradient(135deg, #FFF9C4 0%, #FFF59D 100%);
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
             min-height: 100vh;
-            padding: 20px;
+            overflow-x: hidden;
         }
 
         .game-container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
+            padding: 20px;
         }
 
         .game-header {
             background: white;
             border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(251, 192, 45, 0.1);
-        }
-
-        .back-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #FBC02D, #FDD835);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 15px;
-        }
-
-        .back-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(251, 192, 45, 0.3);
-        }
-
-        .game-stats {
-            background: white;
-            border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
-            display: flex;
-            justify-content: space-around;
-            box-shadow: 0 3px 10px rgba(251, 192, 45, 0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: #999;
-            margin-bottom: 5px;
-        }
-
-        .stat-value {
+        .story-title {
             font-size: 24px;
-            font-weight: 700;
-            color: #FBC02D;
+            font-weight: bold;
+            color: #fcb69f;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #ffecd2 0%, #fcb69f 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
         }
 
         .game-area {
             background: white;
             border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 5px 15px rgba(251, 192, 45, 0.1);
-        }
-
-        .object-display {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .object-image {
-            width: 200px;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 20px;
-            margin: 0 auto 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            border: 4px solid #FDD835;
-        }
-
-        .object-name {
-            font-size: 36px;
-            font-weight: 700;
-            color: #F57F17;
-            margin-bottom: 10px;
-        }
-
-        .object-description {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        .writing-area {
-            background: #FFFDE7;
-            border: 3px dashed #FDD835;
-            border-radius: 15px;
             padding: 30px;
-            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        .letter-boxes {
+        .word-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fcb69f;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .key-object-image {
+            width: 100%;
+            max-width: 250px;
+            height: 250px;
+            object-fit: contain;
+            border-radius: 15px;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .target-word {
+            font-size: 32px;
+            font-weight: bold;
+            color: #fcb69f;
+            text-align: center;
+            margin: 20px 0;
+            letter-spacing: 8px;
+        }
+
+        .input-area {
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 30px;
+            margin: 30px 0;
             flex-wrap: wrap;
         }
 
         .letter-box {
-            width: 60px;
-            height: 80px;
-            border: 3px solid #FDD835;
+            width: 50px;
+            height: 60px;
+            border: 3px solid #e0e0e0;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
-            font-weight: 700;
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
             background: white;
-            color: #F57F17;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
         }
 
         .letter-box.filled {
-            background: #FFF9C4;
-            border-color: #FBC02D;
-            transform: scale(1.1);
+            border-color: #fcb69f;
+            background: #fff5f0;
         }
 
         .letter-box.correct {
-            background: #C8E6C9;
-            border-color: #4CAF50;
-            animation: bounce 0.5s;
+            border-color: #4caf50;
+            background: #e8f5e9;
+            animation: bounce 0.5s ease;
         }
 
-        .letter-box.wrong {
-            background: #FFCDD2;
-            border-color: #F44336;
-            animation: shake 0.5s;
+        .letter-box.incorrect {
+            border-color: #f44336;
+            background: #ffebee;
+            animation: shake 0.5s ease;
         }
 
         @keyframes bounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         @keyframes shake {
@@ -173,67 +152,103 @@
             display: grid;
             grid-template-columns: repeat(10, 1fr);
             gap: 8px;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .key-button {
-            padding: 15px 10px;
-            font-size: 18px;
-            font-weight: 600;
-            background: white;
-            border: 2px solid #FDD835;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .key-button:hover {
-            background: #FFF9C4;
-            transform: translateY(-2px);
-        }
-
-        .key-button:active {
-            transform: scale(0.95);
-        }
-
-        .key-button.used {
-            background: #E0E0E0;
-            color: #999;
-            border-color: #BDBDBD;
-            pointer-events: none;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
             margin-top: 30px;
         }
 
-        .btn {
-            padding: 15px 30px;
+        .key {
+            aspect-ratio: 1;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 18px;
-            font-weight: 600;
-            border: none;
-            border-radius: 12px;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s ease;
+            user-select: none;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #FBC02D, #FDD835);
+        .key:hover:not(.disabled) {
+            border-color: #fcb69f;
+            transform: scale(1.05);
+        }
+
+        .key.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-warning {
+            background: #ff9800;
             color: white;
         }
 
-        .btn-secondary {
-            background: #E0E0E0;
-            color: #666;
+        .btn-warning:hover {
+            background: #f57c00;
+            transform: translateY(-2px);
         }
 
-        .btn:hover {
+        .btn-primary {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(252, 182, 159, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fcb69f;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
         }
 
         .result-modal {
@@ -243,119 +258,181 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0,0,0,0.7);
             z-index: 1000;
             align-items: center;
             justify-content: center;
         }
 
+        .result-modal.show {
+            display: flex;
+        }
+
         .result-content {
             background: white;
-            border-radius: 30px;
-            padding: 50px;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
             text-align: center;
-            max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-score {
+            font-size: 60px;
+            font-weight: bold;
+            color: #fcb69f;
+            margin: 20px 0;
+        }
+
+        .result-message {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: scale(1.1);
         }
 
         @media (max-width: 768px) {
-            .game-header h1 {
-                font-size: 28px;
+            .game-container {
+                padding: 10px;
             }
 
             .keyboard {
-                grid-template-columns: repeat(5, 1fr);
+                grid-template-columns: repeat(7, 1fr);
+                gap: 5px;
+            }
+
+            .key {
+                font-size: 14px;
             }
 
             .letter-box {
-                width: 45px;
-                height: 60px;
-                font-size: 24px;
+                width: 40px;
+                height: 50px;
+                font-size: 22px;
             }
 
-            .object-name {
-                font-size: 28px;
+            .target-word {
+                font-size: 24px;
+                letter-spacing: 4px;
+            }
+
+            .key-object-image {
+                max-width: 200px;
+                height: 200px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- 뒤로가기 버튼 -->
+    <div class="back-button" onclick="goBack()">
+        <i class="fas fa-arrow-left" style="font-size: 24px; color: #fcb69f;"></i>
+    </div>
+
     <div class="game-container">
+        <!-- 게임 헤더 -->
         <div class="game-header">
-            <button class="back-button" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i>
-                돌아가기
-            </button>
-            <h1 style="font-size: 36px; color: #FBC02D; margin-bottom: 10px;">✍️ 단어 따라 써보기</h1>
-            <div id="story-title" style="font-size: 18px; color: #999;"></div>
-        </div>
-
-        <div class="game-stats">
-            <div class="stat-item">
-                <div class="stat-label">현재 단어</div>
-                <div class="stat-value" id="current-word">1</div>
+            <div class="story-title" id="storyTitle">동화책</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                <div style="font-size: 16px; color: #666;">
+                    <i class="fas fa-pen"></i>
+                    단어 <span id="currentWord">1</span> / <span id="totalWords">5</span>
+                </div>
+                <div style="font-size: 16px; color: #4caf50; font-weight: bold;">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="correctCount">0</span>개 완성
+                </div>
             </div>
-            <div class="stat-item">
-                <div class="stat-label">완성한 단어</div>
-                <div class="stat-value" id="completed-words">0</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label">정확도</div>
-                <div class="stat-value" id="accuracy">100%</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%;">
+                    <span id="progressText">0%</span>
+                </div>
             </div>
         </div>
 
-        <div class="game-area">
-            <div class="object-display">
-                <img id="object-image" class="object-image" src="" alt="Key Object">
-                <div id="object-name" class="object-name">Rose</div>
-                <div id="object-description" class="object-description">아름다운 붉은 장미</div>
+        <!-- 게임 영역 -->
+        <div class="game-area" id="gameArea">
+            <div class="word-number" id="wordNumber">단어 1</div>
+            <img id="keyObjectImage" class="key-object-image" src="" alt="핵심 사물">
+            <div class="target-word" id="targetWord">빨간장미</div>
+            
+            <div class="input-area" id="inputArea">
+                <!-- 글자 박스가 동적으로 추가됩니다 -->
             </div>
 
-            <div class="writing-area">
-                <div style="text-align: center; font-size: 18px; color: #666; margin-bottom: 20px;">
-                    <i class="fas fa-keyboard" style="color: #FBC02D; margin-right: 5px;"></i>
-                    아래 키보드로 단어를 따라 써보세요!
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="accuracyValue">100%</div>
+                    <div class="stat-label">정확도</div>
                 </div>
-
-                <div id="letter-boxes" class="letter-boxes">
-                    <!-- JavaScript로 동적 생성 -->
-                </div>
-
-                <div id="keyboard" class="keyboard">
-                    <!-- JavaScript로 동적 생성 -->
-                </div>
-
-                <div class="action-buttons">
-                    <button class="btn btn-secondary" onclick="clearAnswer()">
-                        <i class="fas fa-eraser"></i> 지우기
-                    </button>
-                    <button class="btn btn-primary" onclick="checkAnswer()">
-                        <i class="fas fa-check"></i> 확인하기
-                    </button>
+                <div class="stat-item">
+                    <div class="stat-value" id="attemptsValue">0</div>
+                    <div class="stat-label">시도 횟수</div>
                 </div>
             </div>
 
-            <div style="text-align: center; color: #999; font-size: 14px;">
-                💡 힌트: 단어의 철자를 순서대로 입력하세요
+            <div class="keyboard" id="keyboard">
+                <!-- 키보드가 동적으로 추가됩니다 -->
+            </div>
+
+            <div class="control-buttons">
+                <button class="btn btn-warning" onclick="clearInput()">
+                    <i class="fas fa-eraser"></i> 지우기
+                </button>
             </div>
         </div>
     </div>
 
     <!-- 결과 모달 -->
-    <div id="result-modal" class="result-modal">
+    <div class="result-modal" id="resultModal">
         <div class="result-content">
-            <div style="font-size: 80px;">🎉</div>
-            <h2 style="font-size: 36px; color: #FBC02D; margin: 20px 0;">완성!</h2>
-            <div style="font-size: 20px; margin: 30px 0; color: #666;">
-                <div style="margin: 10px 0;">완성한 단어: <strong id="final-completed" style="color: #FBC02D;">0</strong>개</div>
-                <div style="margin: 10px 0;">정확도: <strong id="final-accuracy" style="color: #4CAF50;">0</strong>%</div>
-            </div>
-            <div style="display: flex; gap: 15px; justify-content: center;">
-                <button class="btn btn-primary" onclick="location.reload()">
+            <i class="fas fa-trophy" style="font-size: 80px; color: #ffd700;"></i>
+            <div class="result-score" id="resultScore">5 / 5</div>
+            <div class="result-message" id="resultMessage">완벽해요! 🎉</div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="restartGame()">
                     <i class="fas fa-redo"></i> 다시 하기
                 </button>
-                <button class="btn btn-primary" onclick="goBack()">
+                <button class="btn btn-secondary" onclick="goBack()">
                     <i class="fas fa-list"></i> 게임 목록
                 </button>
             </div>
@@ -364,226 +441,273 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const storyId = urlParams.get('story') || urlParams.get('id');
-        
         let storyData = null;
-        let keyObjects = [];
-        let currentObjectIndex = 0;
-        let currentObject = null;
-        let userAnswer = [];
+        let currentWordIndex = 0;
+        let correctWords = 0;
+        let words = [];
+        let currentInput = [];
         let totalAttempts = 0;
         let correctAttempts = 0;
-        let completedWords = 0;
 
-        async function init() {
-            if (!storyId) {
-                alert('❌ 스토리 ID가 없습니다.');
-                goBack();
-                return;
-            }
+        const HANGUL_LETTERS = [
+            'ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ',
+            'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ', 'ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ', 'ㅛ',
+            'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ', 'ㅐ', 'ㅔ', 'ㅚ', 'ㅟ'
+        ];
 
+        // URL에서 스토리 ID 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const storyId = urlParams.get('story') || urlParams.get('id');
+
+        if (!storyId) {
+            alert('스토리 ID가 없습니다.');
+            goBack();
+        }
+
+        // 스토리 데이터 로드
+        async function loadStory() {
             try {
+                console.log('📚 스토리 로딩 중:', storyId);
                 const response = await axios.get(`/api/storybooks/${storyId}`);
                 storyData = response.data;
                 
-                document.getElementById('story-title').textContent = storyData.title || '동화책';
+                console.log('✅ 스토리 로드 완료:', storyData.title);
+                document.getElementById('storyTitle').textContent = storyData.title || '동화책';
+
+                // Key Objects에서 단어 추출
+                const keyObjects = storyData.keyObjectImages?.filter(obj => obj.imageUrl && obj.success) || [];
                 
-                // Key Objects 확인
-                if (!storyData.key_objects || storyData.key_objects.length === 0) {
-                    alert('❌ 이 동화책에는 Key Objects가 없습니다.');
+                if (keyObjects.length === 0) {
+                    alert('Key Objects가 없습니다.');
                     goBack();
                     return;
                 }
 
-                keyObjects = storyData.key_objects;
-                loadWord();
-                
+                words = keyObjects.map(obj => ({
+                    name: obj.name,
+                    imageUrl: obj.imageUrl
+                }));
+
+                document.getElementById('totalWords').textContent = words.length;
+                renderWord();
+                renderKeyboard();
             } catch (error) {
-                console.error('스토리 로드 실패:', error);
+                console.error('❌ 스토리 로드 실패:', error);
                 alert('동화책을 불러오는데 실패했습니다.');
                 goBack();
             }
         }
 
-        function loadWord() {
-            if (currentObjectIndex >= keyObjects.length) {
-                showResult();
-                return;
-            }
+        // 단어 렌더링
+        function renderWord() {
+            const word = words[currentWordIndex];
+            currentInput = [];
 
-            currentObject = keyObjects[currentObjectIndex];
-            userAnswer = [];
-            
-            // 통계 업데이트
-            document.getElementById('current-word').textContent = currentObjectIndex + 1;
-            document.getElementById('completed-words').textContent = completedWords;
-            
-            // 이미지 및 정보 표시
-            const img = document.getElementById('object-image');
-            if (currentObject.imageUrl) {
-                img.src = currentObject.imageUrl;
-                img.style.display = 'block';
-            } else {
-                img.style.display = 'none';
-            }
-            
-            document.getElementById('object-name').textContent = currentObject.name;
-            document.getElementById('object-description').textContent = currentObject.description || '';
-            
-            // 글자 박스 생성
-            createLetterBoxes();
-            
-            // 키보드 생성
-            createKeyboard();
-        }
+            // 단어 번호 업데이트
+            document.getElementById('wordNumber').textContent = `단어 ${currentWordIndex + 1}`;
+            document.getElementById('currentWord').textContent = currentWordIndex + 1;
 
-        function createLetterBoxes() {
-            const container = document.getElementById('letter-boxes');
-            container.innerHTML = '';
-            
-            const word = currentObject.name;
-            for (let i = 0; i < word.length; i++) {
+            // 진행률 업데이트
+            const progress = (currentWordIndex / words.length) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `${Math.round(progress)}%`;
+
+            // 이미지 설정
+            document.getElementById('keyObjectImage').src = word.imageUrl;
+            document.getElementById('keyObjectImage').alt = word.name;
+
+            // 목표 단어 표시
+            document.getElementById('targetWord').textContent = word.name;
+
+            // 입력 영역 생성
+            const inputArea = document.getElementById('inputArea');
+            inputArea.innerHTML = '';
+
+            // 단어에서 공백 제거
+            const cleanWord = word.name.replace(/\s/g, '');
+            for (let i = 0; i < cleanWord.length; i++) {
                 const box = document.createElement('div');
                 box.className = 'letter-box';
-                box.id = `letter-box-${i}`;
-                container.appendChild(box);
+                box.dataset.index = i;
+                inputArea.appendChild(box);
             }
+
+            updateStats();
         }
 
-        function createKeyboard() {
-            const container = document.getElementById('keyboard');
-            container.innerHTML = '';
-            
-            // 영문 알파벳 생성 (대문자)
-            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            
-            for (let letter of alphabet) {
-                const button = document.createElement('button');
-                button.className = 'key-button';
-                button.textContent = letter;
-                button.onclick = () => typeLetter(letter);
-                button.id = `key-${letter}`;
-                container.appendChild(button);
-            }
-            
-            // 공백 키 추가
-            const spaceButton = document.createElement('button');
-            spaceButton.className = 'key-button';
-            spaceButton.textContent = 'Space';
-            spaceButton.style.gridColumn = 'span 2';
-            spaceButton.onclick = () => typeLetter(' ');
-            spaceButton.id = 'key-space';
-            container.appendChild(spaceButton);
+        // 키보드 렌더링
+        function renderKeyboard() {
+            const keyboard = document.getElementById('keyboard');
+            keyboard.innerHTML = '';
+
+            HANGUL_LETTERS.forEach(letter => {
+                const key = document.createElement('div');
+                key.className = 'key';
+                key.textContent = letter;
+                key.onclick = () => inputLetter(letter);
+                keyboard.appendChild(key);
+            });
         }
 
-        function typeLetter(letter) {
-            const word = currentObject.name;
+        // 글자 입력
+        function inputLetter(letter) {
+            const word = words[currentWordIndex];
+            const cleanWord = word.name.replace(/\s/g, '');
             
-            if (userAnswer.length >= word.length) return;
-            
-            userAnswer.push(letter);
-            
-            // 해당 박스에 글자 표시
-            const boxIndex = userAnswer.length - 1;
-            const box = document.getElementById(`letter-box-${boxIndex}`);
+            if (currentInput.length >= cleanWord.length) return;
+
+            totalAttempts++;
+            const currentIndex = currentInput.length;
+            const targetLetter = cleanWord[currentIndex];
+
+            // 자모 분해하여 비교
+            const isCorrect = checkCharacter(letter, targetLetter);
+
+            currentInput.push(letter);
+
+            // 입력 박스 업데이트
+            const box = document.querySelector(`.letter-box[data-index="${currentIndex}"]`);
             box.textContent = letter;
             box.classList.add('filled');
-            
-            // 키 비활성화
-            const key = letter === ' ' ? 'key-space' : `key-${letter}`;
-            const keyButton = document.getElementById(key);
-            if (keyButton) {
-                keyButton.classList.add('used');
+
+            if (isCorrect) {
+                box.classList.add('correct');
+                correctAttempts++;
+            } else {
+                box.classList.add('incorrect');
+                // 틀린 글자는 1초 후 제거
+                setTimeout(() => {
+                    currentInput.pop();
+                    box.textContent = '';
+                    box.className = 'letter-box';
+                }, 1000);
+            }
+
+            updateStats();
+
+            // 단어 완성 확인
+            if (currentInput.length === cleanWord.length && checkWordComplete()) {
+                correctWords++;
+                document.getElementById('correctCount').textContent = correctWords;
+
+                setTimeout(() => {
+                    currentWordIndex++;
+                    if (currentWordIndex < words.length) {
+                        renderWord();
+                    } else {
+                        showResults();
+                    }
+                }, 1000);
             }
         }
 
-        function clearAnswer() {
-            userAnswer = [];
+        // 자모 비교 (간단 버전)
+        function checkCharacter(input, target) {
+            // 완전 일치 확인
+            if (input === target) return true;
+
+            // 자모 분해 비교 (간단 구현)
+            const inputCode = input.charCodeAt(0);
+            const targetCode = target.charCodeAt(0);
+
+            // 한글 범위 확인
+            if (targetCode >= 0xAC00 && targetCode <= 0xD7A3) {
+                // 한글 음절을 자모로 분해
+                const base = targetCode - 0xAC00;
+                const cho = Math.floor(base / 588);
+                const jung = Math.floor((base % 588) / 28);
+                const jong = base % 28;
+
+                const choList = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+                const jungList = ['ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ'];
+
+                // 입력한 자모가 초성, 중성, 종성 중 하나와 일치하는지 확인
+                return input === choList[cho] || input === jungList[jung];
+            }
+
+            return false;
+        }
+
+        // 단어 완성 확인
+        function checkWordComplete() {
+            const word = words[currentWordIndex];
+            const cleanWord = word.name.replace(/\s/g, '');
+            const input = currentInput.join('');
             
-            // 모든 박스 초기화
+            // 각 글자 확인
+            for (let i = 0; i < cleanWord.length; i++) {
+                if (!checkCharacter(currentInput[i], cleanWord[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // 입력 지우기
+        function clearInput() {
+            currentInput = [];
             const boxes = document.querySelectorAll('.letter-box');
             boxes.forEach(box => {
                 box.textContent = '';
-                box.classList.remove('filled', 'correct', 'wrong');
-            });
-            
-            // 키보드 초기화
-            const keys = document.querySelectorAll('.key-button');
-            keys.forEach(key => {
-                key.classList.remove('used');
+                box.className = 'letter-box';
             });
         }
 
-        function checkAnswer() {
-            const word = currentObject.name;
-            const answer = userAnswer.join('');
+        // 통계 업데이트
+        function updateStats() {
+            const accuracy = totalAttempts > 0 
+                ? Math.round((correctAttempts / totalAttempts) * 100)
+                : 100;
             
-            totalAttempts++;
+            document.getElementById('accuracyValue').textContent = `${accuracy}%`;
+            document.getElementById('attemptsValue').textContent = totalAttempts;
+        }
+
+        // 결과 표시
+        function showResults() {
+            const progress = 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `${progress}%`;
+
+            document.getElementById('resultScore').textContent = `${correctWords} / ${words.length}`;
             
-            // 정답 체크
-            const isCorrect = answer.toUpperCase() === word.toUpperCase();
-            
-            if (isCorrect) {
-                correctAttempts++;
-                completedWords++;
-                
-                // 모든 박스를 correct로 표시
-                for (let i = 0; i < word.length; i++) {
-                    const box = document.getElementById(`letter-box-${i}`);
-                    box.classList.add('correct');
-                }
-                
-                // 정확도 업데이트
-                updateAccuracy();
-                
-                // 다음 단어로 이동
-                setTimeout(() => {
-                    currentObjectIndex++;
-                    loadWord();
-                }, 1500);
-                
+            const accuracy = totalAttempts > 0 
+                ? Math.round((correctAttempts / totalAttempts) * 100)
+                : 100;
+
+            let message = '';
+            if (accuracy === 100) {
+                message = '완벽해요! 🎉';
+            } else if (accuracy >= 80) {
+                message = '정말 잘했어요! 👏';
+            } else if (accuracy >= 60) {
+                message = '좋아요! 💪';
             } else {
-                // 틀린 부분 표시
-                for (let i = 0; i < Math.max(word.length, userAnswer.length); i++) {
-                    const box = document.getElementById(`letter-box-${i}`);
-                    if (i < word.length && i < userAnswer.length) {
-                        if (word[i].toUpperCase() === userAnswer[i].toUpperCase()) {
-                            box.classList.add('correct');
-                        } else {
-                            box.classList.add('wrong');
-                        }
-                    }
-                }
-                
-                // 정확도 업데이트
-                updateAccuracy();
-                
-                setTimeout(() => {
-                    clearAnswer();
-                }, 1500);
+                message = '다시 한번 도전해보세요! 📚';
             }
-        }
-
-        function updateAccuracy() {
-            const accuracy = totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 100;
-            document.getElementById('accuracy').textContent = accuracy + '%';
-        }
-
-        function showResult() {
-            const accuracy = totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 100;
             
-            document.getElementById('final-completed').textContent = completedWords;
-            document.getElementById('final-accuracy').textContent = accuracy;
-            
-            document.getElementById('result-modal').style.display = 'flex';
+            document.getElementById('resultMessage').textContent = message;
+            document.getElementById('resultModal').classList.add('show');
         }
 
+        // 게임 재시작
+        function restartGame() {
+            currentWordIndex = 0;
+            correctWords = 0;
+            totalAttempts = 0;
+            correctAttempts = 0;
+            document.getElementById('correctCount').textContent = '0';
+            document.getElementById('resultModal').classList.remove('show');
+            renderWord();
+        }
+
+        // 뒤로가기
         function goBack() {
-            window.location.href = `/games.html?id=${storyId}`;
+            window.history.back();
         }
 
-        init();
+        // 페이지 로드 시 실행
+        loadStory();
     </script>
 </body>
 </html>

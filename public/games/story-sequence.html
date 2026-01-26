@@ -3,200 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📚 스토리 순서 맞추기 - 탱고북</title>
+    <title>스토리 순서 맞추기 - 탱고북</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Noto Sans KR', sans-serif;
-            background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             min-height: 100vh;
-            padding: 20px;
+            overflow-x: hidden;
         }
 
         .game-container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
+            padding: 20px;
         }
 
         .game-header {
             background: white;
             border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.1);
-        }
-
-        .back-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #FF9800, #FFB74D);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 15px;
-        }
-
-        .back-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
-        }
-
-        .progress-section {
-            background: white;
-            border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 3px 10px rgba(255, 152, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .story-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4facfe;
+            text-align: center;
+            margin-bottom: 10px;
         }
 
         .progress-info {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
-            font-size: 18px;
-            color: #666;
+            align-items: center;
+            margin-top: 10px;
         }
 
         .progress-bar {
-            height: 12px;
-            background: #FFE0B2;
+            background: #e0e0e0;
             border-radius: 10px;
+            height: 20px;
             overflow: hidden;
+            margin-top: 10px;
+            flex: 1;
         }
 
         .progress-fill {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
             height: 100%;
-            background: linear-gradient(90deg, #FF9800, #FFB74D);
-            transition: width 0.5s;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
         }
 
         .game-area {
             background: white;
             border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.1);
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        .instruction {
+        .question-header {
             text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .question-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4facfe;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
             font-size: 18px;
             color: #666;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #FFF8E1;
-            border-radius: 15px;
-            border-left: 5px solid #FF9800;
         }
 
-        .story-cards {
-            display: flex;
-            flex-direction: column;
+        .pages-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
-            margin-bottom: 30px;
+            margin-top: 20px;
         }
 
-        .story-card {
-            background: linear-gradient(135deg, #FFF9C4 0%, #FFF59D 100%);
-            border: 3px solid #FFE082;
+        .page-card {
+            background: #f5f5f5;
+            border: 3px solid #e0e0e0;
             border-radius: 15px;
-            padding: 20px;
+            padding: 15px;
             cursor: move;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            position: relative;
+            transition: all 0.3s ease;
+            user-select: none;
         }
 
-        .story-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+        .page-card:hover {
+            border-color: #4facfe;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
         }
 
-        .story-card.dragging {
-            opacity: 0.3;
-            cursor: grabbing;
+        .page-card.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
         }
 
-        .story-card.drag-over {
-            border-color: #FF9800;
-            border-style: dashed;
-            background: #FFE0B2;
+        .page-card.drag-over {
+            border-color: #4facfe;
+            background: #e3f2fd;
         }
 
-        .card-number {
-            width: 50px;
-            height: 50px;
-            background: #FF9800;
+        .page-number {
+            display: inline-block;
+            background: #4facfe;
             color: white;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            font-weight: 700;
-            flex-shrink: 0;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
 
-        .card-image {
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
+        .page-image {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
             border-radius: 10px;
-            border: 3px solid #FFE082;
-            flex-shrink: 0;
+            margin-bottom: 10px;
+            background: white;
         }
 
-        .card-content {
-            flex: 1;
-        }
-
-        .card-text {
-            font-size: 16px;
-            line-height: 1.6;
+        .page-text {
+            font-size: 14px;
             color: #333;
-            font-weight: 500;
+            line-height: 1.4;
+            max-height: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
         }
 
         .drag-handle {
-            width: 30px;
-            height: 30px;
-            background: #FFE082;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: grab;
-            flex-shrink: 0;
-        }
-
-        .drag-handle:active {
-            cursor: grabbing;
-        }
-
-        .check-button {
-            width: 100%;
-            padding: 20px;
+            text-align: center;
+            color: #999;
             font-size: 20px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #FF9800, #FFB74D);
-            color: white;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
+            margin-bottom: 10px;
+            cursor: move;
         }
 
-        .check-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .feedback-message {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-message.correct {
+            background: #e8f5e9;
+            color: #4caf50;
+            display: block;
+        }
+
+        .feedback-message.incorrect {
+            background: #ffebee;
+            color: #f44336;
+            display: block;
         }
 
         .result-modal {
@@ -206,125 +234,147 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0,0,0,0.7);
             z-index: 1000;
             align-items: center;
             justify-content: center;
         }
 
+        .result-modal.show {
+            display: flex;
+        }
+
         .result-content {
             background: white;
-            border-radius: 30px;
-            padding: 50px;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
             text-align: center;
-            max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
         }
 
-        .btn {
-            padding: 15px 30px;
-            font-size: 18px;
-            font-weight: 600;
-            border: none;
-            border-radius: 12px;
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-score {
+            font-size: 60px;
+            font-weight: bold;
+            color: #4facfe;
+            margin: 20px 0;
+        }
+
+        .result-message {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+            transition: all 0.3s ease;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #FF9800, #FFB74D);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #E0E0E0;
-            color: #666;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            50% { transform: translateX(10px); }
-            75% { transform: translateX(-10px); }
+        .back-button:hover {
+            transform: scale(1.1);
         }
 
         @media (max-width: 768px) {
-            .game-header h1 {
-                font-size: 28px;
+            .game-container {
+                padding: 10px;
             }
 
-            .story-card {
-                padding: 15px;
+            .story-title {
+                font-size: 20px;
             }
 
-            .card-text {
-                font-size: 14px;
+            .pages-container {
+                grid-template-columns: 1fr;
             }
 
-            .card-image {
-                width: 80px;
-                height: 80px;
+            .page-image {
+                height: 120px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- 뒤로가기 버튼 -->
+    <div class="back-button" onclick="goBack()">
+        <i class="fas fa-arrow-left" style="font-size: 24px; color: #4facfe;"></i>
+    </div>
+
     <div class="game-container">
+        <!-- 게임 헤더 -->
         <div class="game-header">
-            <button class="back-button" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i>
-                돌아가기
-            </button>
-            <h1 style="font-size: 36px; color: #FF9800; margin-bottom: 10px;">📚 스토리 순서 맞추기</h1>
-            <div id="story-title" style="font-size: 18px; color: #999;"></div>
-        </div>
-
-        <!-- 진행 상태 -->
-        <div class="progress-section">
+            <div class="story-title" id="storyTitle">동화책</div>
             <div class="progress-info">
-                <span>문제 <strong id="current-question">1</strong> / <strong id="total-questions">4</strong></span>
-                <span>정답: <strong id="correct-count" style="color: #4CAF50;">0</strong>개</span>
-            </div>
-            <div class="progress-bar">
-                <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
-            </div>
-        </div>
-
-        <div class="game-area">
-            <div class="instruction">
-                <i class="fas fa-hand-pointer" style="font-size: 24px; color: #FF9800; margin-bottom: 10px;"></i>
-                <div>카드를 드래그하여 올바른 순서로 배열하세요!</div>
-                <div style="font-size: 14px; color: #999; margin-top: 10px;">
-                    카드 오른쪽의 핸들(⋮⋮)을 잡고 위아래로 움직여서 순서를 바꿀 수 있어요
+                <div style="font-size: 16px; color: #666;">
+                    <i class="fas fa-tasks"></i>
+                    문제 <span id="currentQuestion">1</span> / <span id="totalQuestions">4</span>
+                </div>
+                <div style="font-size: 16px; color: #4caf50; font-weight: bold; margin-left: 20px;">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="correctCount">0</span>개 정답
                 </div>
             </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%;">
+                    <span id="progressText">0%</span>
+                </div>
+            </div>
+        </div>
 
-            <div id="story-cards" class="story-cards">
-                <!-- JavaScript로 동적 생성 -->
+        <!-- 게임 영역 -->
+        <div class="game-area" id="gameArea">
+            <div class="question-header">
+                <div class="question-number" id="questionNumber">문제 1</div>
+                <div class="question-text">페이지를 올바른 순서대로 배열하세요</div>
             </div>
 
-            <button class="check-button" onclick="checkAnswer()">
-                <i class="fas fa-check-circle"></i> 정답 확인하기
-            </button>
+            <div class="pages-container" id="pagesContainer">
+                <!-- 페이지 카드가 동적으로 추가됩니다 -->
+            </div>
+
+            <div class="feedback-message" id="feedbackMessage"></div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkAnswer()">
+                    <i class="fas fa-check"></i> 정답 확인
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- 결과 모달 -->
-    <div id="result-modal" class="result-modal">
+    <div class="result-modal" id="resultModal">
         <div class="result-content">
-            <div id="result-icon" style="font-size: 80px;">🎉</div>
-            <h2 id="result-title" style="font-size: 36px; color: #FF9800; margin: 20px 0;">완료!</h2>
-            <div id="result-message" style="font-size: 20px; margin: 30px 0; color: #666;">
-                <div style="margin: 10px 0;">정답: <strong id="final-correct" style="color: #4CAF50;">0</strong>개</div>
-                <div style="margin: 10px 0;">오답: <strong id="final-wrong" style="color: #F44336;">0</strong>개</div>
-            </div>
-            <div style="display: flex; gap: 15px; justify-content: center;">
-                <button class="btn btn-primary" onclick="location.reload()">
+            <i class="fas fa-trophy" style="font-size: 80px; color: #ffd700;"></i>
+            <div class="result-score" id="resultScore">4 / 4</div>
+            <div class="result-message" id="resultMessage">완벽해요! 🎉</div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="restartGame()">
                     <i class="fas fa-redo"></i> 다시 하기
                 </button>
                 <button class="btn btn-secondary" onclick="goBack()">
@@ -336,161 +386,150 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script>
+        let storyData = null;
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+        let quizQuestions = [];
+        let currentPages = [];
+        let draggedElement = null;
+
+        // URL에서 스토리 ID 가져오기
         const urlParams = new URLSearchParams(window.location.search);
         const storyId = urlParams.get('story') || urlParams.get('id');
-        
-        let storyData = null;
-        let questions = [];
-        let currentQuestionIndex = 0;
-        let correctCount = 0;
-        let totalQuestions = 4;
 
-        async function init() {
-            if (!storyId) {
-                alert('❌ 스토리 ID가 없습니다.');
-                goBack();
-                return;
-            }
+        if (!storyId) {
+            alert('스토리 ID가 없습니다.');
+            goBack();
+        }
 
+        // 스토리 데이터 로드
+        async function loadStory() {
             try {
+                console.log('📚 스토리 로딩 중:', storyId);
                 const response = await axios.get(`/api/storybooks/${storyId}`);
                 storyData = response.data;
                 
-                document.getElementById('story-title').textContent = storyData.title || '동화책';
-                
-                // 페이지 확인
+                console.log('✅ 스토리 로드 완료:', storyData.title);
+                document.getElementById('storyTitle').textContent = storyData.title || '동화책';
+
+                // 페이지 데이터 확인
                 if (!storyData.pages || storyData.pages.length < 4) {
-                    alert('❌ 이 동화책은 페이지가 부족합니다.\n최소 4페이지 이상이 필요합니다.');
+                    alert('스토리 페이지가 부족합니다. (최소 4페이지 필요)');
                     goBack();
                     return;
                 }
 
-                // 문제 생성
+                // 4개의 문제 생성 (각 문제마다 4개의 페이지)
                 generateQuestions();
-                loadQuestion();
-                
+                document.getElementById('totalQuestions').textContent = quizQuestions.length;
+                renderQuestion();
             } catch (error) {
-                console.error('스토리 로드 실패:', error);
+                console.error('❌ 스토리 로드 실패:', error);
                 alert('동화책을 불러오는데 실패했습니다.');
                 goBack();
             }
         }
 
+        // 문제 생성
         function generateQuestions() {
+            const pages = storyData.pages;
+            const totalPages = pages.length;
+            
             // 4개의 문제 생성
-            for (let i = 0; i < totalQuestions; i++) {
-                // 각 문제마다 4개의 연속된 페이지 선택
-                const startPage = Math.floor(i * (storyData.pages.length / totalQuestions));
-                const pages = [];
-                
-                for (let j = 0; j < 4; j++) {
-                    const pageIndex = Math.min(startPage + j, storyData.pages.length - 1);
-                    pages.push({
-                        index: pageIndex,
-                        page: storyData.pages[pageIndex]
-                    });
-                }
-                
-                // 정답 순서 저장
-                const correctOrder = pages.map(p => p.index);
-                
-                // 페이지 섞기
-                const shuffledPages = [...pages];
-                shuffleArray(shuffledPages);
-                
-                questions.push({
-                    pages: shuffledPages,
-                    correctOrder: correctOrder
+            for (let i = 0; i < 4; i++) {
+                // 각 문제마다 연속된 4개의 페이지 선택
+                const startIndex = Math.floor((totalPages - 4) * i / 3);
+                const selectedPages = pages.slice(startIndex, startIndex + 4).map(p => ({
+                    ...p,
+                    originalIndex: p.pageNumber
+                }));
+
+                quizQuestions.push({
+                    pages: selectedPages,
+                    correctOrder: selectedPages.map(p => p.pageNumber)
                 });
             }
-            
-            document.getElementById('total-questions').textContent = totalQuestions;
         }
 
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
+        // 문제 렌더링
+        function renderQuestion() {
+            const question = quizQuestions[currentQuestionIndex];
+            currentPages = shuffleArray([...question.pages]);
+
+            // 문제 번호 업데이트
+            document.getElementById('questionNumber').textContent = `문제 ${currentQuestionIndex + 1}`;
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+
+            // 진행률 업데이트
+            const progress = (currentQuestionIndex / quizQuestions.length) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `${Math.round(progress)}%`;
+
+            // 피드백 메시지 숨기기
+            document.getElementById('feedbackMessage').className = 'feedback-message';
+
+            // 페이지 카드 렌더링
+            renderPages();
         }
 
-        function loadQuestion() {
-            if (currentQuestionIndex >= questions.length) {
-                showFinalResult();
-                return;
-            }
-
-            const question = questions[currentQuestionIndex];
-            
-            // 진행 상태 업데이트
-            document.getElementById('current-question').textContent = currentQuestionIndex + 1;
-            const progress = ((currentQuestionIndex) / totalQuestions) * 100;
-            document.getElementById('progress-fill').style.width = progress + '%';
-            
-            // 안내 메시지 초기화 (매우 중요!)
-            const instruction = document.querySelector('.instruction');
-            instruction.innerHTML = `
-                <i class="fas fa-hand-pointer" style="font-size: 24px; color: #FF9800; margin-bottom: 10px;"></i>
-                <div>카드를 드래그하여 올바른 순서로 배열하세요!</div>
-                <div style="font-size: 14px; color: #999; margin-top: 10px;">
-                    카드 오른쪽의 핸들(⋮⋮)을 잡고 위아래로 움직여서 순서를 바꿀 수 있어요
-                </div>
-            `;
-            instruction.style.borderColor = '#FF9800';
-            
-            // 카드 렌더링
-            renderCards(question.pages);
-        }
-
-        function renderCards(pages) {
-            const container = document.getElementById('story-cards');
+        // 페이지 카드 렌더링
+        function renderPages() {
+            const container = document.getElementById('pagesContainer');
             container.innerHTML = '';
-            
-            pages.forEach((pageData, index) => {
-                const page = pageData.page;
+
+            currentPages.forEach((page, index) => {
                 const card = document.createElement('div');
-                card.className = 'story-card';
+                card.className = 'page-card';
                 card.draggable = true;
-                card.dataset.pageIndex = pageData.index;
-                
-                // 텍스트 추출 (첫 문장)
-                const sentences = page.text.split(/[.!?]/).filter(s => s.trim().length > 10);
-                const text = sentences[0] ? sentences[0].trim() + '...' : page.text.substring(0, 50) + '...';
-                
-                // 페이지 삽화 이미지 사용
-                let imageHTML;
+                card.dataset.index = index;
+                card.dataset.pageNumber = page.pageNumber;
+
+                // 드래그 핸들
+                const dragHandle = document.createElement('div');
+                dragHandle.className = 'drag-handle';
+                dragHandle.innerHTML = '⋮⋮';
+                card.appendChild(dragHandle);
+
+                // 페이지 번호
+                const pageNumber = document.createElement('div');
+                pageNumber.className = 'page-number';
+                pageNumber.textContent = index + 1;
+                card.appendChild(pageNumber);
+
+                // 페이지 이미지
                 if (page.illustrationImage) {
-                    imageHTML = `<img src="${page.illustrationImage}" class="card-image" alt="페이지 ${page.pageNumber} 삽화">`;
+                    const img = document.createElement('img');
+                    img.className = 'page-image';
+                    img.src = page.illustrationImage;
+                    img.alt = `페이지 ${page.pageNumber}`;
+                    card.appendChild(img);
                 } else {
-                    // fallback: 기본 아이콘
-                    imageHTML = `<div class="card-image" style="background: linear-gradient(135deg, #FFE082, #FFCC80); display: flex; align-items: center; justify-content: center; font-size: 48px;">📖</div>`;
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'page-image';
+                    placeholder.style.display = 'flex';
+                    placeholder.style.alignItems = 'center';
+                    placeholder.style.justifyContent = 'center';
+                    placeholder.innerHTML = '<i class="fas fa-book" style="font-size: 50px; color: #ccc;"></i>';
+                    card.appendChild(placeholder);
                 }
-                
-                card.innerHTML = `
-                    <div class="card-number">${index + 1}</div>
-                    ${imageHTML}
-                    <div class="card-content">
-                        <div class="card-text">${text}</div>
-                    </div>
-                    <div class="drag-handle">
-                        <i class="fas fa-grip-vertical" style="color: #FF9800;"></i>
-                    </div>
-                `;
-                
+
+                // 페이지 텍스트
+                const text = document.createElement('div');
+                text.className = 'page-text';
+                text.textContent = page.text || '';
+                card.appendChild(text);
+
                 // 드래그 이벤트
                 card.addEventListener('dragstart', handleDragStart);
                 card.addEventListener('dragover', handleDragOver);
-                card.addEventListener('dragenter', handleDragEnter);
-                card.addEventListener('dragleave', handleDragLeave);
                 card.addEventListener('drop', handleDrop);
                 card.addEventListener('dragend', handleDragEnd);
-                
+
                 container.appendChild(card);
             });
         }
 
-        let draggedElement = null;
-
+        // 드래그 이벤트 핸들러
         function handleDragStart(e) {
             draggedElement = this;
             this.classList.add('dragging');
@@ -503,180 +542,122 @@
                 e.preventDefault();
             }
             e.dataTransfer.dropEffect = 'move';
-            return false;
-        }
-
-        function handleDragEnter(e) {
+            
             if (this !== draggedElement) {
                 this.classList.add('drag-over');
             }
-        }
-
-        function handleDragLeave(e) {
-            this.classList.remove('drag-over');
+            return false;
         }
 
         function handleDrop(e) {
             if (e.stopPropagation) {
                 e.stopPropagation();
             }
-            
-            this.classList.remove('drag-over');
-            
+
             if (draggedElement !== this) {
-                const container = document.getElementById('story-cards');
-                const cards = Array.from(container.children);
-                const draggedIndex = cards.indexOf(draggedElement);
-                const targetIndex = cards.indexOf(this);
-                
-                if (draggedIndex < targetIndex) {
-                    container.insertBefore(draggedElement, this.nextSibling);
-                } else {
-                    container.insertBefore(draggedElement, this);
-                }
-                
-                updateCardNumbers();
+                // 배열에서 위치 교환
+                const draggedIndex = parseInt(draggedElement.dataset.index);
+                const targetIndex = parseInt(this.dataset.index);
+
+                [currentPages[draggedIndex], currentPages[targetIndex]] = 
+                [currentPages[targetIndex], currentPages[draggedIndex]];
+
+                renderPages();
             }
-            
+
+            this.classList.remove('drag-over');
             return false;
         }
 
         function handleDragEnd(e) {
             this.classList.remove('dragging');
             
-            // 모든 drag-over 제거
-            const cards = document.querySelectorAll('.story-card');
-            cards.forEach(card => card.classList.remove('drag-over'));
-        }
-
-        function updateCardNumbers() {
-            const cards = document.querySelectorAll('.story-card');
-            cards.forEach((card, index) => {
-                const numberElement = card.querySelector('.card-number');
-                numberElement.textContent = index + 1;
+            document.querySelectorAll('.page-card').forEach(card => {
+                card.classList.remove('drag-over');
             });
         }
 
+        // 배열 섞기
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // 정답 확인
         function checkAnswer() {
-            const question = questions[currentQuestionIndex];
-            const cards = document.querySelectorAll('.story-card');
-            const currentOrder = Array.from(cards).map(card => parseInt(card.dataset.pageIndex));
-            
-            const isCorrect = JSON.stringify(currentOrder) === JSON.stringify(question.correctOrder);
-            
-            // 버튼 비활성화
-            const checkButton = document.querySelector('.check-button');
-            checkButton.disabled = true;
-            checkButton.style.opacity = '0.5';
-            
+            const question = quizQuestions[currentQuestionIndex];
+            const userOrder = currentPages.map(p => p.pageNumber);
+            const correctOrder = question.correctOrder;
+
+            const isCorrect = JSON.stringify(userOrder) === JSON.stringify(correctOrder);
+
+            const feedbackMessage = document.getElementById('feedbackMessage');
             if (isCorrect) {
-                correctCount++;
-                document.getElementById('correct-count').textContent = correctCount;
-                
-                // 성공 피드백 - 각 카드에 애니메이션
-                cards.forEach((card, index) => {
-                    setTimeout(() => {
-                        card.style.borderColor = '#4CAF50';
-                        card.style.background = 'linear-gradient(135deg, #C8E6C9, #A5D6A7)';
-                        card.style.transform = 'scale(1.05)';
-                        
-                        // 정답 체크 아이콘 추가
-                        const checkIcon = document.createElement('div');
-                        checkIcon.innerHTML = '<i class="fas fa-check-circle" style="color: #4CAF50; font-size: 32px;"></i>';
-                        checkIcon.style.position = 'absolute';
-                        checkIcon.style.top = '10px';
-                        checkIcon.style.right = '10px';
-                        card.appendChild(checkIcon);
-                    }, index * 100);
-                });
-                
-                // 축하 메시지
-                setTimeout(() => {
-                    const instruction = document.querySelector('.instruction');
-                    instruction.innerHTML = `
-                        <i class="fas fa-check-circle" style="font-size: 48px; color: #4CAF50; margin-bottom: 10px;"></i>
-                        <div style="font-size: 24px; color: #4CAF50; font-weight: 700;">정답입니다! 🎉</div>
-                        <div style="font-size: 16px; color: #666; margin-top: 10px;">잠시 후 다음 문제로 넘어갑니다...</div>
-                    `;
-                    instruction.style.borderColor = '#4CAF50';
-                }, 500);
-                
+                feedbackMessage.className = 'feedback-message correct';
+                feedbackMessage.innerHTML = '<i class="fas fa-check-circle"></i> 정답입니다! 잘했어요!';
+                correctAnswers++;
+                document.getElementById('correctCount').textContent = correctAnswers;
+
+                // 1.5초 후 다음 문제로
                 setTimeout(() => {
                     currentQuestionIndex++;
-                    checkButton.disabled = false;
-                    checkButton.style.opacity = '1';
-                    loadQuestion();
-                }, 2500);
-                
-            } else {
-                // 실패 피드백 - 틀린 순서 표시
-                let correctPositions = 0;
-                cards.forEach((card, index) => {
-                    const pageIndex = parseInt(card.dataset.pageIndex);
-                    if (question.correctOrder[index] === pageIndex) {
-                        // 올바른 위치
-                        card.style.borderColor = '#4CAF50';
-                        card.style.background = 'linear-gradient(135deg, #C8E6C9, #A5D6A7)';
-                        correctPositions++;
+                    if (currentQuestionIndex < quizQuestions.length) {
+                        renderQuestion();
                     } else {
-                        // 잘못된 위치
-                        card.style.borderColor = '#F44336';
-                        card.style.background = 'linear-gradient(135deg, #FFCDD2, #EF9A9A)';
-                        card.style.animation = 'shake 0.5s';
+                        showResults();
                     }
-                });
-                
-                // 오답 메시지
-                const instruction = document.querySelector('.instruction');
-                instruction.innerHTML = `
-                    <i class="fas fa-times-circle" style="font-size: 48px; color: #F44336; margin-bottom: 10px;"></i>
-                    <div style="font-size: 24px; color: #F44336; font-weight: 700;">아쉬워요! 😅</div>
-                    <div style="font-size: 16px; color: #666; margin-top: 10px;">
-                        ${correctPositions}개의 카드가 올바른 위치에 있어요.<br>
-                        빨간색 카드의 순서를 다시 맞춰보세요!
-                    </div>
-                `;
-                instruction.style.borderColor = '#F44336';
-                
-                setTimeout(() => {
-                    // 피드백 초기화
-                    cards.forEach(card => {
-                        card.style.borderColor = '#FFE082';
-                        card.style.background = 'linear-gradient(135deg, #FFF9C4, #FFF59D)';
-                        card.style.animation = '';
-                    });
-                    
-                    instruction.innerHTML = `
-                        <i class="fas fa-hand-pointer" style="font-size: 24px; color: #FF9800; margin-bottom: 10px;"></i>
-                        <div>카드를 드래그하여 올바른 순서로 배열하세요!</div>
-                        <div style="font-size: 14px; color: #999; margin-top: 10px;">
-                            카드 오른쪽의 핸들(⋮⋮)을 잡고 위아래로 움직여서 순서를 바꿀 수 있어요
-                        </div>
-                    `;
-                    instruction.style.borderColor = '#FF9800';
-                    
-                    checkButton.disabled = false;
-                    checkButton.style.opacity = '1';
-                }, 3000);
+                }, 1500);
+            } else {
+                feedbackMessage.className = 'feedback-message incorrect';
+                feedbackMessage.innerHTML = '<i class="fas fa-times-circle"></i> 아쉬워요. 다시 한번 시도해보세요!';
             }
         }
 
-        function showFinalResult() {
-            const wrongCount = totalQuestions - correctCount;
+        // 결과 표시
+        function showResults() {
+            const progress = 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `${progress}%`;
+
+            document.getElementById('resultScore').textContent = `${correctAnswers} / ${quizQuestions.length}`;
             
-            document.getElementById('result-icon').textContent = correctCount === totalQuestions ? '🎉' : '😊';
-            document.getElementById('result-title').textContent = correctCount === totalQuestions ? '완벽해요!' : '수고했어요!';
-            document.getElementById('final-correct').textContent = correctCount;
-            document.getElementById('final-wrong').textContent = wrongCount;
+            let message = '';
+            const percentage = (correctAnswers / quizQuestions.length) * 100;
+            if (percentage === 100) {
+                message = '완벽해요! 🎉';
+            } else if (percentage >= 75) {
+                message = '정말 잘했어요! 👏';
+            } else if (percentage >= 50) {
+                message = '좋아요! 💪';
+            } else {
+                message = '다시 한번 도전해보세요! 📚';
+            }
             
-            document.getElementById('result-modal').style.display = 'flex';
+            document.getElementById('resultMessage').textContent = message;
+            document.getElementById('resultModal').classList.add('show');
         }
 
+        // 게임 재시작
+        function restartGame() {
+            currentQuestionIndex = 0;
+            correctAnswers = 0;
+            document.getElementById('correctCount').textContent = '0';
+            document.getElementById('resultModal').classList.remove('show');
+            generateQuestions();
+            renderQuestion();
+        }
+
+        // 뒤로가기
         function goBack() {
-            window.location.href = `/games.html?id=${storyId}`;
+            window.history.back();
         }
 
-        init();
+        // 페이지 로드 시 실행
+        loadStory();
     </script>
 </body>
 </html>

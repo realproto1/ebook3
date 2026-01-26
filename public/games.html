@@ -2,8 +2,8 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🎮 독후활동 게임 - 탱고북</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>독후활동 게임 - 탱고북</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -12,212 +12,254 @@
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #FFF5F7 0%, #FFE8EE 100%);
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            overflow-x: hidden;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 40px 20px;
         }
 
         .header {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.1);
+            text-align: center;
+            margin-bottom: 50px;
         }
 
-        .header h1 {
+        .main-title {
             font-size: 48px;
-            color: #FF6B9D;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #FF6B9D, #FF8DB4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .header .story-title {
-            font-size: 24px;
-            color: #666;
-            margin-bottom: 15px;
-        }
-
-        .back-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #FF6B9D, #FF8DB4);
+            font-weight: bold;
             color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
-        .back-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.3);
+        .story-title {
+            font-size: 24px;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: rgba(255,255,255,0.8);
         }
 
         .games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
+            gap: 30px;
+            margin-top: 40px;
         }
 
         .game-card {
             background: white;
             border-radius: 20px;
-            padding: 40px;
-            text-align: center;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             cursor: pointer;
-            transition: all 0.3s;
-            border: 3px solid transparent;
-            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .game-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(255, 107, 157, 0.25);
-            border-color: #FF6B9D;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
         }
 
-        .game-card .game-icon {
-            font-size: 64px;
+        .game-card:hover::before {
+            opacity: 1;
+        }
+
+        .game-card.purple {
+            border-top: 5px solid #9C27B0;
+        }
+
+        .game-card.pink {
+            border-top: 5px solid #E91E63;
+        }
+
+        .game-card.blue {
+            border-top: 5px solid #2196F3;
+        }
+
+        .game-card.orange {
+            border-top: 5px solid #FF9800;
+        }
+
+        .game-icon {
+            font-size: 60px;
+            text-align: center;
             margin-bottom: 20px;
         }
 
-        .game-card .game-title {
+        .game-card.purple .game-icon { color: #9C27B0; }
+        .game-card.pink .game-icon { color: #E91E63; }
+        .game-card.blue .game-icon { color: #2196F3; }
+        .game-card.orange .game-icon { color: #FF9800; }
+
+        .game-title {
             font-size: 24px;
-            font-weight: 700;
-            color: #FF6B9D;
-            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin-bottom: 15px;
         }
 
-        .game-card .game-desc {
-            font-size: 14px;
-            color: #999;
+        .game-description {
+            font-size: 16px;
+            color: #666;
+            text-align: center;
             line-height: 1.6;
         }
 
-        .game-card.memory-match { border-bottom: 5px solid #9C27B0; }
-        .game-card.word-quiz { border-bottom: 5px solid #2196F3; }
-        .game-card.word-builder { border-bottom: 5px solid #4CAF50; }
-        .game-card.word-tracing { border-bottom: 5px solid #FF9800; }
-        .game-card.story-quiz { border-bottom: 5px solid #F44336; }
-
-        .loading {
-            text-align: center;
-            padding: 100px 20px;
-        }
-
-        .loading-spinner {
-            display: inline-block;
+        .back-button {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            background: white;
             width: 60px;
             height: 60px;
-            border: 6px solid #FFE8EE;
-            border-top-color: #FF6B9D;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 100;
+            transition: all 0.3s ease;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            margin-top: 20px;
-            font-size: 18px;
-            color: #FF6B9D;
-            font-weight: 600;
+        .back-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
         }
 
         @media (max-width: 768px) {
-            .header h1 {
+            .main-title {
                 font-size: 32px;
             }
 
-            .header .story-title {
-                font-size: 18px;
+            .story-title {
+                font-size: 20px;
+            }
+
+            .subtitle {
+                font-size: 16px;
             }
 
             .games-grid {
                 grid-template-columns: 1fr;
+                gap: 20px;
             }
 
             .game-card {
-                padding: 30px;
+                padding: 25px;
             }
 
-            .game-card .game-icon {
-                font-size: 48px;
+            .game-icon {
+                font-size: 50px;
             }
 
-            .game-card .game-title {
+            .game-title {
                 font-size: 20px;
+            }
+
+            .game-description {
+                font-size: 14px;
+            }
+
+            .back-button {
+                top: 20px;
+                left: 20px;
+                width: 50px;
+                height: 50px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- 뒤로가기 버튼 -->
+    <div class="back-button" onclick="goBack()">
+        <i class="fas fa-arrow-left" style="font-size: 28px; color: #667eea;"></i>
+    </div>
+
     <div class="container">
-        <!-- 로딩 -->
-        <div id="loading" class="loading">
-            <div class="loading-spinner"></div>
-            <div class="loading-text">🎮 게임을 준비하는 중...</div>
+        <!-- 헤더 -->
+        <div class="header">
+            <div class="main-title">
+                <i class="fas fa-gamepad"></i>
+                독후활동 게임
+            </div>
+            <div class="story-title" id="storyTitle">동화책</div>
+            <div class="subtitle">재미있는 게임으로 동화를 복습해보세요!</div>
         </div>
 
-        <!-- 메인 컨텐츠 -->
-        <div id="main-content" style="display: none;">
-            <!-- 헤더 -->
-            <div class="header">
-                <button class="back-button" onclick="goBack()">
-                    <i class="fas fa-arrow-left"></i>
-                    돌아가기
-                </button>
-                <h1>🎮 독후활동 게임</h1>
-                <div id="story-title" class="story-title">동화책 제목</div>
+        <!-- 게임 목록 -->
+        <div class="games-grid">
+            <!-- 1. 핵심 사물 퀴즈 -->
+            <div class="game-card purple" onclick="startGame('story-quiz')">
+                <div class="game-icon">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <div class="game-title">핵심 사물 퀴즈</div>
+                <div class="game-description">
+                    Key Objects를 찾아보며<br>
+                    동화 내용을 복습해요!
+                </div>
             </div>
 
-            <!-- 게임 선택 -->
-            <div class="games-grid">
-                <!-- 1. Key Object 퀴즈 게임 -->
-                <div class="game-card story-quiz" onclick="startGame('story-quiz')">
-                    <div class="game-icon">🎯</div>
-                    <div class="game-title">핵심 사물 퀴즈</div>
-                    <div class="game-desc">Key Objects를 찾아보며<br>동화 내용을 복습해요!</div>
+            <!-- 2. 사물 카드 매칭 -->
+            <div class="game-card pink" onclick="startGame('memory-match')">
+                <div class="game-icon">
+                    <i class="fas fa-clone"></i>
                 </div>
-
-                <!-- 2. 카드 매칭 게임 -->
-                <div class="game-card memory-match" onclick="startGame('memory-match')">
-                    <div class="game-icon">🃏</div>
-                    <div class="game-title">사물 카드 매칭</div>
-                    <div class="game-desc">카드를 뒤집어서<br>같은 사물을 찾아요!</div>
+                <div class="game-title">사물 카드 매칭</div>
+                <div class="game-description">
+                    카드를 뒤집어서<br>
+                    이미지와 이름을 매칭해요!
                 </div>
+            </div>
 
-                <!-- 3. 스토리 순서 맞추기 -->
-                <div class="game-card word-builder" onclick="startGame('story-sequence')">
-                    <div class="game-icon">📚</div>
-                    <div class="game-title">스토리 순서 맞추기</div>
-                    <div class="game-desc">이야기의 순서를<br>올바르게 배열해요!</div>
+            <!-- 3. 스토리 순서 맞추기 -->
+            <div class="game-card blue" onclick="startGame('story-sequence')">
+                <div class="game-icon">
+                    <i class="fas fa-sort-numeric-down"></i>
                 </div>
+                <div class="game-title">스토리 순서 맞추기</div>
+                <div class="game-description">
+                    이야기의 순서를<br>
+                    올바르게 배열해요!
+                </div>
+            </div>
 
-                <!-- 4. 캐릭터 맞히기 -->
-                <div class="game-card word-quiz" onclick="startGame('character-quiz')">
-                    <div class="game-icon">👤</div>
-                    <div class="game-title">캐릭터 맞히기</div>
-                    <div class="game-desc">누가 이 말을 했을까요?<br>캐릭터를 맞혀보세요!</div>
+            <!-- 4. 단어 따라 써보기 -->
+            <div class="game-card orange" onclick="startGame('word-writing')">
+                <div class="game-icon">
+                    <i class="fas fa-pen-fancy"></i>
+                </div>
+                <div class="game-title">단어 따라 써보기</div>
+                <div class="game-description">
+                    핵심 사물의 이름을<br>
+                    따라 써보아요!
                 </div>
             </div>
         </div>
@@ -225,88 +267,43 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script>
-        // URL에서 스토리 ID 추출 (id 또는 story 파라미터 모두 지원)
+        // URL에서 스토리 ID 가져오기
         const urlParams = new URLSearchParams(window.location.search);
-        const storyId = urlParams.get('id') || urlParams.get('story');
+        const storyId = urlParams.get('story') || urlParams.get('id');
 
-        // 디버깅 로그
-        console.log('🎮 Games.html loaded');
-        console.log('📍 Current URL:', window.location.href);
-        console.log('🔑 Story ID from URL:', storyId);
-        console.log('🔍 URL Params - id:', urlParams.get('id'), 'story:', urlParams.get('story'));
+        if (!storyId) {
+            alert('스토리 ID가 없습니다.');
+            goBack();
+        }
 
-        // 스토리 데이터
-        let storyData = null;
-
-        // 초기화
-        async function init() {
-            if (!storyId) {
-                console.error('❌ No story ID found in URL');
-                alert('❌ 스토리 ID가 없습니다.');
-                window.history.back();
-                return;
-            }
-            
-            console.log('✅ Story ID found:', storyId);
-
+        // 스토리 정보 로드
+        async function loadStoryInfo() {
             try {
-                // 스토리 데이터 로드
+                console.log('📚 스토리 정보 로딩:', storyId);
                 const response = await axios.get(`/api/storybooks/${storyId}`);
-                storyData = response.data; // API는 직접 storybook 객체 반환
-
-                console.log('📦 Loaded storybook data:', {
-                    title: storyData.title,
-                    hasQuizzes: !!storyData.quizzes,
-                    quizCount: storyData.quizzes?.length || 0,
-                    hasKeyObjects: !!storyData.key_objects,
-                    keyObjectCount: storyData.key_objects?.length || 0
-                });
-
-                // 제목 표시
-                document.getElementById('story-title').textContent = storyData.title || '동화책';
-
-                // 퀴즈 확인 (Key Objects 기반 퀴즈)
-                const quizzes = storyData.quizzes || [];
-                const keyObjects = storyData.key_objects || [];
+                const storyData = response.data;
                 
-                if (quizzes.length === 0) {
-                    const message = keyObjects.length === 0 
-                        ? '❌ 이 동화책에는 Key Objects와 퀴즈가 없습니다.\n\n먼저 편집 페이지에서:\n1. Key Objects(핵심 사물)를 생성하고\n2. 퀴즈를 만들어주세요.'
-                        : '❌ 이 동화책에는 아직 퀴즈가 없습니다.\n\n편집 페이지에서 "퀴즈 만들기" 버튼을 눌러주세요.';
-                    
-                    alert(message);
-                    window.history.back();
-                    return;
-                }
-
-                console.log(`✅ 퀴즈 ${quizzes.length}개 로드 완료`);
-                console.log(`📦 Key Objects ${keyObjects.length}개 확인`);
-
-                // 로딩 숨기고 메인 표시
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('main-content').style.display = 'block';
-
+                console.log('✅ 스토리 로드 완료:', storyData.title);
+                document.getElementById('storyTitle').textContent = storyData.title || '동화책';
             } catch (error) {
                 console.error('❌ 스토리 로드 실패:', error);
-                console.error('Error details:', error.response?.data || error.message);
-                alert('동화책을 불러오는데 실패했습니다.\n\n에러: ' + (error.response?.data?.error || error.message));
-                window.history.back();
+                document.getElementById('storyTitle').textContent = '동화책';
             }
         }
 
         // 게임 시작
         function startGame(gameType) {
-            // 각 게임 페이지로 이동 (storyId 전달)
-            window.location.href = `/games/${gameType}.html?story=${storyId}`;
+            console.log(`🎮 게임 시작: ${gameType}`);
+            window.location.href = `/games/${gameType}.html?id=${storyId}`;
         }
 
-        // 뒤로 가기 - 동화책 페이지로 직접 이동
+        // 뒤로가기
         function goBack() {
-            window.location.href = `/book.html?id=${storyId}`;
+            window.history.back();
         }
 
-        // 페이지 로드 시 초기화
-        init();
+        // 페이지 로드 시 실행
+        loadStoryInfo();
     </script>
 </body>
 </html>

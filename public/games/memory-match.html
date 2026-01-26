@@ -3,156 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🃏 사물 카드 매칭 - 탱고북</title>
+    <title>사물 카드 매칭 - 탱고북</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Noto Sans KR', sans-serif;
-            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             min-height: 100vh;
-            padding: 20px;
+            overflow-x: hidden;
         }
 
         .game-container {
             max-width: 900px;
             margin: 0 auto;
+            padding: 20px;
         }
 
         .game-header {
             background: white;
             border-radius: 20px;
-            padding: 30px;
+            padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        .back-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #4CAF50, #66BB6A);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 15px;
-        }
-
-        .back-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        .story-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f5576c;
+            text-align: center;
+            margin-bottom: 10px;
         }
 
         .game-stats {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
             display: flex;
             justify-content: space-around;
-            box-shadow: 0 3px 10px rgba(76, 175, 80, 0.1);
+            margin-top: 15px;
+            gap: 10px;
         }
 
         .stat-item {
-            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
         }
 
-        .stat-label {
-            font-size: 14px;
-            color: #999;
-            margin-bottom: 5px;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #4CAF50;
-        }
-
-        .game-area {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
-        }
-
-        .cards-grid {
+        .cards-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 15px;
-            margin-top: 30px;
+            margin-top: 20px;
         }
 
         .memory-card {
-            aspect-ratio: 1;
-            background: linear-gradient(135deg, #A5D6A7 0%, #81C784 100%);
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
+            aspect-ratio: 3/4;
             position: relative;
+            cursor: pointer;
+            perspective: 1000px;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
             transform-style: preserve-3d;
         }
 
-        .memory-card:hover {
-            transform: scale(1.05);
+        .memory-card.flipped .card-inner {
+            transform: rotateY(180deg);
         }
 
-        .memory-card.flipped {
-            background: white;
-            border: 3px solid #4CAF50;
-        }
-
-        .memory-card.matched {
-            background: #E8F5E9;
-            border: 3px solid #4CAF50;
+        .memory-card.matched .card-inner {
+            transform: rotateY(180deg);
             opacity: 0.6;
-            pointer-events: none;
         }
 
-        .card-front,
-        .card-back {
+        .card-face {
             position: absolute;
             width: 100%;
             height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 15px;
-            backface-visibility: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         .card-front {
-            background: linear-gradient(135deg, #A5D6A7 0%, #81C784 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 60px;
         }
 
         .card-back {
             background: white;
+            transform: rotateY(180deg);
+            padding: 10px;
         }
 
-        .card-icon {
-            font-size: 40px;
-            color: white;
+        .card-back.image-card {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .card-image {
-            width: 80%;
-            height: 60%;
-            object-fit: cover;
+            width: 100%;
+            height: 70%;
+            object-fit: contain;
             border-radius: 10px;
         }
 
-        .card-name {
-            font-size: 12px;
-            font-weight: 600;
+        .card-back.text-card {
+            font-size: 18px;
+            font-weight: bold;
             color: #333;
-            margin-top: 5px;
-            text-align: center;
+            word-break: keep-all;
+            padding: 20px;
         }
 
         .result-modal {
@@ -162,105 +142,205 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0,0,0,0.7);
             z-index: 1000;
             align-items: center;
             justify-content: center;
         }
 
+        .result-modal.show {
+            display: flex;
+        }
+
         .result-content {
             background: white;
-            border-radius: 30px;
-            padding: 50px;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
             text-align: center;
-            max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .result-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .result-stat {
+            text-align: center;
+        }
+
+        .result-stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #f5576c;
+        }
+
+        .result-stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
         }
 
         .btn {
-            padding: 15px 30px;
-            font-size: 18px;
-            font-weight: 600;
-            border: none;
-            border-radius: 12px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
+            border: none;
+            transition: all 0.3s ease;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
         }
 
-        .btn:hover {
+        .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: scale(1.1);
         }
 
         @media (max-width: 768px) {
-            .cards-grid {
+            .cards-container {
                 grid-template-columns: repeat(3, 1fr);
                 gap: 10px;
             }
 
-            .game-header h1 {
-                font-size: 28px;
+            .card-back.text-card {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .card-front {
+                font-size: 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cards-container {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
 </head>
 <body>
+    <!-- 뒤로가기 버튼 -->
+    <div class="back-button" onclick="goBack()">
+        <i class="fas fa-arrow-left" style="font-size: 24px; color: #f5576c;"></i>
+    </div>
+
     <div class="game-container">
+        <!-- 게임 헤더 -->
         <div class="game-header">
-            <button class="back-button" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i>
-                돌아가기
-            </button>
-            <h1 style="font-size: 36px; color: #4CAF50; margin-bottom: 10px;">🃏 사물 카드 매칭</h1>
-            <div id="story-title" style="font-size: 18px; color: #999;"></div>
-        </div>
-
-        <div class="game-stats">
-            <div class="stat-item">
-                <div class="stat-label">시도 횟수</div>
-                <div class="stat-value" id="moves-count">0</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label">맞춘 짝</div>
-                <div class="stat-value" id="matches-count">0</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label">남은 짝</div>
-                <div class="stat-value" id="remaining-count">0</div>
+            <div class="story-title" id="storyTitle">동화책</div>
+            <div class="game-stats">
+                <div class="stat-item">
+                    <i class="fas fa-gamepad" style="color: #f5576c;"></i>
+                    <span id="movesCount">0</span>번 시도
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-check-circle" style="color: #4caf50;"></i>
+                    <span id="matchedCount">0</span> / <span id="totalPairs">6</span> 매칭
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-clock" style="color: #ff9800;"></i>
+                    <span id="timeDisplay">0:00</span>
+                </div>
             </div>
         </div>
 
-        <div class="game-area">
-            <div style="text-align: center; font-size: 18px; color: #666; margin-bottom: 20px;">
-                <i class="fas fa-lightbulb" style="color: #FFC107; margin-right: 5px;"></i>
-                같은 사물 카드 2개를 찾아서 짝을 맞춰보세요!
-            </div>
-
-            <div id="cards-grid" class="cards-grid">
-                <!-- JavaScript로 동적 생성 -->
-            </div>
+        <!-- 카드 영역 -->
+        <div class="cards-container" id="cardsContainer">
+            <!-- 카드가 동적으로 추가됩니다 -->
         </div>
     </div>
 
     <!-- 결과 모달 -->
-    <div id="result-modal" class="result-modal">
+    <div class="result-modal" id="resultModal">
         <div class="result-content">
-            <div style="font-size: 80px;">🎉</div>
-            <h2 style="font-size: 36px; color: #4CAF50; margin: 20px 0;">완성!</h2>
-            <div style="font-size: 20px; margin: 30px 0; color: #666;">
-                <div style="margin: 10px 0;">총 시도: <strong id="final-moves" style="color: #4CAF50;">0</strong>회</div>
-                <div style="margin: 10px 0;">맞춘 짝: <strong id="final-matches" style="color: #4CAF50;">0</strong>개</div>
+            <div class="result-icon">🎉</div>
+            <div class="result-title">완료!</div>
+            <div class="result-stats">
+                <div class="result-stat">
+                    <div class="result-stat-value" id="finalMoves">0</div>
+                    <div class="result-stat-label">시도 횟수</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-stat-value" id="finalTime">0:00</div>
+                    <div class="result-stat-label">소요 시간</div>
+                </div>
             </div>
-            <div style="display: flex; gap: 15px; justify-content: center;">
-                <button class="btn btn-primary" onclick="location.reload()">
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="restartGame()">
                     <i class="fas fa-redo"></i> 다시 하기
                 </button>
-                <button class="btn btn-primary" onclick="goBack()">
+                <button class="btn btn-secondary" onclick="goBack()">
                     <i class="fas fa-list"></i> 게임 목록
                 </button>
             </div>
@@ -269,178 +349,261 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const storyId = urlParams.get('story') || urlParams.get('id');
-        
         let storyData = null;
         let cards = [];
         let flippedCards = [];
         let matchedPairs = 0;
         let moves = 0;
-        let canFlip = true;
+        let startTime = null;
+        let timerInterval = null;
+        let isProcessing = false;
 
-        async function init() {
-            if (!storyId) {
-                alert('❌ 스토리 ID가 없습니다.');
-                goBack();
-                return;
-            }
+        // URL에서 스토리 ID 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const storyId = urlParams.get('story') || urlParams.get('id');
 
+        if (!storyId) {
+            alert('스토리 ID가 없습니다.');
+            goBack();
+        }
+
+        // 스토리 데이터 로드
+        async function loadStory() {
             try {
+                console.log('📚 스토리 로딩 중:', storyId);
                 const response = await axios.get(`/api/storybooks/${storyId}`);
                 storyData = response.data;
                 
-                document.getElementById('story-title').textContent = storyData.title || '동화책';
+                console.log('✅ 스토리 로드 완료:', storyData.title);
+                document.getElementById('storyTitle').textContent = storyData.title || '동화책';
+
+                // Key Objects 이미지 확인
+                const keyObjects = storyData.keyObjectImages?.filter(obj => obj.imageUrl && obj.success) || [];
                 
-                // Key Objects Images 확인
-                const keyObjectImages = storyData.keyObjectImages || [];
-                const validObjects = keyObjectImages.filter(obj => obj.imageUrl && obj.success);
-                
-                if (validObjects.length < 4) {
-                    alert('❌ 이 동화책에는 충분한 Key Objects 이미지가 없습니다.\n최소 4개 이상이 필요합니다.');
+                if (keyObjects.length < 4) {
+                    alert('Key Objects 이미지가 부족합니다. (최소 4개 필요)');
                     goBack();
                     return;
                 }
 
-                // 카드 생성 (6쌍 = 12장)
-                generateCards();
-                renderCards();
-                
+                // 6쌍(12장)의 카드 생성
+                generateCards(keyObjects);
+                startTimer();
             } catch (error) {
-                console.error('스토리 로드 실패:', error);
+                console.error('❌ 스토리 로드 실패:', error);
                 alert('동화책을 불러오는데 실패했습니다.');
                 goBack();
             }
         }
 
-        function generateCards() {
-            // keyObjectImages 배열 사용 (이미지가 있는 것만)
-            const keyObjectImages = storyData.keyObjectImages || [];
-            const validObjects = keyObjectImages.filter(obj => obj.imageUrl && obj.success).slice(0, 6);
-            
-            if (validObjects.length === 0) {
-                alert('❌ 이 동화책에는 Key Objects 이미지가 없습니다.');
-                goBack();
-                return;
-            }
-            
-            // 각 객체를 2번씩 추가 (짝 만들기)
-            validObjects.forEach((obj, index) => {
-                cards.push({ id: index, object: obj, matched: false });
-                cards.push({ id: index, object: obj, matched: false });
+        // 카드 생성
+        function generateCards(keyObjects) {
+            // 최대 6개의 Key Objects 선택
+            const selectedObjects = keyObjects.slice(0, 6);
+            document.getElementById('totalPairs').textContent = selectedObjects.length;
+
+            const cardPairs = [];
+
+            // 각 Key Object마다 이미지 카드와 텍스트 카드 생성
+            selectedObjects.forEach((obj, index) => {
+                // 이미지 카드
+                cardPairs.push({
+                    id: `img-${index}`,
+                    pairId: index,
+                    type: 'image',
+                    imageUrl: obj.imageUrl,
+                    name: obj.name
+                });
+
+                // 텍스트 카드
+                cardPairs.push({
+                    id: `text-${index}`,
+                    pairId: index,
+                    type: 'text',
+                    name: obj.name
+                });
             });
-            
+
             // 카드 섞기
-            shuffleArray(cards);
-            
-            // 통계 초기화
-            document.getElementById('remaining-count').textContent = validObjects.length;
+            cards = shuffleArray(cardPairs);
+            renderCards();
         }
 
+        // 배열 섞기
         function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
             }
+            return newArray;
         }
 
+        // 카드 렌더링
         function renderCards() {
-            const grid = document.getElementById('cards-grid');
-            grid.innerHTML = '';
-            
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = '';
+
             cards.forEach((card, index) => {
                 const cardElement = document.createElement('div');
                 cardElement.className = 'memory-card';
                 cardElement.dataset.index = index;
                 cardElement.onclick = () => flipCard(index);
-                
-                const frontHTML = `
-                    <div class="card-front">
-                        <i class="fas fa-question card-icon"></i>
-                    </div>
-                `;
-                
-                const backHTML = card.object.imageUrl 
-                    ? `
-                        <div class="card-back">
-                            <img src="${card.object.imageUrl}" class="card-image" alt="${card.object.name}">
-                            <div class="card-name">${card.object.name}</div>
-                        </div>
-                    `
-                    : `
-                        <div class="card-back">
-                            <div style="font-size: 40px; margin-bottom: 10px;">🎯</div>
-                            <div class="card-name">${card.object.name}</div>
-                        </div>
-                    `;
-                
-                cardElement.innerHTML = frontHTML + backHTML;
-                grid.appendChild(cardElement);
+
+                const cardInner = document.createElement('div');
+                cardInner.className = 'card-inner';
+
+                // 앞면 (물음표)
+                const cardFront = document.createElement('div');
+                cardFront.className = 'card-face card-front';
+                cardFront.innerHTML = '<i class="fas fa-question"></i>';
+
+                // 뒷면 (이미지 또는 텍스트)
+                const cardBack = document.createElement('div');
+                cardBack.className = `card-face card-back ${card.type}-card`;
+
+                if (card.type === 'image') {
+                    cardBack.innerHTML = `<img src="${card.imageUrl}" alt="${card.name}" class="card-image">`;
+                } else {
+                    cardBack.textContent = card.name;
+                }
+
+                cardInner.appendChild(cardFront);
+                cardInner.appendChild(cardBack);
+                cardElement.appendChild(cardInner);
+                container.appendChild(cardElement);
             });
         }
 
+        // 카드 뒤집기
         function flipCard(index) {
-            if (!canFlip || flippedCards.length >= 2) return;
+            if (isProcessing) return;
             
             const card = cards[index];
-            const cardElement = document.querySelector(`[data-index="${index}"]`);
-            
-            // 이미 뒤집힌 카드는 무시
+            const cardElement = document.querySelector(`.memory-card[data-index="${index}"]`);
+
+            // 이미 뒤집혔거나 매칭된 카드는 무시
             if (cardElement.classList.contains('flipped') || cardElement.classList.contains('matched')) {
                 return;
             }
-            
+
             // 카드 뒤집기
             cardElement.classList.add('flipped');
-            flippedCards.push({ index, card, element: cardElement });
-            
-            // 2장 뒤집었을 때
+            flippedCards.push({ index, card });
+
+            // 2장의 카드가 뒤집혔을 때
             if (flippedCards.length === 2) {
+                isProcessing = true;
                 moves++;
-                document.getElementById('moves-count').textContent = moves;
-                canFlip = false;
-                
-                setTimeout(checkMatch, 800);
+                document.getElementById('movesCount').textContent = moves;
+                checkMatch();
             }
         }
 
+        // 매칭 확인
         function checkMatch() {
             const [first, second] = flippedCards;
-            
-            if (first.card.id === second.card.id) {
-                // 짝 맞음!
-                first.element.classList.add('matched');
-                second.element.classList.add('matched');
-                
-                matchedPairs++;
-                document.getElementById('matches-count').textContent = matchedPairs;
-                document.getElementById('remaining-count').textContent = 6 - matchedPairs;
-                
-                // 게임 완료 체크
-                if (matchedPairs === 6) {
-                    setTimeout(showResult, 500);
-                }
+
+            if (first.card.pairId === second.card.pairId) {
+                // 매칭 성공
+                setTimeout(() => {
+                    const firstElement = document.querySelector(`.memory-card[data-index="${first.index}"]`);
+                    const secondElement = document.querySelector(`.memory-card[data-index="${second.index}"]`);
+                    
+                    firstElement.classList.add('matched');
+                    secondElement.classList.add('matched');
+
+                    matchedPairs++;
+                    document.getElementById('matchedCount').textContent = matchedPairs;
+
+                    flippedCards = [];
+                    isProcessing = false;
+
+                    // 모든 쌍이 매칭되면 게임 종료
+                    if (matchedPairs === cards.length / 2) {
+                        setTimeout(showResults, 500);
+                    }
+                }, 500);
             } else {
-                // 짝 안 맞음
-                first.element.classList.remove('flipped');
-                second.element.classList.remove('flipped');
+                // 매칭 실패
+                setTimeout(() => {
+                    const firstElement = document.querySelector(`.memory-card[data-index="${first.index}"]`);
+                    const secondElement = document.querySelector(`.memory-card[data-index="${second.index}"]`);
+                    
+                    firstElement.classList.remove('flipped');
+                    secondElement.classList.remove('flipped');
+
+                    flippedCards = [];
+                    isProcessing = false;
+                }, 1000);
             }
+        }
+
+        // 타이머 시작
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timeDisplay').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        // 타이머 정지
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        // 결과 표시
+        function showResults() {
+            stopTimer();
             
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            document.getElementById('finalMoves').textContent = moves;
+            document.getElementById('finalTime').textContent = timeString;
+            document.getElementById('resultModal').classList.add('show');
+        }
+
+        // 게임 재시작
+        function restartGame() {
+            // 초기화
+            matchedPairs = 0;
+            moves = 0;
             flippedCards = [];
-            canFlip = true;
+            isProcessing = false;
+            
+            document.getElementById('movesCount').textContent = '0';
+            document.getElementById('matchedCount').textContent = '0';
+            document.getElementById('resultModal').classList.remove('show');
+
+            // 카드 재생성
+            if (storyData && storyData.keyObjectImages) {
+                const keyObjects = storyData.keyObjectImages.filter(obj => obj.imageUrl && obj.success);
+                generateCards(keyObjects);
+            }
+
+            // 타이머 재시작
+            stopTimer();
+            startTimer();
         }
 
-        function showResult() {
-            document.getElementById('final-moves').textContent = moves;
-            document.getElementById('final-matches').textContent = matchedPairs;
-            document.getElementById('result-modal').style.display = 'flex';
-        }
-
+        // 뒤로가기
         function goBack() {
-            window.location.href = `/games.html?id=${storyId}`;
+            stopTimer();
+            window.history.back();
         }
 
-        init();
+        // 페이지 로드 시 실행
+        loadStory();
     </script>
 </body>
 </html>
