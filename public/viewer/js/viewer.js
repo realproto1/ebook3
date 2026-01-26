@@ -16,6 +16,9 @@ async function loadStorybooks() {
             allStorybooks = response.data.storybooks;
             filteredStorybooks = [...allStorybooks];
             
+            // 초기 로드 시 제목순으로 정렬
+            filteredStorybooks.sort((a, b) => a.title.localeCompare(b.title, 'ko'));
+            
             console.log(`✅ Loaded ${allStorybooks.length} storybooks`);
             
             if (allStorybooks.length === 0) {
@@ -144,7 +147,7 @@ function sortBooks() {
             filteredStorybooks.sort((a, b) => new Date(a.publishedAt) - new Date(b.publishedAt));
             break;
         case 'title':
-            filteredStorybooks.sort((a, b) => a.title.localeCompare(b.title));
+            filteredStorybooks.sort((a, b) => a.title.localeCompare(b.title, 'ko'));
             break;
     }
     

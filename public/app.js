@@ -1100,6 +1100,13 @@ function renderBookList() {
     // undefined, null 항목 필터링
     storybooks = storybooks.filter(book => book && book.id);
     
+    // 이름순으로 정렬 (가나다순, ABC순)
+    storybooks.sort((a, b) => {
+        const titleA = (a.title || '').toLowerCase();
+        const titleB = (b.title || '').toLowerCase();
+        return titleA.localeCompare(titleB, 'ko');
+    });
+    
     if (storybooks.length === 0) {
         listDiv.innerHTML = '<p class="text-gray-500 text-center py-4">아직 만든 동화책이 없어요</p>';
         return;
