@@ -584,7 +584,7 @@ app.post('/api/upload-image', upload.single('image'), async (req, res) => {
 // 1. 동화책 스토리 생성 API
 app.post('/api/generate-storybook', requireAPIKey, async (req, res) => {
   try {
-    const { title, targetAge, artStyle, referenceContent, totalPages = 10, geminiModel = 'gemini-3-pro-preview', existingCharacters, languages = ['ko'] } = req.body;
+    const { title, targetAge, artStyle, referenceContent, totalPages = 10, geminiModel = 'gemini-2.5-flash', existingCharacters, languages = ['ko'] } = req.body;
     
     if (!title) {
       return res.status(400).json({ error: '동화책 제목을 입력해주세요.' });
@@ -1640,8 +1640,12 @@ ${pagesText}
 
 **CRITICAL:** Respond ONLY with valid JSON. No markdown, no explanation, just pure JSON.`;
 
+          // 사용자가 선택한 모델 또는 기본 모델 사용
+          const translateModel = geminiModel || 'gemini-2.5-flash';
+          console.log(`  🤖 번역 모델: ${translateModel}`);
+          
           const translateResponse = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${translateModel}:generateContent?key=${GEMINI_API_KEY}`,
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -2757,7 +2761,7 @@ app.post('/api/generate-tts', requireAPIKey, async (req, res) => {
 // 동화책 번역 API
 app.post('/api/translate-storybook', requireAPIKey, async (req, res) => {
   try {
-    const { storybook, targetLanguage } = req.body;
+    const { storybook, targetLanguage, geminiModel } = req.body;
     
     if (!storybook || !storybook.pages || !targetLanguage) {
       return res.status(400).json({
@@ -2853,8 +2857,11 @@ ${i === 0 ? `{
 - Respond ONLY with valid JSON. No markdown, no explanation, just pure JSON.
 - ALL translated text MUST be in ${targetLang.toUpperCase()} only - absolutely NO Korean or mixed languages.`;
 
+      const translateModel = geminiModel || 'gemini-2.5-flash';
+      console.log(`  🤖 번역 모델: ${translateModel} (청크 ${i + 1}/${numChunks})`);
+
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${translateModel}:generateContent?key=${GEMINI_API_KEY}`,
         {
           method: 'POST',
           headers: {
