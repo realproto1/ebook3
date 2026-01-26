@@ -292,9 +292,12 @@
                 
                 document.getElementById('story-title').textContent = storyData.title || '동화책';
                 
-                // Key Objects 확인
-                if (!storyData.key_objects || storyData.key_objects.length < 4) {
-                    alert('❌ 이 동화책에는 충분한 Key Objects가 없습니다.\n최소 4개 이상이 필요합니다.');
+                // Key Objects Images 확인
+                const keyObjectImages = storyData.keyObjectImages || [];
+                const validObjects = keyObjectImages.filter(obj => obj.imageUrl && obj.success);
+                
+                if (validObjects.length < 4) {
+                    alert('❌ 이 동화책에는 충분한 Key Objects 이미지가 없습니다.\n최소 4개 이상이 필요합니다.');
                     goBack();
                     return;
                 }
@@ -311,10 +314,18 @@
         }
 
         function generateCards() {
-            const keyObjects = storyData.key_objects.slice(0, 6);
+            // keyObjectImages 배열 사용 (이미지가 있는 것만)
+            const keyObjectImages = storyData.keyObjectImages || [];
+            const validObjects = keyObjectImages.filter(obj => obj.imageUrl && obj.success).slice(0, 6);
+            
+            if (validObjects.length === 0) {
+                alert('❌ 이 동화책에는 Key Objects 이미지가 없습니다.');
+                goBack();
+                return;
+            }
             
             // 각 객체를 2번씩 추가 (짝 만들기)
-            keyObjects.forEach((obj, index) => {
+            validObjects.forEach((obj, index) => {
                 cards.push({ id: index, object: obj, matched: false });
                 cards.push({ id: index, object: obj, matched: false });
             });
@@ -323,7 +334,7 @@
             shuffleArray(cards);
             
             // 통계 초기화
-            document.getElementById('remaining-count').textContent = keyObjects.length;
+            document.getElementById('remaining-count').textContent = validObjects.length;
         }
 
         function shuffleArray(array) {
