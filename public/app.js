@@ -2909,7 +2909,7 @@ function displayStorybook(storybook) {
                 <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 shadow-lg border-2 border-purple-200">
                     <div class="flex justify-between items-center mb-4">
                         <h4 class="text-xl font-bold text-purple-800">
-                            <i class="fas fa-question-circle mr-2"></i>독해 퀴즈
+                            <i class="fas fa-question-circle mr-2"></i>핵심 사물 퀴즈
                             ${storybook.quizzes && storybook.quizzes.length > 0 ? ` (${storybook.quizzes.length}개)` : ''}
                         </h4>
                         <button 
@@ -2925,12 +2925,21 @@ function displayStorybook(storybook) {
                             storybook.quizzes.map((quiz, qIdx) => `
                             <div class="bg-white p-5 rounded-lg border-2 border-purple-200 shadow-sm">
                                 <div class="flex justify-between items-start mb-3">
-                                    <h5 class="font-bold text-gray-800 flex-1">
-                                        <span class="inline-block bg-purple-500 text-white rounded-full w-7 h-7 text-center leading-7 text-sm mr-2">
-                                            ${qIdx + 1}
-                                        </span>
-                                        ${quiz.question}
-                                    </h5>
+                                    <div class="flex-1">
+                                        <h5 class="font-bold text-gray-800">
+                                            <span class="inline-block bg-purple-500 text-white rounded-full w-7 h-7 text-center leading-7 text-sm mr-2">
+                                                ${qIdx + 1}
+                                            </span>
+                                            ${quiz.question}
+                                        </h5>
+                                        ${quiz.relatedKeyObject ? `
+                                        <div class="mt-2 ml-9">
+                                            <span class="inline-block bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-semibold">
+                                                <i class="fas fa-key mr-1"></i>${quiz.relatedKeyObject}
+                                            </span>
+                                        </div>
+                                        ` : ''}
+                                    </div>
                                     <button 
                                         onclick="deleteQuiz(${qIdx})"
                                         class="text-red-500 hover:text-red-700 ml-2"
@@ -2967,7 +2976,7 @@ function displayStorybook(storybook) {
                             `<div class="text-center py-8 text-gray-500">
                                 <i class="fas fa-question-circle text-4xl mb-3"></i>
                                 <p>아직 퀴즈가 없습니다.</p>
-                                <p class="text-sm mt-1">위의 "퀴즈 만들기" 버튼을 눌러 퀴즈를 생성하세요.</p>
+                                <p class="text-sm mt-1">위의 "퀴즈 만들기" 버튼을 눌러 Key Objects 기반 퀴즈를 생성하세요.</p>
                             </div>`
                         }
                     </div>
@@ -5835,6 +5844,12 @@ async function generateQuiz(count = 5) {
         return;
     }
     
+    // Key Objects 체크
+    if (!currentStorybook.key_objects || currentStorybook.key_objects.length === 0) {
+        alert('퀴즈를 생성하려면 먼저 Key Objects(핵심 사물)를 생성해주세요.\n\n"Key Objects(핵심 사물)" 섹션에서 사물을 추가할 수 있습니다.');
+        return;
+    }
+    
     const quizContainer = document.getElementById('quiz-container');
     if (!quizContainer) return;
     
@@ -5842,12 +5857,14 @@ async function generateQuiz(count = 5) {
     quizContainer.innerHTML = `
         <div class="text-center py-8">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <p class="text-gray-600">퀴즈를 생성하고 있습니다...</p>
+            <p class="text-gray-600">Key Objects 기반 퀴즈를 생성하고 있습니다...</p>
+            <p class="text-xs text-gray-500 mt-2">Key Objects: ${currentStorybook.key_objects.map(obj => obj.name).join(', ')}</p>
         </div>
     `;
     
     try {
-        console.log(`🎯 Generating ${count} quiz questions...`);
+        console.log(`🎯 Generating ${count} quiz questions based on Key Objects...`);
+        console.log('📦 Key Objects:', currentStorybook.key_objects.map(obj => obj.name).join(', '));
         
         const response = await axios.post('/api/generate-quiz', {
             storybook: currentStorybook,
@@ -5869,7 +5886,13 @@ async function generateQuiz(count = 5) {
             // UI 업데이트
             displayStorybook(currentStorybook);
             
-            console.log(`✅ Generated ${response.data.quizzes.length} quiz questions`);
+            console.log(`✅ Generated ${response.data.quizzes.length} Key Object-based quiz questions`);
+            
+            // 성공 메시지
+            const successQuizzes = response.data.quizzes.filter(q => q.relatedKeyObject).length;
+            if (successQuizzes > 0) {
+                console.log(`🔑 ${successQuizzes}개의 퀴즈가 Key Objects와 연결되었습니다.`);
+            }
         } else {
             throw new Error('퀴즈 생성 실패');
         }

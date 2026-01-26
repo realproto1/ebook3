@@ -2424,30 +2424,38 @@ app.post('/api/generate-quiz', requireAPIKey, async (req, res) => {
     const characterInfo = storybook.characters ? 
       storybook.characters.map(char => `${char.name}: ${char.role}`).join(', ') : '';
     
-    const prompt = `다음 동화책을 읽고 어린이를 위한 독해 퀴즈 ${count}개를 만들어주세요.
+    // Key Objects 정보 추출
+    const keyObjectsInfo = storybook.key_objects && storybook.key_objects.length > 0 ?
+      storybook.key_objects.map(obj => `${obj.name}: ${obj.description || ''}`).join(', ') : '';
+    
+    const prompt = `다음 동화책을 읽고 Key Objects(핵심 사물)를 기반으로 한 어린이 퀴즈 ${count}개를 만들어주세요.
 
 **동화 제목:** ${storybook.title}
 
 **캐릭터:** ${characterInfo}
+
+**핵심 사물(Key Objects):** ${keyObjectsInfo}
 
 **동화 내용:**
 ${storyText}
 
 **퀴즈 생성 규칙:**
 1. 타깃 연령: ${storybook.targetAge || '6'}세 수준
-2. 각 퀴즈는 다음 형식으로 작성:
-   - question: 질문 (간단하고 명확하게)
+2. **반드시 Key Objects(핵심 사물)와 관련된 퀴즈를 만들어야 합니다**
+3. 각 퀴즈는 다음 형식으로 작성:
+   - question: 질문 (Key Object에 대한 질문)
    - options: 4개의 선택지 (배열)
    - answer: 정답 번호 (0, 1, 2, 3 중 하나)
-   - explanation: 정답 설명 (왜 이게 정답인지 간단히)
-3. 퀴즈 유형을 다양하게:
-   - 스토리 순서 (무엇을 먼저 했나요?)
-   - 캐릭터 행동 (누가 ~했나요?)
-   - 원인과 결과 (왜 ~했나요?)
-   - 감정 이해 (어떻게 느꼈을까요?)
-   - 교훈 이해 (이 이야기가 알려주는 것은?)
-4. 모든 선택지는 그럴듯해야 하지만 명확히 하나만 정답
-5. 쉬운 질문부터 조금씩 어려운 질문 순서로
+   - explanation: 정답 설명 (Key Object와 연관지어 설명)
+   - relatedKeyObject: 관련된 Key Object 이름
+4. 퀴즈 유형 (Key Objects 기반):
+   - 사물 식별 (이것은 무엇인가요?)
+   - 사물 용도 (이것은 어디에 쓰이나요?)
+   - 사물과 스토리 연결 (이 사물은 언제 등장했나요?)
+   - 사물의 특징 (이 사물의 색깔/모양은?)
+   - 사물의 중요성 (왜 이 사물이 중요한가요?)
+5. 모든 선택지는 그럴듯해야 하지만 명확히 하나만 정답
+6. 쉬운 질문부터 조금씩 어려운 질문 순서로
 
 **JSON 형식으로만 응답하세요:**
 {
@@ -2456,7 +2464,8 @@ ${storyText}
       "question": "질문",
       "options": ["선택지1", "선택지2", "선택지3", "선택지4"],
       "answer": 0,
-      "explanation": "정답 설명"
+      "explanation": "정답 설명",
+      "relatedKeyObject": "Key Object 이름"
     }
   ]
 }
