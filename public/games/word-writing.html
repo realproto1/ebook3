@@ -498,6 +498,33 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
+        // 가이드 글자 그리기 (회색 반투명)
+        function drawGuideChar(char) {
+            ctx.save();
+            
+            // 회색 반투명으로 설정
+            ctx.fillStyle = 'rgba(200, 200, 200, 0.3)';
+            ctx.strokeStyle = 'rgba(150, 150, 150, 0.5)';
+            ctx.lineWidth = 2;
+            
+            // 글자 크기 설정
+            const fontSize = canvas.width * 0.6; // 캔버스 너비의 60%
+            ctx.font = `bold ${fontSize}px 'Noto Sans KR', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // 캔버스 중앙에 글자 그리기
+            const x = canvas.width / 2;
+            const y = canvas.height / 2;
+            
+            // 외곽선 먼저 그리기
+            ctx.strokeText(char, x, y);
+            // 그 다음 채우기
+            ctx.fillText(char, x, y);
+            
+            ctx.restore();
+        }
+
         // 스토리 데이터 로드
         async function loadStory() {
             try {
@@ -508,27 +535,29 @@
                 console.log('✅ 스토리 로드 완료:', storyData.title);
                 document.getElementById('storyTitle').textContent = storyData.title || '동화책';
 
-                // Key Objects에서 글자 추출
-                const keyObjects = storyData.keyObjectImages?.filter(obj => obj.imageUrl && obj.success) || [];
+                // Vocabulary에서 글자 추출 (Key Objects 대신)
+                const vocabulary = storyData.vocabulary || [];
                 
-                if (keyObjects.length === 0) {
-                    alert('Key Objects가 없습니다.');
+                if (vocabulary.length === 0) {
+                    alert('단어장이 없습니다.');
                     goBack();
                     return;
                 }
 
                 // 각 단어에서 한 글자씩 추출
                 characters = [];
-                keyObjects.forEach(obj => {
-                    const korean = obj.korean || obj.name;
+                vocabulary.forEach(vocabItem => {
+                    const korean = vocabItem.korean;
+                    const word = vocabItem.word; // 영어 단어
+                    
                     // 공백 제거하고 각 글자를 분리
                     const chars = korean.replace(/\s/g, '').split('');
                     chars.forEach(char => {
                         characters.push({
                             char: char,
                             word: korean,
-                            imageUrl: obj.imageUrl,
-                            name: obj.name
+                            englishWord: word,
+                            imageUrl: null // vocabulary에는 이미지가 없음
                         });
                     });
                 });
@@ -559,15 +588,22 @@
             document.getElementById('progressFill').style.width = `${progress}%`;
             document.getElementById('progressText').textContent = `${Math.round(progress)}%`;
 
-            // 이미지 설정
-            document.getElementById('keyObjectImage').src = charData.imageUrl;
-            document.getElementById('keyObjectImage').alt = charData.word;
+            // 이미지 설정 (이미지가 있을 경우에만)
+            const imgElement = document.getElementById('keyObjectImage');
+            if (charData.imageUrl) {
+                imgElement.src = charData.imageUrl;
+                imgElement.alt = charData.word;
+                imgElement.style.display = 'block';
+            } else {
+                imgElement.style.display = 'none';
+            }
 
             // 목표 글자 표시
             document.getElementById('targetChar').textContent = charData.char;
 
-            // 캔버스 초기화
+            // 캔버스 초기화 및 가이드 글자 그리기
             clearCanvas();
+            drawGuideChar(charData.char);
             updateStats();
         }
 
