@@ -87,7 +87,11 @@
 
         .memory-card.matched .card-inner {
             transform: rotateY(180deg);
-            opacity: 0.6;
+        }
+
+        .memory-card.matched {
+            pointer-events: none;
+            opacity: 0.7;
         }
 
         .card-face {
@@ -128,11 +132,25 @@
         }
 
         .card-back.text-card {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #333;
             word-break: keep-all;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .card-korean {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .card-english {
+            font-size: 14px;
+            color: #666;
         }
 
         .result-modal {
@@ -273,8 +291,15 @@
             }
 
             .card-back.text-card {
-                font-size: 14px;
                 padding: 10px;
+            }
+
+            .card-korean {
+                font-size: 16px;
+            }
+
+            .card-english {
+                font-size: 12px;
             }
 
             .card-front {
@@ -420,7 +445,8 @@
                     id: `text-${index}`,
                     pairId: index,
                     type: 'text',
-                    name: obj.name
+                    name: obj.name,
+                    korean: obj.korean || obj.name
                 });
             });
 
@@ -463,9 +489,12 @@
                 cardBack.className = `card-face card-back ${card.type}-card`;
 
                 if (card.type === 'image') {
-                    cardBack.innerHTML = `<img src="${card.imageUrl}" alt="${card.name}" class="card-image">`;
+                    cardBack.innerHTML = `<img src="${card.imageUrl}" alt="${card.korean || card.name}" class="card-image">`;
                 } else {
-                    cardBack.textContent = card.name;
+                    cardBack.innerHTML = `
+                        <div class="card-korean">${card.korean || card.name}</div>
+                        <div class="card-english">${card.name}</div>
+                    `;
                 }
 
                 cardInner.appendChild(cardFront);
