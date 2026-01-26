@@ -318,6 +318,99 @@ pm2 logs storybook-generator --nostream
 pm2 restart storybook-generator
 ```
 
+## 🔍 에러 모니터링 및 디버깅
+
+### 실시간 에러 모니터링
+동화책 생성 중 에러를 실시간으로 확인:
+```bash
+cd /home/user/webapp
+./monitor-errors.sh
+```
+
+**기능**:
+- ❌ 에러 메시지 빨간색 강조
+- ⚠️ 경고 메시지 노란색 강조  
+- ✅ 성공 메시지 초록색 강조
+- 🤖 Gemini API 관련 메시지 표시
+- 🔥 503 Overload 강조
+- ⏱️ Timeout 강조
+
+종료: `Ctrl + C`
+
+### 에러 로그 분석
+최근 에러를 통계적으로 분석:
+```bash
+cd /home/user/webapp
+
+# 기본: 최근 100줄 분석
+./analyze-errors.sh
+
+# 최근 200줄 분석
+./analyze-errors.sh 200
+
+# 최근 500줄 분석
+./analyze-errors.sh 500
+```
+
+**분석 항목**:
+1. 📈 에러 통계 (총 에러, 경고, 타임아웃, 오버로드)
+2. 🔍 주요 에러 타입 (axios, parts, OTHER, 503, 524 등)
+3. 📋 최근 에러 메시지 (최대 10개)
+4. 🌐 API 호출 통계 (동화책/이미지/TTS 생성)
+5. 🤖 Gemini API 응답 통계 (STOP, OTHER, SAFETY)
+6. 🔄 재시도 통계
+7. ✅ 최근 성공 메시지
+8. 💡 권장 조치사항
+
+### 주요 에러 패턴 및 해결책
+
+#### 1. axios is not defined
+```
+ReferenceError: axios is not defined
+```
+**해결**: server.js에 `import axios from 'axios';` 추가 필요
+
+#### 2. parts is not an array
+```
+Invalid response structure: parts is not an array
+```
+**해결**: 최신 코드로 업데이트 (finishReason: OTHER 처리 로직 포함)
+
+#### 3. 503 Model Overloaded
+```
+The model is overloaded. Please try again later.
+```
+**해결**: 자동 재시도 작동 중 (3초, 6초, 9초 간격)
+
+#### 4. 524 Timeout
+```
+Request failed with status code 524
+```
+**해결**: 
+- 더 빠른 모델 사용 (`gemini-2.5-flash`)
+- 프롬프트 축소
+- 비동기 처리
+
+### 유용한 디버깅 명령어
+```bash
+# PM2 로그 최근 100줄 (non-blocking)
+pm2 logs --nostream --lines 100
+
+# 에러 로그만 확인
+pm2 logs --nostream --lines 100 --err
+
+# 특정 키워드 검색
+pm2 logs --nostream --lines 200 | grep -i "error\|timeout\|503"
+
+# 서버 재시작
+pm2 restart all
+
+# 포트 3000 정리
+fuser -k 3000/tcp 2>/dev/null || true
+```
+
+자세한 내용은 [ERROR_MONITORING.md](./ERROR_MONITORING.md) 참조
+
 ## 📝 라이선스
 
 MIT License
