@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 스토리 순서 맞추기 - 탱고북</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .game-header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.1);
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #FF9800, #FFB74D);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+        }
+
+        .game-area {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.1);
+        }
+
+        .instruction {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #FFF8E1;
+            border-radius: 15px;
+            border-left: 5px solid #FF9800;
+        }
+
+        .story-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .story-card {
+            background: linear-gradient(135deg, #FFF9C4 0%, #FFF59D 100%);
+            border: 3px solid #FFE082;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: move;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .story-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+        }
+
+        .story-card.dragging {
+            opacity: 0.5;
+        }
+
+        .card-number {
+            width: 40px;
+            height: 40px;
+            background: #FF9800;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .card-text {
+            flex: 1;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .check-button {
+            width: 100%;
+            padding: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FF9800, #FFB74D);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .check-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-content {
+            background: white;
+            border-radius: 30px;
+            padding: 50px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FF9800, #FFB74D);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .game-header h1 {
+                font-size: 28px;
+            }
+
+            .story-card {
+                padding: 15px;
+            }
+
+            .card-text {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <button class="back-button" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+                돌아가기
+            </button>
+            <h1 style="font-size: 36px; color: #FF9800; margin-bottom: 10px;">📚 스토리 순서 맞추기</h1>
+            <div id="story-title" style="font-size: 18px; color: #999;"></div>
+        </div>
+
+        <div class="game-area">
+            <div class="instruction">
+                <i class="fas fa-hand-pointer" style="font-size: 24px; color: #FF9800; margin-bottom: 10px;"></i>
+                <div>카드를 드래그하여 올바른 순서로 배열하세요!</div>
+                <div style="font-size: 14px; color: #999; margin-top: 10px;">
+                    카드를 잡고 위아래로 움직여서 순서를 바꿀 수 있어요
+                </div>
+            </div>
+
+            <div id="story-cards" class="story-cards">
+                <!-- JavaScript로 동적 생성 -->
+            </div>
+
+            <button class="check-button" onclick="checkAnswer()">
+                <i class="fas fa-check-circle"></i> 정답 확인하기
+            </button>
+        </div>
+    </div>
+
+    <!-- 결과 모달 -->
+    <div id="result-modal" class="result-modal">
+        <div class="result-content">
+            <div id="result-icon" style="font-size: 80px;">🏆</div>
+            <h2 id="result-title" style="font-size: 36px; color: #FF9800; margin: 20px 0;">정답입니다!</h2>
+            <div id="result-message" style="font-size: 20px; margin: 30px 0; color: #666;">
+                동화 이야기의 순서를 정확하게 맞추셨어요!
+            </div>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i class="fas fa-redo"></i> 다시 하기
+                </button>
+                <button class="btn btn-primary" onclick="goBack()">
+                    <i class="fas fa-list"></i> 게임 목록
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const storyId = urlParams.get('story') || urlParams.get('id');
+        
+        let storyData = null;
+        let storySequences = [];
+        let correctOrder = [];
+
+        async function init() {
+            if (!storyId) {
+                alert('❌ 스토리 ID가 없습니다.');
+                goBack();
+                return;
+            }
+
+            try {
+                const response = await axios.get(`/api/storybooks/${storyId}`);
+                storyData = response.data;
+                
+                document.getElementById('story-title').textContent = storyData.title || '동화책';
+                
+                // 페이지에서 주요 문장 추출 (5-8개)
+                generateSequences();
+                renderCards();
+                
+            } catch (error) {
+                console.error('스토리 로드 실패:', error);
+                alert('동화책을 불러오는데 실패했습니다.');
+                goBack();
+            }
+        }
+
+        function generateSequences() {
+            const pages = storyData.pages;
+            const step = Math.max(1, Math.floor(pages.length / 6));
+            
+            // 동화의 주요 페이지에서 대표 문장 추출
+            for (let i = 0; i < Math.min(6, pages.length); i += step) {
+                const page = pages[i];
+                const sentences = page.text.split(/[.!?]/).filter(s => s.trim().length > 15);
+                
+                if (sentences.length > 0) {
+                    const sentence = sentences[0].trim();
+                    storySequences.push({
+                        id: i,
+                        text: sentence,
+                        order: i
+                    });
+                }
+            }
+            
+            // 정답 순서 저장
+            correctOrder = storySequences.map(s => s.id);
+            
+            // 순서 섞기
+            shuffleArray(storySequences);
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function renderCards() {
+            const container = document.getElementById('story-cards');
+            container.innerHTML = '';
+            
+            storySequences.forEach((seq, index) => {
+                const card = document.createElement('div');
+                card.className = 'story-card';
+                card.draggable = true;
+                card.dataset.id = seq.id;
+                
+                card.innerHTML = `
+                    <div class="card-number">${index + 1}</div>
+                    <div class="card-text">${seq.text}</div>
+                `;
+                
+                // 드래그 이벤트
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragover', handleDragOver);
+                card.addEventListener('drop', handleDrop);
+                card.addEventListener('dragend', handleDragEnd);
+                
+                container.appendChild(card);
+            });
+        }
+
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            if (draggedElement !== this) {
+                const container = document.getElementById('story-cards');
+                const cards = Array.from(container.children);
+                const draggedIndex = cards.indexOf(draggedElement);
+                const targetIndex = cards.indexOf(this);
+                
+                if (draggedIndex < targetIndex) {
+                    container.insertBefore(draggedElement, this.nextSibling);
+                } else {
+                    container.insertBefore(draggedElement, this);
+                }
+                
+                // 번호 재정렬
+                updateCardNumbers();
+            }
+            
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+        }
+
+        function updateCardNumbers() {
+            const cards = document.querySelectorAll('.story-card');
+            cards.forEach((card, index) => {
+                const numberElement = card.querySelector('.card-number');
+                numberElement.textContent = index + 1;
+            });
+        }
+
+        function checkAnswer() {
+            const cards = document.querySelectorAll('.story-card');
+            const currentOrder = Array.from(cards).map(card => parseInt(card.dataset.id));
+            
+            const isCorrect = JSON.stringify(currentOrder) === JSON.stringify(correctOrder);
+            
+            const modal = document.getElementById('result-modal');
+            const icon = document.getElementById('result-icon');
+            const title = document.getElementById('result-title');
+            const message = document.getElementById('result-message');
+            
+            if (isCorrect) {
+                icon.textContent = '🎉';
+                title.textContent = '정답입니다!';
+                title.style.color = '#4CAF50';
+                message.textContent = '동화 이야기의 순서를 정확하게 맞추셨어요!';
+            } else {
+                icon.textContent = '😅';
+                title.textContent = '아쉽네요!';
+                title.style.color = '#FF5722';
+                message.textContent = '순서가 조금 달라요. 다시 한번 시도해보세요!';
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function goBack() {
+            window.location.href = `/games.html?id=${storyId}`;
+        }
+
+        init();
+    </script>
+</body>
+</html>
