@@ -427,7 +427,24 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
     
     // 응답에서 이미지 데이터 추출
     if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-      const parts = data.candidates[0].content.parts;
+      const content = data.candidates[0].content;
+      const parts = content.parts;
+      const finishReason = data.candidates[0].finishReason;
+      
+      // finishReason이 OTHER이고 content가 비어있는 경우 - 무시하고 재시도 유도
+      if (finishReason === 'OTHER' && (!parts || Object.keys(content).length === 0)) {
+        console.warn('⚠️ finishReason: OTHER with empty content - 이미지 생성 실패 (재시도 권장)');
+        console.warn('Content:', JSON.stringify(content, null, 2));
+        throw new Error('GEMINI_OTHER_ERROR: 이미지 생성 중 일시적 오류가 발생했습니다. 다시 시도해주세요.');
+      }
+      
+      // content가 비어있거나 parts가 없는 경우 (OTHER 외)
+      if (!parts || Object.keys(content).length === 0) {
+        console.error('❌ Empty content or no parts in response');
+        console.error('Content:', JSON.stringify(content, null, 2));
+        console.error('Finish Reason:', finishReason);
+        throw new Error(`Image generation failed: ${finishReason} - Empty content`);
+      }
       
       // parts가 배열인지 확인
       if (!Array.isArray(parts)) {
