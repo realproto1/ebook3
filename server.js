@@ -3314,7 +3314,7 @@ app.get('/api/storybooks/:id', async (req, res) => {
         });
       }
       
-      console.log(`✅ [API] 동화책 로드 완료:`, storybook.title, `(페이지: ${storybook.pages?.length || 0}, 캐릭터: ${storybook.characters?.length || 0}, base64 TTS removed)`);
+      console.log(`✅ [API] 동화책 로드 완료:`, storybook.title, `(페이지: ${storybook.pages?.length || 0}, 캐릭터: ${storybook.characters?.length || 0}, 퀴즈: ${storybook.quizzes?.length || 0}, Key Objects: ${storybook.key_objects?.length || 0}, base64 TTS removed)`);
     
       res.json(storybook);
     } catch (getError) {
