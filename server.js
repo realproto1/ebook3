@@ -387,22 +387,40 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
 
     const data = await response.json();
     console.log('Gemini API response received');
-    console.log('Response structure:', JSON.stringify(data, null, 2).substring(0, 1000));
+    console.log('Full Response:', JSON.stringify(data, null, 2));
     
     // finishReason 확인
     if (data.candidates && data.candidates[0]) {
-      const finishReason = data.candidates[0].finishReason;
+      const candidate = data.candidates[0];
+      const finishReason = candidate.finishReason;
       console.log('🔍 Finish Reason:', finishReason);
       
-      if (finishReason === 'OTHER') {
-        console.error('❌ Image generation blocked by Gemini API (finishReason: OTHER)');
-        console.error('Possible reasons: Safety policy, too many/large reference images, or quota exceeded');
-        throw new Error('이미지 생성이 차단되었습니다. 참조 이미지를 제거하거나 프롬프트를 수정해보세요.');
+      // safetyRatings 확인
+      if (candidate.safetyRatings) {
+        console.log('🛡️ Safety Ratings:', JSON.stringify(candidate.safetyRatings, null, 2));
       }
       
-      if (finishReason && finishReason !== 'STOP') {
-        console.error('❌ Image generation blocked. Finish Reason:', finishReason);
-        throw new Error(`Image generation blocked: ${finishReason}`);
+      // blockReason 확인
+      if (data.promptFeedback) {
+        console.log('⚠️ Prompt Feedback:', JSON.stringify(data.promptFeedback, null, 2));
+      }
+      
+      // finishReason 검사: SAFETY나 RECITATION만 에러로 처리
+      // OTHER는 정상 응답일 수 있음 (이미지 데이터가 있으면 OK)
+      if (finishReason === 'SAFETY') {
+        console.error('❌ Image generation blocked by safety policy');
+        console.error('Safety Ratings:', JSON.stringify(candidate.safetyRatings, null, 2));
+        throw new Error('안전 정책에 의해 이미지 생성이 차단되었습니다. 프롬프트를 수정해주세요.');
+      }
+      
+      if (finishReason === 'RECITATION') {
+        console.error('❌ Image generation blocked due to recitation');
+        throw new Error('저작권 문제로 이미지 생성이 차단되었습니다. 프롬프트를 수정해주세요.');
+      }
+      
+      // OTHER나 STOP은 정상 처리 (이미지 데이터 확인)
+      if (finishReason === 'OTHER' || finishReason === 'STOP') {
+        console.log('✅ finishReason:', finishReason, '(정상 처리)');
       }
     }
     
