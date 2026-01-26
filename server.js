@@ -469,6 +469,14 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
     
   } catch (error) {
     console.error('Image generation error:', error);
+    
+    // GEMINI_OTHER_ERROR인 경우 재시도
+    if (error.message && error.message.includes('GEMINI_OTHER_ERROR') && retryCount < maxRetries - 1) {
+      console.log(`🔄 Retrying due to GEMINI_OTHER_ERROR (${retryCount + 1}/${maxRetries - 1})...`);
+      await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // 지수 백오프
+      return generateImage(prompt, referenceImages, retryCount + 1, maxRetries, modelName);
+    }
+    
     throw error;
   }
 }
