@@ -3044,12 +3044,16 @@ function addNewCharacter() {
 }
 
 function updatePageText(pageIndex, newText) {
+    console.log(`🔄 updatePageText 호출: 페이지 ${pageIndex + 1}, 텍스트 길이: ${newText.length}`);
+    
     if (newText.trim()) {
         const text = newText.trim();
         
         // 현재 언어가 한국어면 기본 text에 저장
         if (currentLanguage === 'ko') {
+            const oldText = currentStorybook.pages[pageIndex].text;
             currentStorybook.pages[pageIndex].text = text;
+            console.log(`📝 한국어 텍스트 업데이트: "${oldText?.substring(0, 30)}..." → "${text.substring(0, 30)}..."`);
         } else {
             // 다른 언어면 translations에 저장
             if (!currentStorybook.translations) {
@@ -3066,12 +3070,17 @@ function updatePageText(pageIndex, newText) {
             // 해당 페이지의 번역 텍스트 업데이트
             const translatedPage = currentStorybook.translations[currentLanguage].find(p => p.pageNumber === currentStorybook.pages[pageIndex].pageNumber);
             if (translatedPage) {
+                const oldText = translatedPage.text;
                 translatedPage.text = text;
+                console.log(`📝 ${currentLanguage} 번역 텍스트 업데이트: "${oldText?.substring(0, 30)}..." → "${text.substring(0, 30)}..."`);
             }
         }
         
         saveCurrentStorybook();
-        console.log(`✅ 페이지 ${pageIndex + 1} 텍스트 저장됨 (${currentLanguage})`);
+        console.log(`✅ 페이지 ${pageIndex + 1} 텍스트 저장 완료 (${currentLanguage})`);
+        console.log(`💾 저장된 텍스트:`, currentStorybook.pages[pageIndex].text?.substring(0, 50));
+    } else {
+        console.warn(`⚠️ 빈 텍스트는 저장하지 않음: 페이지 ${pageIndex + 1}`);
     }
 }
 
