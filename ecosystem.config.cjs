@@ -16,6 +16,20 @@ module.exports = {
       exec_mode: 'fork',
       autorestart: true,
       max_memory_restart: '1G'
+    },
+    {
+      name: 'storybook-generator-3001',
+      script: 'server.js',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3001,
+        GEMINI_API_KEY: process.env.GEMINI_API_KEY
+      },
+      watch: false,
+      instances: 1,
+      exec_mode: 'fork',
+      autorestart: true,
+      max_memory_restart: '1G'
     }
   ]
 }
