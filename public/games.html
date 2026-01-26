@@ -232,14 +232,15 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script>
-        // URL에서 스토리 ID 추출
+        // URL에서 스토리 ID 추출 (id 또는 story 파라미터 모두 지원)
         const urlParams = new URLSearchParams(window.location.search);
-        const storyId = urlParams.get('story');
+        const storyId = urlParams.get('id') || urlParams.get('story');
 
         // 디버깅 로그
         console.log('🎮 Games.html loaded');
         console.log('📍 Current URL:', window.location.href);
         console.log('🔑 Story ID from URL:', storyId);
+        console.log('🔍 URL Params - id:', urlParams.get('id'), 'story:', urlParams.get('story'));
 
         // 스토리 데이터
         let storyData = null;
