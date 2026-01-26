@@ -246,6 +246,13 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+        }
+
         @media (max-width: 768px) {
             .game-header h1 {
                 font-size: 28px;
@@ -436,12 +443,26 @@
                 card.dataset.pageIndex = pageData.index;
                 
                 // 텍스트 추출 (첫 문장)
-                const text = page.text.split(/[.!?]/)[0].trim() + '...';
+                const sentences = page.text.split(/[.!?]/).filter(s => s.trim().length > 10);
+                const text = sentences[0] ? sentences[0].trim() + '...' : page.text.substring(0, 50) + '...';
                 
-                // 이미지 HTML
-                const imageHTML = page.imageUrl 
-                    ? `<img src="${page.imageUrl}" class="card-image" alt="장면 ${pageData.index + 1}">`
-                    : `<div class="card-image" style="background: linear-gradient(135deg, #FFE082, #FFCC80); display: flex; align-items: center; justify-content: center; font-size: 48px;">📖</div>`;
+                // 이미지 결정 로직
+                let imageHTML;
+                if (page.imageUrl) {
+                    // 페이지 이미지가 있으면 사용
+                    imageHTML = `<img src="${page.imageUrl}" class="card-image" alt="장면 ${pageData.index + 1}">`;
+                } else if (storyData.key_objects && storyData.key_objects.length > 0) {
+                    // 페이지 이미지가 없으면 Key Object에서 랜덤 선택
+                    const randomKeyObject = storyData.key_objects[Math.floor(Math.random() * storyData.key_objects.length)];
+                    if (randomKeyObject.imageUrl) {
+                        imageHTML = `<img src="${randomKeyObject.imageUrl}" class="card-image" alt="${randomKeyObject.name}" style="border: 3px solid #FFB74D;">`;
+                    } else {
+                        imageHTML = `<div class="card-image" style="background: linear-gradient(135deg, #FFE082, #FFCC80); display: flex; align-items: center; justify-content: center; font-size: 48px;">📖</div>`;
+                    }
+                } else {
+                    // Key Object도 없으면 기본 아이콘
+                    imageHTML = `<div class="card-image" style="background: linear-gradient(135deg, #FFE082, #FFCC80); display: flex; align-items: center; justify-content: center; font-size: 48px;">📖</div>`;
+                }
                 
                 card.innerHTML = `
                     <div class="card-number">${index + 1}</div>
@@ -541,24 +562,100 @@
             
             const isCorrect = JSON.stringify(currentOrder) === JSON.stringify(question.correctOrder);
             
+            // 버튼 비활성화
+            const checkButton = document.querySelector('.check-button');
+            checkButton.disabled = true;
+            checkButton.style.opacity = '0.5';
+            
             if (isCorrect) {
                 correctCount++;
                 document.getElementById('correct-count').textContent = correctCount;
                 
-                // 성공 피드백
-                cards.forEach(card => {
-                    card.style.borderColor = '#4CAF50';
-                    card.style.background = 'linear-gradient(135deg, #C8E6C9, #A5D6A7)';
+                // 성공 피드백 - 각 카드에 애니메이션
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.borderColor = '#4CAF50';
+                        card.style.background = 'linear-gradient(135deg, #C8E6C9, #A5D6A7)';
+                        card.style.transform = 'scale(1.05)';
+                        
+                        // 정답 체크 아이콘 추가
+                        const checkIcon = document.createElement('div');
+                        checkIcon.innerHTML = '<i class="fas fa-check-circle" style="color: #4CAF50; font-size: 32px;"></i>';
+                        checkIcon.style.position = 'absolute';
+                        checkIcon.style.top = '10px';
+                        checkIcon.style.right = '10px';
+                        card.appendChild(checkIcon);
+                    }, index * 100);
                 });
+                
+                // 축하 메시지
+                setTimeout(() => {
+                    const instruction = document.querySelector('.instruction');
+                    instruction.innerHTML = `
+                        <i class="fas fa-check-circle" style="font-size: 48px; color: #4CAF50; margin-bottom: 10px;"></i>
+                        <div style="font-size: 24px; color: #4CAF50; font-weight: 700;">정답입니다! 🎉</div>
+                        <div style="font-size: 16px; color: #666; margin-top: 10px;">잠시 후 다음 문제로 넘어갑니다...</div>
+                    `;
+                    instruction.style.borderColor = '#4CAF50';
+                }, 500);
                 
                 setTimeout(() => {
                     currentQuestionIndex++;
+                    checkButton.disabled = false;
+                    checkButton.style.opacity = '1';
                     loadQuestion();
-                }, 1500);
+                }, 2500);
                 
             } else {
-                // 실패 피드백
-                alert('❌ 순서가 맞지 않아요!\n다시 한번 시도해보세요.');
+                // 실패 피드백 - 틀린 순서 표시
+                let correctPositions = 0;
+                cards.forEach((card, index) => {
+                    const pageIndex = parseInt(card.dataset.pageIndex);
+                    if (question.correctOrder[index] === pageIndex) {
+                        // 올바른 위치
+                        card.style.borderColor = '#4CAF50';
+                        card.style.background = 'linear-gradient(135deg, #C8E6C9, #A5D6A7)';
+                        correctPositions++;
+                    } else {
+                        // 잘못된 위치
+                        card.style.borderColor = '#F44336';
+                        card.style.background = 'linear-gradient(135deg, #FFCDD2, #EF9A9A)';
+                        card.style.animation = 'shake 0.5s';
+                    }
+                });
+                
+                // 오답 메시지
+                const instruction = document.querySelector('.instruction');
+                instruction.innerHTML = `
+                    <i class="fas fa-times-circle" style="font-size: 48px; color: #F44336; margin-bottom: 10px;"></i>
+                    <div style="font-size: 24px; color: #F44336; font-weight: 700;">아쉬워요! 😅</div>
+                    <div style="font-size: 16px; color: #666; margin-top: 10px;">
+                        ${correctPositions}개의 카드가 올바른 위치에 있어요.<br>
+                        빨간색 카드의 순서를 다시 맞춰보세요!
+                    </div>
+                `;
+                instruction.style.borderColor = '#F44336';
+                
+                setTimeout(() => {
+                    // 피드백 초기화
+                    cards.forEach(card => {
+                        card.style.borderColor = '#FFE082';
+                        card.style.background = 'linear-gradient(135deg, #FFF9C4, #FFF59D)';
+                        card.style.animation = '';
+                    });
+                    
+                    instruction.innerHTML = `
+                        <i class="fas fa-hand-pointer" style="font-size: 24px; color: #FF9800; margin-bottom: 10px;"></i>
+                        <div>카드를 드래그하여 올바른 순서로 배열하세요!</div>
+                        <div style="font-size: 14px; color: #999; margin-top: 10px;">
+                            카드 오른쪽의 핸들(⋮⋮)을 잡고 위아래로 움직여서 순서를 바꿀 수 있어요
+                        </div>
+                    `;
+                    instruction.style.borderColor = '#FF9800';
+                    
+                    checkButton.disabled = false;
+                    checkButton.style.opacity = '1';
+                }, 3000);
             }
         }
 
