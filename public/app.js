@@ -1629,22 +1629,11 @@ async function generateStorybook() {
     const artStyleCustom = document.getElementById('artStyleCustom').value.trim();
     const referenceContent = document.getElementById('referenceContent').value.trim();
     
-    // 선택된 언어 수집
-    const selectedLanguages = Array.from(document.querySelectorAll('input[name="languages"]:checked'))
-        .map(checkbox => checkbox.value);
+    // 언어는 무조건 한국어만 (UI에서 제거됨)
+    const selectedLanguages = ['ko'];
     
-    if (selectedLanguages.length === 0) {
-        alert('최소 1개 이상의 언어를 선택해주세요.');
-        return;
-    }
-    
-    // 이미지 AI 모델 선택 (동화책 생성 폼에서)
-    const imageModelSelect = document.getElementById('imageModelSelect');
-    if (imageModelSelect) {
-        imageSettings.imageModel = imageModelSelect.value;
-        saveImageSettings();
-        console.log('🤖 이미지 AI 모델 설정됨:', imageSettings.imageModel);
-    }
+    // 이미지 AI 모델은 기본값 사용 (UI에서 제거됨)
+    // imageSettings.imageModel은 기존 값 유지
     
     // 그림체 결정: custom이면 직접 입력값 사용, 아니면 선택값 사용
     const artStyle = artStyleSelect === 'custom' ? artStyleCustom : artStyleSelect;
@@ -5838,6 +5827,7 @@ async function executeRegenerate() {
             totalPages: totalPages,
             geminiModel: geminiModel, // AI 모델 전달
             artStyle: artStyle,
+            languages: ['ko'], // 무조건 한국어만
             referenceContent: notes, // 수정 요청사항을 참고 내용으로 전달
             existingCharacters: existingCharacters.map(char => ({
                 name: char.name,
