@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>단어 따라 써보기 - 탱고북</title>
+    <title>글자 따라 쓰기 - 탱고북</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -69,7 +69,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        .word-number {
+        .char-number {
             font-size: 18px;
             font-weight: bold;
             color: #fcb69f;
@@ -79,8 +79,8 @@
 
         .key-object-image {
             width: 100%;
-            max-width: 250px;
-            height: 250px;
+            max-width: 200px;
+            height: 200px;
             object-fit: contain;
             border-radius: 15px;
             margin: 20px auto;
@@ -88,96 +88,28 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        .target-word {
-            font-size: 32px;
+        .target-char {
+            font-size: 120px;
             font-weight: bold;
             color: #fcb69f;
             text-align: center;
-            margin: 20px 0;
-            letter-spacing: 8px;
-        }
-
-        .input-area {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
             margin: 30px 0;
-            flex-wrap: wrap;
+            font-family: 'Noto Sans KR', sans-serif;
+            line-height: 1;
         }
 
-        .letter-box {
-            width: 50px;
-            height: 60px;
-            border: 3px solid #e0e0e0;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            font-weight: bold;
-            color: #333;
+        .canvas-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        #drawingCanvas {
+            border: 3px solid #fcb69f;
+            border-radius: 15px;
+            cursor: crosshair;
             background: white;
-            transition: all 0.3s ease;
-        }
-
-        .letter-box.filled {
-            border-color: #fcb69f;
-            background: #fff5f0;
-        }
-
-        .letter-box.correct {
-            border-color: #4caf50;
-            background: #e8f5e9;
-            animation: bounce 0.5s ease;
-        }
-
-        .letter-box.incorrect {
-            border-color: #f44336;
-            background: #ffebee;
-            animation: shake 0.5s ease;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
-        .keyboard {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 8px;
-            margin-top: 30px;
-        }
-
-        .key {
-            aspect-ratio: 1;
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            user-select: none;
-        }
-
-        .key:hover:not(.disabled) {
-            border-color: #fcb69f;
-            transform: scale(1.05);
-        }
-
-        .key.disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            touch-action: none;
         }
 
         .control-buttons {
@@ -185,6 +117,7 @@
             gap: 10px;
             justify-content: center;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -226,6 +159,15 @@
             background: #d0d0d0;
         }
 
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+        }
+
         .stats {
             display: flex;
             justify-content: space-around;
@@ -249,6 +191,13 @@
             font-size: 12px;
             color: #666;
             margin-top: 5px;
+        }
+
+        .instruction {
+            text-align: center;
+            color: #666;
+            margin: 15px 0;
+            font-size: 14px;
         }
 
         .result-modal {
@@ -335,29 +284,18 @@
                 padding: 10px;
             }
 
-            .keyboard {
-                grid-template-columns: repeat(7, 1fr);
-                gap: 5px;
+            .target-char {
+                font-size: 80px;
             }
 
-            .key {
-                font-size: 14px;
-            }
-
-            .letter-box {
-                width: 40px;
-                height: 50px;
-                font-size: 22px;
-            }
-
-            .target-word {
-                font-size: 24px;
-                letter-spacing: 4px;
+            #drawingCanvas {
+                width: 100% !important;
+                max-width: 300px;
             }
 
             .key-object-image {
-                max-width: 200px;
-                height: 200px;
+                max-width: 150px;
+                height: 150px;
             }
         }
     </style>
@@ -375,7 +313,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                 <div style="font-size: 16px; color: #666;">
                     <i class="fas fa-pen"></i>
-                    단어 <span id="currentWord">1</span> / <span id="totalWords">5</span>
+                    글자 <span id="currentChar">1</span> / <span id="totalChars">5</span>
                 </div>
                 <div style="font-size: 16px; color: #4caf50; font-weight: bold;">
                     <i class="fas fa-check-circle"></i>
@@ -391,33 +329,40 @@
 
         <!-- 게임 영역 -->
         <div class="game-area" id="gameArea">
-            <div class="word-number" id="wordNumber">단어 1</div>
+            <div class="char-number" id="charNumber">글자 1</div>
             <img id="keyObjectImage" class="key-object-image" src="" alt="핵심 사물">
-            <div class="target-word" id="targetWord">빨간장미</div>
+            <div class="target-char" id="targetChar">장</div>
             
-            <div class="input-area" id="inputArea">
-                <!-- 글자 박스가 동적으로 추가됩니다 -->
+            <div class="instruction">
+                <i class="fas fa-info-circle"></i>
+                아래 캔버스에 글자를 따라 그려보세요
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="drawingCanvas" width="400" height="400"></canvas>
+            </div>
+
+            <div class="control-buttons">
+                <button class="btn btn-warning" onclick="clearCanvas()">
+                    <i class="fas fa-eraser"></i> 지우기
+                </button>
+                <button class="btn btn-success" onclick="checkDrawing()">
+                    <i class="fas fa-check"></i> 확인
+                </button>
+                <button class="btn btn-secondary" onclick="skipChar()">
+                    <i class="fas fa-forward"></i> 건너뛰기
+                </button>
             </div>
 
             <div class="stats">
                 <div class="stat-item">
-                    <div class="stat-value" id="accuracyValue">100%</div>
-                    <div class="stat-label">정확도</div>
+                    <div class="stat-value" id="accuracyValue">0%</div>
+                    <div class="stat-label">완성률</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value" id="attemptsValue">0</div>
                     <div class="stat-label">시도 횟수</div>
                 </div>
-            </div>
-
-            <div class="keyboard" id="keyboard">
-                <!-- 키보드가 동적으로 추가됩니다 -->
-            </div>
-
-            <div class="control-buttons">
-                <button class="btn btn-warning" onclick="clearInput()">
-                    <i class="fas fa-eraser"></i> 지우기
-                </button>
             </div>
         </div>
     </div>
@@ -442,18 +387,15 @@
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script>
         let storyData = null;
-        let currentWordIndex = 0;
-        let correctWords = 0;
-        let words = [];
-        let currentInput = [];
+        let currentCharIndex = 0;
+        let correctChars = 0;
+        let characters = [];
         let totalAttempts = 0;
-        let correctAttempts = 0;
-
-        const HANGUL_LETTERS = [
-            'ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ',
-            'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ', 'ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ', 'ㅛ',
-            'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ', 'ㅐ', 'ㅔ', 'ㅚ', 'ㅟ'
-        ];
+        let canvas = null;
+        let ctx = null;
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
 
         // URL에서 스토리 ID 가져오기
         const urlParams = new URLSearchParams(window.location.search);
@@ -462,6 +404,98 @@
         if (!storyId) {
             alert('스토리 ID가 없습니다.');
             goBack();
+        }
+
+        // Canvas 초기화
+        function initCanvas() {
+            canvas = document.getElementById('drawingCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // 고해상도 디스플레이 지원
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+
+            // 그리기 설정
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // 마우스 이벤트
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            // 터치 이벤트
+            canvas.addEventListener('touchstart', handleTouchStart);
+            canvas.addEventListener('touchmove', handleTouchMove);
+            canvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            lastX = e.clientX - rect.left;
+            lastY = e.clientY - rect.top;
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+
+            lastX = x;
+            lastY = y;
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            lastX = touch.clientX - rect.left;
+            lastY = touch.clientY - rect.top;
+            isDrawing = true;
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!isDrawing) return;
+
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+
+            lastX = x;
+            lastY = y;
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
         // 스토리 데이터 로드
@@ -474,7 +508,7 @@
                 console.log('✅ 스토리 로드 완료:', storyData.title);
                 document.getElementById('storyTitle').textContent = storyData.title || '동화책';
 
-                // Key Objects에서 단어 추출
+                // Key Objects에서 글자 추출
                 const keyObjects = storyData.keyObjectImages?.filter(obj => obj.imageUrl && obj.success) || [];
                 
                 if (keyObjects.length === 0) {
@@ -483,14 +517,28 @@
                     return;
                 }
 
-                words = keyObjects.map(obj => ({
-                    name: obj.name,
-                    imageUrl: obj.imageUrl
-                }));
+                // 각 단어에서 한 글자씩 추출
+                characters = [];
+                keyObjects.forEach(obj => {
+                    const korean = obj.korean || obj.name;
+                    // 공백 제거하고 각 글자를 분리
+                    const chars = korean.replace(/\s/g, '').split('');
+                    chars.forEach(char => {
+                        characters.push({
+                            char: char,
+                            word: korean,
+                            imageUrl: obj.imageUrl,
+                            name: obj.name
+                        });
+                    });
+                });
 
-                document.getElementById('totalWords').textContent = words.length;
-                renderWord();
-                renderKeyboard();
+                // 최대 10개로 제한
+                characters = characters.slice(0, 10);
+
+                document.getElementById('totalChars').textContent = characters.length;
+                initCanvas();
+                renderChar();
             } catch (error) {
                 console.error('❌ 스토리 로드 실패:', error);
                 alert('동화책을 불러오는데 실패했습니다.');
@@ -498,168 +546,87 @@
             }
         }
 
-        // 단어 렌더링
-        function renderWord() {
-            const word = words[currentWordIndex];
-            currentInput = [];
+        // 글자 렌더링
+        function renderChar() {
+            const charData = characters[currentCharIndex];
 
-            // 단어 번호 업데이트
-            document.getElementById('wordNumber').textContent = `단어 ${currentWordIndex + 1}`;
-            document.getElementById('currentWord').textContent = currentWordIndex + 1;
+            // 글자 번호 업데이트
+            document.getElementById('charNumber').textContent = `글자 ${currentCharIndex + 1}`;
+            document.getElementById('currentChar').textContent = currentCharIndex + 1;
 
             // 진행률 업데이트
-            const progress = (currentWordIndex / words.length) * 100;
+            const progress = (currentCharIndex / characters.length) * 100;
             document.getElementById('progressFill').style.width = `${progress}%`;
             document.getElementById('progressText').textContent = `${Math.round(progress)}%`;
 
             // 이미지 설정
-            document.getElementById('keyObjectImage').src = word.imageUrl;
-            document.getElementById('keyObjectImage').alt = word.name;
+            document.getElementById('keyObjectImage').src = charData.imageUrl;
+            document.getElementById('keyObjectImage').alt = charData.word;
 
-            // 목표 단어 표시
-            document.getElementById('targetWord').textContent = word.name;
+            // 목표 글자 표시
+            document.getElementById('targetChar').textContent = charData.char;
 
-            // 입력 영역 생성
-            const inputArea = document.getElementById('inputArea');
-            inputArea.innerHTML = '';
-
-            // 단어에서 공백 제거
-            const cleanWord = word.name.replace(/\s/g, '');
-            for (let i = 0; i < cleanWord.length; i++) {
-                const box = document.createElement('div');
-                box.className = 'letter-box';
-                box.dataset.index = i;
-                inputArea.appendChild(box);
-            }
-
+            // 캔버스 초기화
+            clearCanvas();
             updateStats();
         }
 
-        // 키보드 렌더링
-        function renderKeyboard() {
-            const keyboard = document.getElementById('keyboard');
-            keyboard.innerHTML = '';
-
-            HANGUL_LETTERS.forEach(letter => {
-                const key = document.createElement('div');
-                key.className = 'key';
-                key.textContent = letter;
-                key.onclick = () => inputLetter(letter);
-                keyboard.appendChild(key);
-            });
-        }
-
-        // 글자 입력
-        function inputLetter(letter) {
-            const word = words[currentWordIndex];
-            const cleanWord = word.name.replace(/\s/g, '');
-            
-            if (currentInput.length >= cleanWord.length) return;
-
+        // 그림 확인 (간단한 검사)
+        function checkDrawing() {
             totalAttempts++;
-            const currentIndex = currentInput.length;
-            const targetLetter = cleanWord[currentIndex];
 
-            // 자모 분해하여 비교
-            const isCorrect = checkCharacter(letter, targetLetter);
+            // 캔버스에 그림이 있는지 확인
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+            let hasDrawing = false;
 
-            currentInput.push(letter);
-
-            // 입력 박스 업데이트
-            const box = document.querySelector(`.letter-box[data-index="${currentIndex}"]`);
-            box.textContent = letter;
-            box.classList.add('filled');
-
-            if (isCorrect) {
-                box.classList.add('correct');
-                correctAttempts++;
-            } else {
-                box.classList.add('incorrect');
-                // 틀린 글자는 1초 후 제거
-                setTimeout(() => {
-                    currentInput.pop();
-                    box.textContent = '';
-                    box.className = 'letter-box';
-                }, 1000);
-            }
-
-            updateStats();
-
-            // 단어 완성 확인
-            if (currentInput.length === cleanWord.length && checkWordComplete()) {
-                correctWords++;
-                document.getElementById('correctCount').textContent = correctWords;
-
-                setTimeout(() => {
-                    currentWordIndex++;
-                    if (currentWordIndex < words.length) {
-                        renderWord();
-                    } else {
-                        showResults();
-                    }
-                }, 1000);
-            }
-        }
-
-        // 자모 비교 (간단 버전)
-        function checkCharacter(input, target) {
-            // 완전 일치 확인
-            if (input === target) return true;
-
-            // 자모 분해 비교 (간단 구현)
-            const inputCode = input.charCodeAt(0);
-            const targetCode = target.charCodeAt(0);
-
-            // 한글 범위 확인
-            if (targetCode >= 0xAC00 && targetCode <= 0xD7A3) {
-                // 한글 음절을 자모로 분해
-                const base = targetCode - 0xAC00;
-                const cho = Math.floor(base / 588);
-                const jung = Math.floor((base % 588) / 28);
-                const jong = base % 28;
-
-                const choList = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
-                const jungList = ['ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ'];
-
-                // 입력한 자모가 초성, 중성, 종성 중 하나와 일치하는지 확인
-                return input === choList[cho] || input === jungList[jung];
-            }
-
-            return false;
-        }
-
-        // 단어 완성 확인
-        function checkWordComplete() {
-            const word = words[currentWordIndex];
-            const cleanWord = word.name.replace(/\s/g, '');
-            const input = currentInput.join('');
-            
-            // 각 글자 확인
-            for (let i = 0; i < cleanWord.length; i++) {
-                if (!checkCharacter(currentInput[i], cleanWord[i])) {
-                    return false;
+            for (let i = 3; i < pixels.length; i += 4) {
+                if (pixels[i] > 0) {
+                    hasDrawing = true;
+                    break;
                 }
             }
-            return true;
+
+            if (!hasDrawing) {
+                alert('글자를 그려주세요!');
+                return;
+            }
+
+            // 간단한 피드백 (실제로는 AI 모델이 필요하지만, 여기서는 간단히 처리)
+            const confirmed = confirm('잘 그렸어요! 다음 글자로 넘어갈까요?');
+            
+            if (confirmed) {
+                correctChars++;
+                document.getElementById('correctCount').textContent = correctChars;
+                
+                currentCharIndex++;
+                if (currentCharIndex < characters.length) {
+                    renderChar();
+                } else {
+                    showResults();
+                }
+            }
         }
 
-        // 입력 지우기
-        function clearInput() {
-            currentInput = [];
-            const boxes = document.querySelectorAll('.letter-box');
-            boxes.forEach(box => {
-                box.textContent = '';
-                box.className = 'letter-box';
-            });
+        // 글자 건너뛰기
+        function skipChar() {
+            totalAttempts++;
+            currentCharIndex++;
+            
+            if (currentCharIndex < characters.length) {
+                renderChar();
+            } else {
+                showResults();
+            }
         }
 
         // 통계 업데이트
         function updateStats() {
-            const accuracy = totalAttempts > 0 
-                ? Math.round((correctAttempts / totalAttempts) * 100)
-                : 100;
+            const completion = characters.length > 0 
+                ? Math.round((correctChars / characters.length) * 100)
+                : 0;
             
-            document.getElementById('accuracyValue').textContent = `${accuracy}%`;
+            document.getElementById('accuracyValue').textContent = `${completion}%`;
             document.getElementById('attemptsValue').textContent = totalAttempts;
         }
 
@@ -669,18 +636,15 @@
             document.getElementById('progressFill').style.width = `${progress}%`;
             document.getElementById('progressText').textContent = `${progress}%`;
 
-            document.getElementById('resultScore').textContent = `${correctWords} / ${words.length}`;
+            document.getElementById('resultScore').textContent = `${correctChars} / ${characters.length}`;
             
-            const accuracy = totalAttempts > 0 
-                ? Math.round((correctAttempts / totalAttempts) * 100)
-                : 100;
-
+            const percentage = (correctChars / characters.length) * 100;
             let message = '';
-            if (accuracy === 100) {
+            if (percentage === 100) {
                 message = '완벽해요! 🎉';
-            } else if (accuracy >= 80) {
+            } else if (percentage >= 80) {
                 message = '정말 잘했어요! 👏';
-            } else if (accuracy >= 60) {
+            } else if (percentage >= 60) {
                 message = '좋아요! 💪';
             } else {
                 message = '다시 한번 도전해보세요! 📚';
@@ -692,13 +656,12 @@
 
         // 게임 재시작
         function restartGame() {
-            currentWordIndex = 0;
-            correctWords = 0;
+            currentCharIndex = 0;
+            correctChars = 0;
             totalAttempts = 0;
-            correctAttempts = 0;
             document.getElementById('correctCount').textContent = '0';
             document.getElementById('resultModal').classList.remove('show');
-            renderWord();
+            renderChar();
         }
 
         // 뒤로가기
@@ -707,7 +670,9 @@
         }
 
         // 페이지 로드 시 실행
-        loadStory();
+        window.addEventListener('load', () => {
+            loadStory();
+        });
     </script>
 </body>
 </html>
