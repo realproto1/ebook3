@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✍️ 단어 따라 써보기 - 탱고북</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #FFF9C4 0%, #FFF59D 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .game-header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(251, 192, 45, 0.1);
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #FBC02D, #FDD835);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(251, 192, 45, 0.3);
+        }
+
+        .game-stats {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 3px 10px rgba(251, 192, 45, 0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #FBC02D;
+        }
+
+        .game-area {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 5px 15px rgba(251, 192, 45, 0.1);
+        }
+
+        .object-display {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .object-image {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 20px;
+            margin: 0 auto 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 4px solid #FDD835;
+        }
+
+        .object-name {
+            font-size: 36px;
+            font-weight: 700;
+            color: #F57F17;
+            margin-bottom: 10px;
+        }
+
+        .object-description {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .writing-area {
+            background: #FFFDE7;
+            border: 3px dashed #FDD835;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .letter-boxes {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .letter-box {
+            width: 60px;
+            height: 80px;
+            border: 3px solid #FDD835;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            background: white;
+            color: #F57F17;
+            transition: all 0.3s;
+        }
+
+        .letter-box.filled {
+            background: #FFF9C4;
+            border-color: #FBC02D;
+            transform: scale(1.1);
+        }
+
+        .letter-box.correct {
+            background: #C8E6C9;
+            border-color: #4CAF50;
+            animation: bounce 0.5s;
+        }
+
+        .letter-box.wrong {
+            background: #FFCDD2;
+            border-color: #F44336;
+            animation: shake 0.5s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .key-button {
+            padding: 15px 10px;
+            font-size: 18px;
+            font-weight: 600;
+            background: white;
+            border: 2px solid #FDD835;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .key-button:hover {
+            background: #FFF9C4;
+            transform: translateY(-2px);
+        }
+
+        .key-button:active {
+            transform: scale(0.95);
+        }
+
+        .key-button.used {
+            background: #E0E0E0;
+            color: #999;
+            border-color: #BDBDBD;
+            pointer-events: none;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FBC02D, #FDD835);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #E0E0E0;
+            color: #666;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-content {
+            background: white;
+            border-radius: 30px;
+            padding: 50px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .game-header h1 {
+                font-size: 28px;
+            }
+
+            .keyboard {
+                grid-template-columns: repeat(5, 1fr);
+            }
+
+            .letter-box {
+                width: 45px;
+                height: 60px;
+                font-size: 24px;
+            }
+
+            .object-name {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <button class="back-button" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+                돌아가기
+            </button>
+            <h1 style="font-size: 36px; color: #FBC02D; margin-bottom: 10px;">✍️ 단어 따라 써보기</h1>
+            <div id="story-title" style="font-size: 18px; color: #999;"></div>
+        </div>
+
+        <div class="game-stats">
+            <div class="stat-item">
+                <div class="stat-label">현재 단어</div>
+                <div class="stat-value" id="current-word">1</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">완성한 단어</div>
+                <div class="stat-value" id="completed-words">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">정확도</div>
+                <div class="stat-value" id="accuracy">100%</div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="object-display">
+                <img id="object-image" class="object-image" src="" alt="Key Object">
+                <div id="object-name" class="object-name">Rose</div>
+                <div id="object-description" class="object-description">아름다운 붉은 장미</div>
+            </div>
+
+            <div class="writing-area">
+                <div style="text-align: center; font-size: 18px; color: #666; margin-bottom: 20px;">
+                    <i class="fas fa-keyboard" style="color: #FBC02D; margin-right: 5px;"></i>
+                    아래 키보드로 단어를 따라 써보세요!
+                </div>
+
+                <div id="letter-boxes" class="letter-boxes">
+                    <!-- JavaScript로 동적 생성 -->
+                </div>
+
+                <div id="keyboard" class="keyboard">
+                    <!-- JavaScript로 동적 생성 -->
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="clearAnswer()">
+                        <i class="fas fa-eraser"></i> 지우기
+                    </button>
+                    <button class="btn btn-primary" onclick="checkAnswer()">
+                        <i class="fas fa-check"></i> 확인하기
+                    </button>
+                </div>
+            </div>
+
+            <div style="text-align: center; color: #999; font-size: 14px;">
+                💡 힌트: 단어의 철자를 순서대로 입력하세요
+            </div>
+        </div>
+    </div>
+
+    <!-- 결과 모달 -->
+    <div id="result-modal" class="result-modal">
+        <div class="result-content">
+            <div style="font-size: 80px;">🎉</div>
+            <h2 style="font-size: 36px; color: #FBC02D; margin: 20px 0;">완성!</h2>
+            <div style="font-size: 20px; margin: 30px 0; color: #666;">
+                <div style="margin: 10px 0;">완성한 단어: <strong id="final-completed" style="color: #FBC02D;">0</strong>개</div>
+                <div style="margin: 10px 0;">정확도: <strong id="final-accuracy" style="color: #4CAF50;">0</strong>%</div>
+            </div>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i class="fas fa-redo"></i> 다시 하기
+                </button>
+                <button class="btn btn-primary" onclick="goBack()">
+                    <i class="fas fa-list"></i> 게임 목록
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const storyId = urlParams.get('story') || urlParams.get('id');
+        
+        let storyData = null;
+        let keyObjects = [];
+        let currentObjectIndex = 0;
+        let currentObject = null;
+        let userAnswer = [];
+        let totalAttempts = 0;
+        let correctAttempts = 0;
+        let completedWords = 0;
+
+        async function init() {
+            if (!storyId) {
+                alert('❌ 스토리 ID가 없습니다.');
+                goBack();
+                return;
+            }
+
+            try {
+                const response = await axios.get(`/api/storybooks/${storyId}`);
+                storyData = response.data;
+                
+                document.getElementById('story-title').textContent = storyData.title || '동화책';
+                
+                // Key Objects 확인
+                if (!storyData.key_objects || storyData.key_objects.length === 0) {
+                    alert('❌ 이 동화책에는 Key Objects가 없습니다.');
+                    goBack();
+                    return;
+                }
+
+                keyObjects = storyData.key_objects;
+                loadWord();
+                
+            } catch (error) {
+                console.error('스토리 로드 실패:', error);
+                alert('동화책을 불러오는데 실패했습니다.');
+                goBack();
+            }
+        }
+
+        function loadWord() {
+            if (currentObjectIndex >= keyObjects.length) {
+                showResult();
+                return;
+            }
+
+            currentObject = keyObjects[currentObjectIndex];
+            userAnswer = [];
+            
+            // 통계 업데이트
+            document.getElementById('current-word').textContent = currentObjectIndex + 1;
+            document.getElementById('completed-words').textContent = completedWords;
+            
+            // 이미지 및 정보 표시
+            const img = document.getElementById('object-image');
+            if (currentObject.imageUrl) {
+                img.src = currentObject.imageUrl;
+                img.style.display = 'block';
+            } else {
+                img.style.display = 'none';
+            }
+            
+            document.getElementById('object-name').textContent = currentObject.name;
+            document.getElementById('object-description').textContent = currentObject.description || '';
+            
+            // 글자 박스 생성
+            createLetterBoxes();
+            
+            // 키보드 생성
+            createKeyboard();
+        }
+
+        function createLetterBoxes() {
+            const container = document.getElementById('letter-boxes');
+            container.innerHTML = '';
+            
+            const word = currentObject.name;
+            for (let i = 0; i < word.length; i++) {
+                const box = document.createElement('div');
+                box.className = 'letter-box';
+                box.id = `letter-box-${i}`;
+                container.appendChild(box);
+            }
+        }
+
+        function createKeyboard() {
+            const container = document.getElementById('keyboard');
+            container.innerHTML = '';
+            
+            // 영문 알파벳 생성 (대문자)
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            
+            for (let letter of alphabet) {
+                const button = document.createElement('button');
+                button.className = 'key-button';
+                button.textContent = letter;
+                button.onclick = () => typeLetter(letter);
+                button.id = `key-${letter}`;
+                container.appendChild(button);
+            }
+            
+            // 공백 키 추가
+            const spaceButton = document.createElement('button');
+            spaceButton.className = 'key-button';
+            spaceButton.textContent = 'Space';
+            spaceButton.style.gridColumn = 'span 2';
+            spaceButton.onclick = () => typeLetter(' ');
+            spaceButton.id = 'key-space';
+            container.appendChild(spaceButton);
+        }
+
+        function typeLetter(letter) {
+            const word = currentObject.name;
+            
+            if (userAnswer.length >= word.length) return;
+            
+            userAnswer.push(letter);
+            
+            // 해당 박스에 글자 표시
+            const boxIndex = userAnswer.length - 1;
+            const box = document.getElementById(`letter-box-${boxIndex}`);
+            box.textContent = letter;
+            box.classList.add('filled');
+            
+            // 키 비활성화
+            const key = letter === ' ' ? 'key-space' : `key-${letter}`;
+            const keyButton = document.getElementById(key);
+            if (keyButton) {
+                keyButton.classList.add('used');
+            }
+        }
+
+        function clearAnswer() {
+            userAnswer = [];
+            
+            // 모든 박스 초기화
+            const boxes = document.querySelectorAll('.letter-box');
+            boxes.forEach(box => {
+                box.textContent = '';
+                box.classList.remove('filled', 'correct', 'wrong');
+            });
+            
+            // 키보드 초기화
+            const keys = document.querySelectorAll('.key-button');
+            keys.forEach(key => {
+                key.classList.remove('used');
+            });
+        }
+
+        function checkAnswer() {
+            const word = currentObject.name;
+            const answer = userAnswer.join('');
+            
+            totalAttempts++;
+            
+            // 정답 체크
+            const isCorrect = answer.toUpperCase() === word.toUpperCase();
+            
+            if (isCorrect) {
+                correctAttempts++;
+                completedWords++;
+                
+                // 모든 박스를 correct로 표시
+                for (let i = 0; i < word.length; i++) {
+                    const box = document.getElementById(`letter-box-${i}`);
+                    box.classList.add('correct');
+                }
+                
+                // 정확도 업데이트
+                updateAccuracy();
+                
+                // 다음 단어로 이동
+                setTimeout(() => {
+                    currentObjectIndex++;
+                    loadWord();
+                }, 1500);
+                
+            } else {
+                // 틀린 부분 표시
+                for (let i = 0; i < Math.max(word.length, userAnswer.length); i++) {
+                    const box = document.getElementById(`letter-box-${i}`);
+                    if (i < word.length && i < userAnswer.length) {
+                        if (word[i].toUpperCase() === userAnswer[i].toUpperCase()) {
+                            box.classList.add('correct');
+                        } else {
+                            box.classList.add('wrong');
+                        }
+                    }
+                }
+                
+                // 정확도 업데이트
+                updateAccuracy();
+                
+                setTimeout(() => {
+                    clearAnswer();
+                }, 1500);
+            }
+        }
+
+        function updateAccuracy() {
+            const accuracy = totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 100;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        function showResult() {
+            const accuracy = totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 100;
+            
+            document.getElementById('final-completed').textContent = completedWords;
+            document.getElementById('final-accuracy').textContent = accuracy;
+            
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        function goBack() {
+            window.location.href = `/games.html?id=${storyId}`;
+        }
+
+        init();
+    </script>
+</body>
+</html>
