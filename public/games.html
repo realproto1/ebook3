@@ -259,20 +259,35 @@
             try {
                 // 스토리 데이터 로드
                 const response = await axios.get(`/api/storybooks/${storyId}`);
-                storyData = response.data;
+                storyData = response.data; // API는 직접 storybook 객체 반환
+
+                console.log('📦 Loaded storybook data:', {
+                    title: storyData.title,
+                    hasQuizzes: !!storyData.quizzes,
+                    quizCount: storyData.quizzes?.length || 0,
+                    hasKeyObjects: !!storyData.key_objects,
+                    keyObjectCount: storyData.key_objects?.length || 0
+                });
 
                 // 제목 표시
                 document.getElementById('story-title').textContent = storyData.title || '동화책';
 
-                // 학습 단어 확인
-                const vocabulary = storyData.educational_content?.vocabulary || [];
-                if (vocabulary.length === 0) {
-                    alert('❌ 이 동화책에는 학습 단어가 없습니다.');
+                // 퀴즈 확인 (Key Objects 기반 퀴즈)
+                const quizzes = storyData.quizzes || [];
+                const keyObjects = storyData.key_objects || [];
+                
+                if (quizzes.length === 0) {
+                    const message = keyObjects.length === 0 
+                        ? '❌ 이 동화책에는 Key Objects와 퀴즈가 없습니다.\n\n먼저 편집 페이지에서:\n1. Key Objects(핵심 사물)를 생성하고\n2. 퀴즈를 만들어주세요.'
+                        : '❌ 이 동화책에는 아직 퀴즈가 없습니다.\n\n편집 페이지에서 "퀴즈 만들기" 버튼을 눌러주세요.';
+                    
+                    alert(message);
                     window.history.back();
                     return;
                 }
 
-                console.log(`✅ 학습 단어 ${vocabulary.length}개 로드 완료`);
+                console.log(`✅ 퀴즈 ${quizzes.length}개 로드 완료`);
+                console.log(`📦 Key Objects ${keyObjects.length}개 확인`);
 
                 // 로딩 숨기고 메인 표시
                 document.getElementById('loading').style.display = 'none';
@@ -280,7 +295,8 @@
 
             } catch (error) {
                 console.error('❌ 스토리 로드 실패:', error);
-                alert('동화책을 불러오는데 실패했습니다.');
+                console.error('Error details:', error.response?.data || error.message);
+                alert('동화책을 불러오는데 실패했습니다.\n\n에러: ' + (error.response?.data?.error || error.message));
                 window.history.back();
             }
         }
