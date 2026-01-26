@@ -48,6 +48,35 @@
             box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
         }
 
+        .progress-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(255, 152, 0, 0.1);
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: #FFE0B2;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF9800, #FFB74D);
+            transition: width 0.5s;
+        }
+
         .game-area {
             background: white;
             border-radius: 20px;
@@ -83,6 +112,7 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            position: relative;
         }
 
         .story-card:hover {
@@ -91,28 +121,64 @@
         }
 
         .story-card.dragging {
-            opacity: 0.5;
+            opacity: 0.3;
+            cursor: grabbing;
+        }
+
+        .story-card.drag-over {
+            border-color: #FF9800;
+            border-style: dashed;
+            background: #FFE0B2;
         }
 
         .card-number {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             background: #FF9800;
             color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 700;
             flex-shrink: 0;
         }
 
-        .card-text {
+        .card-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 3px solid #FFE082;
+            flex-shrink: 0;
+        }
+
+        .card-content {
             flex: 1;
+        }
+
+        .card-text {
             font-size: 16px;
             line-height: 1.6;
             color: #333;
+            font-weight: 500;
+        }
+
+        .drag-handle {
+            width: 30px;
+            height: 30px;
+            background: #FFE082;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            flex-shrink: 0;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
         }
 
         .check-button {
@@ -170,6 +236,11 @@
             color: white;
         }
 
+        .btn-secondary {
+            background: #E0E0E0;
+            color: #666;
+        }
+
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
@@ -187,6 +258,11 @@
             .card-text {
                 font-size: 14px;
             }
+
+            .card-image {
+                width: 80px;
+                height: 80px;
+            }
         }
     </style>
 </head>
@@ -201,12 +277,23 @@
             <div id="story-title" style="font-size: 18px; color: #999;"></div>
         </div>
 
+        <!-- 진행 상태 -->
+        <div class="progress-section">
+            <div class="progress-info">
+                <span>문제 <strong id="current-question">1</strong> / <strong id="total-questions">4</strong></span>
+                <span>정답: <strong id="correct-count" style="color: #4CAF50;">0</strong>개</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
+            </div>
+        </div>
+
         <div class="game-area">
             <div class="instruction">
                 <i class="fas fa-hand-pointer" style="font-size: 24px; color: #FF9800; margin-bottom: 10px;"></i>
                 <div>카드를 드래그하여 올바른 순서로 배열하세요!</div>
                 <div style="font-size: 14px; color: #999; margin-top: 10px;">
-                    카드를 잡고 위아래로 움직여서 순서를 바꿀 수 있어요
+                    카드 오른쪽의 핸들(⋮⋮)을 잡고 위아래로 움직여서 순서를 바꿀 수 있어요
                 </div>
             </div>
 
@@ -223,16 +310,17 @@
     <!-- 결과 모달 -->
     <div id="result-modal" class="result-modal">
         <div class="result-content">
-            <div id="result-icon" style="font-size: 80px;">🏆</div>
-            <h2 id="result-title" style="font-size: 36px; color: #FF9800; margin: 20px 0;">정답입니다!</h2>
+            <div id="result-icon" style="font-size: 80px;">🎉</div>
+            <h2 id="result-title" style="font-size: 36px; color: #FF9800; margin: 20px 0;">완료!</h2>
             <div id="result-message" style="font-size: 20px; margin: 30px 0; color: #666;">
-                동화 이야기의 순서를 정확하게 맞추셨어요!
+                <div style="margin: 10px 0;">정답: <strong id="final-correct" style="color: #4CAF50;">0</strong>개</div>
+                <div style="margin: 10px 0;">오답: <strong id="final-wrong" style="color: #F44336;">0</strong>개</div>
             </div>
             <div style="display: flex; gap: 15px; justify-content: center;">
                 <button class="btn btn-primary" onclick="location.reload()">
                     <i class="fas fa-redo"></i> 다시 하기
                 </button>
-                <button class="btn btn-primary" onclick="goBack()">
+                <button class="btn btn-secondary" onclick="goBack()">
                     <i class="fas fa-list"></i> 게임 목록
                 </button>
             </div>
@@ -245,8 +333,10 @@
         const storyId = urlParams.get('story') || urlParams.get('id');
         
         let storyData = null;
-        let storySequences = [];
-        let correctOrder = [];
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let totalQuestions = 4;
 
         async function init() {
             if (!storyId) {
@@ -261,9 +351,16 @@
                 
                 document.getElementById('story-title').textContent = storyData.title || '동화책';
                 
-                // 페이지에서 주요 문장 추출 (5-8개)
-                generateSequences();
-                renderCards();
+                // 페이지 확인
+                if (!storyData.pages || storyData.pages.length < 4) {
+                    alert('❌ 이 동화책은 페이지가 부족합니다.\n최소 4페이지 이상이 필요합니다.');
+                    goBack();
+                    return;
+                }
+
+                // 문제 생성
+                generateQuestions();
+                loadQuestion();
                 
             } catch (error) {
                 console.error('스토리 로드 실패:', error);
@@ -272,30 +369,35 @@
             }
         }
 
-        function generateSequences() {
-            const pages = storyData.pages;
-            const step = Math.max(1, Math.floor(pages.length / 6));
-            
-            // 동화의 주요 페이지에서 대표 문장 추출
-            for (let i = 0; i < Math.min(6, pages.length); i += step) {
-                const page = pages[i];
-                const sentences = page.text.split(/[.!?]/).filter(s => s.trim().length > 15);
+        function generateQuestions() {
+            // 4개의 문제 생성
+            for (let i = 0; i < totalQuestions; i++) {
+                // 각 문제마다 4개의 연속된 페이지 선택
+                const startPage = Math.floor(i * (storyData.pages.length / totalQuestions));
+                const pages = [];
                 
-                if (sentences.length > 0) {
-                    const sentence = sentences[0].trim();
-                    storySequences.push({
-                        id: i,
-                        text: sentence,
-                        order: i
+                for (let j = 0; j < 4; j++) {
+                    const pageIndex = Math.min(startPage + j, storyData.pages.length - 1);
+                    pages.push({
+                        index: pageIndex,
+                        page: storyData.pages[pageIndex]
                     });
                 }
+                
+                // 정답 순서 저장
+                const correctOrder = pages.map(p => p.index);
+                
+                // 페이지 섞기
+                const shuffledPages = [...pages];
+                shuffleArray(shuffledPages);
+                
+                questions.push({
+                    pages: shuffledPages,
+                    correctOrder: correctOrder
+                });
             }
             
-            // 정답 순서 저장
-            correctOrder = storySequences.map(s => s.id);
-            
-            // 순서 섞기
-            shuffleArray(storySequences);
+            document.getElementById('total-questions').textContent = totalQuestions;
         }
 
         function shuffleArray(array) {
@@ -305,24 +407,58 @@
             }
         }
 
-        function renderCards() {
+        function loadQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                showFinalResult();
+                return;
+            }
+
+            const question = questions[currentQuestionIndex];
+            
+            // 진행 상태 업데이트
+            document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+            const progress = ((currentQuestionIndex) / totalQuestions) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            
+            // 카드 렌더링
+            renderCards(question.pages);
+        }
+
+        function renderCards(pages) {
             const container = document.getElementById('story-cards');
             container.innerHTML = '';
             
-            storySequences.forEach((seq, index) => {
+            pages.forEach((pageData, index) => {
+                const page = pageData.page;
                 const card = document.createElement('div');
                 card.className = 'story-card';
                 card.draggable = true;
-                card.dataset.id = seq.id;
+                card.dataset.pageIndex = pageData.index;
+                
+                // 텍스트 추출 (첫 문장)
+                const text = page.text.split(/[.!?]/)[0].trim() + '...';
+                
+                // 이미지 HTML
+                const imageHTML = page.imageUrl 
+                    ? `<img src="${page.imageUrl}" class="card-image" alt="장면 ${pageData.index + 1}">`
+                    : `<div class="card-image" style="background: linear-gradient(135deg, #FFE082, #FFCC80); display: flex; align-items: center; justify-content: center; font-size: 48px;">📖</div>`;
                 
                 card.innerHTML = `
                     <div class="card-number">${index + 1}</div>
-                    <div class="card-text">${seq.text}</div>
+                    ${imageHTML}
+                    <div class="card-content">
+                        <div class="card-text">${text}</div>
+                    </div>
+                    <div class="drag-handle">
+                        <i class="fas fa-grip-vertical" style="color: #FF9800;"></i>
+                    </div>
                 `;
                 
                 // 드래그 이벤트
                 card.addEventListener('dragstart', handleDragStart);
                 card.addEventListener('dragover', handleDragOver);
+                card.addEventListener('dragenter', handleDragEnter);
+                card.addEventListener('dragleave', handleDragLeave);
                 card.addEventListener('drop', handleDrop);
                 card.addEventListener('dragend', handleDragEnd);
                 
@@ -336,6 +472,7 @@
             draggedElement = this;
             this.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
         }
 
         function handleDragOver(e) {
@@ -346,10 +483,22 @@
             return false;
         }
 
+        function handleDragEnter(e) {
+            if (this !== draggedElement) {
+                this.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
         function handleDrop(e) {
             if (e.stopPropagation) {
                 e.stopPropagation();
             }
+            
+            this.classList.remove('drag-over');
             
             if (draggedElement !== this) {
                 const container = document.getElementById('story-cards');
@@ -363,7 +512,6 @@
                     container.insertBefore(draggedElement, this);
                 }
                 
-                // 번호 재정렬
                 updateCardNumbers();
             }
             
@@ -372,6 +520,10 @@
 
         function handleDragEnd(e) {
             this.classList.remove('dragging');
+            
+            // 모든 drag-over 제거
+            const cards = document.querySelectorAll('.story-card');
+            cards.forEach(card => card.classList.remove('drag-over'));
         }
 
         function updateCardNumbers() {
@@ -383,29 +535,42 @@
         }
 
         function checkAnswer() {
+            const question = questions[currentQuestionIndex];
             const cards = document.querySelectorAll('.story-card');
-            const currentOrder = Array.from(cards).map(card => parseInt(card.dataset.id));
+            const currentOrder = Array.from(cards).map(card => parseInt(card.dataset.pageIndex));
             
-            const isCorrect = JSON.stringify(currentOrder) === JSON.stringify(correctOrder);
-            
-            const modal = document.getElementById('result-modal');
-            const icon = document.getElementById('result-icon');
-            const title = document.getElementById('result-title');
-            const message = document.getElementById('result-message');
+            const isCorrect = JSON.stringify(currentOrder) === JSON.stringify(question.correctOrder);
             
             if (isCorrect) {
-                icon.textContent = '🎉';
-                title.textContent = '정답입니다!';
-                title.style.color = '#4CAF50';
-                message.textContent = '동화 이야기의 순서를 정확하게 맞추셨어요!';
+                correctCount++;
+                document.getElementById('correct-count').textContent = correctCount;
+                
+                // 성공 피드백
+                cards.forEach(card => {
+                    card.style.borderColor = '#4CAF50';
+                    card.style.background = 'linear-gradient(135deg, #C8E6C9, #A5D6A7)';
+                });
+                
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    loadQuestion();
+                }, 1500);
+                
             } else {
-                icon.textContent = '😅';
-                title.textContent = '아쉽네요!';
-                title.style.color = '#FF5722';
-                message.textContent = '순서가 조금 달라요. 다시 한번 시도해보세요!';
+                // 실패 피드백
+                alert('❌ 순서가 맞지 않아요!\n다시 한번 시도해보세요.');
             }
+        }
+
+        function showFinalResult() {
+            const wrongCount = totalQuestions - correctCount;
             
-            modal.style.display = 'flex';
+            document.getElementById('result-icon').textContent = correctCount === totalQuestions ? '🎉' : '😊';
+            document.getElementById('result-title').textContent = correctCount === totalQuestions ? '완벽해요!' : '수고했어요!';
+            document.getElementById('final-correct').textContent = correctCount;
+            document.getElementById('final-wrong').textContent = wrongCount;
+            
+            document.getElementById('result-modal').style.display = 'flex';
         }
 
         function goBack() {
