@@ -388,10 +388,20 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
       
       // 503 에러(overloaded)이고 재시도 횟수가 남아있으면 재시도
       if (response.status === 503 && retryCount < maxRetries - 1) {
-        const waitTime = 3000 * (retryCount + 1); // 3초, 6초, 9초
+        const waitTime = 5000 * (retryCount + 1); // 5초, 10초, 15초로 증가
         console.log(`🔄 503 Error (Model Overloaded). Retrying in ${waitTime/1000} seconds... (Attempt ${retryCount + 2}/${maxRetries})`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
         return generateImage(prompt, referenceImages, retryCount + 1, maxRetries, modelName);
+      }
+      
+      // 503 에러가 최종적으로 실패한 경우
+      if (response.status === 503) {
+        throw new Error('🔥 Gemini 서버 과부하: 현재 Gemini API가 매우 혼잡합니다. 5-10분 후 다시 시도해주세요.');
+      }
+      
+      // 429 에러 (Quota exceeded)
+      if (response.status === 429) {
+        throw new Error('⏱️ API 요청 한도 초과: Gemini API 무료 티어는 하루 1,500개 요청 제한이 있습니다. 내일 다시 시도하거나 API 키를 업그레이드해주세요.');
       }
       
       // 500 에러이고 재시도 횟수가 남아있으면 재시도
