@@ -919,13 +919,17 @@ ${referenceContent}
           
           const translatePrompt = `Translate the following children's storybook to ${targetLang}.
 
-**IMPORTANT TRANSLATION RULES:**
-1. Maintain the natural tone and style for children ages ${targetAge || '4-8'}
-2. Keep cultural context appropriate for the target language
-3. Preserve emotional nuance and storytelling rhythm
-4. Keep character names as they are (do not translate proper nouns)
-5. Adapt idioms and expressions to be culturally relevant
-6. Maintain the same reading level and vocabulary complexity
+**CRITICAL TRANSLATION RULES:**
+1. **COMPLETE TRANSLATION**: Translate EVERY word to ${targetLang}. Do NOT mix Korean or other languages.
+2. **NO MIXED LANGUAGES**: The output must be 100% in ${targetLang} only. 
+   - ❌ WRONG: "개미 said with a worried look"
+   - ✅ CORRECT: "The ant said with a worried look"
+3. Character names: Keep proper nouns as they are (백설공주 → Snow White, 신데렐라 → Cinderella)
+4. Maintain natural tone and style for children ages ${targetAge || '4-8'}
+5. Keep cultural context appropriate for the target language
+6. Preserve emotional nuance and storytelling rhythm
+7. Adapt idioms and expressions to be culturally relevant
+8. Maintain the same reading level and vocabulary complexity
 
 **STORYBOOK TITLE:**
 ${title}
@@ -941,16 +945,18 @@ ${pagesText}
   "translatedPages": [
     {
       "pageNumber": 1,
-      "text": "translated text for page 1"
+      "text": "translated text for page 1 (100% in ${targetLang})"
     },
     {
       "pageNumber": 2,
-      "text": "translated text for page 2"
+      "text": "translated text for page 2 (100% in ${targetLang})"
     }
   ]
 }
 
-**CRITICAL:** Respond ONLY with valid JSON. No markdown, no explanation, just pure JSON.`;
+**CRITICAL:** 
+- Respond ONLY with valid JSON. No markdown, no explanation, just pure JSON.
+- Every translated text must be 100% in ${targetLang}. NO mixed languages.`;
 
           // 사용자가 선택한 모델 또는 기본 모델 사용
           const translateModel = geminiModel || 'gemini-2.5-flash';
