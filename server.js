@@ -1635,7 +1635,7 @@ Create a single, clear character portrait that children can easily recognize.`;
 **Object Description from Story:**
 ${objectDescription || '이 동화에서 중요한 역할을 하는 사물입니다.'}
 
-**Art Style:** ${artStyle} style for children's book illustration.
+**Art Style:** ${artStyle} style for children's book illustration. Use the EXACT same visual style, color palette, texture, and artistic technique as the storybook. Match the illustration style precisely - including brush strokes, shading technique, color saturation, and overall aesthetic. This should look like it came from the same illustrator and the same book.
 
 **Image Aspect Ratio:** ${aspectRatio}
 
@@ -1643,15 +1643,17 @@ ${objectDescription || '이 동화에서 중요한 역할을 하는 사물입니
 - Show the object clearly and simply
 - Clean white background
 - **Match the visual description from the story above**
-- Bright, vibrant colors
+- **Use the SAME art style, colors, and visual language as the storybook**
+- Bright, vibrant colors consistent with the book's palette
 - Child-friendly, appealing design
 - Age-appropriate for 4-8 years old
 - Focus on the object's distinctive features as described
-- Make it consistent with how it appears in the storybook illustrations
+- Make it visually consistent with how it appears in the storybook illustrations
+- Same level of detail and rendering style as character references
 ${noTextPrompt}
 ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}
 
-Create a single, clear object illustration that matches the storybook's visual style.`;
+CRITICAL: This image must be visually indistinguishable in style from the storybook's character references and page illustrations. Use identical artistic techniques, color choices, and visual treatment.`;
         }
         // 일반 단어인 경우 - 기본 프롬프트
         else {
@@ -1661,22 +1663,24 @@ Create a single, clear object illustration that matches the storybook's visual s
 
 **Word to Illustrate:** ${word}${korean ? ` (${korean})` : ''}
 
-**Art Style:** ${artStyle} style for children's book illustration.
+**Art Style:** ${artStyle} style for children's book illustration. Use the EXACT same visual style, color palette, texture, and artistic technique as would be used in this storybook. Match the illustration style precisely - including brush strokes, shading technique, color saturation, and overall aesthetic.
 
 **Image Aspect Ratio:** ${aspectRatio}
 
 **Requirements:**
 - Show a clear, simple representation of "${word}"
 - Clean white background
-- Bright, vibrant colors
+- **Use the SAME art style and visual language as the storybook**
+- Bright, vibrant colors consistent with the book's palette
 - Child-friendly, appealing design
 - Age-appropriate for 4-8 years old
 - Focus on clarity and easy recognition
 - The object should be a concrete, tangible noun (not abstract concepts)
+- Same level of detail and rendering style as character references
 ${noTextPrompt}
 ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}
 
-Create a single, clear image that children can easily understand and associate with the word.`;
+CRITICAL: This image must be visually consistent in style with the storybook's character references and page illustrations. Use identical artistic techniques and visual treatment.`;
         }
 
         console.log(`Generating vocabulary image for: ${word}${korean ? ` (${korean})` : ''}`);
