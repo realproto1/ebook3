@@ -80,6 +80,62 @@
 }
 ```
 
+**어휘(Vocabulary) 작성 예시:**
+```json
+"educational_content": {
+  "vocabulary": [
+    {
+      "word": "Princess",
+      "korean": "공주",
+      "definition": "왕의 딸이에요. 아름다운 드레스를 입고 왕관을 쓰고 있어요.",
+      "example": "백설공주는 아름다운 공주예요."
+    },
+    {
+      "word": "Queen",
+      "korean": "왕비",
+      "definition": "왕의 아내예요. 왕국을 다스리는 여자 왕이에요.",
+      "example": "왕비는 거울에게 물어봤어요."
+    },
+    {
+      "word": "Mirror",
+      "korean": "거울",
+      "definition": "자신의 모습을 비춰 볼 수 있는 물건이에요.",
+      "example": "마법 거울은 진실을 말해요."
+    },
+    {
+      "word": "Apple",
+      "korean": "사과",
+      "definition": "빨갛고 둥근 과일이에요. 달콤하고 맛있어요.",
+      "example": "왕비가 독이 든 사과를 주었어요."
+    },
+    {
+      "word": "Forest",
+      "korean": "숲",
+      "definition": "나무가 많이 있는 곳이에요. 동물들이 살아요.",
+      "example": "백설공주는 깊은 숲으로 도망쳤어요."
+    },
+    {
+      "word": "House",
+      "korean": "집",
+      "definition": "사람이 사는 곳이에요. 안에서 먹고 자요.",
+      "example": "난쟁이들의 작은 집을 찾았어요."
+    },
+    {
+      "word": "Prince",
+      "korean": "왕자",
+      "definition": "왕의 아들이에요. 멋진 옷을 입고 말을 타요.",
+      "example": "왕자가 공주를 구해주었어요."
+    },
+    {
+      "word": "Dwarf",
+      "korean": "난쟁이",
+      "definition": "키가 작은 사람이에요. 친절하고 힘이 세요.",
+      "example": "일곱 난쟁이가 함께 살아요."
+    }
+  ]
+}
+```
+
 **⭐⭐⭐ 매우 중요: 원본이 있는 유명 동화는 원작 구조를 존중하세요 ⭐⭐⭐**
 
 **복선 규칙의 적용 범위:**
@@ -273,3 +329,8 @@
     ]
   }
 }
+
+**⭐ 중요: educational_content.vocabulary는 필수입니다 ⭐**
+- 동화 내용과 관련된 핵심 단어를 **최소 8개 이상** 포함해야 합니다
+- 각 단어는 영어 단어(word), 한글 뜻(korean), 설명(definition), 예문(example)을 모두 포함해야 합니다
+- 예시: Princess(공주), Queen(왕비), Apple(사과), Mirror(거울), Forest(숲), House(집), Prince(왕자), Dwarf(난쟁이)
