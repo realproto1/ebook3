@@ -47,40 +47,43 @@ function renderBooks() {
     hideEmptyState();
     
     grid.innerHTML = filteredStorybooks.map(book => `
-        <div class="book-card bg-white rounded-2xl shadow-xl overflow-hidden fade-in">
+        <div class="book-card bg-white rounded-3xl shadow-xl overflow-hidden fade-in">
             <!-- 표지 이미지 -->
-            <div class="relative h-64 overflow-hidden cursor-pointer" onclick="openBook('${book.id}')">
+            <div class="relative h-72 overflow-hidden cursor-pointer" onclick="openBook('${book.id}')">
                 ${book.coverImage 
-                    ? `<img src="${book.coverImage}" alt="${book.title}" class="w-full h-full object-cover">`
-                    : `<div class="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                        <i class="fas fa-book text-white text-6xl"></i>
+                    ? `<img src="${book.coverImage}" alt="${book.title}" class="book-cover w-full h-full object-cover">`
+                    : `<div class="book-cover w-full h-full bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 flex items-center justify-center">
+                        <i class="fas fa-book-open text-white text-7xl opacity-80"></i>
                        </div>`
                 }
                 <!-- 연령 배지 -->
-                <div class="absolute top-4 right-4 bg-white bg-opacity-90 rounded-full px-3 py-1 text-sm font-bold text-purple-700">
-                    <i class="fas fa-child mr-1"></i>
-                    ${book.targetAge}세
+                <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-2 shadow-lg">
+                    <span class="text-sm font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                        <i class="fas fa-child mr-1"></i>
+                        ${book.targetAge}세
+                    </span>
+                </div>
+                <!-- 조회수 배지 -->
+                <div class="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm rounded-xl px-3 py-1 shadow-lg">
+                    <span class="text-xs font-semibold text-white flex items-center">
+                        <i class="fas fa-eye mr-1.5"></i>
+                        ${book.viewCount || 0}
+                    </span>
                 </div>
             </div>
             
             <!-- 정보 -->
-            <div class="p-5">
-                <!-- 제목과 조회수 -->
-                <div class="flex items-start justify-between mb-6">
-                    <h3 class="text-xl font-bold text-gray-800 line-clamp-2 flex-1">${book.title}</h3>
-                    <span class="text-sm text-gray-500 ml-3 mt-1 whitespace-nowrap">
-                        <i class="fas fa-eye mr-1"></i>
-                        ${book.viewCount || 0}
-                    </span>
-                </div>
+            <div class="p-6">
+                <!-- 제목 -->
+                <h3 class="text-xl font-bold text-gray-800 mb-5 line-clamp-2 min-h-[3.5rem]">${book.title}</h3>
                 
                 <!-- 액션 버튼 -->
                 <div class="flex gap-2 mb-3">
-                    <button onclick="openBook('${book.id}')" class="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3 rounded-lg transition">
+                    <button onclick="openBook('${book.id}')" class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
                         <i class="fas fa-book-open mr-2"></i>
-                        보기
+                        읽기
                     </button>
-                    <button onclick="openGamesFromViewer('${book.id}')" class="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold py-3 rounded-lg transition">
+                    <button onclick="openGamesFromViewer('${book.id}')" class="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
                         <i class="fas fa-gamepad mr-2"></i>
                         게임
                     </button>
@@ -88,12 +91,12 @@ function renderBooks() {
                 
                 <!-- 공유하기 & 댓글 버튼 -->
                 <div class="flex gap-2">
-                    <button onclick="shareBook('${book.id}'); event.stopPropagation();" class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold py-2 rounded-lg transition text-sm">
-                        <i class="fas fa-share-alt mr-1"></i>
+                    <button onclick="shareBook('${book.id}'); event.stopPropagation();" class="flex-1 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-700 font-semibold py-2.5 rounded-xl transition-all border border-blue-200">
+                        <i class="fas fa-share-alt mr-1.5"></i>
                         공유
                     </button>
-                    <button onclick="openComments('${book.id}', '${book.title.replace(/'/g, "\\'")}'); event.stopPropagation();" class="flex-1 bg-purple-100 hover:bg-purple-200 text-purple-700 font-semibold py-2 rounded-lg transition text-sm">
-                        <i class="fas fa-comments mr-1"></i>
+                    <button onclick="openComments('${book.id}', '${book.title.replace(/'/g, "\\'")}'); event.stopPropagation();" class="flex-1 bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 text-purple-700 font-semibold py-2.5 rounded-xl transition-all border border-purple-200">
+                        <i class="fas fa-comments mr-1.5"></i>
                         댓글 <span class="comment-count-${book.id}">0</span>
                     </button>
                 </div>
