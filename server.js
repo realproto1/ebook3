@@ -715,8 +715,10 @@ ${referenceContent}
 어휘 수준: ${settings.vocabulary}${existingCharSection}${referenceSection}
 
 **중요: 반드시 educational_content.vocabulary를 포함해야 합니다.**
-- 동화 내용과 관련된 핵심 단어를 최소 8개 이상 작성하세요.
-- 각 단어는 word(영어), korean(한글), definition(설명), example(예문)을 모두 포함해야 합니다.`;
+- 동화 내용과 관련된 **동물, 사물, 장소, 사람 등의 명사**를 최소 8개 이상 작성하세요.
+- **반드시 명사만 사용**: 동물(개, 제비, 곰), 사물(사과, 거울, 박), 장소(숲, 집, 성), 사람(공주, 왕자, 난쟁이)
+- **금지**: 형용사(착하다, 큰), 동사(돕다, 먹다), 감정(사랑, 기쁨)
+- 각 단어는 word(영어 명사), korean(한글 명사), definition(설명), example(예문)을 모두 포함해야 합니다.`;
 
     // 선택한 Gemini 모델 사용
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${GEMINI_API_KEY}`;
