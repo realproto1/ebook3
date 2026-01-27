@@ -1479,7 +1479,13 @@ ${previousTexts}
       '\n\n**🚫 CRITICAL - ABSOLUTELY NO TEXT 🚫:**\nDo NOT include ANY text, labels, words, letters, captions, titles, speech bubbles, dialogue boxes, or text overlays in the image.\nAbsolutely NO TEXT of any kind - not even a single letter or number.\nNO VISUAL TEXT ELEMENTS WHATSOEVER.\nPure illustration only with zero text content.' : 
       '\n\n**🚫 IMPORTANT - NO TEXT 🚫:**\nDo NOT include any text, labels, words, letters, captions, titles, speech bubbles, dialogue boxes, or text overlays in the image.\nNo visual text of any kind.\nPure illustration only.';
     
-    const prompt = `Create a beautiful, professional illustration for a children's storybook page.
+    const prompt = `🎨 ART STYLE (CRITICAL - READ THIS FIRST):
+${artStyle}
+
+⚠️ MANDATORY: You MUST follow the art style specification above EXACTLY. This is the MOST IMPORTANT requirement.
+Do NOT use any other style. Do NOT add your own interpretation. 
+STRICT ADHERENCE TO THE SPECIFIED ART STYLE IS REQUIRED.
+
 ${storyContext}
 
 **Main Scene Description:** ${sceneDescriptionEn}
@@ -1487,21 +1493,24 @@ ${sceneDetails}
 ${characterInfo}
 ${editNoteEn ? `\n\n**Important Modification Request:** ${editNoteEn}` : ''}
 
-**Art Style:** ${artStyle}
-
 **Image Aspect Ratio:** ${aspectRatio}
 
-**Composition:** Create a warm, inviting scene that captures the emotion and action of the story moment. Use a horizontal composition suitable for a storybook spread. Follow the art style specifications precisely to maintain visual consistency throughout the book.
+**Composition:** Create a scene that captures the emotion and action of the story moment. Use a horizontal composition suitable for a storybook spread.
 
 **Lighting & Atmosphere:** ${page.scene_structure?.background?.includes('밤') || page.scene_structure?.background?.includes('night') || page.scene_structure?.background?.includes('달빛') || page.scene_structure?.background?.includes('moonlight') || page.scene_structure?.background?.includes('저녁') || page.scene_structure?.background?.includes('evening') ? 'NIGHT SCENE: Dark sky with stars or moonlight. Use cool blue/purple tones for nighttime atmosphere. Include visible moon or stars if outdoors. Indoor scenes should have candles, lanterns, or dim warm lighting.' : 'DAY SCENE: Bright, clear daylight with warm sunlight. Use bright yellows and warm colors for daytime atmosphere. Show clear blue sky if outdoors. Indoor scenes should have natural sunlight streaming through windows.'} The scene should feel magical yet safe and welcoming for young children.
-
-**Quality:** Follow the art style specifications above precisely - maintain the same texture, brush strokes, color palette, shading technique, and artistic approach as specified. The image should be engaging and age-appropriate for children aged 4-8 years.
 
 **Background:** Detailed but not overwhelming - the focus should remain on the characters and their actions while providing a rich, immersive environment.
 ${noTextPrompt}
 ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}
 
-Make the illustration emotionally engaging and visually captivating while maintaining a child-friendly, whimsical tone.`;
+🎯 QUALITY REQUIREMENT:
+This illustration is for a children's storybook. The image MUST:
+- Be engaging and age-appropriate for children aged 4-8 years
+- Follow the exact texture, brush strokes, color palette, shading technique specified in the art style above
+- Be emotionally engaging and visually captivating while maintaining a child-friendly, whimsical tone
+- Look like it was created by the same illustrator using the same technique and materials
+
+🚨 FINAL REMINDER: USE THE EXACT ART STYLE SPECIFIED AT THE TOP. NO DEVIATIONS.`;
     
     console.log('🎨 Generating illustration with', referenceImages.length, 'reference images');
     console.log('⚙️ Settings:', { modelName, aspectRatio, enforceNoText, enforceCharacterConsistency });
