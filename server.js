@@ -883,6 +883,19 @@ ${referenceContent}
     
     storybook.characters = expandedCharacters;
     
+    // educational_content.vocabulary를 key_objects로 변환 (UI 호환성)
+    if (storybook.educational_content && storybook.educational_content.vocabulary) {
+      storybook.key_objects = storybook.educational_content.vocabulary.map(vocab => ({
+        name: vocab.word,
+        korean: vocab.korean,
+        definition: vocab.definition,
+        example: vocab.example,
+        size: 'medium',
+        sizeCm: 50
+      }));
+      console.log(`✅ Vocabulary → Key Objects 변환 완료: ${storybook.key_objects.length}개`);
+    }
+    
     // ID와 메타데이터 추가
     storybook.id = Date.now().toString();
     storybook.targetAge = targetAge;
