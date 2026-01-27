@@ -1138,7 +1138,7 @@ app.post('/api/generate-character-image', requireAPIKey, async (req, res) => {
 
 ${character.age ? `**Character Age:** ${character.age}` : ''}
 
-**Art Style:** ${artStyle} style for children's book illustration.
+**Art Style:** ${artStyle}
 
 **Image Aspect Ratio:** ${aspectRatio}
 
@@ -1150,7 +1150,7 @@ ${character.age ? `**Character Age:** ${character.age}` : ''}
 
 **Background:** Clean white background suitable for character reference.
 
-**Quality:** High detail, vibrant colors, soft shading, professional children's book illustration quality. The character should have a warm, friendly, and appealing appearance suitable for young children aged 4-8 years.
+**Quality:** Follow the art style specifications above precisely. The character should have a warm, friendly, and appealing appearance suitable for young children aged 4-8 years. Maintain consistency with the specified visual style, texture, color palette, and artistic techniques.
 
 **Composition:** Arrange all views in a single cohesive character sheet layout that clearly shows the character's design from different angles.
 ${noTextPrompt}
@@ -1476,15 +1476,15 @@ ${sceneDetails}
 ${characterInfo}
 ${editNoteEn ? `\n\n**Important Modification Request:** ${editNoteEn}` : ''}
 
-**Art Style:** ${artStyle} style for children's book illustration.
+**Art Style:** ${artStyle}
 
 **Image Aspect Ratio:** ${aspectRatio}
 
-**Composition:** Create a warm, inviting scene that captures the emotion and action of the story moment. Use a horizontal composition suitable for a storybook spread.
+**Composition:** Create a warm, inviting scene that captures the emotion and action of the story moment. Use a horizontal composition suitable for a storybook spread. Follow the art style specifications precisely to maintain visual consistency throughout the book.
 
 **Lighting & Atmosphere:** ${page.scene_structure?.background?.includes('밤') || page.scene_structure?.background?.includes('night') || page.scene_structure?.background?.includes('달빛') || page.scene_structure?.background?.includes('moonlight') || page.scene_structure?.background?.includes('저녁') || page.scene_structure?.background?.includes('evening') ? 'NIGHT SCENE: Dark sky with stars or moonlight. Use cool blue/purple tones for nighttime atmosphere. Include visible moon or stars if outdoors. Indoor scenes should have candles, lanterns, or dim warm lighting.' : 'DAY SCENE: Bright, clear daylight with warm sunlight. Use bright yellows and warm colors for daytime atmosphere. Show clear blue sky if outdoors. Indoor scenes should have natural sunlight streaming through windows.'} The scene should feel magical yet safe and welcoming for young children.
 
-**Quality:** High detail, rich colors, professional children's book illustration quality. The image should be engaging and age-appropriate for children aged 4-8 years.
+**Quality:** Follow the art style specifications above precisely - maintain the same texture, brush strokes, color palette, shading technique, and artistic approach as specified. The image should be engaging and age-appropriate for children aged 4-8 years.
 
 **Background:** Detailed but not overwhelming - the focus should remain on the characters and their actions while providing a rich, immersive environment.
 ${noTextPrompt}
@@ -1599,7 +1599,7 @@ ${matchingCharacter.description}
 
 **Character Role:** ${matchingCharacter.role}
 
-**Art Style:** ${artStyle} style for children's book illustration.
+**Art Style:** ${artStyle}
 
 **Image Aspect Ratio:** ${aspectRatio}
 
@@ -1607,11 +1607,12 @@ ${matchingCharacter.description}
 - Show the character in a simple, clear, frontal pose
 - Clean white or simple background (no complex scenes)
 - **EXACT appearance matching the character description above**
-- Bright, vibrant colors
+- **Follow the art style specifications precisely** - same texture, brush strokes, color palette, and artistic technique
 - Child-friendly, appealing design
 - Age-appropriate for 4-8 years old
 - Focus on the character's distinctive features
 - Make it easy for children to recognize this character
+- Maintain visual consistency with the storybook's art style
 ${noTextPrompt}
 ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}
 
