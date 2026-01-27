@@ -712,7 +712,11 @@ ${referenceContent}
 총 단어 수: ${settings.wordCount}자
 문장 길이: ${settings.sentenceLength}
 문장 복잡도: ${settings.sentenceComplexity}
-어휘 수준: ${settings.vocabulary}${existingCharSection}${referenceSection}`;
+어휘 수준: ${settings.vocabulary}${existingCharSection}${referenceSection}
+
+**중요: 반드시 educational_content.vocabulary를 포함해야 합니다.**
+- 동화 내용과 관련된 핵심 단어를 최소 8개 이상 작성하세요.
+- 각 단어는 word(영어), korean(한글), definition(설명), example(예문)을 모두 포함해야 합니다.`;
 
     // 선택한 Gemini 모델 사용
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${GEMINI_API_KEY}`;
@@ -866,7 +870,9 @@ ${referenceContent}
           expandedCharacters.push({
             name: `${baseName}${i}`,
             description: `${char.description} (${i}번째 ${baseName})`,
-            role: char.role
+            role: char.role,
+            age: char.age,
+            height: char.height
           });
         }
       } else {
