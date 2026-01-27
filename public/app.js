@@ -3581,8 +3581,7 @@ async function generateAllCharacterReferences() {
                     artStyle: currentStorybook.artStyle || '디즈니 스타일',
                     settings: {
                         aspectRatio: '16:9',
-                        enforceNoText: true,
-                        characterModel: 'gemini-3-pro-image-preview'  // 🔒 고정: Gemini 3 Pro만 사용
+                        enforceNoText: true
                     },
                     storybookId: currentStorybook.id,
                     storybookTitle: currentStorybook.title
@@ -3702,8 +3701,7 @@ async function generateCharacterReference(charIndex) {
             artStyle: currentStorybook.artStyle || '디즈니 스타일',
             settings: {
                 aspectRatio: '16:9',
-                enforceNoText: true,
-                characterModel: 'gemini-3-pro-image-preview'  // 🔒 고정: Gemini 3 Pro만 사용
+                enforceNoText: true
             },
             storybookId: currentStorybook.id,
             storybookTitle: currentStorybook.title
@@ -4026,10 +4024,7 @@ async function generateAllIllustrationsParallel() {
                         page: pageData,
                         artStyle: artStyle,
                         characterReferences: refImageUrls, // URL 배열 전달
-                        settings: {
-                            ...imageSettings,
-                            illustrationModel: 'gemini-3-pro-image-preview'  // 🔒 고정: Gemini 3 Pro만 사용
-                        },
+                        settings: imageSettings,
                         storybookId: currentStorybook.id,
                         storybookTitle: currentStorybook.title
                     });
@@ -4205,10 +4200,7 @@ async function generateAllIllustrationsSequential() {
                     page: pageData,
                     artStyle: artStyle,
                     characterReferences: refImageUrls, // URL 배열 전달
-                    settings: {
-                        ...imageSettings,
-                        illustrationModel: 'gemini-3-pro-image-preview'  // 🔒 고정: Gemini 3 Pro만 사용
-                    },
+                    settings: imageSettings,
                     previousPages: previousPages,
                     storybookId: currentStorybook.id,
                     storybookTitle: currentStorybook.title
@@ -4594,10 +4586,7 @@ async function generateIllustration(pageIndex) {
             page: pageData,
             artStyle: artStyle,
             characterReferences: refImageUrls, // URL 배열 전달
-            settings: {
-                ...imageSettings,
-                illustrationModel: 'gemini-3-pro-image-preview'  // 🔒 고정: Gemini 3 Pro만 사용
-            },
+            settings: imageSettings,
             editNote: editNote,
             previousPages: pageIndex > 0 ? [currentStorybook.pages[pageIndex - 1]] : [],
             storybookId: currentStorybook.id,
@@ -5205,8 +5194,7 @@ Example: For "Apple", show only a red apple fruit. No text.`;
             artStyle: currentStorybook.artStyle || '디즈니 스타일',
             settings: {
                 aspectRatio: '16:9',
-                enforceNoText: true,
-                keyObjectModel: 'gemini-3-pro-image-preview'  // 🔒 고정: Gemini 3 Pro만 사용
+                enforceNoText: true
             },
             customPrompt: prompt,
             storybookId: currentStorybook.id,
