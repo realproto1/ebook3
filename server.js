@@ -1102,7 +1102,7 @@ app.post('/api/generate-character-image', requireAPIKey, async (req, res) => {
         body: JSON.stringify({
           contents: [{ 
             parts: [{ 
-              text: `Translate the following Korean character description to English for image generation. Keep it detailed and visual:\n\n${character.description}` 
+              text: `Translate the following Korean character description to English. ONLY translate the character's physical appearance, personality, and features. DO NOT add any art style, rendering technique, or visual style descriptions:\n\n${character.description}` 
             }] 
           }]
         })
@@ -1134,11 +1134,20 @@ app.post('/api/generate-character-image', requireAPIKey, async (req, res) => {
     
     const prompt = `Create a professional character design reference sheet for a children's storybook character. 
 
+**🎨 CRITICAL - ART STYLE (HIGHEST PRIORITY):**
+${artStyle}
+
+**⚠️ MANDATORY:** You MUST follow the art style specifications above EXACTLY. This includes:
+- Exact color palette (muted blue/gray/charcoal if specified)
+- Exact texture and medium (watercolor, gouache, textured paper if specified)
+- Exact atmosphere and mood (moody, whimsical, etc. if specified)
+- Exact rendering technique (soft washes, dry-brush, layered look if specified)
+- Exact decorative patterns and visual elements (dots, scales, grain if specified)
+DO NOT deviate from the art style. DO NOT use a different color palette. DO NOT use a different rendering technique.
+
 **Character Description:** ${characterDescriptionEn}
 
 ${character.age ? `**Character Age:** ${character.age}` : ''}
-
-**Art Style:** ${artStyle}
 
 **Image Aspect Ratio:** ${aspectRatio}
 
@@ -1148,13 +1157,15 @@ ${character.age ? `**Character Age:** ${character.age}` : ''}
 - 3/4 view (right side)
 - Three facial expressions at the bottom: happy, surprised, and neutral
 
-**Background:** Clean white background suitable for character reference.
+**Background:** Clean white background suitable for character reference, or use the background style specified in the art style above (e.g., textured paper).
 
-**Quality:** Follow the art style specifications above precisely. The character should have a warm, friendly, and appealing appearance suitable for young children aged 4-8 years. Maintain consistency with the specified visual style, texture, color palette, and artistic techniques.
+**Quality:** Follow the art style specifications at the top with ABSOLUTE PRECISION. The character should have a warm, friendly, and appealing appearance suitable for young children aged 4-8 years. Every visual aspect must match the specified art style perfectly.
 
-**Composition:** Arrange all views in a single cohesive character sheet layout that clearly shows the character's design from different angles.
+**Composition:** Arrange all views in a single cohesive character sheet layout that clearly shows the character's design from different angles. Apply the art style consistently across all views.
 ${noTextPrompt}
-${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}`;
+${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}
+
+🚨 FINAL REMINDER: The art style at the top of this prompt is MANDATORY and NON-NEGOTIABLE. Follow it EXACTLY.`;
     
     console.log('🎨 Generating character image with settings:', { modelName, aspectRatio, enforceNoText });
 
