@@ -748,9 +748,9 @@ ${referenceContent}
           const message = errorJson.error.message;
           
           if (code === 503 || status === 'UNAVAILABLE') {
-            errorMessage = 'AI 서버가 일시적으로 과부하 상태입니다. 잠시 후 다시 시도해주세요.';
-          } else if (code === 429) {
-            errorMessage = 'API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.';
+            errorMessage = 'AI 서버가 일시적으로 과부하 상태입니다. 1-2분 후 다시 시도해주세요.';
+          } else if (code === 429 || status === 'RESOURCE_EXHAUSTED') {
+            errorMessage = '⏱️ API 요청 한도 초과: Gemini API는 1분당 15개 요청 제한이 있습니다. 1-2분 후 다시 시도해주세요. (현재 너무 많은 동화책을 빠르게 생성하고 있습니다)';
           } else if (code === 403) {
             errorMessage = 'API 키 권한 오류입니다. 관리자에게 문의하세요.';
           } else {
@@ -791,7 +791,13 @@ ${referenceContent}
       storybook = JSON.parse(storyText);
     } catch (parseError) {
       console.error('JSON Parse Error:', parseError);
-      console.error('Failed to parse text:', storyText.substring(0, 500) + '...');
+      console.error('Failed to parse text:', storyText.substring(0, 1000) + '...');
+      
+      // JSON이 중간에 잘렸는지 확인
+      if (storyText.length > 0 && storyText.includes('"title"') && !storyText.endsWith('}')) {
+        throw new Error('⚠️ AI 응답이 중간에 잘렸습니다. 이것은 보통 API 요청 한도 초과(429 에러) 후에 발생합니다. 1-2분 후 다시 시도해주세요.');
+      }
+      
       throw new Error('Failed to parse AI response as JSON. The AI response may be incomplete or malformed.');
     }
     
