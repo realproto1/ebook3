@@ -347,6 +347,7 @@ function showPage(pageIndex) {
     if (pageIndex >= 0) {
         // 이미지 로드 완료 대기 후 TTS 자동 재생
         setTimeout(() => {
+            console.log('🎬 페이지 애니메이션 완료 - TTS 자동 재생 시도');
             autoPlayTTS();
         }, 400); // 애니메이션 완료 후 약간의 딜레이
     }
@@ -479,25 +480,27 @@ async function autoPlayTTS() {
             const button = document.getElementById('tts-button-header');
             const buttonText = document.getElementById('tts-text');
             
-            console.log('🎵 TTS 자동 재생 시작');
+            console.log('🎵 TTS 자동 재생 시작:', audioUrl.substring(0, 50) + '...');
             buttonText.textContent = '재생 중...';
             button.classList.add('playing');
             currentAudio = new Audio(audioUrl);
             
             // TTS 완료 시 자동 넘김
             currentAudio.addEventListener('ended', () => {
-                console.log('✅ TTS 완료 - 자동 넘김');
+                console.log('✅ TTS 완료 - 자동 넘김 준비');
                 currentAudio = null;
                 buttonText.textContent = '읽어주기';
                 button.classList.remove('playing');
                 
                 // 1초 딜레이 후 다음 페이지로 자동 넘김
+                console.log('⏱️ 1초 대기 후 자동 넘김...');
                 setTimeout(() => {
                     const lastPage = currentBook.pages.length - 1;
+                    console.log(`📊 현재 페이지: ${currentPage}, 마지막 페이지: ${lastPage}`);
                     if (currentPage < lastPage) {
+                        console.log('⏭️ 다음 페이지로 자동 이동 실행!');
                         nextPage();
                     } else {
-                        // 마지막 페이지면 알림
                         console.log('📖 마지막 페이지입니다');
                     }
                 }, 1000);
@@ -556,9 +559,21 @@ async function playTTS() {
             currentAudio = new Audio(audioUrl);
             
             currentAudio.addEventListener('ended', () => {
+                console.log('✅ TTS 완료 - 자동 넘김');
                 currentAudio = null;
                 buttonText.textContent = '읽어주기';
                 button.classList.remove('playing');
+                
+                // 1초 딜레이 후 다음 페이지로 자동 넘김
+                setTimeout(() => {
+                    const lastPage = currentBook.pages.length - 1;
+                    if (currentPage < lastPage) {
+                        console.log('⏭️ 다음 페이지로 자동 이동');
+                        nextPage();
+                    } else {
+                        console.log('📖 마지막 페이지입니다');
+                    }
+                }, 1000);
             });
             
             currentAudio.addEventListener('error', () => {
