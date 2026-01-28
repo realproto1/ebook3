@@ -1,7 +1,9 @@
 // 전역 변수
 let allStorybooks = [];
 let filteredStorybooks = [];
-let currentFilter = '';
+let currentAgeFilter = '';
+let currentCategoryFilter = '';
+let currentSort = 'title';
 
 // 페이지 로드 시 동화책 목록 불러오기
 async function loadStorybooks() {
@@ -126,45 +128,73 @@ function renderBooks() {
 }
 
 // 연령대 필터
-function filterByAge(age) {
-    currentFilter = age;
+// 카테고리 필터
+function filterByCategory(category) {
+    currentCategoryFilter = category;
     
-    // 필터 버튼 활성화 상태 변경
-    document.querySelectorAll('.filter-btn').forEach(btn => {
+    // 필터 버튼 활성화 상태 변경 (카테고리)
+    document.querySelectorAll('.filter-btn[data-category]').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.category === category) {
+            btn.classList.add('active');
+        }
+    });
+    
+    applyFilters();
+}
+
+// 연령 필터
+function filterByAge(age) {
+    currentAgeFilter = age;
+    
+    // 필터 버튼 활성화 상태 변경 (연령대)
+    document.querySelectorAll('.filter-btn[data-age]').forEach(btn => {
         btn.classList.remove('active');
         if (btn.dataset.age === age) {
             btn.classList.add('active');
         }
     });
     
-    // 필터링
-    if (age === '') {
-        filteredStorybooks = [...allStorybooks];
-    } else {
-        filteredStorybooks = allStorybooks.filter(book => {
+    applyFilters();
+}
+
+// 필터 적용 (카테고리 + 연령대)
+function applyFilters() {
+    filteredStorybooks = allStorybooks.filter(book => {
+        // 카테고리 필터
+        const categoryMatch = currentCategoryFilter === '' || book.category === currentCategoryFilter;
+        
+        // 연령 필터
+        let ageMatch = true;
+        if (currentAgeFilter !== '') {
             const targetAge = parseInt(book.targetAge);
-            if (age === '4-5') return targetAge >= 4 && targetAge <= 5;
-            if (age === '5-7') return targetAge >= 5 && targetAge <= 7;
-            if (age === '7-8') return targetAge >= 7 && targetAge <= 8;
-            return true;
-        });
-    }
+            if (currentAgeFilter === '4-5') ageMatch = targetAge >= 4 && targetAge <= 5;
+            else if (currentAgeFilter === '5-7') ageMatch = targetAge >= 5 && targetAge <= 7;
+            else if (currentAgeFilter === '7-8') ageMatch = targetAge >= 7 && targetAge <= 8;
+        }
+        
+        return categoryMatch && ageMatch;
+    });
     
-    renderBooks();
+    // 현재 정렬 유지
+    sortBooks();
 }
 
 // 정렬
 function sortBooks() {
-    const sortValue = document.getElementById('sort-select').value;
+    const sortSelect = document.getElementById('sort-select');
+    const sortValue = sortSelect ? sortSelect.value : 'title';
+    currentSort = sortValue;
     
     switch(sortValue) {
         case 'latest':
-            filteredStorybooks.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+            filteredStorybooks.sort((a, b) => new Date(b.publishedAt || b.createdAt) - new Date(a.publishedAt || a.createdAt));
             break;
         case 'oldest':
-            filteredStorybooks.sort((a, b) => new Date(a.publishedAt) - new Date(b.publishedAt));
+            filteredStorybooks.sort((a, b) => new Date(a.publishedAt || a.createdAt) - new Date(b.publishedAt || b.createdAt));
             break;
         case 'title':
+        default:
             filteredStorybooks.sort((a, b) => a.title.localeCompare(b.title, 'ko'));
             break;
     }
@@ -401,13 +431,15 @@ window.addEventListener('DOMContentLoaded', () => {
     window.selectLanguageAndOpen = selectLanguageAndOpen;
     window.closeLanguageModal = closeLanguageModal;
     window.filterByAge = filterByAge;
+    window.filterByCategory = filterByCategory;
     window.sortBooks = sortBooks;
     
     console.log('🌐 전역 함수 등록 완료:', {
         openBook: typeof window.openBook,
         openGamesFromViewer: typeof window.openGamesFromViewer,
         shareBook: typeof window.shareBook,
-        openComments: typeof window.openComments
+        openComments: typeof window.openComments,
+        filterByCategory: typeof window.filterByCategory
     });
 });
 
