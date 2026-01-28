@@ -53,6 +53,7 @@
             opacity: 0;
             transition: opacity 0.4s ease;
             z-index: 1;
+            pointer-events: none; /* 클릭 이벤트를 통과시킴 */
         }
         
         .book-card:hover {
@@ -183,6 +184,12 @@
         /* 터치 영역 개선 */
         .book-card, .filter-btn, button {
             min-height: 44px;
+        }
+        
+        /* 버튼이 hover 레이어 위에 오도록 */
+        .book-card button {
+            position: relative;
+            z-index: 10;
         }
         
         /* 스크롤바 스타일링 */
