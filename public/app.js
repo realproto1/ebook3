@@ -1100,12 +1100,8 @@ function renderBookList() {
     // undefined, null 항목 필터링
     storybooks = storybooks.filter(book => book && book.id);
     
-    // 이름순으로 정렬 (가나다순, ABC순)
-    storybooks.sort((a, b) => {
-        const titleA = (a.title || '').toLowerCase();
-        const titleB = (b.title || '').toLowerCase();
-        return titleA.localeCompare(titleB, 'ko');
-    });
+    // ⚠️ 정렬 제거: 복사본이 맨 위에 유지되도록
+    // 사용자가 직접 드래그로 순서 변경 가능
     
     if (storybooks.length === 0) {
         listDiv.innerHTML = '<p class="text-gray-500 text-center py-4">아직 만든 동화책이 없어요</p>';
@@ -1576,6 +1572,12 @@ async function duplicateStorybookById(id) {
     currentStorybook = duplicate;
     await renderBookList(); // await 추가
     displayStorybook(duplicate);
+    
+    // 왼쪽 리스트를 맨 위로 스크롤 (복사본 보이도록)
+    const bookListContainer = document.getElementById('bookList');
+    if (bookListContainer) {
+        bookListContainer.scrollTop = 0;
+    }
     
     console.log(`✅ 동화책 복사 완료: "${duplicate.title}" (ID: ${duplicate.id})`);
     console.log(`   - 새 제목: ${newTitle}`);
