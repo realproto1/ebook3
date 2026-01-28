@@ -108,6 +108,17 @@ function renderBooks() {
     console.log('🔍 openBook 함수 존재 여부:', typeof openBook !== 'undefined');
     console.log('🔍 첫 번째 책 ID:', filteredStorybooks[0]?.id);
     
+    // 실제로 onclick이 HTML에 있는지 확인
+    setTimeout(() => {
+        const firstButton = document.querySelector('.book-card button');
+        if (firstButton) {
+            console.log('🔍 첫 번째 버튼 onclick 속성:', firstButton.getAttribute('onclick'));
+            console.log('🔍 첫 번째 버튼 존재:', !!firstButton);
+        } else {
+            console.error('❌ 버튼을 찾을 수 없습니다!');
+        }
+    }, 100);
+    
     // 각 책의 댓글 개수 불러오기
     filteredStorybooks.forEach(book => {
         loadCommentCount(book.id);
