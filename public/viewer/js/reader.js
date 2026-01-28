@@ -391,7 +391,7 @@ function updateNavigationButtons() {
     }
 }
 
-// 다음 페이지 (전환 효과 개선)
+// 다음 페이지 (책장 넘김 효과)
 function nextPage() {
     if (!currentBook || !currentBook.pages) {
         console.error('❌ currentBook is not loaded');
@@ -401,19 +401,30 @@ function nextPage() {
     const lastPage = currentBook.pages.length - 1;
     
     if (currentPage < lastPage) {
-        // 1단계: 현재 페이지를 잠깐 강조 (페이지 넘김 시작 신호)
+        // TTS 중지
+        stopTTS();
+        
+        // 책장 넘김 효과
         const pageImage = document.getElementById('page-image');
         const pageText = document.getElementById('page-text');
+        const imageContainer = document.getElementById('page-image-container');
         
-        pageImage.style.transition = 'transform 0.2s ease-out';
-        pageText.style.transition = 'transform 0.2s ease-out';
-        pageImage.style.transform = 'scale(0.95)';
-        pageText.style.transform = 'scale(0.95)';
+        // 1단계: 페이지 넘김 애니메이션 시작
+        imageContainer.classList.add('page-flip-exit');
         
-        // 2단계: 200ms 후 실제 페이지 전환
+        // 2단계: 600ms 후 새 페이지로 전환
         setTimeout(() => {
+            imageContainer.classList.remove('page-flip-exit');
             showPage(currentPage + 1);
-        }, 200);
+            
+            // 3단계: 새 페이지 입장 애니메이션
+            setTimeout(() => {
+                imageContainer.classList.add('page-flip-enter');
+                setTimeout(() => {
+                    imageContainer.classList.remove('page-flip-enter');
+                }, 600);
+            }, 50);
+        }, 600);
     } else {
         // 마지막 페이지면 완독 알림
         if (confirm('동화책을 모두 읽으셨습니다!\n\n목록으로 돌아가시겠습니까?')) {
@@ -422,7 +433,7 @@ function nextPage() {
     }
 }
 
-// 이전 페이지
+// 이전 페이지 (책장 넘김 효과)
 function previousPage() {
     if (!currentBook || !currentBook.pages) {
         console.error('❌ currentBook is not loaded');
@@ -432,7 +443,49 @@ function previousPage() {
     const firstPage = hasCoverPage ? -1 : 0;
     
     if (currentPage > firstPage) {
-        showPage(currentPage - 1);
+        // TTS 중지
+        stopTTS();
+        
+        // 책장 넘김 효과 (역방향)
+        const imageContainer = document.getElementById('page-image-container');
+        
+        // 1단계: 페이지 넘김 애니메이션 시작 (역방향)
+        imageContainer.style.animation = 'pageFlipIn 0.6s ease-in-out reverse';
+        
+        // 2단계: 600ms 후 이전 페이지로 전환
+        setTimeout(() => {
+            imageContainer.style.animation = '';
+            showPage(currentPage - 1);
+            
+            // 3단계: 이전 페이지 입장 애니메이션
+            setTimeout(() => {
+                imageContainer.style.animation = 'pageFlip 0.6s ease-in-out reverse';
+                setTimeout(() => {
+                    imageContainer.style.animation = '';
+                }, 600);
+            }, 50);
+        }, 600);
+    }
+}
+
+// TTS 중지 함수
+function stopTTS() {
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio = null;
+        
+        const button = document.getElementById('tts-button-header');
+        const buttonText = document.getElementById('tts-text');
+        
+        if (buttonText) {
+            buttonText.textContent = '읽어주기';
+        }
+        if (button) {
+            button.classList.remove('playing');
+        }
+        
+        console.log('🔇 TTS 중지됨');
     }
 }
 
