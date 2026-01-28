@@ -2685,6 +2685,16 @@ function displayStorybook(storybook) {
                         <span>전체 페이지 텍스트 다운로드</span>
                     </button>
                     
+                    <!-- 일괄 업로드 버튼 -->
+                    <button 
+                        onclick="openBatchUploadModal()"
+                        id="batch-upload-btn"
+                        class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-3.5 rounded-lg hover:from-orange-600 hover:to-orange-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
+                    >
+                        <i class="fas fa-upload text-xl"></i>
+                        <span>삽화 일괄 업로드</span>
+                    </button>
+                    
                     <!-- 다운로드 버튼 -->
                 </div>
 
@@ -3333,6 +3343,10 @@ let currentUploadCharIndex = null;
 let currentUploadType = 'illustration'; // 'illustration', 'character', 'cover'
 let currentUploadTab = 'file';
 
+// 일괄 업로드 관련 변수
+let batchUploadCancelled = false;
+let batchUploadInProgress = false;
+
 // 삽화 업로드 모달 열기
 function openIllustrationUploadModal(pageIndex) {
     currentUploadPageIndex = pageIndex;
@@ -3519,6 +3533,139 @@ async function uploadIllustration() {
     } finally {
         uploadBtn.disabled = false;
         uploadBtn.innerHTML = originalText;
+    }
+}
+
+// 일괄 업로드 모달 열기
+function openBatchUploadModal() {
+    if (!currentStorybook || !currentStorybook.pages) {
+        alert('동화책이 선택되지 않았습니다.');
+        return;
+    }
+    
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.accept = 'image/*';
+    
+    input.onchange = async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+        
+        // 가나다순으로 파일 정렬
+        files.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+        
+        const totalPages = currentStorybook.pages.length;
+        
+        if (files.length > totalPages) {
+            if (!confirm(`선택한 파일(${files.length}개)이 페이지 수(${totalPages}개)보다 많습니다. 처음 ${totalPages}개만 업로드하시겠습니까?`)) {
+                return;
+            }
+            files.splice(totalPages);
+        }
+        
+        if (!confirm(`${files.length}개의 이미지를 페이지 1부터 순서대로 업로드하시겠습니까?`)) {
+            return;
+        }
+        
+        await batchUploadIllustrations(files);
+    };
+    
+    input.click();
+}
+
+// 일괄 업로드 실행
+async function batchUploadIllustrations(files) {
+    batchUploadCancelled = false;
+    batchUploadInProgress = true;
+    
+    const btn = document.getElementById('batch-upload-btn');
+    const originalHTML = btn.innerHTML;
+    
+    let successCount = 0;
+    let failCount = 0;
+    
+    try {
+        for (let i = 0; i < files.length; i++) {
+            if (batchUploadCancelled) {
+                showNotification('warning', '업로드 취소', `${successCount}개 업로드 완료, ${files.length - i}개 취소됨`);
+                break;
+            }
+            
+            const file = files[i];
+            const pageIndex = i;
+            
+            // 버튼 업데이트 (애니메이션 효과)
+            btn.innerHTML = `
+                <i class="fas fa-spinner fa-spin text-xl"></i>
+                <span class="animate-pulse">${i + 1}/${files.length} 업로드 중...</span>
+                <button onclick="cancelBatchUpload()" class="ml-2 px-2 py-1 bg-red-500 rounded hover:bg-red-600 text-xs">
+                    취소
+                </button>
+            `;
+            
+            try {
+                // 이미지를 R2에 업로드
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('storybookId', currentStorybook.id);
+                formData.append('storybookTitle', currentStorybook.title);
+                formData.append('type', 'illustration');
+                formData.append('pageNumber', currentStorybook.pages[pageIndex].pageNumber);
+                
+                const response = await axios.post('/api/upload-image', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                
+                if (response.data.success) {
+                    currentStorybook.pages[pageIndex].illustrationImage = response.data.imageUrl;
+                    successCount++;
+                    console.log(`✅ 페이지 ${pageIndex + 1} 업로드 완료:`, file.name);
+                } else {
+                    failCount++;
+                    console.error(`❌ 페이지 ${pageIndex + 1} 업로드 실패:`, file.name);
+                }
+            } catch (error) {
+                failCount++;
+                console.error(`❌ 페이지 ${pageIndex + 1} 업로드 오류:`, error.message);
+            }
+            
+            // 진행률 표시 (0.5초 대기)
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+        // 저장 및 UI 업데이트
+        if (successCount > 0) {
+            saveCurrentStorybook();
+            displayStorybook(currentStorybook);
+        }
+        
+        // 결과 알림
+        if (failCount === 0 && !batchUploadCancelled) {
+            showNotification('success', '업로드 완료', `${successCount}개의 삽화가 업로드되었습니다.`);
+        } else if (successCount > 0) {
+            showNotification('warning', '일부 업로드 완료', `성공: ${successCount}개, 실패: ${failCount}개`);
+        } else {
+            showNotification('error', '업로드 실패', '모든 이미지 업로드에 실패했습니다.');
+        }
+        
+    } catch (error) {
+        console.error('일괄 업로드 오류:', error);
+        showNotification('error', '업로드 오류', error.message);
+    } finally {
+        btn.innerHTML = originalHTML;
+        batchUploadInProgress = false;
+        batchUploadCancelled = false;
+    }
+}
+
+// 일괄 업로드 취소
+function cancelBatchUpload() {
+    if (batchUploadInProgress) {
+        batchUploadCancelled = true;
+        console.log('⏹️ 일괄 업로드 취소 요청');
     }
 }
 
