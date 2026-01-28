@@ -49,7 +49,7 @@ function renderBooks() {
     grid.innerHTML = filteredStorybooks.map(book => `
         <div class="book-card bg-white rounded-3xl shadow-xl overflow-hidden fade-in">
             <!-- 표지 이미지 -->
-            <div class="relative h-72 overflow-hidden cursor-pointer" onclick="openBook('${book.id}')">
+            <div class="relative h-72 overflow-hidden cursor-pointer" onclick="console.log('📖 표지 클릭:', '${book.id}'); openBook('${book.id}')">
                 ${book.coverImage 
                     ? `<img src="${book.coverImage}" alt="${book.title}" class="book-cover w-full h-full object-cover">`
                     : `<div class="book-cover w-full h-full bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 flex items-center justify-center">
@@ -79,7 +79,7 @@ function renderBooks() {
                 
                 <!-- 액션 버튼 -->
                 <div class="flex gap-2 mb-3">
-                    <button onclick="openBook('${book.id}')" class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
+                    <button onclick="console.log('📖 읽기 버튼 클릭:', '${book.id}'); openBook('${book.id}')" class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
                         <i class="fas fa-book-open mr-2"></i>
                         읽기
                     </button>
@@ -209,7 +209,7 @@ async function openBook(bookId) {
         // 5. 언어가 1개면 바로 이동, 2개 이상이면 선택 모달 표시
         if (availableLanguages.length === 1) {
             console.log('➡️ 언어 1개 - 바로 이동:', availableLanguages[0]);
-            window.location.href = `/book.html?id=${bookId}&lang=${availableLanguages[0]}`;
+            window.location.href = `/reader.html?id=${bookId}&lang=${availableLanguages[0]}`;
         } else {
             console.log('📋 언어 2개 이상 - 선택 모달 표시');
             showLanguageModal(bookId, storybook.title, availableLanguages);
@@ -306,7 +306,7 @@ function showLanguageModal(bookId, bookTitle, languages) {
 // 언어 선택하고 동화책 열기
 function selectLanguageAndOpen(bookId, language) {
     console.log('✅ selectLanguageAndOpen 호출:', { bookId, language });
-    const url = `/book.html?id=${bookId}&lang=${language}`;
+    const url = `/reader.html?id=${bookId}&lang=${language}`;
     console.log('➡️ 이동할 URL:', url);
     window.location.href = url;
 }
