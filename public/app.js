@@ -1519,11 +1519,14 @@ async function duplicateStorybookById(id) {
         });
     }
     
-    // Key Object 이미지 완전히 제거 (3단계)
+    // Key Object 이미지 완전히 제거 (4단계)
     // 1. vocabularyImages 배열 비우기
     duplicate.vocabularyImages = [];
     
-    // 2. educational_content.vocabulary 안의 image 필드 제거
+    // 2. keyObjectImages 배열 비우기 (화면에 표시되는 이미지)
+    duplicate.keyObjectImages = [];
+    
+    // 3. educational_content.vocabulary 안의 image 필드 제거
     if (duplicate.educational_content && 
         duplicate.educational_content.vocabulary && 
         Array.isArray(duplicate.educational_content.vocabulary)) {
@@ -1535,7 +1538,7 @@ async function duplicateStorybookById(id) {
         });
     }
     
-    // 3. key_objects 배열의 image 필드도 제거 (혹시 있다면)
+    // 4. key_objects 배열의 image 필드도 제거 (혹시 있다면)
     if (duplicate.key_objects && Array.isArray(duplicate.key_objects)) {
         duplicate.key_objects.forEach(obj => {
             if (typeof obj === 'object') {
