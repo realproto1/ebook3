@@ -66,50 +66,6 @@
         #page-image, #page-text {
             transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
         }
-        
-        /* 책장 넘김 효과 */
-        @keyframes pageFlip {
-            0% {
-                transform: perspective(1000px) rotateY(0deg);
-                transform-origin: left center;
-            }
-            50% {
-                transform: perspective(1000px) rotateY(-90deg);
-                transform-origin: left center;
-                opacity: 0.5;
-            }
-            100% {
-                transform: perspective(1000px) rotateY(-180deg);
-                transform-origin: left center;
-                opacity: 0;
-            }
-        }
-        
-        @keyframes pageFlipIn {
-            0% {
-                transform: perspective(1000px) rotateY(90deg);
-                transform-origin: right center;
-                opacity: 0;
-            }
-            50% {
-                transform: perspective(1000px) rotateY(45deg);
-                transform-origin: right center;
-                opacity: 0.5;
-            }
-            100% {
-                transform: perspective(1000px) rotateY(0deg);
-                transform-origin: right center;
-                opacity: 1;
-            }
-        }
-        
-        .page-flip-exit {
-            animation: pageFlip 0.6s ease-in-out forwards;
-        }
-        
-        .page-flip-enter {
-            animation: pageFlipIn 0.6s ease-in-out forwards;
-        }
         .nav-button {
             transition: all 0.2s;
         }

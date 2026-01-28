@@ -342,6 +342,14 @@ function showPage(pageIndex) {
     
     // 버튼 상태 업데이트 (즉시)
     updateNavigationButtons();
+    
+    // 페이지 이미지 로드 후 TTS 자동 재생 (본문 페이지만)
+    if (pageIndex >= 0) {
+        // 이미지 로드 완료 대기 후 TTS 자동 재생
+        setTimeout(() => {
+            autoPlayTTS();
+        }, 400); // 애니메이션 완료 후 약간의 딜레이
+    }
 }
 
 // 진행률 업데이트
@@ -391,7 +399,7 @@ function updateNavigationButtons() {
     }
 }
 
-// 다음 페이지 (책장 넘김 효과)
+// 다음 페이지 (원래 버전 + TTS 중지)
 function nextPage() {
     if (!currentBook || !currentBook.pages) {
         console.error('❌ currentBook is not loaded');
@@ -403,28 +411,8 @@ function nextPage() {
     if (currentPage < lastPage) {
         // TTS 중지
         stopTTS();
-        
-        // 책장 넘김 효과
-        const pageImage = document.getElementById('page-image');
-        const pageText = document.getElementById('page-text');
-        const imageContainer = document.getElementById('page-image-container');
-        
-        // 1단계: 페이지 넘김 애니메이션 시작
-        imageContainer.classList.add('page-flip-exit');
-        
-        // 2단계: 600ms 후 새 페이지로 전환
-        setTimeout(() => {
-            imageContainer.classList.remove('page-flip-exit');
-            showPage(currentPage + 1);
-            
-            // 3단계: 새 페이지 입장 애니메이션
-            setTimeout(() => {
-                imageContainer.classList.add('page-flip-enter');
-                setTimeout(() => {
-                    imageContainer.classList.remove('page-flip-enter');
-                }, 600);
-            }, 50);
-        }, 600);
+        // 다음 페이지 표시
+        showPage(currentPage + 1);
     } else {
         // 마지막 페이지면 완독 알림
         if (confirm('동화책을 모두 읽으셨습니다!\n\n목록으로 돌아가시겠습니까?')) {
@@ -433,7 +421,7 @@ function nextPage() {
     }
 }
 
-// 이전 페이지 (책장 넘김 효과)
+// 이전 페이지 (원래 버전 + TTS 중지)
 function previousPage() {
     if (!currentBook || !currentBook.pages) {
         console.error('❌ currentBook is not loaded');
@@ -445,26 +433,8 @@ function previousPage() {
     if (currentPage > firstPage) {
         // TTS 중지
         stopTTS();
-        
-        // 책장 넘김 효과 (역방향)
-        const imageContainer = document.getElementById('page-image-container');
-        
-        // 1단계: 페이지 넘김 애니메이션 시작 (역방향)
-        imageContainer.style.animation = 'pageFlipIn 0.6s ease-in-out reverse';
-        
-        // 2단계: 600ms 후 이전 페이지로 전환
-        setTimeout(() => {
-            imageContainer.style.animation = '';
-            showPage(currentPage - 1);
-            
-            // 3단계: 이전 페이지 입장 애니메이션
-            setTimeout(() => {
-                imageContainer.style.animation = 'pageFlip 0.6s ease-in-out reverse';
-                setTimeout(() => {
-                    imageContainer.style.animation = '';
-                }, 600);
-            }, 50);
-        }, 600);
+        // 이전 페이지 표시
+        showPage(currentPage - 1);
     }
 }
 
@@ -486,6 +456,68 @@ function stopTTS() {
         }
         
         console.log('🔇 TTS 중지됨');
+    }
+}
+
+// TTS 자동 재생 함수
+async function autoPlayTTS() {
+    // 표지 페이지에서는 자동 재생 안 함
+    if (currentPage === -1) {
+        return;
+    }
+    
+    // 이미 재생 중이면 중지하고 재시작
+    if (currentAudio) {
+        stopTTS();
+    }
+    
+    const page = currentBook.pages[currentPage];
+    const audioUrl = getPageTTS(page, currentLanguage);
+    
+    if (audioUrl) {
+        try {
+            const button = document.getElementById('tts-button-header');
+            const buttonText = document.getElementById('tts-text');
+            
+            console.log('🎵 TTS 자동 재생 시작');
+            buttonText.textContent = '재생 중...';
+            button.classList.add('playing');
+            currentAudio = new Audio(audioUrl);
+            
+            // TTS 완료 시 자동 넘김
+            currentAudio.addEventListener('ended', () => {
+                console.log('✅ TTS 완료 - 자동 넘김');
+                currentAudio = null;
+                buttonText.textContent = '읽어주기';
+                button.classList.remove('playing');
+                
+                // 1초 딜레이 후 다음 페이지로 자동 넘김
+                setTimeout(() => {
+                    const lastPage = currentBook.pages.length - 1;
+                    if (currentPage < lastPage) {
+                        nextPage();
+                    } else {
+                        // 마지막 페이지면 알림
+                        console.log('📖 마지막 페이지입니다');
+                    }
+                }, 1000);
+            });
+            
+            currentAudio.addEventListener('error', () => {
+                console.error('❌ TTS 재생 실패');
+                currentAudio = null;
+                buttonText.textContent = '읽어주기';
+                button.classList.remove('playing');
+            });
+            
+            await currentAudio.play();
+            buttonText.textContent = '중지';
+        } catch (error) {
+            console.error('TTS autoplay error:', error);
+            currentAudio = null;
+        }
+    } else {
+        console.log('⚠️ 이 페이지에는 TTS가 없습니다');
     }
 }
 
