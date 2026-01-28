@@ -1552,6 +1552,7 @@ async function duplicateStorybookById(id) {
     if (duplicate.pages && Array.isArray(duplicate.pages)) {
         duplicate.pages.forEach(page => {
             page.illustrationImage = null;
+            page.illustrationHistory = [];  // 히스토리도 초기화
             delete page.artStyle; // ⚠️ 페이지별 artStyle 제거 (동화책 전역 스타일 사용)
         });
     }
@@ -2836,16 +2837,37 @@ function displayStorybook(storybook) {
                                 
                                 <div id="illustration-${idx}" class="bg-white rounded-lg overflow-hidden shadow-sm border-2 border-gray-200">
                                     ${page.illustrationImage ?
-                                        `<div class="relative group">
-                                            <img src="${page.illustrationImage}" alt="Page ${page.pageNumber}" class="w-full h-auto"/>
-                                            <button 
-                                                onclick="downloadImage('${page.illustrationImage}', '${storybook.title}_페이지_${page.pageNumber}.png')"
-                                                class="absolute top-3 right-3 bg-white bg-opacity-90 text-green-600 w-11 h-11 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
-                                                title="다운로드"
-                                            >
-                                                <i class="fas fa-download text-base"></i>
-                                            </button>
-                                        </div>` :
+                                        (() => {
+                                            const history = page.illustrationHistory || [];
+                                            return `
+                                                <div class="flex gap-2 h-full">
+                                                    <!-- 메인 이미지 -->
+                                                    <div class="flex-1 relative group">
+                                                        <img src="${page.illustrationImage}" alt="Page ${page.pageNumber}" class="w-full h-auto"/>
+                                                        <button 
+                                                            onclick="downloadImage('${page.illustrationImage}', '${storybook.title}_페이지_${page.pageNumber}.png')"
+                                                            class="absolute top-3 right-3 bg-white bg-opacity-90 text-green-600 w-11 h-11 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                                                            title="다운로드"
+                                                        >
+                                                            <i class="fas fa-download text-base"></i>
+                                                        </button>
+                                                    </div>
+                                                    ${history.length > 0 ? `
+                                                        <!-- 히스토리 -->
+                                                        <div class="w-20 overflow-y-auto space-y-2 p-1" style="scrollbar-width: thin; scrollbar-color: rgba(34, 197, 94, 0.5) rgba(34, 197, 94, 0.1);">
+                                                            ${history.map((url, histIdx) => `
+                                                                <div class="relative group cursor-pointer border-2 border-transparent hover:border-green-400 rounded transition" onclick="selectIllustrationFromHistory(${idx}, ${histIdx})" title="이전 버전 ${histIdx + 1}">
+                                                                    <img src="${url}" alt="이전 ${histIdx + 1}" class="w-full h-16 object-cover rounded"/>
+                                                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition rounded flex items-center justify-center">
+                                                                        <i class="fas fa-check text-white text-xs opacity-0 group-hover:opacity-100 transition"></i>
+                                                                    </div>
+                                                                </div>
+                                                            `).join('')}
+                                                        </div>
+                                                    ` : ''}
+                                                </div>
+                                            `;
+                                        })() :
                                         `<div class="min-h-[150px] md:min-h-[200px] flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
                                             <p class="text-gray-400 text-center p-4 text-xs md:text-sm">
                                                 <i class="fas fa-image text-3xl md:text-4xl mb-2 block"></i>
@@ -3505,8 +3527,24 @@ async function uploadIllustration() {
         
         // 타입별로 이미지 적용
         if (currentUploadType === 'illustration' && currentUploadPageIndex !== null) {
-            // 페이지 삽화
-            currentStorybook.pages[currentUploadPageIndex].illustrationImage = imageUrl;
+            // 페이지 삽화 - 히스토리 관리
+            const page = currentStorybook.pages[currentUploadPageIndex];
+            
+            // 기존 이미지가 있으면 히스토리에 추가
+            if (page.illustrationImage) {
+                if (!page.illustrationHistory) {
+                    page.illustrationHistory = [];
+                }
+                page.illustrationHistory.unshift(page.illustrationImage);
+                console.log(`📸 이전 이미지를 히스토리에 추가 (총 ${page.illustrationHistory.length}개)`);
+                
+                // 히스토리 10개 제한
+                if (page.illustrationHistory.length > 10) {
+                    page.illustrationHistory.splice(10);
+                }
+            }
+            
+            page.illustrationImage = imageUrl;
         } else if (currentUploadType === 'character' && currentUploadCharIndex !== null) {
             // 캐릭터 레퍼런스
             currentStorybook.characters[currentUploadCharIndex].referenceImage = imageUrl;
@@ -3620,7 +3658,22 @@ async function batchUploadIllustrations(files) {
                 });
                 
                 if (response.data.success) {
-                    currentStorybook.pages[pageIndex].illustrationImage = response.data.imageUrl;
+                    const page = currentStorybook.pages[pageIndex];
+                    
+                    // 기존 이미지가 있으면 히스토리에 추가
+                    if (page.illustrationImage) {
+                        if (!page.illustrationHistory) {
+                            page.illustrationHistory = [];
+                        }
+                        page.illustrationHistory.unshift(page.illustrationImage);
+                        
+                        // 히스토리 10개 제한
+                        if (page.illustrationHistory.length > 10) {
+                            page.illustrationHistory.splice(10);
+                        }
+                    }
+                    
+                    page.illustrationImage = response.data.imageUrl;
                     successCount++;
                     console.log(`✅ 페이지 ${pageIndex + 1} 업로드 완료:`, file.name);
                 } else {
@@ -3667,6 +3720,37 @@ function cancelBatchUpload() {
         batchUploadCancelled = true;
         console.log('⏹️ 일괄 업로드 취소 요청');
     }
+}
+
+// 삽화 히스토리에서 선택
+function selectIllustrationFromHistory(pageIndex, historyIndex) {
+    if (!currentStorybook || !currentStorybook.pages[pageIndex]) return;
+    
+    const page = currentStorybook.pages[pageIndex];
+    const history = page.illustrationHistory || [];
+    
+    if (historyIndex >= history.length) return;
+    
+    const selectedImage = history[historyIndex];
+    
+    // 현재 이미지를 히스토리 맨 앞에 추가
+    history.splice(historyIndex, 1); // 선택된 항목 제거
+    history.unshift(page.illustrationImage); // 현재 이미지를 맨 앞에 추가
+    
+    // 선택된 이미지를 현재 이미지로 설정
+    page.illustrationImage = selectedImage;
+    
+    // 10개 제한 유지
+    if (history.length > 10) {
+        history.splice(10);
+    }
+    
+    page.illustrationHistory = history;
+    
+    saveCurrentStorybook();
+    displayStorybook(currentStorybook);
+    
+    showNotification('success', '이미지 변경', '이전 버전으로 변경되었습니다.');
 }
 
 // 오디오 다운로드
@@ -4323,6 +4407,21 @@ async function generateAllIllustrationsParallel() {
                     
                     if (response.data.success && response.data.imageUrl) {
                         const result = response.data; // R2 URL 포함
+                        const page = currentStorybook.pages[pageIndex];
+                        
+                        // 기존 이미지가 있으면 히스토리에 추가
+                        if (page.illustrationImage) {
+                            if (!page.illustrationHistory) {
+                                page.illustrationHistory = [];
+                            }
+                            page.illustrationHistory.unshift(page.illustrationImage);
+                            
+                            // 히스토리 10개 제한
+                            if (page.illustrationHistory.length > 10) {
+                                page.illustrationHistory.splice(10);
+                            }
+                        }
+                        
                         currentStorybook.pages[pageIndex].illustrationImage = result.imageUrl;
                         currentStorybook.pages[pageIndex].scene_description = sceneDesc;
                         currentStorybook.pages[pageIndex].scene_structure = sceneStructure;
@@ -4517,6 +4616,21 @@ async function generateAllIllustrationsSequential() {
                 
                 if (response.data.success && response.data.imageUrl) {
                     const result = response.data; // R2 URL 포함
+                    const page = currentStorybook.pages[i];
+                    
+                    // 기존 이미지가 있으면 히스토리에 추가
+                    if (page.illustrationImage) {
+                        if (!page.illustrationHistory) {
+                            page.illustrationHistory = [];
+                        }
+                        page.illustrationHistory.unshift(page.illustrationImage);
+                        
+                        // 히스토리 10개 제한
+                        if (page.illustrationHistory.length > 10) {
+                            page.illustrationHistory.splice(10);
+                        }
+                    }
+                    
                     currentStorybook.pages[i].illustrationImage = result.imageUrl;
                     currentStorybook.pages[i].scene_description = sceneDesc;
                     currentStorybook.pages[i].scene_structure = sceneStructure;
@@ -4922,6 +5036,26 @@ async function generateIllustration(pageIndex) {
         if (response.data.success && response.data.imageUrl) {
             const result = response.data; // R2 URL 포함
             const imageUrl = result.imageUrl;
+            
+            // 히스토리 관리: 기존 이미지가 있으면 히스토리에 추가
+            const page = currentStorybook.pages[pageIndex];
+            if (page.illustrationImage) {
+                // 히스토리 배열 초기화
+                if (!page.illustrationHistory) {
+                    page.illustrationHistory = [];
+                }
+                
+                // 현재 이미지를 히스토리 맨 앞에 추가
+                page.illustrationHistory.unshift(page.illustrationImage);
+                console.log(`📸 이전 이미지를 히스토리에 추가 (총 ${page.illustrationHistory.length}개)`);
+                
+                // 히스토리 10개 제한
+                if (page.illustrationHistory.length > 10) {
+                    const removed = page.illustrationHistory.splice(10);
+                    console.log(`🗑️ 오래된 히스토리 ${removed.length}개 제거`);
+                }
+            }
+            
             currentStorybook.pages[pageIndex].illustrationImage = imageUrl;
             currentStorybook.pages[pageIndex].scene_description = sceneDesc;
             currentStorybook.pages[pageIndex].scene_structure = sceneStructure;
