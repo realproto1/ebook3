@@ -209,7 +209,7 @@ async function openBook(bookId) {
         // 5. 언어가 1개면 바로 이동, 2개 이상이면 선택 모달 표시
         if (availableLanguages.length === 1) {
             console.log('➡️ 언어 1개 - 바로 이동:', availableLanguages[0]);
-            window.location.href = `/reader.html?id=${bookId}&lang=${availableLanguages[0]}`;
+            window.location.href = `/book.html?id=${bookId}&lang=${availableLanguages[0]}`;
         } else {
             console.log('📋 언어 2개 이상 - 선택 모달 표시');
             showLanguageModal(bookId, storybook.title, availableLanguages);
@@ -306,7 +306,7 @@ function showLanguageModal(bookId, bookTitle, languages) {
 // 언어 선택하고 동화책 열기
 function selectLanguageAndOpen(bookId, language) {
     console.log('✅ selectLanguageAndOpen 호출:', { bookId, language });
-    const url = `/reader.html?id=${bookId}&lang=${language}`;
+    const url = `/book.html?id=${bookId}&lang=${language}`;
     console.log('➡️ 이동할 URL:', url);
     window.location.href = url;
 }

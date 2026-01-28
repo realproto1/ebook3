@@ -2590,7 +2590,7 @@ function displayStorybook(storybook) {
                         </label>
                         <select 
                             id="page-tts-model-select"
-                            onchange="updatePageTTSModel(this.value)"
+                            onchange="updateGlobalTTSModel(this.value)"
                             class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                         >
                             <option value="Puck">Puck (남성, 밝고 활기찬)</option>
@@ -3325,7 +3325,7 @@ function updatePageGeminiTTSModel(value) {
 }
 
 // 전체 페이지용 TTS 음성 업데이트 (모든 TTS 생성 시 사용)
-function updatePageTTSModel(value) {
+function updateGlobalTTSModel(value) {
     imageSettings.ttsModel = value;
     console.log(`✅ 전체 페이지 TTS 음성 변경:`, value);
     
@@ -7190,21 +7190,37 @@ function getPageTTS(page, lang) {
 
 // 동화책 뷰어 열기
 function openReader(bookId) {
+    console.log('📖 openReader 호출됨, bookId:', bookId);
+    
     const book = storybooks.find(b => b.id === bookId);
     if (!book) {
+        console.error('❌ 동화책을 찾을 수 없습니다. bookId:', bookId);
         alert('동화책을 찾을 수 없습니다.');
         return;
     }
     
+    console.log('✅ 동화책 발견:', book.title);
+    
     // localStorage quota 문제 해결: bookId만 저장
     try {
         localStorage.setItem('temp_reader_book_id', bookId);
+        console.log('💾 localStorage에 bookId 저장 완료');
         // reader.html로 이동
-        window.open('/reader.html', '_blank');
+        const newWindow = window.open('/reader.html', '_blank');
+        if (!newWindow) {
+            console.error('❌ 새 창 열기 실패 (팝업 차단?)');
+            alert('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
+        } else {
+            console.log('✅ reader.html 새 창 열기 성공');
+        }
     } catch (e) {
         // localStorage 실패 시 URL 파라미터 사용
-        console.error('localStorage error:', e);
-        window.open(`/reader.html?id=${bookId}`, '_blank');
+        console.error('❌ localStorage 오류:', e);
+        const newWindow = window.open(`/reader.html?id=${bookId}`, '_blank');
+        if (!newWindow) {
+            console.error('❌ 새 창 열기 실패 (팝업 차단?)');
+            alert('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
+        }
     }
 }
 
