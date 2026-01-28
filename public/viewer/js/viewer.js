@@ -130,6 +130,7 @@ function renderBooks() {
 // 연령대 필터
 // 카테고리 필터
 function filterByCategory(category) {
+    console.log('🏷️ 카테고리 필터 선택:', category);
     currentCategoryFilter = category;
     
     // 필터 버튼 활성화 상태 변경 (카테고리)
@@ -160,6 +161,12 @@ function filterByAge(age) {
 
 // 필터 적용 (카테고리 + 연령대)
 function applyFilters() {
+    console.log('🔍 필터 적용:', {
+        카테고리: currentCategoryFilter || '전체',
+        연령대: currentAgeFilter || '전체',
+        전체동화책수: allStorybooks.length
+    });
+    
     filteredStorybooks = allStorybooks.filter(book => {
         // 카테고리 필터
         const categoryMatch = currentCategoryFilter === '' || book.category === currentCategoryFilter;
@@ -173,8 +180,22 @@ function applyFilters() {
             else if (currentAgeFilter === '7-8') ageMatch = targetAge >= 7 && targetAge <= 8;
         }
         
+        // 디버깅: 브레멘 음악대인 경우 상세 로그
+        if (book.title.includes('브레멘')) {
+            console.log('📖 브레멘 음악대 필터 체크:', {
+                제목: book.title,
+                카테고리: book.category,
+                카테고리매칭: categoryMatch,
+                연령: book.targetAge,
+                연령매칭: ageMatch,
+                최종결과: categoryMatch && ageMatch
+            });
+        }
+        
         return categoryMatch && ageMatch;
     });
+    
+    console.log('✅ 필터링 결과:', filteredStorybooks.length + '개');
     
     // 현재 정렬 유지
     sortBooks();
