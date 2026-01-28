@@ -1143,6 +1143,7 @@ function renderBookList() {
                     <p class="text-xs text-gray-500 mt-1 px-1">
                         <i class="fas fa-child mr-1"></i>${book.targetAge}세 
                         <i class="fas fa-file-alt ml-2 mr-1"></i>${book.pages.length}p
+                        ${book.category ? `<i class="fas fa-tag ml-2 mr-1"></i>${book.category}` : ''}
                     </p>
                 </div>
             </div>
@@ -6834,6 +6835,12 @@ function renderReviewHeader() {
     document.getElementById('reviewStoryTitle').textContent = reviewStorybookData.title;
     document.getElementById('reviewTargetAge').textContent = `${reviewStorybookData.targetAge}세 대상`;
     document.getElementById('reviewTotalPages').textContent = `${reviewStorybookData.pages?.length || 0}페이지`;
+    
+    // 카테고리 선택 초기화
+    const categorySelect = document.getElementById('storybookCategory');
+    if (categorySelect) {
+        categorySelect.value = reviewStorybookData.category || '';
+    }
 }
 
 // Review 언어 탭 렌더링
@@ -7557,5 +7564,24 @@ async function translateAllPages() {
     }
     
     console.log(`✅ 모든 페이지 번역 완료: 성공 ${successCount}개, 실패 ${failCount}개`);
+}
+
+// 동화책 카테고리 업데이트
+function updateStorybookCategory(category) {
+    if (!currentStorybook) {
+        console.error('❌ 동화책이 선택되지 않았습니다.');
+        return;
+    }
+    
+    console.log(`📚 카테고리 업데이트: ${category}`);
+    
+    // 카테고리 저장
+    currentStorybook.category = category;
+    
+    // R2에 자동 저장
+    saveCurrentStorybook();
+    
+    // 성공 알림
+    showNotification('success', '카테고리 저장 완료', `"${category || '미지정'}"로 설정되었습니다.`);
 }
 

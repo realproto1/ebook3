@@ -919,6 +919,7 @@ ${referenceContent}
     storybook.targetAge = targetAge;
     storybook.artStyle = artStyle;
     storybook.createdAt = new Date().toISOString();
+    storybook.category = ''; // 카테고리 초기화 (빈 문자열)
     
     // 다국어 번역 처리
     if (languages.length > 1 || (languages.length === 1 && languages[0] !== 'ko')) {
