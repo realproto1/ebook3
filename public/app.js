@@ -1991,6 +1991,22 @@ function displayStorybook(storybook) {
                         <i class="fas fa-palette ml-2 md:ml-4 mr-1 md:mr-2"></i><span class="hidden sm:inline">${storybook.artStyle}</span>
                         <i class="fas fa-file-alt ml-2 md:ml-4 mr-1 md:mr-2"></i>${storybook.pages.length}페이지
                     </p>
+                    <!-- 카테고리 선택 -->
+                    <div class="mt-3">
+                        <label class="inline-block text-sm font-semibold text-gray-700 mr-2">
+                            <i class="fas fa-tag mr-1"></i>카테고리:
+                        </label>
+                        <select 
+                            onchange="updateStorybookCategory(this.value)"
+                            class="inline-block px-3 py-1 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-800 text-sm"
+                        >
+                            <option value="" ${!storybook.category ? 'selected' : ''}>미지정</option>
+                            <option value="세계 명작" ${storybook.category === '세계 명작' ? 'selected' : ''}>📚 세계 명작</option>
+                            <option value="전래 동화" ${storybook.category === '전래 동화' ? 'selected' : ''}>🏮 전래 동화</option>
+                            <option value="자연 관찰" ${storybook.category === '자연 관찰' ? 'selected' : ''}>🌿 자연 관찰</option>
+                            <option value="기타" ${storybook.category === '기타' ? 'selected' : ''}>📖 기타</option>
+                        </select>
+                    </div>
                     <p class="text-xs text-gray-400 mt-2">
                         <i class="fas fa-info-circle mr-1"></i>
                         좌측 사이드바에서 제목 수정, 복사, 순서 변경이 가능합니다
