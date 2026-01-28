@@ -3675,8 +3675,23 @@ async function generateAllCharacterReferences() {
                     throw new Error(response.data.error || '이미지 URL을 받지 못했습니다.');
                 }
             } catch (error) {
-                console.error(`Error generating character ${i}:`, error);
-                return { index: i, success: false, error: error.message };
+                console.error(`❌ 캐릭터 ${i} 생성 실패:`, error);
+                
+                // 서버 응답에서 상세 에러 메시지 추출
+                let errorMessage = '이미지 생성 실패';
+                if (error.response && error.response.data) {
+                    if (error.response.data.error) {
+                        errorMessage = error.response.data.error;
+                        console.error('📡 서버 에러 메시지:', errorMessage);
+                    } else if (error.response.data.message) {
+                        errorMessage = error.response.data.message;
+                        console.error('📡 서버 에러 메시지:', errorMessage);
+                    }
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                return { index: i, success: false, error: errorMessage };
             }
         });
         
@@ -4133,15 +4148,29 @@ async function generateAllIllustrationsParallel() {
                         throw new Error(result.error || '이미지 생성 실패');
                     }
                 } catch (error) {
-                    console.error(`Error generating illustration ${pageIndex}:`, error);
+                    console.error(`❌ 삽화 ${pageIndex} 생성 실패:`, error);
+                    
+                    // 서버 응답에서 상세 에러 메시지 추출
+                    let errorMessage = '이미지 생성 실패';
+                    if (error.response && error.response.data) {
+                        if (error.response.data.error) {
+                            errorMessage = error.response.data.error;
+                            console.error('📡 서버 에러 메시지:', errorMessage);
+                        } else if (error.response.data.message) {
+                            errorMessage = error.response.data.message;
+                            console.error('📡 서버 에러 메시지:', errorMessage);
+                        }
+                    } else if (error.message) {
+                        errorMessage = error.message;
+                    }
                     
                     // 실패 표시
                     const illustrationDiv = document.getElementById(`illustration-${pageIndex}`);
                     if (illustrationDiv) {
                         illustrationDiv.innerHTML = `
                             <div class="p-6 text-center">
-                                <p class="text-red-600 text-sm mb-2">⚠️ 생성 실패</p>
-                                <p class="text-gray-500 text-xs">${error.message}</p>
+                                <p class="text-red-600 text-sm mb-2 font-bold">⚠️ 생성 실패</p>
+                                <p class="text-gray-700 text-xs">${errorMessage}</p>
                             </div>
                         `;
                     }
@@ -4312,15 +4341,29 @@ async function generateAllIllustrationsSequential() {
                     throw new Error(result.error || '이미지 생성 실패');
                 }
             } catch (error) {
-                console.error(`Error generating illustration ${i}:`, error);
+                console.error(`❌ 삽화 ${i} 생성 실패:`, error);
                 failCount++;
+                
+                // 서버 응답에서 상세 에러 메시지 추출
+                let errorMessage = '이미지 생성 실패';
+                if (error.response && error.response.data) {
+                    if (error.response.data.error) {
+                        errorMessage = error.response.data.error;
+                        console.error('📡 서버 에러 메시지:', errorMessage);
+                    } else if (error.response.data.message) {
+                        errorMessage = error.response.data.message;
+                        console.error('📡 서버 에러 메시지:', errorMessage);
+                    }
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
                 
                 // 실패 표시
                 if (illustrationDiv) {
                     illustrationDiv.innerHTML = `
                         <div class="p-6 text-center">
-                            <p class="text-red-600 text-sm mb-2">⚠️ 생성 실패</p>
-                            <p class="text-gray-500 text-xs">${error.message}</p>
+                            <p class="text-red-600 text-sm mb-2 font-bold">⚠️ 생성 실패</p>
+                            <p class="text-gray-700 text-xs">${errorMessage}</p>
                         </div>
                     `;
                 }
@@ -4702,11 +4745,26 @@ async function generateIllustration(pageIndex) {
         }
 
     } catch (error) {
-        console.error('Error:', error);
+        console.error('❌ 삽화 생성 실패:', error);
+        
+        // 서버 응답에서 상세 에러 메시지 추출
+        let errorMessage = '이미지 생성 실패';
+        if (error.response && error.response.data) {
+            if (error.response.data.error) {
+                errorMessage = error.response.data.error;
+                console.error('📡 서버 에러 메시지:', errorMessage);
+            } else if (error.response.data.message) {
+                errorMessage = error.response.data.message;
+                console.error('📡 서버 에러 메시지:', errorMessage);
+            }
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        
         illustrationDiv.innerHTML = `
             <div class="p-6 text-center">
-                <p class="text-gray-600 text-sm mb-2">⚠️ 이미지 생성 실패</p>
-                <p class="text-gray-500 text-xs">${error.message}</p>
+                <p class="text-red-600 text-sm mb-2 font-bold">⚠️ 이미지 생성 실패</p>
+                <p class="text-gray-700 text-xs mb-2">${errorMessage}</p>
                 <button 
                     onclick="generateIllustration(${pageIndex})"
                     class="mt-3 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm"
