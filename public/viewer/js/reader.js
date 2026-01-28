@@ -400,7 +400,7 @@ function updateNavigationButtons() {
     }
 }
 
-// 다음 페이지 (원래 버전 + TTS 중지)
+// 다음 페이지 (전환 애니메이션 + 이전 페이지 잠깐 보이기)
 function nextPage() {
     if (!currentBook || !currentBook.pages) {
         console.error('❌ currentBook is not loaded');
@@ -412,8 +412,26 @@ function nextPage() {
     if (currentPage < lastPage) {
         // TTS 중지
         stopTTS();
-        // 다음 페이지 표시
-        showPage(currentPage + 1);
+        
+        const imageEl = document.getElementById('page-image');
+        const textEl = document.getElementById('page-text');
+        
+        // 1단계: 현재 페이지 축소 애니메이션 (200ms)
+        imageEl.style.transition = 'transform 0.2s ease-out';
+        textEl.style.transition = 'transform 0.2s ease-out';
+        imageEl.style.transform = 'scale(0.95)';
+        textEl.style.transform = 'scale(0.95)';
+        
+        // 2단계: 200ms 후 다음 페이지로 전환
+        setTimeout(() => {
+            // transition 초기화
+            imageEl.style.transition = '';
+            textEl.style.transition = '';
+            imageEl.style.transform = '';
+            textEl.style.transform = '';
+            
+            showPage(currentPage + 1);
+        }, 200);
     } else {
         // 마지막 페이지면 완독 알림
         if (confirm('동화책을 모두 읽으셨습니다!\n\n목록으로 돌아가시겠습니까?')) {
@@ -422,7 +440,7 @@ function nextPage() {
     }
 }
 
-// 이전 페이지 (원래 버전 + TTS 중지)
+// 이전 페이지 (전환 애니메이션 + 현재 페이지 잠깐 보이기)
 function previousPage() {
     if (!currentBook || !currentBook.pages) {
         console.error('❌ currentBook is not loaded');
@@ -434,8 +452,26 @@ function previousPage() {
     if (currentPage > firstPage) {
         // TTS 중지
         stopTTS();
-        // 이전 페이지 표시
-        showPage(currentPage - 1);
+        
+        const imageEl = document.getElementById('page-image');
+        const textEl = document.getElementById('page-text');
+        
+        // 1단계: 현재 페이지 축소 애니메이션 (200ms)
+        imageEl.style.transition = 'transform 0.2s ease-out';
+        textEl.style.transition = 'transform 0.2s ease-out';
+        imageEl.style.transform = 'scale(0.95)';
+        textEl.style.transform = 'scale(0.95)';
+        
+        // 2단계: 200ms 후 이전 페이지로 전환
+        setTimeout(() => {
+            // transition 초기화
+            imageEl.style.transition = '';
+            textEl.style.transition = '';
+            imageEl.style.transform = '';
+            textEl.style.transform = '';
+            
+            showPage(currentPage - 1);
+        }, 200);
     }
 }
 
