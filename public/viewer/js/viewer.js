@@ -104,6 +104,10 @@ function renderBooks() {
         </div>
     `).join('');
     
+    console.log(`✅ ${filteredStorybooks.length}개 동화책 카드 렌더링 완료`);
+    console.log('🔍 openBook 함수 존재 여부:', typeof openBook !== 'undefined');
+    console.log('🔍 첫 번째 책 ID:', filteredStorybooks[0]?.id);
+    
     // 각 책의 댓글 개수 불러오기
     filteredStorybooks.forEach(book => {
         loadCommentCount(book.id);
