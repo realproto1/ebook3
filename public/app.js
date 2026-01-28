@@ -1536,7 +1536,6 @@ async function duplicateStorybookById(id) {
     
     // 동화책 목록에 추가
     storybooks.unshift(duplicate);
-    saveStorybooks();
     
     // R2에 저장
     try {
@@ -1548,9 +1547,12 @@ async function duplicateStorybookById(id) {
         showNotification('error', 'DB 저장 실패', '복사본이 DB에 저장되지 않았습니다.');
     }
     
-    // 복사본 선택
+    // localStorage에도 저장
+    saveStorybooks();
+    
+    // 복사본 선택 및 화면 업데이트
     currentStorybook = duplicate;
-    renderBookList();
+    await renderBookList(); // await 추가
     displayStorybook(duplicate);
     
     console.log(`✅ 동화책 복사 완료: "${duplicate.title}" (ID: ${duplicate.id})`);
