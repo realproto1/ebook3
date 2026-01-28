@@ -217,8 +217,6 @@ function showPage(pageIndex) {
         return;
     }
     
-    currentPage = pageIndex;
-    
     // TTS 버튼 표시/숨김
     const ttsButton = document.getElementById('tts-button-header');
     if (ttsButton) {
@@ -258,6 +256,9 @@ function showPage(pageIndex) {
             // 위치 초기화
             imageEl.style.transform = 'translateX(100px)';
             textEl.style.transform = 'translateX(100px)';
+            
+            // currentPage 업데이트 (DOM 업데이트 후)
+            currentPage = pageIndex;
             
             // 3단계: Enter 애니메이션
             requestAnimationFrame(() => {
@@ -319,6 +320,9 @@ function showPage(pageIndex) {
         // 위치 초기화 (오른쪽에서 시작)
         imageEl.style.transform = 'translateX(100px)';
         textEl.style.transform = 'translateX(100px)';
+        
+        // currentPage 업데이트 (DOM 업데이트 후)
+        currentPage = pageIndex;
         
         // 3단계: 다시 보이기 + Enter 애니메이션
         requestAnimationFrame(() => {
@@ -387,7 +391,7 @@ function updateNavigationButtons() {
     }
 }
 
-// 다음 페이지
+// 다음 페이지 (전환 효과 개선)
 function nextPage() {
     if (!currentBook || !currentBook.pages) {
         console.error('❌ currentBook is not loaded');
@@ -397,7 +401,19 @@ function nextPage() {
     const lastPage = currentBook.pages.length - 1;
     
     if (currentPage < lastPage) {
-        showPage(currentPage + 1);
+        // 1단계: 현재 페이지를 잠깐 강조 (페이지 넘김 시작 신호)
+        const pageImage = document.getElementById('page-image');
+        const pageText = document.getElementById('page-text');
+        
+        pageImage.style.transition = 'transform 0.2s ease-out';
+        pageText.style.transition = 'transform 0.2s ease-out';
+        pageImage.style.transform = 'scale(0.95)';
+        pageText.style.transform = 'scale(0.95)';
+        
+        // 2단계: 200ms 후 실제 페이지 전환
+        setTimeout(() => {
+            showPage(currentPage + 1);
+        }, 200);
     } else {
         // 마지막 페이지면 완독 알림
         if (confirm('동화책을 모두 읽으셨습니다!\n\n목록으로 돌아가시겠습니까?')) {
