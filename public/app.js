@@ -1488,14 +1488,51 @@ async function duplicateStorybookById(id) {
         return;
     }
     
-    // 깊은 복사 (이미지 URL 포함)
+    // 사용자 입력 받기 (동화 이름, 그림 스타일)
+    const newTitle = prompt('새로운 동화책 제목을 입력하세요:', `${book.title} (복사본)`);
+    if (!newTitle) {
+        return; // 취소
+    }
+    
+    const newArtStyle = prompt('새로운 그림 스타일을 입력하세요:', book.artStyle || '디즈니 스타일');
+    if (!newArtStyle) {
+        return; // 취소
+    }
+    
+    // 깊은 복사
     const duplicate = JSON.parse(JSON.stringify(book));
     
     // 새 ID 생성
     duplicate.id = Date.now().toString();
     
-    // 제목에 "(복사본)" 추가
-    duplicate.title = `${book.title} (복사본)`;
+    // 제목과 그림 스타일 업데이트
+    duplicate.title = newTitle;
+    duplicate.artStyle = newArtStyle;
+    
+    // 🔥 이미지 제거 (텍스트는 유지)
+    
+    // 캐릭터 레퍼런스 이미지만 제거
+    if (duplicate.characters && Array.isArray(duplicate.characters)) {
+        duplicate.characters.forEach(char => {
+            char.referenceImage = null;
+            char.imageHistory = []; // 히스토리도 초기화
+        });
+    }
+    
+    // Key Object 이미지만 제거
+    if (duplicate.vocabularyImages && Array.isArray(duplicate.vocabularyImages)) {
+        duplicate.vocabularyImages = duplicate.vocabularyImages.map(() => null);
+    }
+    
+    // 페이지 삽화 이미지만 제거
+    if (duplicate.pages && Array.isArray(duplicate.pages)) {
+        duplicate.pages.forEach(page => {
+            page.illustrationImage = null;
+        });
+    }
+    
+    // 표지 이미지 제거
+    duplicate.coverImage = null;
     
     // 동화책 목록에 추가
     storybooks.unshift(duplicate);
@@ -1517,9 +1554,12 @@ async function duplicateStorybookById(id) {
     displayStorybook(duplicate);
     
     console.log(`✅ 동화책 복사 완료: "${duplicate.title}" (ID: ${duplicate.id})`);
+    console.log(`   - 새 제목: ${newTitle}`);
+    console.log(`   - 새 그림 스타일: ${newArtStyle}`);
+    console.log(`   - 이미지 제거됨: 캐릭터, Key Objects, 삽화, 표지`);
     
     // 복사 완료 알림
-    showNotification('success', '복사 완료!', `"${duplicate.title}"이 생성되었습니다.`);
+    showNotification('success', '복사 완료!', `"${duplicate.title}"이 생성되었습니다. 이미지를 새로 생성해주세요.`);
 }
 
 // 알림 표시 함수
