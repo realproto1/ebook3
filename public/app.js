@@ -1519,18 +1519,28 @@ async function duplicateStorybookById(id) {
         });
     }
     
-    // Key Object 이미지만 제거
-    if (duplicate.vocabularyImages && Array.isArray(duplicate.vocabularyImages)) {
-        duplicate.vocabularyImages = duplicate.vocabularyImages.map(() => null);
-    }
+    // Key Object 이미지 완전히 제거 (3단계)
+    // 1. vocabularyImages 배열 비우기
+    duplicate.vocabularyImages = [];
     
-    // educational_content.vocabulary 안의 image 필드도 제거
+    // 2. educational_content.vocabulary 안의 image 필드 제거
     if (duplicate.educational_content && 
         duplicate.educational_content.vocabulary && 
         Array.isArray(duplicate.educational_content.vocabulary)) {
         duplicate.educational_content.vocabulary.forEach(vocab => {
-            if (typeof vocab === 'object' && vocab.image) {
+            if (typeof vocab === 'object') {
                 delete vocab.image;
+                delete vocab.imageUrl; // imageUrl도 제거
+            }
+        });
+    }
+    
+    // 3. key_objects 배열의 image 필드도 제거 (혹시 있다면)
+    if (duplicate.key_objects && Array.isArray(duplicate.key_objects)) {
+        duplicate.key_objects.forEach(obj => {
+            if (typeof obj === 'object') {
+                delete obj.image;
+                delete obj.imageUrl;
             }
         });
     }
