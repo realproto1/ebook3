@@ -1524,10 +1524,22 @@ async function duplicateStorybookById(id) {
         duplicate.vocabularyImages = duplicate.vocabularyImages.map(() => null);
     }
     
-    // 페이지 삽화 이미지만 제거
+    // educational_content.vocabulary 안의 image 필드도 제거
+    if (duplicate.educational_content && 
+        duplicate.educational_content.vocabulary && 
+        Array.isArray(duplicate.educational_content.vocabulary)) {
+        duplicate.educational_content.vocabulary.forEach(vocab => {
+            if (typeof vocab === 'object' && vocab.image) {
+                delete vocab.image;
+            }
+        });
+    }
+    
+    // 페이지 삽화 이미지와 artStyle 제거 (새 동화책 스타일 적용을 위해)
     if (duplicate.pages && Array.isArray(duplicate.pages)) {
         duplicate.pages.forEach(page => {
             page.illustrationImage = null;
+            delete page.artStyle; // ⚠️ 페이지별 artStyle 제거 (동화책 전역 스타일 사용)
         });
     }
     
