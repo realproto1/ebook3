@@ -2682,7 +2682,7 @@ function displayStorybook(storybook) {
                         class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-3.5 rounded-lg hover:from-purple-600 hover:to-purple-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
                     >
                         <i class="fas fa-file-alt text-xl"></i>
-                        <span>전체 삽화 텍스트 다운로드</span>
+                        <span>전체 페이지 텍스트 다운로드</span>
                     </button>
                     
                     <!-- 다운로드 버튼 -->
@@ -3599,11 +3599,11 @@ async function downloadAllIllustrationTexts() {
         return;
     }
     
-    if (!confirm(`${currentStorybook.pages.length}개 페이지의 삽화 텍스트를 다운로드하시겠습니까?`)) {
+    if (!confirm(`${currentStorybook.pages.length}개 페이지의 텍스트를 다운로드하시겠습니까?`)) {
         return;
     }
     
-    // 텍스트 파일 생성
+    // 텍스트 파일 생성 (페이지 텍스트만)
     let content = `동화책: ${currentStorybook.title}\n`;
     content += `생성 일시: ${new Date().toLocaleString('ko-KR')}\n`;
     content += `총 페이지: ${currentStorybook.pages.length}\n`;
@@ -3611,40 +3611,7 @@ async function downloadAllIllustrationTexts() {
     
     currentStorybook.pages.forEach((page, idx) => {
         content += `📖 페이지 ${page.pageNumber}\n`;
-        content += `${'='.repeat(80)}\n\n`;
-        
-        // 페이지 텍스트
-        content += `[페이지 텍스트]\n${page.text || '(없음)'}\n\n`;
-        
-        // 장면 설명
-        content += `[장면 설명]\n${page.scene_description || '(없음)'}\n\n`;
-        
-        // 장면 구조
-        if (page.scene_structure) {
-            content += `[장면 구조]\n`;
-            content += `- 캐릭터: ${page.scene_structure.characters || '(없음)'}\n`;
-            content += `- 배경: ${page.scene_structure.background || '(없음)'}\n`;
-            content += `- 분위기: ${page.scene_structure.atmosphere || '(없음)'}\n`;
-            if (page.scene_structure.key_objects) {
-                content += `- 핵심 사물: ${page.scene_structure.key_objects}\n`;
-            }
-            if (page.scene_structure.spatial_layout) {
-                content += `- 공간 배치: ${page.scene_structure.spatial_layout}\n`;
-            }
-            content += '\n';
-        }
-        
-        // 그림 스타일
-        if (page.artStyle || currentStorybook.artStyle) {
-            content += `[그림 스타일]\n${page.artStyle || currentStorybook.artStyle}\n\n`;
-        }
-        
-        // 수정 사항
-        if (page.editNote) {
-            content += `[수정 사항]\n${page.editNote}\n\n`;
-        }
-        
-        content += '\n\n';
+        content += `${page.text || '(텍스트 없음)'}\n\n`;
     });
     
     // Blob 생성 및 다운로드
@@ -3652,13 +3619,13 @@ async function downloadAllIllustrationTexts() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${currentStorybook.title}_삽화텍스트.txt`;
+    a.download = `${currentStorybook.title}_페이지텍스트.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    showNotification('success', '다운로드 완료', `${currentStorybook.pages.length}개 페이지의 삽화 텍스트가 다운로드되었습니다.`);
+    showNotification('success', '다운로드 완료', `${currentStorybook.pages.length}개 페이지의 텍스트가 다운로드되었습니다.`);
 }
 
 // 단어 업데이트 함수
