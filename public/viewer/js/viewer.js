@@ -392,6 +392,23 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     
     loadStorybooks();
+    
+    // 전역으로 함수 노출 (디버깅용)
+    window.openBook = openBook;
+    window.openGamesFromViewer = openGamesFromViewer;
+    window.shareBook = shareBook;
+    window.openComments = openComments;
+    window.selectLanguageAndOpen = selectLanguageAndOpen;
+    window.closeLanguageModal = closeLanguageModal;
+    window.filterByAge = filterByAge;
+    window.sortBooks = sortBooks;
+    
+    console.log('🌐 전역 함수 등록 완료:', {
+        openBook: typeof window.openBook,
+        openGamesFromViewer: typeof window.openGamesFromViewer,
+        shareBook: typeof window.shareBook,
+        openComments: typeof window.openComments
+    });
 });
 
 // ===== 공유하기 & 댓글 기능 =====
