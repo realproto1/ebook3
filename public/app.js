@@ -3647,6 +3647,8 @@ async function generateAllCharacterReferences() {
                 console.log(`🎨 캐릭터 "${char.name}" 이미지 생성 시작 (배치 생성)`);
                 
                 // 🔥 서버 API 호출 (R2 업로드 포함)
+                console.log(`📤 API 요청 - storybookId: ${currentStorybook.id}, title: ${currentStorybook.title}`);
+                
                 const response = await axios.post('/api/generate-character-image', {
                     character: {
                         name: char.name,
@@ -3665,6 +3667,7 @@ async function generateAllCharacterReferences() {
                 
                 if (response.data.success && response.data.imageUrl) {
                     const imageUrl = response.data.imageUrl; // R2 URL
+                    console.log(`📥 API 응답 - imageUrl: ${imageUrl}`);
                     currentStorybook.characters[i].referenceImage = imageUrl;
                     console.log(`✅ 캐릭터 "${char.name}" 이미지 생성 완료 (R2 업로드 포함)`);
                     return { index: i, success: true, imageUrl: imageUrl };
@@ -3768,6 +3771,8 @@ async function generateCharacterReference(charIndex) {
         }
         
         // 🔥 서버 API 호출 (R2 업로드 포함)
+        console.log(`📤 단일 생성 API 요청 - storybookId: ${currentStorybook.id}, title: ${currentStorybook.title}`);
+        
         const response = await axios.post('/api/generate-character-image', {
             character: {
                 name: character.name,
@@ -3786,6 +3791,7 @@ async function generateCharacterReference(charIndex) {
         
         if (response.data.success && response.data.imageUrl) {
             const imageUrl = response.data.imageUrl; // R2 URL
+            console.log(`📥 단일 생성 API 응답 - imageUrl: ${imageUrl}`);
             
             // 히스토리에 추가 (최대 10개 유지)
             if (!character.imageHistory) {
