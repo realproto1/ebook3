@@ -993,43 +993,55 @@ async function enterImageFullscreen() {
         nextBtn.style.pointerEvents = 'none';
     }
     
-    // 텍스트 오버레이
+    // 텍스트 오버레이 - overlay의 직계 자식으로 배치
     const textOverlay = document.createElement('div');
+    
+    // 모바일 여부 체크
+    const isMobile = window.innerWidth <= 768;
+    
     textOverlay.style.cssText = `
-        position: absolute;
+        position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        padding: 2rem 1.5rem 1.5rem 1.5rem;
+        width: 100vw;
+        padding: ${isMobile ? '1.5rem 1rem 1rem 1rem' : '2rem 1.5rem 1.5rem 1.5rem'};
         background: linear-gradient(
             to top, 
-            rgba(0, 0, 0, 0.9) 0%, 
-            rgba(0, 0, 0, 0.7) 25%,
-            rgba(0, 0, 0, 0.4) 50%,
+            rgba(0, 0, 0, 0.95) 0%, 
+            rgba(0, 0, 0, 0.85) 20%,
+            rgba(0, 0, 0, 0.6) 40%,
+            rgba(0, 0, 0, 0.3) 60%,
             transparent 100%
         );
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         color: white;
-        font-size: 1.25rem;
-        line-height: 1.8;
+        font-size: ${isMobile ? '1rem' : '1.25rem'};
+        line-height: ${isMobile ? '1.6' : '1.8'};
         text-align: center;
         text-shadow: 
-            0 1px 2px rgba(0, 0, 0, 0.8),
-            0 2px 8px rgba(0, 0, 0, 0.6);
+            0 2px 4px rgba(0, 0, 0, 0.9),
+            0 4px 12px rgba(0, 0, 0, 0.7);
         font-weight: 500;
         letter-spacing: 0.3px;
         word-break: keep-all;
+        z-index: 100002;
+        pointer-events: none;
+        min-height: ${isMobile ? '80px' : '100px'};
+        display: flex;
+        align-items: center;
+        justify-content: center;
     `;
     textOverlay.textContent = pageText ? pageText.textContent : '';
     
-    // 조립
+    // 조립 - textOverlay를 overlay에 직접 추가
     imageContainer.appendChild(fullImage);
-    imageContainer.appendChild(textOverlay);
     imageContainer.appendChild(prevBtn);
     imageContainer.appendChild(nextBtn);
     overlay.appendChild(closeBtn);
     overlay.appendChild(imageContainer);
+    overlay.appendChild(textOverlay);
     
     // DOM에 추가
     document.body.appendChild(overlay);
