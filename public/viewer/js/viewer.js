@@ -169,7 +169,14 @@ function applyFilters() {
     
     filteredStorybooks = allStorybooks.filter(book => {
         // 카테고리 필터
-        const categoryMatch = currentCategoryFilter === '' || book.category === currentCategoryFilter;
+        let categoryMatch = false;
+        if (currentCategoryFilter === '') {
+            // "전체" 선택 시: 모든 동화책 표시
+            categoryMatch = true;
+        } else {
+            // 특정 카테고리 선택 시: 해당 카테고리만 표시
+            categoryMatch = book.category === currentCategoryFilter;
+        }
         
         // 연령 필터
         let ageMatch = true;
@@ -185,6 +192,7 @@ function applyFilters() {
             console.log('📖 브레멘 음악대 필터 체크:', {
                 제목: book.title,
                 카테고리: book.category,
+                현재필터: currentCategoryFilter,
                 카테고리매칭: categoryMatch,
                 연령: book.targetAge,
                 연령매칭: ageMatch,
