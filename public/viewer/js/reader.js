@@ -236,39 +236,36 @@ function showPage(pageIndex) {
         const textEl = document.getElementById('page-text');
         const imageContainer = document.getElementById('page-image-container');
         
-        // 1단계: Exit 애니메이션
-        imageEl.style.opacity = '0';
-        imageEl.style.transform = 'translateX(-100px)';
-        textEl.style.opacity = '0';
-        textEl.style.transform = 'translateX(-100px)';
+        // 즉시 내용 변경 (페이드아웃 없이)
+        imageContainer.style.visibility = 'hidden';
         
-        // 2단계: 표지 표시
-        setTimeout(() => {
-            imageContainer.style.visibility = 'hidden';
+        // 표지 이미지 설정
+        imageEl.src = currentBook.coverImage;
+        imageEl.alt = `${currentBook.title} 표지`;
+        
+        // 표지에는 텍스트 오버레이 숨김
+        textEl.textContent = '';
+        
+        // 시작 위치 설정 (오른쪽에서 시작)
+        imageEl.style.opacity = '0';
+        imageEl.style.transform = 'translateX(100px)';
+        textEl.style.opacity = '0';
+        textEl.style.transform = 'translateX(100px)';
+        
+        // currentPage 업데이트
+        currentPage = pageIndex;
+        
+        // Enter 애니메이션 (페이드인만)
+        requestAnimationFrame(() => {
+            imageContainer.style.visibility = 'visible';
             
-            // 표지 이미지 설정
-            imageEl.src = currentBook.coverImage;
-            imageEl.alt = `${currentBook.title} 표지`;
-            
-            // 표지에는 텍스트 오버레이 숨김
-            textEl.textContent = '';
-            
-            // 위치 초기화
-            imageEl.style.transform = 'translateX(100px)';
-            textEl.style.transform = 'translateX(100px)';
-            
-            // currentPage 업데이트 (DOM 업데이트 후)
-            currentPage = pageIndex;
-            
-            // 3단계: Enter 애니메이션
             requestAnimationFrame(() => {
-                imageContainer.style.visibility = 'visible';
                 imageEl.style.opacity = '1';
                 imageEl.style.transform = 'translateX(0)';
                 textEl.style.opacity = '0'; // 표지에는 텍스트 숨김
                 textEl.style.transform = 'translateX(0)';
             });
-        }, 350);
+        });
         
         updateProgress();
         updateNavigationButtons();
@@ -285,57 +282,51 @@ function showPage(pageIndex) {
     const textEl = document.getElementById('page-text');
     const imageContainer = document.getElementById('page-image-container');
     
-    // 1단계: Exit 애니메이션 시작 (페이드아웃 + 왼쪽 이동)
-    imageEl.style.opacity = '0';
-    imageEl.style.transform = 'translateX(-100px)';
-    textEl.style.opacity = '0';
-    textEl.style.transform = 'translateX(-100px)';
+    // 즉시 내용 변경 (페이드아웃 없이)
+    imageContainer.style.visibility = 'hidden';
     
-    // 2단계: 애니메이션 완료 후 내용 변경
-    setTimeout(() => {
-        // 완전히 숨김 (visibility)
-        imageContainer.style.visibility = 'hidden';
+    // 내용 변경
+    if (page.illustrationImage) {
+        imageEl.src = page.illustrationImage;
+        imageEl.alt = `Page ${pageIndex + 1}`;
+    } else {
+        imageEl.src = '';
+        imageEl.alt = '이미지 없음';
+    }
+    
+    // 현재 언어에 맞는 텍스트 표시
+    const pageText = getPageText(page, currentLanguage);
+    console.log(`📝 페이지 ${pageIndex + 1} 텍스트:`, {
+        currentLanguage,
+        pageNumber: page.pageNumber,
+        hasTranslations: !!currentBook.translations,
+        hasCurrentLangTranslation: !!currentBook.translations?.[currentLanguage],
+        originalText: page.text?.substring(0, 30),
+        translatedText: pageText?.substring(0, 30)
+    });
+    textEl.textContent = pageText || '텍스트가 없습니다.';
+    
+    // 시작 위치 설정 (오른쪽에서 시작)
+    imageEl.style.opacity = '0';
+    imageEl.style.transform = 'translateX(100px)';
+    textEl.style.opacity = '0';
+    textEl.style.transform = 'translateX(100px)';
+    
+    // currentPage 업데이트
+    currentPage = pageIndex;
+    
+    // Enter 애니메이션 (페이드인만)
+    requestAnimationFrame(() => {
+        imageContainer.style.visibility = 'visible';
         
-        // 내용 변경
-        if (page.illustrationImage) {
-            imageEl.src = page.illustrationImage;
-            imageEl.alt = `Page ${pageIndex + 1}`;
-        } else {
-            imageEl.src = '';
-            imageEl.alt = '이미지 없음';
-        }
-        
-        // 현재 언어에 맞는 텍스트 표시
-        const pageText = getPageText(page, currentLanguage);
-        console.log(`📝 페이지 ${pageIndex + 1} 텍스트:`, {
-            currentLanguage,
-            pageNumber: page.pageNumber,
-            hasTranslations: !!currentBook.translations,
-            hasCurrentLangTranslation: !!currentBook.translations?.[currentLanguage],
-            originalText: page.text?.substring(0, 30),
-            translatedText: pageText?.substring(0, 30)
-        });
-        textEl.textContent = pageText || '텍스트가 없습니다.';
-        
-        // 위치 초기화 (오른쪽에서 시작)
-        imageEl.style.transform = 'translateX(100px)';
-        textEl.style.transform = 'translateX(100px)';
-        
-        // currentPage 업데이트 (DOM 업데이트 후)
-        currentPage = pageIndex;
-        
-        // 3단계: 다시 보이기 + Enter 애니메이션
         requestAnimationFrame(() => {
-            imageContainer.style.visibility = 'visible';
-            
             // Enter 애니메이션 (페이드인 + 중앙으로 이동)
             imageEl.style.opacity = '1';
             imageEl.style.transform = 'translateX(0)';
             textEl.style.opacity = '1';
             textEl.style.transform = 'translateX(0)';
         });
-        
-    }, 350); // Exit 애니메이션 완료 대기 (300ms + 50ms 버퍼)
+    });
     
     // 진행률 업데이트 (즉시)
     updateProgress();
@@ -345,11 +336,11 @@ function showPage(pageIndex) {
     
     // 페이지 이미지 로드 후 TTS 자동 재생 (본문 페이지만)
     if (pageIndex >= 0) {
-        // 이미지 로드 완료 대기 후 TTS 자동 재생
+        // 페이드인 애니메이션 완료 대기 후 TTS 자동 재생
         setTimeout(() => {
-            console.log('🎬 페이지 애니메이션 완료 - TTS 자동 재생 시도');
+            console.log('🎬 페이지 전환 완료 - TTS 자동 재생 시도');
             autoPlayTTS();
-        }, 400); // 애니메이션 완료 후 약간의 딜레이
+        }, 350); // 페이드인 애니메이션 시간 (300ms) + 버퍼
     }
 }
 
