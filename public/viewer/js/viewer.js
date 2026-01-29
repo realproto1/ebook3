@@ -211,9 +211,17 @@ function applyFilters() {
 
 // 정렬
 function sortBooks() {
+    // 데스크톱과 모바일 select 모두 확인
     const sortSelect = document.getElementById('sort-select');
-    const sortValue = sortSelect ? sortSelect.value : 'title';
+    const mobileSortSelect = document.getElementById('mobile-sort-select');
+    const sortValue = sortSelect ? sortSelect.value : (mobileSortSelect ? mobileSortSelect.value : 'title');
     currentSort = sortValue;
+    
+    // 두 select 값 동기화
+    if (sortSelect && mobileSortSelect) {
+        sortSelect.value = sortValue;
+        mobileSortSelect.value = sortValue;
+    }
     
     switch(sortValue) {
         case 'latest':
@@ -461,6 +469,8 @@ window.addEventListener('DOMContentLoaded', () => {
     window.closeLanguageModal = closeLanguageModal;
     window.filterByAge = filterByAge;
     window.filterByCategory = filterByCategory;
+    window.filterByAgeMobile = filterByAgeMobile;
+    window.filterByCategoryMobile = filterByCategoryMobile;
     window.sortBooks = sortBooks;
     
     console.log('🌐 전역 함수 등록 완료:', {
@@ -471,6 +481,18 @@ window.addEventListener('DOMContentLoaded', () => {
         filterByCategory: typeof window.filterByCategory
     });
 });
+
+// 모바일 카테고리 필터 (드롭다운)
+function filterByCategoryMobile(category) {
+    console.log(`📱 모바일 카테고리 필터: ${category || '전체'}`);
+    filterByCategory(category);
+}
+
+// 모바일 연령대 필터 (드롭다운)
+function filterByAgeMobile(age) {
+    console.log(`📱 모바일 연령대 필터: ${age || '전체'}`);
+    filterByAge(age);
+}
 
 // ===== 공유하기 & 댓글 기능 =====
 

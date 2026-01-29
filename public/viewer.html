@@ -264,19 +264,19 @@
             }
             
             header {
-                padding: 2rem 0;
+                padding: 1.5rem 0;
             }
             
             header h1 {
-                font-size: 2rem;
+                font-size: 1.75rem;
             }
             
             header p {
-                font-size: 1rem;
+                font-size: 0.875rem;
             }
             
             .books-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
                 gap: 1rem;
             }
             
@@ -284,10 +284,39 @@
                 padding: 1rem;
             }
             
-            .filter-btn {
-                padding: 0.5rem 1rem;
-                font-size: 0.8125rem;
+            /* 모바일에서는 데스크톱 필터 숨기기 */
+            .desktop-filters {
+                display: none !important;
             }
+            
+            /* 모바일 필터 표시 */
+            .mobile-filters {
+                display: block !important;
+            }
+            
+            .mobile-select {
+                width: 100%;
+                padding: 0.75rem 1rem;
+                border-radius: 8px;
+                border: 1px solid #e5e7eb;
+                font-size: 0.875rem;
+                font-weight: 500;
+                color: #374151;
+                background: white;
+                cursor: pointer;
+                margin-bottom: 0.75rem;
+            }
+            
+            .mobile-select:focus {
+                outline: none;
+                border-color: #6366f1;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            }
+        }
+        
+        /* 데스크톱에서는 모바일 필터 숨기기 */
+        .mobile-filters {
+            display: none;
         }
         
         /* 네비게이션 헤더 */
@@ -353,7 +382,40 @@
 
         <!-- 필터 섹션 -->
         <div class="filter-section">
-            <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 1.5rem; align-items: start;">
+            <!-- 모바일 필터 (드롭다운) -->
+            <div class="mobile-filters">
+                <span class="filter-label">
+                    <i class="fas fa-filter" style="color: #6366f1; margin-right: 0.25rem;"></i>
+                    필터 및 정렬
+                </span>
+                
+                <!-- 카테고리 선택 -->
+                <select id="mobile-category-select" onchange="filterByCategoryMobile(this.value)" class="mobile-select">
+                    <option value="">🏷️ 전체 카테고리</option>
+                    <option value="세계 명작">📚 세계 명작</option>
+                    <option value="전래 동화">🏮 전래 동화</option>
+                    <option value="자연 관찰">🌿 자연 관찰</option>
+                    <option value="기타">📖 기타</option>
+                </select>
+                
+                <!-- 연령대 선택 -->
+                <select id="mobile-age-select" onchange="filterByAgeMobile(this.value)" class="mobile-select">
+                    <option value="">👶 전체 연령대</option>
+                    <option value="4-5">4-5세</option>
+                    <option value="5-7">5-7세</option>
+                    <option value="7-8">7-8세</option>
+                </select>
+                
+                <!-- 정렬 선택 -->
+                <select id="mobile-sort-select" onchange="sortBooks()" class="mobile-select">
+                    <option value="title" selected>📖 제목순</option>
+                    <option value="latest">🆕 최신순</option>
+                    <option value="oldest">🕰️ 오래된순</option>
+                </select>
+            </div>
+            
+            <!-- 데스크톱 필터 (버튼) -->
+            <div class="desktop-filters" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 1.5rem; align-items: start;">
                 <!-- 카테고리 필터 -->
                 <div>
                     <span class="filter-label">
