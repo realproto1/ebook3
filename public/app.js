@@ -2238,6 +2238,12 @@ function displayStorybook(storybook) {
                         <i class="fas fa-download mr-1 md:mr-2"></i><span class="hidden sm:inline">모두 다운로드</span><span class="sm:hidden">다운</span>
                     </button>
                     <button 
+                        onclick="bulkUploadKeyObjectImages()"
+                        class="bg-purple-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-purple-700 transition whitespace-nowrap text-sm md:text-base"
+                    >
+                        <i class="fas fa-upload mr-1 md:mr-2"></i><span class="hidden sm:inline">일괄 업로드</span><span class="sm:hidden">업로드</span>
+                    </button>
+                    <button 
                         onclick="addNewKeyObject()"
                         class="bg-blue-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-blue-700 transition whitespace-nowrap text-sm md:text-base"
                     >
@@ -6633,6 +6639,130 @@ function deleteKeyObject(objIndex) {
         
         alert('Key Object가 삭제되었습니다.');
     }
+}
+
+// 핵심 단어 이미지 일괄 업로드
+async function bulkUploadKeyObjectImages() {
+    if (!currentStorybook || !currentStorybook.key_objects || currentStorybook.key_objects.length === 0) {
+        alert('핵심 사물이 없습니다. 먼저 핵심 사물을 추가해주세요.');
+        return;
+    }
+    
+    // 파일 입력 요소 생성
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = true;
+    
+    input.onchange = async (e) => {
+        const files = Array.from(e.target.files);
+        
+        if (files.length === 0) {
+            return;
+        }
+        
+        // 핵심 사물을 가나다순으로 정렬
+        const sortedKeyObjects = currentStorybook.key_objects
+            .map((obj, idx) => ({ obj, originalIdx: idx }))
+            .sort((a, b) => {
+                const nameA = (a.obj.korean || a.obj.name).toLowerCase();
+                const nameB = (b.obj.korean || b.obj.name).toLowerCase();
+                return nameA.localeCompare(nameB, 'ko');
+            });
+        
+        // 파일을 이름순으로 정렬
+        files.sort((a, b) => a.name.localeCompare(b.name));
+        
+        if (files.length !== sortedKeyObjects.length) {
+            const proceed = confirm(
+                `⚠️ 파일 개수(${files.length}개)와 핵심 사물 개수(${sortedKeyObjects.length}개)가 일치하지 않습니다.\n\n` +
+                `가나다순 매칭:\n` +
+                sortedKeyObjects.slice(0, Math.min(files.length, 5)).map((item, i) => 
+                    `${i + 1}. ${files[i]?.name || '없음'} → ${item.obj.korean || item.obj.name}`
+                ).join('\n') +
+                (sortedKeyObjects.length > 5 ? `\n...\n` : '') +
+                `\n\n계속하시겠습니까?`
+            );
+            
+            if (!proceed) {
+                return;
+            }
+        }
+        
+        // 업로드 진행
+        showNotification('info', '일괄 업로드 시작', `${files.length}개 파일 업로드 중...`);
+        
+        // keyObjectImages 배열 초기화
+        if (!currentStorybook.keyObjectImages) {
+            currentStorybook.keyObjectImages = [];
+        }
+        
+        let successCount = 0;
+        let failCount = 0;
+        
+        for (let i = 0; i < Math.min(files.length, sortedKeyObjects.length); i++) {
+            const file = files[i];
+            const { obj, originalIdx } = sortedKeyObjects[i];
+            
+            try {
+                console.log(`📤 업로드 중 (${i + 1}/${files.length}): ${file.name} → ${obj.korean || obj.name}`);
+                
+                // Base64로 변환
+                const base64 = await fileToBase64(file);
+                
+                // R2에 업로드
+                const response = await axios.post('/api/upload-image', {
+                    image: base64,
+                    filename: `keyobject-${currentStorybook.id}-${originalIdx}-${Date.now()}.png`
+                }, {
+                    headers: {
+                        'X-API-Key': getAPIKey()
+                    }
+                });
+                
+                if (response.data.success) {
+                    // keyObjectImages 배열에 저장 (원래 인덱스 위치에)
+                    currentStorybook.keyObjectImages[originalIdx] = {
+                        imageUrl: response.data.url,
+                        uploadedAt: new Date().toISOString()
+                    };
+                    
+                    successCount++;
+                    console.log(`✅ 업로드 성공: ${obj.korean || obj.name}`);
+                } else {
+                    failCount++;
+                    console.error(`❌ 업로드 실패: ${obj.korean || obj.name}`);
+                }
+                
+            } catch (error) {
+                failCount++;
+                console.error(`❌ 업로드 오류: ${obj.korean || obj.name}`, error);
+            }
+        }
+        
+        // 저장 및 화면 업데이트
+        saveCurrentStorybook();
+        displayStorybook(currentStorybook);
+        
+        // 결과 알림
+        if (failCount === 0) {
+            showNotification('success', '일괄 업로드 완료!', `${successCount}개 이미지가 성공적으로 업로드되었습니다.`);
+        } else {
+            showNotification('warning', '일괄 업로드 완료', `성공: ${successCount}개, 실패: ${failCount}개`);
+        }
+    };
+    
+    input.click();
+}
+
+// 파일을 Base64로 변환하는 헬퍼 함수
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
 
 // 모든 페이지의 참조 이미지 섹션 새로고침
