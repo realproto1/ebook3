@@ -3439,6 +3439,7 @@ async function updateViewerMetadata() {
             publicStorybooks.push({
               id: storybook.id,
               title: storybook.title,
+              category: storybook.category || '',  // 카테고리 추가
               targetAge: storybook.targetAge,
               artStyle: storybook.artStyle,
               coverImage: storybook.coverImage,
@@ -3519,6 +3520,18 @@ app.get('/api/viewer/storybooks', async (req, res) => {
       success: false, 
       error: '뷰어 목록 로드 실패: ' + error.message 
     });
+  }
+});
+
+// 🔧 임시: viewer-metadata.json 강제 업데이트 (디버깅용)
+app.post('/api/refresh-viewer-metadata', async (req, res) => {
+  try {
+    console.log('🔄 강제로 viewer-metadata 업데이트 중...');
+    await updateViewerMetadata();
+    res.json({ success: true, message: 'Viewer metadata refreshed' });
+  } catch (error) {
+    console.error('❌ 메타데이터 업데이트 실패:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
