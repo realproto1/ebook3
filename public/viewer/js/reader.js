@@ -913,6 +913,86 @@ async function enterImageFullscreen() {
         display: block;
     `;
     
+    // 이전 페이지 버튼
+    const prevBtn = document.createElement('button');
+    prevBtn.style.cssText = `
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 56px;
+        height: 56px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 100001;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        font-size: 1.5rem;
+        transition: all 0.2s;
+    `;
+    prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    prevBtn.onclick = async () => {
+        // 전체화면 내에서 페이지 변경
+        previousPage();
+        // 잠시 대기 후 전체화면 다시 진입
+        setTimeout(async () => {
+            await enterImageFullscreen();
+        }, 100);
+    };
+    
+    // 다음 페이지 버튼
+    const nextBtn = document.createElement('button');
+    nextBtn.style.cssText = `
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 56px;
+        height: 56px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 100001;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        font-size: 1.5rem;
+        transition: all 0.2s;
+    `;
+    nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    nextBtn.onclick = async () => {
+        // 전체화면 내에서 페이지 변경
+        nextPage();
+        // 잠시 대기 후 전체화면 다시 진입
+        setTimeout(async () => {
+            await enterImageFullscreen();
+        }, 100);
+    };
+    
+    // 페이지가 첫 페이지/마지막 페이지인 경우 버튼 비활성화
+    const firstPage = currentBook.hasCoverPage ? -1 : 0;
+    const lastPage = currentBook.pages.length - 1;
+    
+    if (currentPage <= firstPage) {
+        prevBtn.style.opacity = '0.3';
+        prevBtn.style.pointerEvents = 'none';
+    }
+    
+    if (currentPage >= lastPage) {
+        nextBtn.style.opacity = '0.3';
+        nextBtn.style.pointerEvents = 'none';
+    }
+    
     // 텍스트 오버레이
     const textOverlay = document.createElement('div');
     textOverlay.style.cssText = `
@@ -946,6 +1026,8 @@ async function enterImageFullscreen() {
     // 조립
     imageContainer.appendChild(fullImage);
     imageContainer.appendChild(textOverlay);
+    imageContainer.appendChild(prevBtn);
+    imageContainer.appendChild(nextBtn);
     overlay.appendChild(closeBtn);
     overlay.appendChild(imageContainer);
     
