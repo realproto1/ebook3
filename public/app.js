@@ -1093,121 +1093,10 @@ function saveStorybooks() {
 }
 
 function renderBookList() {
-    const listDiv = document.getElementById('bookList');
-    
     console.log('📋 renderBookList 호출 - 동화책 개수:', storybooks.length);
     
-    // undefined, null 항목 필터링
-    storybooks = storybooks.filter(book => book && book.id);
-    
-    // 이름순으로 정렬 (가나다순, ABC순)
-    storybooks.sort((a, b) => {
-        const titleA = (a.title || '').toLowerCase();
-        const titleB = (b.title || '').toLowerCase();
-        return titleA.localeCompare(titleB, 'ko');
-    });
-    
-    if (storybooks.length === 0) {
-        listDiv.innerHTML = '<p class="text-gray-500 text-center py-4">아직 만든 동화책이 없어요</p>';
-        return;
-    }
-
-    listDiv.innerHTML = storybooks.map((book, index) => `
-        <div 
-            class="book-item ${currentStorybook && currentStorybook.id === book.id ? 'active' : ''} p-3 rounded-lg mb-2 border border-gray-200 cursor-move"
-            draggable="true"
-            data-book-id="${book.id}"
-            data-book-index="${index}"
-            ondragstart="handleDragStart(event)"
-            ondragover="handleDragOver(event)"
-            ondragenter="handleDragEnter(event)"
-            ondragleave="handleDragLeave(event)"
-            ondrop="handleDrop(event)"
-            ondragend="handleDragEnd(event)"
-        >
-            <!-- 드래그 핸들 & 제목 -->
-            <div class="flex items-start gap-2 mb-2">
-                <div class="text-gray-400 cursor-move mt-1" title="드래그하여 순서 변경">
-                    <i class="fas fa-grip-vertical"></i>
-                </div>
-                <div class="flex-1 min-w-0" onclick="selectStorybook('${book.id}')">
-                    <input 
-                        type="text" 
-                        value="${book.title}"
-                        class="w-full font-bold text-gray-800 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-purple-500 outline-none text-sm px-1 -ml-1"
-                        onclick="event.stopPropagation(); this.select();"
-                        onchange="updateBookTitleInList('${book.id}', this.value)"
-                        onblur="this.classList.remove('border-purple-500')"
-                        title="클릭하여 제목 수정"
-                    />
-                    <p class="text-xs text-gray-500 mt-1 px-1">
-                        <i class="fas fa-child mr-1"></i>${book.targetAge}세 
-                        <i class="fas fa-file-alt ml-2 mr-1"></i>${book.pages.length}p
-                        ${book.category ? `<i class="fas fa-tag ml-2 mr-1"></i>${book.category}` : ''}
-                    </p>
-                </div>
-            </div>
-            
-            <!-- 뷰어 공개 체크박스 -->
-            <div class="flex items-center gap-2 mt-2 px-1 mb-2">
-                <input 
-                    type="checkbox" 
-                    id="public-${book.id}"
-                    ${book.isPublic ? 'checked' : ''}
-                    onchange="togglePublicStatus('${book.id}')"
-                    onclick="event.stopPropagation();"
-                    class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
-                />
-                <label 
-                    for="public-${book.id}" 
-                    class="text-xs text-gray-700 cursor-pointer select-none"
-                    onclick="event.stopPropagation();"
-                >
-                    <i class="fas fa-eye ${book.isPublic ? 'text-green-600' : 'text-gray-400'} mr-1"></i>
-                    뷰어 공개${book.isPublic ? ' ✓' : ''}
-                </label>
-            </div>
-            
-            <!-- 버튼 그룹 -->
-            <div class="flex gap-1 mt-2 px-1">
-                <button 
-                    onclick="event.stopPropagation(); openReader('${book.id}')"
-                    class="flex-1 bg-green-100 hover:bg-green-200 text-green-700 text-xs py-1.5 rounded transition"
-                    title="동화책 보기"
-                >
-                    <i class="fas fa-book-open mr-1"></i>보기
-                </button>
-                <button 
-                    onclick="event.stopPropagation(); openQuiz('${book.id}')"
-                    class="flex-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 text-xs py-1.5 rounded transition"
-                    title="퀴즈 풀기"
-                >
-                    <i class="fas fa-question-circle mr-1"></i>퀴즈
-                </button>
-                <button 
-                    onclick="event.stopPropagation(); selectStorybook('${book.id}')"
-                    class="flex-1 bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs py-1.5 rounded transition"
-                    title="편집"
-                >
-                    <i class="fas fa-edit mr-1"></i>편집
-                </button>
-                <button 
-                    onclick="event.stopPropagation(); duplicateStorybookById('${book.id}')"
-                    class="bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs py-1.5 px-2.5 rounded transition"
-                    title="복사"
-                >
-                    <i class="fas fa-copy"></i>
-                </button>
-                <button 
-                    onclick="event.stopPropagation(); deleteStorybook('${book.id}')"
-                    class="bg-red-100 hover:bg-red-200 text-red-700 text-xs py-1.5 px-2.5 rounded transition"
-                    title="삭제"
-                >
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        </div>
-    `).join('');
+    // 필터 적용 (검색 및 카테고리 필터 포함)
+    applyBookFilters();
 }
 
 function selectStorybook(id) {
@@ -7599,5 +7488,167 @@ function updateStorybookCategory(category) {
     
     // 성공 알림
     showNotification('success', '카테고리 저장 완료', `"${category || '미지정'}"로 설정되었습니다.`);
+}
+
+// 📚 검색 및 필터 기능
+let currentCategoryFilter = '';  // 현재 선택된 카테고리
+let currentSearchText = '';      // 현재 검색어
+
+// 카테고리별 필터링
+function filterByCategory(category) {
+    console.log(`📂 카테고리 필터: ${category || '전체'}`);
+    
+    currentCategoryFilter = category;
+    
+    // 버튼 활성화 상태 업데이트
+    const buttons = document.querySelectorAll('.category-filter-btn');
+    buttons.forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // 클릭된 버튼 활성화
+    event.target.classList.add('active');
+    
+    // 필터 적용
+    applyBookFilters();
+}
+
+// 검색어 필터링
+function filterBooks() {
+    const searchInput = document.getElementById('searchInput');
+    currentSearchText = searchInput.value.toLowerCase().trim();
+    
+    console.log(`🔍 검색: "${currentSearchText}"`);
+    
+    // 필터 적용
+    applyBookFilters();
+}
+
+// 통합 필터 적용
+function applyBookFilters() {
+    const listDiv = document.getElementById('bookList');
+    const bookCountSpan = document.getElementById('bookCount');
+    
+    // undefined, null 항목 필터링
+    const validBooks = storybooks.filter(book => book && book.id);
+    
+    // 필터링 로직
+    const filteredBooks = validBooks.filter(book => {
+        // 카테고리 매칭
+        const categoryMatch = currentCategoryFilter === '' || 
+                            (book.category || '') === currentCategoryFilter;
+        
+        // 검색어 매칭
+        const searchMatch = currentSearchText === '' || 
+                          (book.title || '').toLowerCase().includes(currentSearchText);
+        
+        return categoryMatch && searchMatch;
+    });
+    
+    console.log(`✅ 필터링 결과: ${filteredBooks.length}개 (전체: ${validBooks.length}개)`);
+    console.log(`   카테고리: "${currentCategoryFilter || '전체'}", 검색어: "${currentSearchText || '없음'}"`);
+    
+    // 결과 개수 업데이트
+    if (bookCountSpan) {
+        bookCountSpan.textContent = filteredBooks.length;
+    }
+    
+    // 정렬
+    filteredBooks.sort((a, b) => {
+        const titleA = (a.title || '').toLowerCase();
+        const titleB = (b.title || '').toLowerCase();
+        return titleA.localeCompare(titleB, 'ko');
+    });
+    
+    // 빈 결과 처리
+    if (filteredBooks.length === 0) {
+        const message = currentSearchText !== '' || currentCategoryFilter !== '' 
+            ? '검색 결과가 없습니다.' 
+            : '아직 만든 동화책이 없어요';
+        listDiv.innerHTML = `<p class="text-gray-500 text-center py-4">${message}</p>`;
+        return;
+    }
+    
+    // 동화책 목록 렌더링
+    listDiv.innerHTML = filteredBooks.map((book, index) => `
+        <div 
+            class="book-item ${currentStorybook && currentStorybook.id === book.id ? 'active' : ''} p-3 rounded-lg mb-2 border border-gray-200 cursor-move"
+            draggable="true"
+            data-book-id="${book.id}"
+            data-book-index="${index}"
+            ondragstart="handleDragStart(event)"
+            ondragover="handleDragOver(event)"
+            ondragenter="handleDragEnter(event)"
+            ondragleave="handleDragLeave(event)"
+            ondrop="handleDrop(event)"
+            ondragend="handleDragEnd(event)"
+        >
+            <!-- 드래그 핸들 & 제목 -->
+            <div class="flex items-start gap-2 mb-2">
+                <div class="text-gray-400 cursor-move mt-1" title="드래그하여 순서 변경">
+                    <i class="fas fa-grip-vertical"></i>
+                </div>
+                <div class="flex-1 min-w-0" onclick="selectStorybook('${book.id}')">
+                    <input 
+                        type="text" 
+                        value="${book.title}"
+                        class="w-full font-bold text-gray-800 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-purple-500 outline-none text-sm px-1 -ml-1"
+                        onclick="event.stopPropagation(); this.select();"
+                        onchange="updateBookTitleInList('${book.id}', this.value)"
+                        onblur="this.classList.remove('border-purple-500')"
+                        title="클릭하여 제목 수정"
+                    />
+                    <p class="text-xs text-gray-500 mt-1 px-1">
+                        <i class="fas fa-child mr-1"></i>${book.targetAge}세 
+                        <i class="fas fa-file-alt ml-2 mr-1"></i>${book.pages.length}p
+                        ${book.category ? `<i class="fas fa-tag ml-2 mr-1"></i>${book.category}` : ''}
+                    </p>
+                </div>
+            </div>
+            
+            <!-- 뷰어 공개 체크박스 -->
+            <div class="flex items-center gap-2 mt-2 px-1 mb-2">
+                <input 
+                    type="checkbox" 
+                    id="public-${book.id}"
+                    ${book.isPublic ? 'checked' : ''}
+                    onclick="togglePublicVisibility('${book.id}', this.checked)"
+                    class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500"
+                />
+                <label for="public-${book.id}" class="text-xs text-gray-600 cursor-pointer">
+                    <i class="fas fa-globe mr-1"></i>뷰어에 공개
+                </label>
+            </div>
+            
+            <!-- 액션 버튼 -->
+            <div class="flex gap-1">
+                <button 
+                    onclick="openReader('${book.id}')" 
+                    class="flex-1 bg-gradient-to-r from-green-500 to-teal-500 text-white text-xs py-1.5 px-2 rounded hover:from-green-600 hover:to-teal-600 transition"
+                >
+                    <i class="fas fa-book-open mr-1"></i>보기
+                </button>
+                <button 
+                    onclick="openQuiz('${book.id}')" 
+                    class="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs py-1.5 px-2 rounded hover:from-yellow-600 hover:to-orange-600 transition"
+                >
+                    <i class="fas fa-graduation-cap mr-1"></i>퀴즈
+                </button>
+                <button 
+                    onclick="selectStorybook('${book.id}')" 
+                    class="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs py-1.5 px-2 rounded hover:from-purple-600 hover:to-pink-600 transition"
+                >
+                    <i class="fas fa-edit mr-1"></i>편집
+                </button>
+                <button 
+                    onclick="duplicateStorybookById('${book.id}')" 
+                    class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs py-1.5 px-2 rounded hover:from-blue-600 hover:to-indigo-600 transition"
+                    title="복사"
+                >
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
 }
 
