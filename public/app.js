@@ -7612,7 +7612,7 @@ function applyBookFilters() {
                     type="checkbox" 
                     id="public-${book.id}"
                     ${book.isPublic ? 'checked' : ''}
-                    onclick="togglePublicVisibility('${book.id}', this.checked)"
+                    onclick="togglePublicStatus('${book.id}')"
                     class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500"
                 />
                 <label for="public-${book.id}" class="text-xs text-gray-600 cursor-pointer">
