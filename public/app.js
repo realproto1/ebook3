@@ -3493,9 +3493,6 @@ async function uploadTTSAudio() {
             
             const response = await fetch('/api/upload-tts', {
                 method: 'POST',
-                headers: {
-                    'x-api-key': API_KEY
-                },
                 body: formData
             });
             
