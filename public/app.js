@@ -3527,7 +3527,19 @@ async function uploadTTSAudio() {
         }
         
         // R2에 저장
-        await saveStorybookToR2(currentStorybook);
+        console.log(`💾 R2 저장 시작: ${currentStorybook.title}`);
+        const response = await axios.post('/api/storybooks', currentStorybook, {
+            timeout: 300000,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.data.success) {
+            throw new Error('R2 저장 실패');
+        }
+        
+        console.log(`✅ R2 저장 완료: ${currentStorybook.title}`);
         
         // UI 업데이트
         displayStorybook(currentStorybook);
