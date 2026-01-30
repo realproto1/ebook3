@@ -2010,10 +2010,23 @@ function displayStorybook(storybook) {
                                         <div class="flex gap-2 h-full">
                                             <!-- 메인 이미지 -->
                                             <div class="flex-1 relative group">
-                                                <img src="${char.referenceImage}" alt="${char.name}" class="w-full h-full object-cover rounded-lg"/>
+                                                <img 
+                                                    src="${char.referenceImage}" 
+                                                    alt="${char.name}" 
+                                                    class="w-full h-full object-cover rounded-lg cursor-pointer"
+                                                    onclick="toggleImageDeleteButton('char-${idx}')"
+                                                />
+                                                <button 
+                                                    id="char-${idx}-delete-btn"
+                                                    onclick="event.stopPropagation(); deleteCharacterImage(${idx})"
+                                                    class="hidden absolute top-2 right-2 bg-red-500 bg-opacity-90 text-white w-8 h-8 rounded-full hover:bg-opacity-100 transition shadow-lg flex items-center justify-center z-10"
+                                                    title="이미지 삭제"
+                                                >
+                                                    <i class="fas fa-times"></i>
+                                                </button>
                                                 <button 
                                                     onclick="downloadImage('${char.referenceImage}', '캐릭터_${char.name}.png')"
-                                                    class="absolute top-2 right-2 bg-white bg-opacity-90 text-purple-600 w-10 h-10 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                                                    class="absolute bottom-2 right-2 bg-white bg-opacity-90 text-purple-600 w-10 h-10 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
                                                     title="다운로드"
                                                 >
                                                     <i class="fas fa-download"></i>
@@ -2338,9 +2351,24 @@ function displayStorybook(storybook) {
                             />
                         </div>
                         
-                        <div id="keyobj-img-${idx}" class="bg-white rounded-lg mb-2 min-h-[180px] flex items-center justify-center overflow-hidden border-2 border-orange-200">
+                        <div id="keyobj-img-${idx}" class="bg-white rounded-lg mb-2 min-h-[180px] flex items-center justify-center overflow-hidden border-2 border-orange-200 relative">
                             ${objImg && objImg.imageUrl ? 
-                                `<img src="${objImg.imageUrl}" alt="${obj.name}" class="w-full h-full object-cover rounded-lg"/>` :
+                                `<div class="relative w-full h-full group">
+                                    <img 
+                                        src="${objImg.imageUrl}" 
+                                        alt="${obj.name}" 
+                                        class="w-full h-full object-cover rounded-lg cursor-pointer"
+                                        onclick="toggleImageDeleteButton('keyobj-${idx}')"
+                                    />
+                                    <button 
+                                        id="keyobj-${idx}-delete-btn"
+                                        onclick="event.stopPropagation(); deleteKeyObjectImage(${idx})"
+                                        class="hidden absolute top-2 right-2 bg-red-500 bg-opacity-90 text-white w-8 h-8 rounded-full hover:bg-opacity-100 transition shadow-lg flex items-center justify-center z-10"
+                                        title="이미지 삭제"
+                                    >
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>` :
                                 `<p class="text-gray-400 text-sm text-center p-4">
                                     <i class="fas fa-cube text-3xl mb-2"></i><br>
                                     이미지 대기중
@@ -2755,10 +2783,23 @@ function displayStorybook(storybook) {
                                                 <div class="flex gap-2 h-full">
                                                     <!-- 메인 이미지 -->
                                                     <div class="flex-1 relative group">
-                                                        <img src="${page.illustrationImage}" alt="Page ${page.pageNumber}" class="w-full h-auto"/>
+                                                        <img 
+                                                            src="${page.illustrationImage}" 
+                                                            alt="Page ${page.pageNumber}" 
+                                                            class="w-full h-auto cursor-pointer"
+                                                            onclick="toggleImageDeleteButton('page-${idx}')"
+                                                        />
+                                                        <button 
+                                                            id="page-${idx}-delete-btn"
+                                                            onclick="event.stopPropagation(); deletePageIllustration(${idx})"
+                                                            class="hidden absolute top-3 right-3 bg-red-500 bg-opacity-90 text-white w-10 h-10 rounded-full hover:bg-opacity-100 transition shadow-lg flex items-center justify-center z-10"
+                                                            title="이미지 삭제"
+                                                        >
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
                                                         <button 
                                                             onclick="downloadImage('${page.illustrationImage}', '${storybook.title}_페이지_${page.pageNumber}.png')"
-                                                            class="absolute top-3 right-3 bg-white bg-opacity-90 text-green-600 w-11 h-11 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                                                            class="absolute bottom-3 right-3 bg-white bg-opacity-90 text-green-600 w-11 h-11 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
                                                             title="다운로드"
                                                         >
                                                             <i class="fas fa-download text-base"></i>
@@ -8220,5 +8261,94 @@ function closeStatusPopup() {
     if (popup) {
         popup.remove();
     }
+}
+
+// 이미지 삭제 버튼 토글
+function toggleImageDeleteButton(imageId) {
+    // 모든 삭제 버튼 숨기기
+    document.querySelectorAll('[id$="-delete-btn"]').forEach(btn => {
+        if (!btn.id.startsWith(imageId)) {
+            btn.classList.add('hidden');
+        }
+    });
+    
+    // 클릭된 이미지의 삭제 버튼 토글
+    const deleteBtn = document.getElementById(`${imageId}-delete-btn`);
+    if (deleteBtn) {
+        deleteBtn.classList.toggle('hidden');
+    }
+}
+
+// 외부 클릭 시 모든 삭제 버튼 숨기기
+document.addEventListener('click', (e) => {
+    // 이미지나 삭제 버튼이 아닌 곳을 클릭한 경우
+    if (!e.target.closest('img') && !e.target.closest('[id$="-delete-btn"]')) {
+        document.querySelectorAll('[id$="-delete-btn"]').forEach(btn => {
+            btn.classList.add('hidden');
+        });
+    }
+});
+
+// 캐릭터 레퍼런스 이미지 삭제
+async function deleteCharacterImage(charIndex) {
+    if (!confirm('이 캐릭터의 레퍼런스 이미지를 삭제하시겠습니까?')) {
+        return;
+    }
+    
+    if (!currentStorybook.characters || !currentStorybook.characters[charIndex]) {
+        alert('캐릭터를 찾을 수 없습니다.');
+        return;
+    }
+    
+    // 이미지 삭제
+    currentStorybook.characters[charIndex].referenceImage = null;
+    
+    // 저장 및 화면 갱신
+    saveCurrentStorybook();
+    displayStorybook(currentStorybook);
+    
+    showNotification('success', '이미지 삭제 완료', '캐릭터 레퍼런스 이미지가 삭제되었습니다.');
+}
+
+// 핵심 단어 이미지 삭제
+async function deleteKeyObjectImage(objIndex) {
+    if (!confirm('이 핵심 단어의 이미지를 삭제하시겠습니까?')) {
+        return;
+    }
+    
+    if (!currentStorybook.keyObjectImages || !currentStorybook.keyObjectImages[objIndex]) {
+        alert('이미지를 찾을 수 없습니다.');
+        return;
+    }
+    
+    // 이미지 삭제
+    currentStorybook.keyObjectImages[objIndex] = null;
+    
+    // 저장 및 화면 갱신
+    saveCurrentStorybook();
+    displayStorybook(currentStorybook);
+    
+    showNotification('success', '이미지 삭제 완료', '핵심 단어 이미지가 삭제되었습니다.');
+}
+
+// 페이지 삽화 이미지 삭제
+async function deletePageIllustration(pageIndex) {
+    if (!confirm('이 페이지의 삽화를 삭제하시겠습니까?')) {
+        return;
+    }
+    
+    if (!currentStorybook.pages || !currentStorybook.pages[pageIndex]) {
+        alert('페이지를 찾을 수 없습니다.');
+        return;
+    }
+    
+    // 이미지 삭제
+    currentStorybook.pages[pageIndex].illustrationImage = null;
+    
+    // 저장 및 화면 갱신
+    saveCurrentStorybook();
+    displayStorybook(currentStorybook);
+    
+    showNotification('success', '이미지 삭제 완료', '페이지 삽화가 삭제되었습니다.');
 }
 
