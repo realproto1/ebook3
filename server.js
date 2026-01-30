@@ -3885,6 +3885,153 @@ app.get('/api/download-image', async (req, res) => {
   }
 });
 
+// ==================== 배경음악 API ====================
+
+// 배경음악 목록 조회
+app.get('/api/background-music', async (req, res) => {
+  try {
+    // R2에서 background-music.json 파일 가져오기
+    const command = new GetObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: 'background-music.json',
+    });
+    
+    try {
+      const response = await r2Client.send(command);
+      const data = await response.Body.transformToString();
+      const musicList = JSON.parse(data);
+      res.json({ success: true, music: musicList });
+    } catch (error) {
+      // 파일이 없으면 빈 배열 반환
+      if (error.name === 'NoSuchKey') {
+        res.json({ success: true, music: [] });
+      } else {
+        throw error;
+      }
+    }
+  } catch (error) {
+    console.error('❌ 배경음악 목록 조회 오류:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 배경음악 추가
+app.post('/api/background-music', audioUpload.single('audio'), async (req, res) => {
+  try {
+    const { title } = req.body;
+    
+    if (!title) {
+      return res.status(400).json({ success: false, error: '제목을 입력해주세요.' });
+    }
+    
+    let audioUrl = '';
+    
+    // 파일 업로드
+    if (req.file) {
+      const timestamp = Date.now();
+      const sanitizedTitle = title.replace(/[^a-zA-Z0-9가-힣]/g, '_');
+      const fileName = `background-music/${timestamp}-${sanitizedTitle}.${req.file.mimetype.split('/')[1]}`;
+      
+      const uploadCommand = new PutObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: fileName,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype,
+      });
+      
+      await r2Client.send(uploadCommand);
+      audioUrl = `${R2_PUBLIC_URL}/${fileName}`;
+      console.log(`✅ 배경음악 업로드 완료: ${audioUrl}`);
+    } else {
+      return res.status(400).json({ success: false, error: '오디오 파일을 선택해주세요.' });
+    }
+    
+    // 기존 배경음악 목록 가져오기
+    let musicList = [];
+    try {
+      const command = new GetObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: 'background-music.json',
+      });
+      const response = await r2Client.send(command);
+      const data = await response.Body.transformToString();
+      musicList = JSON.parse(data);
+    } catch (error) {
+      if (error.name !== 'NoSuchKey') {
+        throw error;
+      }
+    }
+    
+    // 새 배경음악 추가
+    const newMusic = {
+      id: `bgm_${Date.now()}`,
+      title,
+      url: audioUrl,
+      createdAt: new Date().toISOString(),
+    };
+    
+    musicList.push(newMusic);
+    
+    // R2에 저장
+    const uploadCommand = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: 'background-music.json',
+      Body: JSON.stringify(musicList, null, 2),
+      ContentType: 'application/json',
+    });
+    
+    await r2Client.send(uploadCommand);
+    
+    console.log(`✅ 배경음악 추가 완료: ${title}`);
+    res.json({ success: true, music: newMusic });
+  } catch (error) {
+    console.error('❌ 배경음악 추가 오류:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 배경음악 삭제
+app.delete('/api/background-music/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // 기존 배경음악 목록 가져오기
+    const command = new GetObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: 'background-music.json',
+    });
+    
+    const response = await r2Client.send(command);
+    const data = await response.Body.transformToString();
+    let musicList = JSON.parse(data);
+    
+    // 삭제할 음악 찾기
+    const musicToDelete = musicList.find(m => m.id === id);
+    if (!musicToDelete) {
+      return res.status(404).json({ success: false, error: '배경음악을 찾을 수 없습니다.' });
+    }
+    
+    // 목록에서 제거
+    musicList = musicList.filter(m => m.id !== id);
+    
+    // R2에 저장
+    const uploadCommand = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: 'background-music.json',
+      Body: JSON.stringify(musicList, null, 2),
+      ContentType: 'application/json',
+    });
+    
+    await r2Client.send(uploadCommand);
+    
+    console.log(`✅ 배경음악 삭제 완료: ${musicToDelete.title}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('❌ 배경음악 삭제 오류:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // 메인 페이지 라우팅
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'home.html'));

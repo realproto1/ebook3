@@ -2,6 +2,7 @@
 let storybooks = [];
 let currentStorybook = null;
 let currentLanguage = 'ko'; // 현재 표시 중인 언어 (기본: 한국어)
+let backgroundMusicList = []; // 배경음악 목록
 let imageSettings = {
     aspectRatio: '16:9',
     enforceNoText: true,
@@ -3212,6 +3213,22 @@ function displayStorybook(storybook) {
     const pageTTSModelSelect = document.getElementById('page-tts-model-select');
     if (pageTTSModelSelect) {
         pageTTSModelSelect.value = imageSettings.ttsModel || 'Aoede';
+    }
+    
+    // 배경음악 select 업데이트
+    updateBackgroundMusicSelect();
+    const bgmSelectEl = document.getElementById('backgroundMusicSelect');
+    if (bgmSelectEl && storybook.backgroundMusicId) {
+        bgmSelectEl.value = storybook.backgroundMusicId;
+        
+        // 선택된 배경음악 정보 표시
+        const music = backgroundMusicList.find(m => m.id === storybook.backgroundMusicId);
+        if (music) {
+            document.getElementById('selectedBackgroundMusic').innerHTML = `
+                <i class="fas fa-check-circle text-green-600 mr-1"></i>
+                선택됨: <strong>${music.title}</strong>
+            `;
+        }
     }
 }
 
@@ -8964,4 +8981,192 @@ async function deletePageIllustration(pageIndex) {
     
     showNotification('success', '이미지 삭제 완료', '페이지 삽화가 삭제되었습니다.');
 }
+
+// ==================== 배경음악 관리 ====================
+
+// 배경음악 모달 열기
+async function openBackgroundMusicModal() {
+    document.getElementById('backgroundMusicModal').classList.remove('hidden');
+    document.getElementById('backgroundMusicModal').classList.add('flex');
+    
+    // 배경음악 목록 로드
+    await loadBackgroundMusicList();
+}
+
+// 배경음악 모달 닫기
+function closeBackgroundMusicModal() {
+    document.getElementById('backgroundMusicModal').classList.add('hidden');
+    document.getElementById('backgroundMusicModal').classList.remove('flex');
+    
+    // 입력 필드 초기화
+    document.getElementById('bgmTitle').value = '';
+    document.getElementById('bgmFile').value = '';
+}
+
+// 배경음악 목록 로드
+async function loadBackgroundMusicList() {
+    try {
+        const response = await axios.get('/api/background-music');
+        
+        if (response.data.success) {
+            backgroundMusicList = response.data.music;
+            renderBackgroundMusicList();
+            updateBackgroundMusicSelect();
+        }
+    } catch (error) {
+        console.error('❌ 배경음악 목록 로드 오류:', error);
+    }
+}
+
+// 배경음악 목록 렌더링
+function renderBackgroundMusicList() {
+    const listEl = document.getElementById('backgroundMusicList');
+    
+    if (backgroundMusicList.length === 0) {
+        listEl.innerHTML = `
+            <div class="text-center py-8 text-gray-400">
+                <i class="fas fa-music text-4xl mb-2"></i>
+                <p>등록된 배경음악이 없습니다.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    listEl.innerHTML = backgroundMusicList.map(music => `
+        <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:border-purple-300 transition">
+            <div class="flex items-center gap-3 flex-1">
+                <i class="fas fa-music text-purple-500"></i>
+                <div class="flex-1">
+                    <p class="font-semibold text-gray-800">${music.title}</p>
+                    <audio controls class="w-full mt-1" style="height: 30px;">
+                        <source src="${music.url}" type="audio/mpeg">
+                    </audio>
+                </div>
+            </div>
+            <button 
+                onclick="deleteBackgroundMusic('${music.id}')"
+                class="ml-3 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm"
+                title="삭제"
+            >
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `).join('');
+}
+
+// 배경음악 선택 드롭다운 업데이트
+function updateBackgroundMusicSelect() {
+    const selectEl = document.getElementById('backgroundMusicSelect');
+    
+    selectEl.innerHTML = '<option value="">배경음악 없음</option>' + 
+        backgroundMusicList.map(music => `
+            <option value="${music.id}">${music.title}</option>
+        `).join('');
+    
+    // 현재 동화책에 선택된 배경음악이 있으면 선택
+    if (currentStorybook && currentStorybook.backgroundMusicId) {
+        selectEl.value = currentStorybook.backgroundMusicId;
+    }
+}
+
+// 배경음악 업로드
+async function uploadBackgroundMusic() {
+    const title = document.getElementById('bgmTitle').value.trim();
+    const fileInput = document.getElementById('bgmFile');
+    const file = fileInput.files[0];
+    
+    if (!title) {
+        alert('제목을 입력해주세요.');
+        return;
+    }
+    
+    if (!file) {
+        alert('오디오 파일을 선택해주세요.');
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('audio', file);
+        
+        const response = await axios.post('/api/background-music', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        
+        if (response.data.success) {
+            alert('✅ 배경음악이 추가되었습니다!');
+            
+            // 입력 필드 초기화
+            document.getElementById('bgmTitle').value = '';
+            document.getElementById('bgmFile').value = '';
+            
+            // 목록 새로고침
+            await loadBackgroundMusicList();
+        } else {
+            alert('❌ 업로드 실패: ' + response.data.error);
+        }
+    } catch (error) {
+        console.error('❌ 배경음악 업로드 오류:', error);
+        alert('❌ 업로드 실패: ' + error.message);
+    }
+}
+
+// 배경음악 삭제
+async function deleteBackgroundMusic(id) {
+    if (!confirm('이 배경음악을 삭제하시겠습니까?')) {
+        return;
+    }
+    
+    try {
+        const response = await axios.delete(`/api/background-music/${id}`);
+        
+        if (response.data.success) {
+            alert('✅ 배경음악이 삭제되었습니다.');
+            await loadBackgroundMusicList();
+        } else {
+            alert('❌ 삭제 실패: ' + response.data.error);
+        }
+    } catch (error) {
+        console.error('❌ 배경음악 삭제 오류:', error);
+        alert('❌ 삭제 실패: ' + error.message);
+    }
+}
+
+// 배경음악 선택
+function selectBackgroundMusic(musicId) {
+    if (!currentStorybook) {
+        alert('동화책이 선택되지 않았습니다.');
+        return;
+    }
+    
+    currentStorybook.backgroundMusicId = musicId || null;
+    
+    // 선택된 배경음악 정보 표시
+    const selectedEl = document.getElementById('selectedBackgroundMusic');
+    if (musicId) {
+        const music = backgroundMusicList.find(m => m.id === musicId);
+        if (music) {
+            selectedEl.innerHTML = `
+                <i class="fas fa-check-circle text-green-600 mr-1"></i>
+                선택됨: <strong>${music.title}</strong>
+            `;
+        }
+    } else {
+        selectedEl.innerHTML = `
+            <i class="fas fa-info-circle mr-1"></i>
+            배경음악 없음
+        `;
+    }
+    
+    // 저장
+    saveCurrentStorybook();
+}
+
+// 페이지 로드 시 배경음악 목록 로드
+document.addEventListener('DOMContentLoaded', () => {
+    loadBackgroundMusicList();
+});
 

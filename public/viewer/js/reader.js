@@ -7,6 +7,8 @@ let autoPlayInterval = null;
 let currentAudio = null;
 let isHeaderVisible = false; // 헤더 초기 상태: 숨김
 let hasCoverPage = false; // 표지 페이지 존재 여부
+let backgroundMusic = null; // 배경음악 Audio 객체
+let backgroundMusicList = []; // 배경음악 목록
 
 // 모바일 주소창/네비게이션 숨기기
 function hideAddressBar() {
@@ -169,6 +171,12 @@ async function loadBook() {
             setTimeout(() => {
                 hideHeader();
             }, 3000);
+            
+            // 배경음악 목록 로드 및 재생
+            await loadBackgroundMusicList();
+            if (currentBook.backgroundMusicId) {
+                playBackgroundMusic(currentBook.backgroundMusicId);
+            }
             
             // 이미지 클릭 시 헤더 토글 이벤트 설정 (한 번만)
             const imageContainer = document.getElementById('page-image-container');
@@ -1453,6 +1461,66 @@ function copyToClipboard(text) {
     textarea.select();
     document.execCommand('copy');
     document.body.removeChild(textarea);
+}
+
+// ==================== 배경음악 ====================
+
+// 배경음악 목록 로드
+async function loadBackgroundMusicList() {
+    try {
+        const response = await fetch('/api/background-music');
+        const data = await response.json();
+        
+        if (data.success) {
+            backgroundMusicList = data.music;
+            console.log('✅ 배경음악 목록 로드:', backgroundMusicList.length + '개');
+        }
+    } catch (error) {
+        console.error('❌ 배경음악 목록 로드 오류:', error);
+    }
+}
+
+// 배경음악 재생
+function playBackgroundMusic(musicId) {
+    if (!musicId) {
+        console.log('🎵 배경음악 ID 없음');
+        return;
+    }
+    
+    const music = backgroundMusicList.find(m => m.id === musicId);
+    if (!music) {
+        console.log('🎵 배경음악을 찾을 수 없음:', musicId);
+        return;
+    }
+    
+    // 기존 배경음악 중지
+    stopBackgroundMusic();
+    
+    try {
+        backgroundMusic = new Audio(music.url);
+        backgroundMusic.loop = true; // 반복 재생
+        backgroundMusic.volume = 0.3; // 볼륨 30%
+        
+        backgroundMusic.play()
+            .then(() => {
+                console.log('🎵 배경음악 재생 시작:', music.title);
+            })
+            .catch(error => {
+                console.error('❌ 배경음악 재생 오류:', error);
+            });
+    } catch (error) {
+        console.error('❌ 배경음악 생성 오류:', error);
+    }
+}
+
+// 배경음악 중지
+function stopBackgroundMusic() {
+    if (backgroundMusic) {
+        backgroundMusic.pause();
+        backgroundMusic.currentTime = 0;
+        backgroundMusic = null;
+        console.log('🔇 배경음악 중지됨');
+    }
 }
 
 // 전역으로 노출
