@@ -7894,7 +7894,8 @@ function checkStorybookStatus(bookId) {
                     hasText = page.text && page.text.trim();
                 } else {
                     // 번역 언어
-                    hasText = book.translations?.[lang]?.[idx] && book.translations[lang][idx].trim();
+                    const translatedText = book.translations?.[lang]?.[idx];
+                    hasText = translatedText && typeof translatedText === 'string' && translatedText.trim();
                 }
                 
                 if (hasText) {
