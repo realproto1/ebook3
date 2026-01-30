@@ -6021,9 +6021,8 @@ function buildIllustrationPrompt(page, artStyle, characterReferences, settings, 
     // 이 페이지에 등장하는 캐릭터만 필터링
     const relevantCharacters = characterReferences.filter(char => {
         const charName = char.name.toLowerCase();
-        // 캐릭터 이름이나 설명이 텍스트에 포함되어 있는지 확인
         return allText.includes(charName) || 
-               allText.includes(char.description.toLowerCase().split(' ')[0]); // 설명의 첫 단어
+               allText.includes(char.description.toLowerCase().split(' ')[0]);
     });
     
     // 등장하지 않으면 모든 캐릭터 포함 (안전장치)
@@ -6034,162 +6033,98 @@ function buildIllustrationPrompt(page, artStyle, characterReferences, settings, 
         console.log(`   등장 캐릭터: ${filteredCharacters.map(c => c.name).join(', ')}`);
     }
     
-    // 전체 스토리 맥락 구성 (재생성 시 제한)
-    let storyContext = '';
-    let previousPageNote = '';
-    
-    // 재생성 + editNote가 있으면 스토리 컨텍스트 생략 (타임아웃 방지)
-    if (!isRegeneration || !hasEditNote) {
-        if (currentStorybook && currentStorybook.pages) {
-            const previousPages = currentStorybook.pages
-                .filter(p => p.pageNumber < page.pageNumber)
-                .sort((a, b) => a.pageNumber - b.pageNumber);
-            
-            if (previousPages.length > 0) {
-                // 최근 3페이지만 포함 (타임아웃 방지)
-                const recentPages = previousPages.slice(-3);
-                console.log(`📖 Including story context from ${recentPages.length} recent pages (limited for performance)`);
-                const previousTexts = recentPages
-                    .map(p => `Page ${p.pageNumber}: ${p.text}`)
-                    .join('\n');
-                
-                // 바로 전 페이지 강조
-                const immediatelyPreviousPage = previousPages[previousPages.length - 1];
-                if (immediatelyPreviousPage && immediatelyPreviousPage.illustrationImage) {
-                    previousPageNote = `\n\n**🎨 PREVIOUS PAGE REFERENCE (Page ${immediatelyPreviousPage.pageNumber}):**
-I have provided the illustration from the immediately previous page as a reference image. Use it to maintain visual continuity and art style.`;
+    // 🔄 재생성 모드: 이전 페이지 참조 제거, 현재 이미지 + editNote만 사용
+    if (isRegeneration && hasEditNote) {
+        console.log('🔄 재생성 모드: 이전 페이지 참조 제거, editNote 사용');
+        
+        // 캐릭터 정보
+        let characterInfo = '';
+        if (filteredCharacters.length > 0 && settings.enforceCharacterConsistency) {
+            characterInfo = '\n\n**Character Consistency:**\nMatch character appearance from reference images (faces, clothing, proportions, colors).\n\n';
+            filteredCharacters.forEach((char, index) => {
+                if (char.referenceImage) {
+                    characterInfo += `${index + 1}. ${char.name}: ${char.description}\n`;
                 }
-                
-                storyContext = `\n\n**RECENT STORY CONTEXT:**
-${previousTexts}
-
-**CURRENT PAGE ${page.pageNumber}:** ${page.text}
-${previousPageNote}`;
-            }
+            });
         }
-    } else {
-        console.log('📖 Skipping story context (regeneration with editNote - timeout prevention)');
+        
+        const prompt = `Create a children's storybook illustration.
+
+**🔄 REGENERATION with Modification:**
+"${editNote}"
+
+Use the current image reference to maintain visual style.
+${characterInfo}
+**Art Style:** ${artStyle}
+**Aspect Ratio:** ${settings.aspectRatio}
+**Target:** Children ages 4-8
+${settings.additionalPrompt ? `\n**Additional:** ${settings.additionalPrompt}` : ''}
+
+**NO TEXT:** Do not include any text or words in the image.`;
+
+        return prompt;
     }
     
-    let characterInfo = '';
+    // 장면 구조 정보 (강화)
+    let sceneDetails = '';
+    if (page.scene_structure) {
+        const timeOfDay = page.scene_structure.time_of_day || '';
+        const spatialLayout = page.scene_structure.spatial_layout || '';
+        const background = page.scene_structure.background || '';
+        const atmosphere = page.scene_structure.atmosphere || '';
+        const characters = page.scene_structure.characters || '';
+        
+        sceneDetails = `\n\n**Scene Structure:**
+- **Time:** ${timeOfDay}
+- **Characters & Actions:** ${characters}
+- **Spatial Layout:** ${spatialLayout}
+- **Background:** ${background}
+- **Atmosphere:** ${atmosphere}`;
+    }
     
-    // 캐릭터 레퍼런스 정보 추가 (필터링된 캐릭터만)
+    // 캐릭터 레퍼런스 정보 (단순화)
+    let characterInfo = '';
     if (filteredCharacters.length > 0 && settings.enforceCharacterConsistency) {
-        characterInfo = '\n\n**Character References (MUST FOLLOW EXACTLY):**\n';
-        characterInfo += 'You have been provided with character reference images. ';
-        
-        if (settings.enforceCharacterConsistency) {
-            characterInfo += '**ABSOLUTE REQUIREMENT:** Recreate each character PIXEL-FOR-PIXEL from the reference images. ';
-            characterInfo += 'Match EXACTLY: facial features, body proportions, clothing, colors, hairstyle, and all visual details. ';
-            characterInfo += 'The characters in this illustration MUST be visually identical to the reference images.\n\n';
-        }
-        
+        characterInfo = '\n\n**Character Consistency:**\nMatch character appearance from reference images (faces, clothing, proportions, colors).\n\n';
         filteredCharacters.forEach((char, index) => {
             if (char.referenceImage) {
-                characterInfo += `${index + 1}. **${char.name}:** ${char.description}\n`;
-                if (settings.enforceCharacterConsistency) {
-                    characterInfo += `   - **CRITICAL:** Use reference image to ensure ABSOLUTE PIXEL-PERFECT consistency.\n`;
-                    characterInfo += `   - Match ALL visual details from the reference image exactly.\n`;
-                }
+                characterInfo += `${index + 1}. ${char.name}: ${char.description}\n`;
             }
         });
     }
     
-    // 장면 구조 정보 추가
-    let sceneDetails = '';
-    if (page.scene_structure) {
-        sceneDetails = `\n\n**Scene Structure:**
-- **Characters & Actions:** ${page.scene_structure.characters}
-- **Background Setting:** ${page.scene_structure.background}
-- **Mood & Atmosphere:** ${page.scene_structure.atmosphere}`;
-    }
+    // NO TEXT 프롬프트 (단순화)
+    const noTextPrompt = '\n\n**NO TEXT:** Do not include any text, labels, or words in the image.';
     
-    const noTextPrompt = settings.enforceNoText ? 
-        '\n\n**CRITICAL - NO TEXT:** Do NOT include ANY text, labels, words, letters, captions, titles, speech bubbles, or text overlays in the image. Absolutely NO TEXT of any kind. Pure illustration only.' : 
-        '\n\n**IMPORTANT:** Do NOT include any text, labels, words, letters, or captions in the image. No speech bubbles, no titles, no text overlays. Pure illustration only.';
-    
-    // 재생성 안내 (기존 이미지가 있는 경우) - isRegeneration은 이미 위에서 선언됨
-    const regenerationNote = isRegeneration ? 
-        '\n\n**🔄 REGENERATION MODE - CRITICAL INSTRUCTIONS:**\n' +
-        '**YOU ARE REGENERATING AN EXISTING ILLUSTRATION WITH USER\'S SPECIFIC MODIFICATIONS.**\n\n' +
-        '**STEP 1 - ANALYZE REFERENCE IMAGES:**\n' +
-        '1. CAREFULLY study the provided reference images:\n' +
-        '   - Current illustration (what it looks like now)\n' +
-        '   - Character reference sheets (how characters should look)\n' +
-        '   - Selected reference pages (additional context)\n' +
-        '   - Overall composition, color palette, and art style\n\n' +
-        '**STEP 2 - READ MODIFICATION REQUEST:**\n' +
-        (editNote ? 
-        '2. User\'s modification request:\n' +
-        `   "${editNote}"\n\n` +
-        '   **YOUR TASK:**\n' +
-        '   - CREATE the scene based on this modification request\n' +
-        '   - USE the reference images to maintain:\n' +
-        '     • Character visual consistency (faces, clothing, proportions)\n' +
-        '     • Art style and color palette\n' +
-        '     • Overall composition quality\n' +
-        '   - IGNORE the original scene description below\n' +
-        '   - FOCUS on what the user wants to see\n\n' : 
-        '2. No specific modification request provided.\n' +
-        '   - Create a slightly varied version\n' +
-        '   - Keep characters and composition similar\n' +
-        '   - Maintain art style consistency\n\n') +
-        '**⚠️ CRITICAL REQUIREMENTS:**\n' +
-        '• Characters MUST be visually IDENTICAL to reference sheets\n' +
-        '• Follow the modification request (not the original scene description)\n' +
-        '• Reference images are for VISUAL STYLE only, not for scene content\n' +
-        '• Create what the user wants to see now\n\n' +
-        '**Priority Order for REGENERATION:**\n' +
-        '1st: User\'s Modification Request (what to create)\n' +
-        '2nd: Character Reference Sheets (how characters look)\n' +
-        '3rd: Reference Images (visual style guide)\n' +
-        '4th: Art Style (maintain consistency)\n\n' +
-        '**IGNORE these during regeneration:**\n' +
-        '❌ Original scene description (shown below for reference only)\n' +
-        '❌ Original scene structure (outdated)\n' : 
-        '';
-    
-    const prompt = `Create a beautiful, professional illustration for a children's storybook page.
-${storyContext}
+    // 재생성 (editNote 없음)
+    if (isRegeneration && !hasEditNote) {
+        const prompt = `Create a children's storybook illustration.
 
-${isRegeneration && editNote ? 
-`**🎯 YOUR TASK (Regeneration with Modification):**
-${editNote}
-
-**Reference Information (for visual style only):**
-- Original scene description: ${page.scene_description}
-${sceneDetails ? `${sceneDetails}` : ''}
-
-**IMPORTANT:** Create the scene based on the modification request above, NOT the original scene description. Use the original description only to understand context.` 
-: 
-isRegeneration ? 
-`**🎯 YOUR TASK (Regeneration - Variation):**
-Create a slight variation of the current illustration while maintaining the same scene.
+**🔄 REGENERATION (Variation):**
+Create a slight variation while maintaining the same scene.
 
 **Scene Description:** ${page.scene_description}
-${sceneDetails}` 
-: 
-`**Main Scene Description:** ${page.scene_description}
-${sceneDetails}`}
+${sceneDetails}
 ${characterInfo}
-${regenerationNote}
+**Art Style:** ${artStyle}
+**Aspect Ratio:** ${settings.aspectRatio}
+**Target:** Children ages 4-8
+${settings.additionalPrompt ? `\n**Additional:** ${settings.additionalPrompt}` : ''}
+${noTextPrompt}`;
 
-**Art Style:** ${artStyle} style for children's book illustration.
+        return prompt;
+    }
+    
+    // 신규 생성 (단순화)
+    const prompt = `Create a children's storybook illustration.
 
-**Image Aspect Ratio:** ${settings.aspectRatio}
-${isRegeneration ? '\n**⚠️ CRITICAL: MAINTAIN EXACT ASPECT RATIO** - The image MUST be exactly ' + settings.aspectRatio + '. Do NOT change the aspect ratio from the original image.' : ''}
-
-**Composition:** Create a warm, inviting scene that captures the emotion and action of the story moment. Use a horizontal composition suitable for a storybook spread.
-${currentStorybook && currentStorybook.pages && page.pageNumber > 1 ? '\n**🎯 DIRECTIONAL CONSISTENCY:** Analyze the previous page\'s character positions and maintain consistent left-right orientation throughout the story. If a character was facing right in the previous scene, keep them facing right unless the story requires a directional change.' : ''}
-
-**Lighting & Atmosphere:** Soft, warm lighting with gentle shadows. The scene should feel magical yet safe and welcoming for young children.
-
-**Color Palette:** Vibrant, cheerful colors appropriate for children ages 4-8. Use color psychology to enhance the emotional impact of the scene.
-
-**Art Quality:** High-detail, professional children's book illustration quality with painterly texture and depth.
-
-**Target Audience:** Children ages 4-8. The illustration should be engaging, age-appropriate, and emotionally resonant.
-${settings.additionalPrompt ? `\n\n**Additional Instructions:** ${settings.additionalPrompt}` : ''}
+**Scene Description:** ${page.scene_description}
+${sceneDetails}
+${characterInfo}
+**Art Style:** ${artStyle}
+**Aspect Ratio:** ${settings.aspectRatio}
+**Target:** Children ages 4-8
+${settings.additionalPrompt ? `\n**Additional:** ${settings.additionalPrompt}` : ''}
 ${noTextPrompt}`;
 
     return prompt;

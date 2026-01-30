@@ -359,9 +359,11 @@
       "text": "페이지 텍스트 (연령대에 맞는 표현)",
       "scene_description": "장면 설명 (이미지 생성용)",
       "scene_structure": {
-        "characters": ["캐릭터1", "캐릭터2"],
-        "background": "배경 설명",
-        "atmosphere": "분위기 설명"
+        "characters": "캐릭터와 행동 설명 (누가 무엇을 하는지)",
+        "background": "배경 설명 (낮/밤 명시 필수)",
+        "atmosphere": "분위기 설명 (밝음/어두움, 색조)",
+        "spatial_layout": "공간 구도 (왼쪽에 누가 있고, 오른쪽에 누가 있는지. 예: '왼쪽에 백설공주, 오른쪽에 난쟁이들')",
+        "time_of_day": "시간대 (낮/아침/저녁/밤 중 하나 필수)"
       }
     }
   ],
