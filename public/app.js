@@ -2619,6 +2619,14 @@ function displayStorybook(storybook) {
                     </button>
                     
                     <button 
+                        onclick="openBatchTTSUploadModal()"
+                        class="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white px-4 py-3.5 rounded-lg hover:from-teal-600 hover:to-teal-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
+                    >
+                        <i class="fas fa-upload text-xl"></i>
+                        <span>전체 TTS 업로드</span>
+                    </button>
+                    
+                    <button 
                         onclick="downloadAllIllustrationTexts()"
                         class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-3.5 rounded-lg hover:from-purple-600 hover:to-purple-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
                     >
@@ -3774,6 +3782,119 @@ async function downloadAllAudio() {
     }
     
     showNotification('success', '일괄 다운로드 완료', `${langName} ${downloadCount}개의 오디오 파일이 다운로드되었습니다.`);
+}
+
+// 전체 TTS 일괄 업로드
+async function openBatchTTSUploadModal() {
+    if (!currentStorybook || !currentStorybook.pages || currentStorybook.pages.length === 0) {
+        alert('동화책 페이지가 없습니다.');
+        return;
+    }
+    
+    // 파일 입력 요소 생성
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'audio/*';
+    input.multiple = true;
+    
+    input.onchange = async (e) => {
+        const files = Array.from(e.target.files);
+        
+        if (files.length === 0) {
+            return;
+        }
+        
+        // 페이지를 페이지 번호순으로 정렬 (이미 정렬되어 있지만 확인)
+        const sortedPages = [...currentStorybook.pages].sort((a, b) => a.pageNumber - b.pageNumber);
+        
+        // 파일을 이름순으로 정렬 (가나다순)
+        files.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+        
+        // 개수 확인
+        if (files.length !== sortedPages.length) {
+            const proceed = confirm(
+                `⚠️ 파일 개수(${files.length}개)와 페이지 개수(${sortedPages.length}개)가 일치하지 않습니다.\n\n` +
+                `순서대로 매칭:\n` +
+                sortedPages.slice(0, Math.min(files.length, 5)).map((page, i) => 
+                    `${i + 1}. ${files[i]?.name || '없음'} → 페이지 ${page.pageNumber}`
+                ).join('\n') +
+                (sortedPages.length > 5 ? `\n...\n` : '') +
+                `\n계속하시겠습니까?`
+            );
+            
+            if (!proceed) {
+                return;
+            }
+        }
+        
+        await batchUploadTTSFiles(files, sortedPages);
+    };
+    
+    input.click();
+}
+
+// TTS 파일 일괄 업로드 실행
+async function batchUploadTTSFiles(files, sortedPages) {
+    console.log(`📤 TTS 일괄 업로드 시작: ${files.length}개 파일`);
+    
+    let successCount = 0;
+    let failCount = 0;
+    
+    // 진행 상황 표시
+    showNotification('info', '업로드 중', `TTS 파일을 업로드하는 중입니다... (0/${files.length})`);
+    
+    for (let i = 0; i < Math.min(files.length, sortedPages.length); i++) {
+        const file = files[i];
+        const page = sortedPages[i];
+        
+        try {
+            console.log(`📤 업로드 중 (${i + 1}/${files.length}): ${file.name} → 페이지 ${page.pageNumber}`);
+            
+            // 파일을 Base64로 변환
+            const base64Audio = await fileToBase64(file);
+            
+            // 서버에 업로드
+            const response = await axios.post('/api/upload-audio', {
+                audioData: base64Audio,
+                filename: `${currentStorybook.id}_page_${page.pageNumber}.wav`,
+                storybookId: currentStorybook.id,
+                storybookTitle: currentStorybook.title
+            });
+            
+            if (response.data.success && response.data.audioUrl) {
+                // 해당 페이지의 audioUrl 업데이트
+                const pageIndex = currentStorybook.pages.findIndex(p => p.pageNumber === page.pageNumber);
+                if (pageIndex !== -1) {
+                    currentStorybook.pages[pageIndex].audioUrl = response.data.audioUrl;
+                }
+                
+                successCount++;
+                console.log(`✅ 페이지 ${page.pageNumber} 업로드 성공`);
+            } else {
+                throw new Error(response.data.error || '업로드 실패');
+            }
+            
+            // 진행 상황 업데이트
+            showNotification('info', '업로드 중', `TTS 파일을 업로드하는 중입니다... (${i + 1}/${files.length})`);
+            
+        } catch (error) {
+            console.error(`❌ 페이지 ${page.pageNumber} 업로드 실패:`, error);
+            failCount++;
+        }
+    }
+    
+    // 저장 및 UI 업데이트
+    saveCurrentStorybook();
+    displayStorybook(currentStorybook);
+    
+    // 결과 알림
+    if (failCount === 0) {
+        showNotification('success', '업로드 완료!', `${successCount}개의 TTS 파일이 성공적으로 업로드되었습니다.`);
+    } else {
+        showNotification('warning', '업로드 완료', `성공: ${successCount}개, 실패: ${failCount}개`);
+    }
+    
+    console.log(`✅ TTS 일괄 업로드 완료 - 성공: ${successCount}, 실패: ${failCount}`);
 }
 
 // 전체 삽화 텍스트 다운로드
