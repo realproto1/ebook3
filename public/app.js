@@ -7665,6 +7665,7 @@ function updateStorybookCategory(category) {
 let currentCategoryFilter = '';  // 현재 선택된 카테고리
 let currentSearchText = '';      // 현재 검색어
 let currentSortOption = 'title'; // 현재 정렬 옵션 (title|completion|latest)
+let sortAscending = true;        // 정렬 순서 (true: 오름차순, false: 내림차순)
 
 // 카테고리별 필터링
 function filterByCategory(category) {
@@ -7703,6 +7704,24 @@ function applySortOption(sortOption) {
     applyBookFilters();
 }
 
+// 정렬 순서 토글
+function toggleSortOrder() {
+    sortAscending = !sortAscending;
+    
+    // 아이콘 변경
+    const icon = document.getElementById('sortOrderIcon');
+    if (icon) {
+        if (sortAscending) {
+            icon.className = 'fas fa-sort-amount-down text-gray-600';
+        } else {
+            icon.className = 'fas fa-sort-amount-up text-gray-600';
+        }
+    }
+    
+    console.log(`🔄 정렬 순서: ${sortAscending ? '오름차순' : '내림차순'}`);
+    applyBookFilters();
+}
+
 // 통합 필터 적용
 function applyBookFilters() {
     const listDiv = document.getElementById('bookList');
@@ -7738,25 +7757,28 @@ function applyBookFilters() {
         filteredBooks.sort((a, b) => {
             const titleA = (a.title || '').toLowerCase();
             const titleB = (b.title || '').toLowerCase();
-            return titleA.localeCompare(titleB, 'ko');
+            const result = titleA.localeCompare(titleB, 'ko');
+            return sortAscending ? result : -result;
         });
     } else if (currentSortOption === 'completion') {
-        // 완성도순 (높은순)
+        // 완성도순
         filteredBooks.sort((a, b) => {
             const rateA = calculateCompletionRate(a);
             const rateB = calculateCompletionRate(b);
-            return rateB - rateA; // 높은 순
+            const result = rateB - rateA; // 기본: 높은 순
+            return sortAscending ? result : -result;
         });
     } else if (currentSortOption === 'latest') {
         // 최신순 (생성일)
         filteredBooks.sort((a, b) => {
             const timeA = a.id ? parseInt(a.id) : 0;
             const timeB = b.id ? parseInt(b.id) : 0;
-            return timeB - timeA; // 최신 순
+            const result = timeB - timeA; // 기본: 최신 순
+            return sortAscending ? result : -result;
         });
     }
     
-    console.log(`📊 정렬 적용: ${currentSortOption} (${filteredBooks.length}개)`);
+    console.log(`📊 정렬 적용: ${currentSortOption} (${sortAscending ? '오름차순' : '내림차순'}, ${filteredBooks.length}개)`);
     
     // 빈 결과 처리
     if (filteredBooks.length === 0) {
