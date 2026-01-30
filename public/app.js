@@ -7865,11 +7865,11 @@ function applyBookFilters() {
         // 공개 여부 매칭
         let visibilityMatch = true;
         if (currentVisibilityFilter === 'visible') {
-            // isVisible이 true인 것만
-            visibilityMatch = book.isVisible === true;
+            // isPublic이 true인 것만
+            visibilityMatch = book.isPublic === true;
         } else if (currentVisibilityFilter === 'hidden') {
-            // isVisible이 false이거나 undefined인 것
-            visibilityMatch = book.isVisible !== true;
+            // isPublic이 false이거나 undefined인 것
+            visibilityMatch = book.isPublic !== true;
         }
         // 'all'인 경우 visibilityMatch는 true 유지
         
