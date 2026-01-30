@@ -203,6 +203,22 @@ const upload = multer({
   }
 });
 
+// 오디오 업로드용 multer 설정
+const audioUpload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB 제한 (오디오는 더 큼)
+  },
+  fileFilter: (req, file, cb) => {
+    // 오디오 파일만 허용
+    if (file.mimetype.startsWith('audio/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('오디오 파일만 업로드 가능합니다.'));
+    }
+  }
+});
+
 /**
  * Buffer를 Cloudflare R2에 업로드
  * @param {Buffer} buffer - 이미지 버퍼
@@ -644,7 +660,7 @@ app.post('/api/upload-audio', async (req, res) => {
 });
 
 // TTS 파일 업로드 API
-app.post('/api/upload-tts', upload.single('audio'), async (req, res) => {
+app.post('/api/upload-tts', audioUpload.single('audio'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, error: '오디오 파일이 없습니다.' });
