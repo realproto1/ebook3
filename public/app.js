@@ -7767,7 +7767,7 @@ let currentSortOption = 'title'; // 현재 정렬 옵션 (title|completion|lates
 let sortAscending = true;        // 정렬 순서 (true: 오름차순, false: 내림차순)
 
 // 카테고리별 필터링
-function filterByCategory(category) {
+function filterByCategory(category, event) {
     console.log(`📂 카테고리 필터: ${category || '전체'}`);
     
     currentCategoryFilter = category;
@@ -7779,14 +7779,16 @@ function filterByCategory(category) {
     });
     
     // 클릭된 버튼 활성화
-    event.target.classList.add('active');
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
     
     // 필터 적용
     applyBookFilters();
 }
 
 // 공개 여부 필터링
-function filterByVisibility(visibility) {
+function filterByVisibility(visibility, event) {
     console.log(`👁️ 공개 여부 필터: ${visibility === 'all' ? '전체' : visibility === 'visible' ? '보기 체크' : '보기 미체크'}`);
     
     currentVisibilityFilter = visibility;
@@ -7798,7 +7800,9 @@ function filterByVisibility(visibility) {
     });
     
     // 클릭된 버튼 활성화
-    event.target.classList.add('active');
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
     
     // 필터 적용
     applyBookFilters();

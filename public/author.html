@@ -163,19 +163,19 @@
                         <i class="fas fa-filter mr-1"></i>카테고리
                     </label>
                     <div class="flex flex-wrap gap-1">
-                        <button onclick="filterByCategory('')" class="category-filter-btn active px-3 py-1 rounded-full text-xs font-medium transition border">
+                        <button onclick="filterByCategory('', event)" class="category-filter-btn active px-3 py-1 rounded-full text-xs font-medium transition border">
                             전체
                         </button>
-                        <button onclick="filterByCategory('세계 명작')" class="category-filter-btn px-3 py-1 rounded-full text-xs font-medium transition border">
+                        <button onclick="filterByCategory('세계 명작', event)" class="category-filter-btn px-3 py-1 rounded-full text-xs font-medium transition border">
                             📚 세계 명작
                         </button>
-                        <button onclick="filterByCategory('전래 동화')" class="category-filter-btn px-3 py-1 rounded-full text-xs font-medium transition border">
+                        <button onclick="filterByCategory('전래 동화', event)" class="category-filter-btn px-3 py-1 rounded-full text-xs font-medium transition border">
                             🏮 전래 동화
                         </button>
-                        <button onclick="filterByCategory('자연 관찰')" class="category-filter-btn px-3 py-1 rounded-full text-xs font-medium transition border">
+                        <button onclick="filterByCategory('자연 관찰', event)" class="category-filter-btn px-3 py-1 rounded-full text-xs font-medium transition border">
                             🌿 자연 관찰
                         </button>
-                        <button onclick="filterByCategory('기타')" class="category-filter-btn px-3 py-1 rounded-full text-xs font-medium transition border">
+                        <button onclick="filterByCategory('기타', event)" class="category-filter-btn px-3 py-1 rounded-full text-xs font-medium transition border">
                             📖 기타
                         </button>
                     </div>
@@ -187,13 +187,13 @@
                         <i class="fas fa-eye mr-1"></i>공개 여부
                     </label>
                     <div class="flex flex-wrap gap-1">
-                        <button onclick="filterByVisibility('all')" class="visibility-filter-btn active px-3 py-1 rounded-full text-xs font-medium transition border">
+                        <button onclick="filterByVisibility('all', event)" class="visibility-filter-btn active px-3 py-1 rounded-full text-xs font-medium transition border">
                             전체
                         </button>
-                        <button onclick="filterByVisibility('visible')" class="visibility-filter-btn px-3 py-1 rounded-full text-xs font-medium transition border">
+                        <button onclick="filterByVisibility('visible', event)" class="visibility-filter-btn px-3 py-1 rounded-full text-xs font-medium transition border">
                             ✅ 보기 체크
                         </button>
-                        <button onclick="filterByVisibility('hidden')" class="visibility-filter-btn px-3 py-1 rounded-full text-xs font-medium transition border">
+                        <button onclick="filterByVisibility('hidden', event)" class="visibility-filter-btn px-3 py-1 rounded-full text-xs font-medium transition border">
                             ❌ 보기 미체크
                         </button>
                     </div>
