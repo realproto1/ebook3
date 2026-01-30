@@ -1861,6 +1861,76 @@ async function addLanguageTranslation() {
     }
 }
 
+// 새 페이지 추가
+function addNewPage() {
+    if (!currentStorybook || !currentStorybook.pages) {
+        alert('동화책이 선택되지 않았습니다.');
+        return;
+    }
+    
+    // 확인 메시지
+    if (!confirm('새 페이지를 추가하시겠습니까?\n\n맨 마지막에 빈 페이지가 추가됩니다.')) {
+        return;
+    }
+    
+    // 새 페이지 번호 계산
+    const lastPage = currentStorybook.pages[currentStorybook.pages.length - 1];
+    const newPageNumber = lastPage ? lastPage.pageNumber + 1 : 1;
+    
+    // 새 페이지 객체 생성
+    const newPage = {
+        pageNumber: newPageNumber,
+        text: '',
+        sceneDescription: '',
+        sceneStructure: {
+            scene: '',
+            action: '',
+            emotion: ''
+        },
+        imageUrl: '',
+        imageHistory: [],
+        audioUrl: '',
+        ttsAudio: {
+            ko: { url: '', model: '' }
+        },
+        translatedAudioUrls: {},
+        characterReferences: currentStorybook.characters?.map(() => false) || [],
+        keyObjectReferences: currentStorybook.key_objects?.map(() => false) || []
+    };
+    
+    // 페이지 배열에 추가
+    currentStorybook.pages.push(newPage);
+    
+    // 모든 번역 언어에도 빈 페이지 추가
+    if (currentStorybook.translations) {
+        Object.keys(currentStorybook.translations).forEach(lang => {
+            if (Array.isArray(currentStorybook.translations[lang])) {
+                currentStorybook.translations[lang].push({
+                    pageNumber: newPageNumber,
+                    text: ''
+                });
+            }
+        });
+    }
+    
+    // 저장
+    saveCurrentStorybook();
+    
+    // UI 업데이트
+    displayStorybook(currentStorybook);
+    
+    // 성공 메시지
+    alert(`✅ 페이지 ${newPageNumber}가 추가되었습니다!`);
+    
+    // 새로 추가된 페이지로 스크롤
+    setTimeout(() => {
+        const newPageElement = document.querySelector(`[data-page-index="${currentStorybook.pages.length - 1}"]`);
+        if (newPageElement) {
+            newPageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 500);
+}
+
 function displayStorybook(storybook) {
     console.log('📺 displayStorybook 호출:', {
         title: storybook.title,
@@ -2493,6 +2563,15 @@ function displayStorybook(storybook) {
                                         </div>
                                     </div>
                                 </div>
+                                
+                                <!-- 페이지 추가 버튼 -->
+                                <button 
+                                    onclick="addNewPage()"
+                                    class="px-4 py-2 text-white bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-lg transition-all font-semibold text-sm shadow-lg hover:shadow-xl ml-2"
+                                    title="새 페이지 추가"
+                                >
+                                    <i class="fas fa-plus mr-1"></i>페이지 추가
+                                </button>
                             </div>
                         </div>
                     `;
