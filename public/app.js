@@ -8364,17 +8364,28 @@ function checkStorybookStatus(bookId) {
                 } else {
                     // 번역 언어
                     const translatedText = book.translations?.[lang]?.[idx];
-                    hasText = !!(translatedText && typeof translatedText === 'string' && translatedText.trim().length > 0);
+                    
+                    // 문자열 또는 객체 형태 모두 지원
+                    let actualText = '';
+                    if (typeof translatedText === 'string') {
+                        actualText = translatedText;
+                    } else if (translatedText && typeof translatedText === 'object' && translatedText.text) {
+                        actualText = translatedText.text;
+                    }
+                    
+                    hasText = !!(actualText && actualText.trim().length > 0);
                     
                     // 디버깅: 첫 3개 페이지만 로그
                     if (idx < 3) {
                         console.log(`페이지 ${pageNum} ${languageNames[lang] || lang} 텍스트:`, {
                             exists: !!translatedText,
                             type: typeof translatedText,
-                            length: translatedText?.length,
-                            trimmed: translatedText?.trim?.()?.length,
-                            hasText: hasText,
-                            preview: translatedText?.substring?.(0, 20)
+                            isObject: typeof translatedText === 'object',
+                            hasTextField: translatedText?.text !== undefined,
+                            actualText: actualText?.substring?.(0, 30),
+                            length: actualText?.length,
+                            trimmed: actualText?.trim?.()?.length,
+                            hasText: hasText
                         });
                     }
                 }
