@@ -466,6 +466,15 @@
                 <button onclick="toggleAutoPlay()" class="hover:text-gray-300 transition" title="자동 재생">
                     <i class="fas fa-play text-sm" id="autoplay-icon"></i>
                 </button>
+                <!-- 배경음악 버튼 -->
+                <button 
+                    id="bgm-button"
+                    onclick="toggleBackgroundMusic(); event.stopPropagation();"
+                    title="배경음악"
+                    class="hover:text-gray-300 transition hidden"
+                >
+                    <i class="fas fa-music text-sm" id="bgm-icon"></i>
+                </button>
                 <!-- 전체화면 버튼 -->
                 <button 
                     id="fullscreen-button"

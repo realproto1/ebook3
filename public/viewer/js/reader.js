@@ -9,6 +9,7 @@ let isHeaderVisible = false; // 헤더 초기 상태: 숨김
 let hasCoverPage = false; // 표지 페이지 존재 여부
 let backgroundMusic = null; // 배경음악 Audio 객체
 let backgroundMusicList = []; // 배경음악 목록
+let isBackgroundMusicPlaying = false; // 배경음악 재생 상태
 
 // 모바일 주소창/네비게이션 숨기기
 function hideAddressBar() {
@@ -176,6 +177,25 @@ async function loadBook() {
             await loadBackgroundMusicList();
             if (currentBook.backgroundMusicId) {
                 playBackgroundMusic(currentBook.backgroundMusicId);
+                
+                // 자동재생 실패 시 첫 클릭/터치 시 배경음악 재생
+                const startBGMOnInteraction = () => {
+                    if (backgroundMusic && !isBackgroundMusicPlaying) {
+                        backgroundMusic.play()
+                            .then(() => {
+                                isBackgroundMusicPlaying = true;
+                                updateBGMIcon();
+                                console.log('🎵 사용자 상호작용으로 배경음악 재생 시작');
+                                // 이벤트 리스너 제거 (한 번만 실행)
+                                document.removeEventListener('click', startBGMOnInteraction);
+                                document.removeEventListener('touchstart', startBGMOnInteraction);
+                            })
+                            .catch(e => console.log('배경음악 재생 대기 중...'));
+                    }
+                };
+                
+                document.addEventListener('click', startBGMOnInteraction, { once: true });
+                document.addEventListener('touchstart', startBGMOnInteraction, { once: true });
             }
             
             // 이미지 클릭 시 헤더 토글 이벤트 설정 (한 번만)
@@ -675,6 +695,9 @@ function exitReader() {
         currentAudio.pause();
         currentAudio = null;
     }
+    
+    // 배경음악 중지
+    stopBackgroundMusic();
     
     window.history.back();
 }
@@ -1501,12 +1524,25 @@ function playBackgroundMusic(musicId) {
         backgroundMusic.loop = true; // 반복 재생
         backgroundMusic.volume = 0.3; // 볼륨 30%
         
+        // 배경음악 버튼 표시
+        const bgmButton = document.getElementById('bgm-button');
+        if (bgmButton) {
+            bgmButton.classList.remove('hidden');
+        }
+        
+        // 사용자 상호작용 후 재생 시도
         backgroundMusic.play()
             .then(() => {
                 console.log('🎵 배경음악 재생 시작:', music.title);
+                isBackgroundMusicPlaying = true;
+                updateBGMIcon();
             })
             .catch(error => {
-                console.error('❌ 배경음악 재생 오류:', error);
+                console.log('⚠️ 배경음악 자동재생 차단됨. 사용자가 버튼을 클릭해야 합니다.');
+                console.error('배경음악 재생 오류:', error);
+                // 자동재생 실패 시에도 버튼은 표시 (사용자가 클릭할 수 있도록)
+                isBackgroundMusicPlaying = false;
+                updateBGMIcon();
             });
     } catch (error) {
         console.error('❌ 배경음악 생성 오류:', error);
@@ -1520,6 +1556,50 @@ function stopBackgroundMusic() {
         backgroundMusic.currentTime = 0;
         backgroundMusic = null;
         console.log('🔇 배경음악 중지됨');
+        isBackgroundMusicPlaying = false;
+        updateBGMIcon();
+    }
+}
+
+// 배경음악 토글
+function toggleBackgroundMusic() {
+    if (!backgroundMusic) {
+        // 배경음악이 설정되어 있으면 재생 시도
+        if (currentBook && currentBook.backgroundMusicId) {
+            playBackgroundMusic(currentBook.backgroundMusicId);
+        }
+        return;
+    }
+    
+    if (isBackgroundMusicPlaying) {
+        // 일시정지
+        backgroundMusic.pause();
+        isBackgroundMusicPlaying = false;
+        console.log('⏸️ 배경음악 일시정지');
+    } else {
+        // 재생
+        backgroundMusic.play()
+            .then(() => {
+                isBackgroundMusicPlaying = true;
+                console.log('▶️ 배경음악 재생');
+            })
+            .catch(error => {
+                console.error('❌ 배경음악 재생 오류:', error);
+            });
+    }
+    
+    updateBGMIcon();
+}
+
+// 배경음악 아이콘 업데이트
+function updateBGMIcon() {
+    const icon = document.getElementById('bgm-icon');
+    if (icon) {
+        if (isBackgroundMusicPlaying) {
+            icon.className = 'fas fa-music text-sm text-green-400';
+        } else {
+            icon.className = 'fas fa-music text-sm text-gray-400';
+        }
     }
 }
 
@@ -1529,3 +1609,4 @@ window.toggleComments = toggleComments;
 window.submitComment = submitComment;
 window.likeComment = likeComment;
 window.shareStorybook = shareStorybook;
+window.toggleBackgroundMusic = toggleBackgroundMusic;
