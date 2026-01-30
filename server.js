@@ -4032,6 +4032,80 @@ app.delete('/api/background-music/:id', async (req, res) => {
   }
 });
 
+// ==================== 동화책 조회수 API ====================
+
+// 조회수 증가
+app.post('/api/storybooks/:id/view', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // R2에서 view-counts.json 파일 가져오기
+    let viewCounts = {};
+    try {
+      const command = new GetObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: 'view-counts.json',
+      });
+      const response = await r2Client.send(command);
+      const data = await response.Body.transformToString();
+      viewCounts = JSON.parse(data);
+    } catch (error) {
+      if (error.name !== 'NoSuchKey') {
+        throw error;
+      }
+    }
+    
+    // 조회수 증가
+    if (!viewCounts[id]) {
+      viewCounts[id] = 0;
+    }
+    viewCounts[id]++;
+    
+    // R2에 저장
+    const uploadCommand = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: 'view-counts.json',
+      Body: JSON.stringify(viewCounts, null, 2),
+      ContentType: 'application/json',
+    });
+    
+    await r2Client.send(uploadCommand);
+    
+    console.log(`✅ 조회수 증가: ${id} → ${viewCounts[id]}`);
+    res.json({ success: true, views: viewCounts[id] });
+  } catch (error) {
+    console.error('❌ 조회수 증가 오류:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 전체 조회수 조회
+app.get('/api/view-counts', async (req, res) => {
+  try {
+    // R2에서 view-counts.json 파일 가져오기
+    const command = new GetObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: 'view-counts.json',
+    });
+    
+    try {
+      const response = await r2Client.send(command);
+      const data = await response.Body.transformToString();
+      const viewCounts = JSON.parse(data);
+      res.json({ success: true, viewCounts });
+    } catch (error) {
+      if (error.name === 'NoSuchKey') {
+        res.json({ success: true, viewCounts: {} });
+      } else {
+        throw error;
+      }
+    }
+  } catch (error) {
+    console.error('❌ 조회수 조회 오류:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // 메인 페이지 라우팅
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'home.html'));

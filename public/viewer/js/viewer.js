@@ -4,6 +4,7 @@ let filteredStorybooks = [];
 let currentAgeFilter = '';
 let currentCategoryFilter = '';
 let currentSort = 'title';
+let viewCounts = {}; // 조회수 데이터
 
 // 페이지 로드 시 동화책 목록 불러오기
 async function loadStorybooks() {
@@ -12,11 +13,21 @@ async function loadStorybooks() {
     try {
         console.log('📖 Loading public storybooks...');
         
-        const response = await axios.get('/api/viewer/storybooks');
+        // 동화책 목록과 조회수 병렬로 로드
+        const [storybooksResponse, viewCountsResponse] = await Promise.all([
+            axios.get('/api/viewer/storybooks'),
+            axios.get('/api/view-counts')
+        ]);
         
-        if (response.data.success) {
-            allStorybooks = response.data.storybooks;
+        if (storybooksResponse.data.success) {
+            allStorybooks = storybooksResponse.data.storybooks;
             filteredStorybooks = [...allStorybooks];
+            
+            // 조회수 데이터 저장
+            if (viewCountsResponse.data.success) {
+                viewCounts = viewCountsResponse.data.viewCounts;
+                console.log('📊 조회수 데이터 로드 완료');
+            }
             
             // 초기 로드 시 제목순으로 정렬
             filteredStorybooks.sort((a, b) => a.title.localeCompare(b.title, 'ko'));
@@ -69,7 +80,7 @@ function renderBooks() {
                 <div class="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm rounded-xl px-3 py-1 shadow-lg">
                     <span class="text-xs font-semibold text-white flex items-center">
                         <i class="fas fa-eye mr-1.5"></i>
-                        ${book.viewCount || 0}
+                        ${viewCounts[book.id] || 0}
                     </span>
                 </div>
             </div>

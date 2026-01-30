@@ -139,6 +139,9 @@ async function loadBook() {
             currentBook = response.data.storybook;
             console.log('✅ Storybook loaded:', currentBook.title);
             
+            // 조회수 증가
+            incrementViewCount(bookId);
+            
             // 페이지가 없으면 에러
             if (!currentBook.pages || currentBook.pages.length === 0) {
                 alert('이 동화책에는 페이지가 없습니다.');
@@ -1583,6 +1586,20 @@ function updateBGMIcon() {
         } else {
             icon.className = 'fas fa-music text-sm text-gray-400';
         }
+    }
+}
+
+// ==================== 조회수 ====================
+
+// 조회수 증가
+async function incrementViewCount(bookId) {
+    try {
+        const response = await axios.post(`/api/storybooks/${bookId}/view`);
+        if (response.data.success) {
+            console.log('📊 조회수 증가:', response.data.views);
+        }
+    } catch (error) {
+        console.error('❌ 조회수 증가 오류:', error);
     }
 }
 
