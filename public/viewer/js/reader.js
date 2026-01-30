@@ -908,7 +908,7 @@ async function enterImageFullscreen() {
     const prevBtn = document.createElement('button');
     prevBtn.id = 'fullscreen-prev-btn';
     prevBtn.style.cssText = `
-        position: absolute;
+        position: fixed;
         left: 1rem;
         top: 50%;
         transform: translateY(-50%);
@@ -922,7 +922,7 @@ async function enterImageFullscreen() {
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        z-index: 100001;
+        z-index: 100003;
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         font-size: 1.5rem;
@@ -944,7 +944,7 @@ async function enterImageFullscreen() {
     const nextBtn = document.createElement('button');
     nextBtn.id = 'fullscreen-next-btn';
     nextBtn.style.cssText = `
-        position: absolute;
+        position: fixed;
         right: 1rem;
         top: 50%;
         transform: translateY(-50%);
@@ -958,7 +958,7 @@ async function enterImageFullscreen() {
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        z-index: 100001;
+        z-index: 100003;
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         font-size: 1.5rem;
@@ -1092,12 +1092,12 @@ async function enterImageFullscreen() {
     `;
     textOverlay.textContent = pageText ? pageText.textContent : '';
     
-    // 조립 - textOverlay를 overlay에 직접 추가
+    // 조립 - 버튼과 textOverlay를 overlay에 직접 추가
     imageContainer.appendChild(fullImage);
-    imageContainer.appendChild(prevBtn);
-    imageContainer.appendChild(nextBtn);
     overlay.appendChild(closeBtn);
     overlay.appendChild(imageContainer);
+    overlay.appendChild(prevBtn);
+    overlay.appendChild(nextBtn);
     overlay.appendChild(textOverlay);
     
     // DOM에 추가
