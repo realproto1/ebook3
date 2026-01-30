@@ -906,6 +906,7 @@ async function enterImageFullscreen() {
     
     // 이전 페이지 버튼
     const prevBtn = document.createElement('button');
+    prevBtn.id = 'fullscreen-prev-btn';
     prevBtn.style.cssText = `
         position: absolute;
         left: 1rem;
@@ -926,6 +927,8 @@ async function enterImageFullscreen() {
         -webkit-backdrop-filter: blur(10px);
         font-size: 1.5rem;
         transition: all 0.2s;
+        opacity: 0;
+        pointer-events: none;
     `;
     prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
     prevBtn.onclick = async () => {
@@ -939,6 +942,7 @@ async function enterImageFullscreen() {
     
     // 다음 페이지 버튼
     const nextBtn = document.createElement('button');
+    nextBtn.id = 'fullscreen-next-btn';
     nextBtn.style.cssText = `
         position: absolute;
         right: 1rem;
@@ -959,6 +963,8 @@ async function enterImageFullscreen() {
         -webkit-backdrop-filter: blur(10px);
         font-size: 1.5rem;
         transition: all 0.2s;
+        opacity: 0;
+        pointer-events: none;
     `;
     nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
     nextBtn.onclick = async () => {
@@ -974,15 +980,75 @@ async function enterImageFullscreen() {
     const firstPage = currentBook.hasCoverPage ? -1 : 0;
     const lastPage = currentBook.pages.length - 1;
     
-    if (currentPage <= firstPage) {
-        prevBtn.style.opacity = '0.3';
-        prevBtn.style.pointerEvents = 'none';
+    // 버튼 활성화 상태 업데이트 함수
+    function updateButtonStates() {
+        if (currentPage <= firstPage) {
+            prevBtn.style.opacity = '0';
+        } else {
+            prevBtn.style.pointerEvents = 'auto';
+        }
+        
+        if (currentPage >= lastPage) {
+            nextBtn.style.opacity = '0';
+        } else {
+            nextBtn.style.pointerEvents = 'auto';
+        }
     }
     
-    if (currentPage >= lastPage) {
-        nextBtn.style.opacity = '0.3';
-        nextBtn.style.pointerEvents = 'none';
+    updateButtonStates();
+    
+    // 이미지 클릭 시 버튼 토글
+    let buttonsVisible = false;
+    let hideButtonsTimeout = null;
+    
+    function toggleButtons() {
+        buttonsVisible = !buttonsVisible;
+        
+        // 기존 타임아웃 취소
+        if (hideButtonsTimeout) {
+            clearTimeout(hideButtonsTimeout);
+            hideButtonsTimeout = null;
+        }
+        
+        if (buttonsVisible) {
+            // 버튼 표시
+            if (currentPage > firstPage) {
+                prevBtn.style.opacity = '1';
+                prevBtn.style.pointerEvents = 'auto';
+            }
+            if (currentPage < lastPage) {
+                nextBtn.style.opacity = '1';
+                nextBtn.style.pointerEvents = 'auto';
+            }
+            
+            // 3초 후 자동 숨김
+            hideButtonsTimeout = setTimeout(() => {
+                prevBtn.style.opacity = '0';
+                prevBtn.style.pointerEvents = 'none';
+                nextBtn.style.opacity = '0';
+                nextBtn.style.pointerEvents = 'none';
+                buttonsVisible = false;
+            }, 3000);
+        } else {
+            // 버튼 숨김
+            prevBtn.style.opacity = '0';
+            prevBtn.style.pointerEvents = 'none';
+            nextBtn.style.opacity = '0';
+            nextBtn.style.pointerEvents = 'none';
+        }
     }
+    
+    fullImage.onclick = (e) => {
+        e.stopPropagation();
+        toggleButtons();
+    };
+    
+    imageContainer.onclick = (e) => {
+        // 버튼 클릭이 아닌 경우에만 토글
+        if (e.target === imageContainer || e.target === fullImage) {
+            toggleButtons();
+        }
+    };
     
     // 텍스트 오버레이 - overlay의 직계 자식으로 배치
     const textOverlay = document.createElement('div');
@@ -1055,6 +1121,14 @@ async function enterImageFullscreen() {
     } catch (error) {
         // iOS에서는 실패할 수 있지만 오버레이는 이미 표시됨
         console.log('ℹ️ Fullscreen API 실패 (오버레이로 대체):', error.message);
+    }
+    
+    // 전체화면 진입 후 TTS 자동재생 (표지가 아닌 경우)
+    if (currentPage !== -1) {
+        console.log('🎵 전체화면 모드에서 TTS 자동재생 시작');
+        setTimeout(() => {
+            autoPlayTTS();
+        }, 500);
     }
     
     console.log('📺 이미지 전체화면 진입 (오버레이 방식)');
