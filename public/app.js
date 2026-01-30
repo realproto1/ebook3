@@ -8231,11 +8231,35 @@ function checkStorybookStatus(bookId) {
                 
                 if (lang === 'ko') {
                     // 한국어: 원본 텍스트
-                    hasText = page.text && page.text.trim();
+                    hasText = !!(page.text && typeof page.text === 'string' && page.text.trim().length > 0);
+                    
+                    // 디버깅: 첫 3개 페이지만 로그
+                    if (idx < 3) {
+                        console.log(`페이지 ${pageNum} 한국어 텍스트:`, {
+                            exists: !!page.text,
+                            type: typeof page.text,
+                            length: page.text?.length,
+                            trimmed: page.text?.trim().length,
+                            hasText: hasText,
+                            preview: page.text?.substring(0, 20)
+                        });
+                    }
                 } else {
                     // 번역 언어
                     const translatedText = book.translations?.[lang]?.[idx];
-                    hasText = translatedText && typeof translatedText === 'string' && translatedText.trim();
+                    hasText = !!(translatedText && typeof translatedText === 'string' && translatedText.trim().length > 0);
+                    
+                    // 디버깅: 첫 3개 페이지만 로그
+                    if (idx < 3) {
+                        console.log(`페이지 ${pageNum} ${languageNames[lang] || lang} 텍스트:`, {
+                            exists: !!translatedText,
+                            type: typeof translatedText,
+                            length: translatedText?.length,
+                            trimmed: translatedText?.trim?.()?.length,
+                            hasText: hasText,
+                            preview: translatedText?.substring?.(0, 20)
+                        });
+                    }
                 }
                 
                 if (hasText) {
