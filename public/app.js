@@ -7762,6 +7762,7 @@ function updateStorybookCategory(category) {
 // 📚 검색 및 필터 기능
 let currentCategoryFilter = '';  // 현재 선택된 카테고리
 let currentSearchText = '';      // 현재 검색어
+let currentVisibilityFilter = 'all'; // 현재 공개 여부 필터 (all|visible|hidden)
 let currentSortOption = 'title'; // 현재 정렬 옵션 (title|completion|latest)
 let sortAscending = true;        // 정렬 순서 (true: 오름차순, false: 내림차순)
 
@@ -7773,6 +7774,25 @@ function filterByCategory(category) {
     
     // 버튼 활성화 상태 업데이트
     const buttons = document.querySelectorAll('.category-filter-btn');
+    buttons.forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // 클릭된 버튼 활성화
+    event.target.classList.add('active');
+    
+    // 필터 적용
+    applyBookFilters();
+}
+
+// 공개 여부 필터링
+function filterByVisibility(visibility) {
+    console.log(`👁️ 공개 여부 필터: ${visibility === 'all' ? '전체' : visibility === 'visible' ? '보기 체크' : '보기 미체크'}`);
+    
+    currentVisibilityFilter = visibility;
+    
+    // 버튼 활성화 상태 업데이트
+    const buttons = document.querySelectorAll('.visibility-filter-btn');
     buttons.forEach(btn => {
         btn.classList.remove('active');
     });
@@ -7838,11 +7858,22 @@ function applyBookFilters() {
         const searchMatch = currentSearchText === '' || 
                           (book.title || '').toLowerCase().includes(currentSearchText);
         
-        return categoryMatch && searchMatch;
+        // 공개 여부 매칭
+        let visibilityMatch = true;
+        if (currentVisibilityFilter === 'visible') {
+            // isVisible이 true인 것만
+            visibilityMatch = book.isVisible === true;
+        } else if (currentVisibilityFilter === 'hidden') {
+            // isVisible이 false이거나 undefined인 것
+            visibilityMatch = book.isVisible !== true;
+        }
+        // 'all'인 경우 visibilityMatch는 true 유지
+        
+        return categoryMatch && searchMatch && visibilityMatch;
     });
     
     console.log(`✅ 필터링 결과: ${filteredBooks.length}개 (전체: ${validBooks.length}개)`);
-    console.log(`   카테고리: "${currentCategoryFilter || '전체'}", 검색어: "${currentSearchText || '없음'}"`);
+    console.log(`   카테고리: "${currentCategoryFilter || '전체'}", 검색어: "${currentSearchText || '없음'}", 공개: "${currentVisibilityFilter}"`);
     
     // 결과 개수 업데이트
     if (bookCountSpan) {
