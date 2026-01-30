@@ -173,30 +173,8 @@ async function loadBook() {
                 hideHeader();
             }, 3000);
             
-            // 배경음악 목록 로드 및 재생
+            // 배경음악 목록 로드
             await loadBackgroundMusicList();
-            if (currentBook.backgroundMusicId) {
-                playBackgroundMusic(currentBook.backgroundMusicId);
-                
-                // 자동재생 실패 시 첫 클릭/터치 시 배경음악 재생
-                const startBGMOnInteraction = () => {
-                    if (backgroundMusic && !isBackgroundMusicPlaying) {
-                        backgroundMusic.play()
-                            .then(() => {
-                                isBackgroundMusicPlaying = true;
-                                updateBGMIcon();
-                                console.log('🎵 사용자 상호작용으로 배경음악 재생 시작');
-                                // 이벤트 리스너 제거 (한 번만 실행)
-                                document.removeEventListener('click', startBGMOnInteraction);
-                                document.removeEventListener('touchstart', startBGMOnInteraction);
-                            })
-                            .catch(e => console.log('배경음악 재생 대기 중...'));
-                    }
-                };
-                
-                document.addEventListener('click', startBGMOnInteraction, { once: true });
-                document.addEventListener('touchstart', startBGMOnInteraction, { once: true });
-            }
             
             // 이미지 클릭 시 헤더 토글 이벤트 설정 (한 번만)
             const imageContainer = document.getElementById('page-image-container');
@@ -371,6 +349,11 @@ function showPage(pageIndex) {
         setTimeout(() => {
             console.log('🎬 페이지 전환 완료 - TTS 자동 재생 시도');
             autoPlayTTS();
+            
+            // 첫 페이지에서 배경음악 시작
+            if (pageIndex === 0 && currentBook.backgroundMusicId && !backgroundMusic) {
+                playBackgroundMusic(currentBook.backgroundMusicId);
+            }
         }, 350); // 페이드인 애니메이션 시간 (300ms) + 버퍼
     }
 }
