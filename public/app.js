@@ -1995,6 +1995,45 @@ function displayStorybook(storybook) {
             </div>
         </div>
 
+        <!-- 배경음악 섹션 -->
+        <div class="bg-white rounded-3xl shadow-2xl p-4 md:p-10 mb-8">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0 mb-4 md:mb-6">
+                <div class="flex-1">
+                    <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-music mr-2 text-pink-500"></i>
+                        배경음악
+                    </h3>
+                    <p class="text-xs md:text-base text-gray-600">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <span class="hidden sm:inline">동화책을 읽을 때 재생될 배경음악을 선택하세요.</span>
+                        <span class="sm:hidden">읽을 때 재생될 음악</span>
+                    </p>
+                </div>
+                <button 
+                    onclick="openBackgroundMusicModal()"
+                    class="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg hover:from-pink-600 hover:to-purple-600 transition whitespace-nowrap text-sm md:text-base font-semibold shadow-lg"
+                >
+                    <i class="fas fa-cog mr-1 md:mr-2"></i><span class="hidden sm:inline">배경음악 관리</span><span class="sm:hidden">관리</span>
+                </button>
+            </div>
+            
+            <div class="bg-gradient-to-r from-pink-50 to-purple-50 p-4 md:p-6 rounded-xl border-2 border-pink-200">
+                <!-- 선택된 배경음악 표시 -->
+                <div id="selectedBackgroundMusic" class="text-sm md:text-base text-gray-700 mb-3">
+                    <i class="fas fa-info-circle mr-1 text-pink-500"></i>배경음악을 선택하세요
+                </div>
+                
+                <!-- 배경음악 선택 드롭다운 -->
+                <select 
+                    id="backgroundMusicSelect" 
+                    onchange="selectBackgroundMusic(this.value)"
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm md:text-base focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                >
+                    <option value="">배경음악 없음</option>
+                </select>
+            </div>
+        </div>
+
         <div class="bg-white rounded-3xl shadow-2xl p-4 md:p-10 mb-8">
             <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0 mb-4 md:mb-6">
                 <div class="flex-1">
