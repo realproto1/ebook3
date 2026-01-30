@@ -7135,12 +7135,69 @@ function renderReviewLanguageContents() {
     
     contentsContainer.innerHTML = reviewSelectedLanguages.map((lang, idx) => {
         // translations[lang] 또는 기본 pages 사용
-        const pages = reviewStorybookData.translations?.[lang] || reviewStorybookData.pages || [];
+        let pages = [];
+        
+        if (lang === 'ko') {
+            // 한국어는 기본 pages 사용
+            pages = reviewStorybookData.pages || [];
+        } else {
+            // 다른 언어는 translations[lang] 사용
+            const translation = reviewStorybookData.translations?.[lang];
+            
+            if (translation && Array.isArray(translation) && translation.length > 0) {
+                pages = translation;
+            } else if (translation && typeof translation === 'object' && !Array.isArray(translation)) {
+                // 객체 형태 translations (키: 페이지 인덱스)
+                pages = Object.keys(translation)
+                    .sort((a, b) => parseInt(a) - parseInt(b))
+                    .map(key => translation[key]);
+            } else {
+                // 번역이 없으면 빈 배열
+                pages = [];
+            }
+        }
+        
+        // 페이지가 없는 경우 메시지 표시
+        if (pages.length === 0) {
+            return `
+                <div class="language-content ${idx === 0 ? 'active' : ''}" data-lang="${lang}">
+                    <div class="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 text-center">
+                        <i class="fas fa-exclamation-triangle text-yellow-600 text-2xl mb-2"></i>
+                        <p class="text-yellow-800 font-semibold">
+                            ${lang === 'ko' ? '텍스트가 없습니다.' : `${lang.toUpperCase()} 텍스트가 없습니다.`}
+                        </p>
+                        <p class="text-yellow-600 text-sm mt-1">
+                            번역을 생성해주세요.
+                        </p>
+                    </div>
+                    
+                    <!-- 페이지 추가 버튼 -->
+                    <div class="mt-3">
+                        <button 
+                            onclick="addReviewNewPage('${lang}')"
+                            class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-2 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-600 transition shadow-md text-sm"
+                        >
+                            <i class="fas fa-plus mr-2"></i>
+                            새 페이지 추가
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
         
         return `
             <div class="language-content ${idx === 0 ? 'active' : ''}" data-lang="${lang}">
                 <div id="review-pages-container-${lang}" class="space-y-2">
-                    ${pages.map((page, pageIdx) => `
+                    ${pages.map((page, pageIdx) => {
+                        // 페이지 텍스트 추출 (객체 또는 문자열)
+                        let pageText = '';
+                        if (typeof page === 'string') {
+                            pageText = page;
+                        } else if (page && typeof page === 'object') {
+                            pageText = page.text || '';
+                        }
+                        
+                        return `
                         <div 
                             class="page-item bg-white border-2 border-gray-200 rounded-lg p-3 hover:border-purple-300"
                             data-lang="${lang}"
@@ -7171,13 +7228,14 @@ function renderReviewLanguageContents() {
                                 class="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition resize-y text-sm"
                                 rows="2"
                                 onchange="updateReviewPageText('${lang}', ${pageIdx}, this.value)"
-                            >${page.text || ''}</textarea>
+                            >${pageText}</textarea>
                             <p class="text-[10px] text-gray-400 mt-1">
                                 <i class="fas fa-info-circle mr-1"></i>
                                 텍스트 수정 후 다른 곳 클릭 시 자동 저장
                             </p>
                         </div>
-                    `).join('')}
+                    `;
+                    }).join('')}
                 </div>
                 
                 <!-- 페이지 추가 버튼 -->
