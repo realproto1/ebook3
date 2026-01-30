@@ -7754,7 +7754,7 @@ function applyBookFilters() {
             <div class="flex gap-1">
                 <button 
                     onclick="checkStorybookStatus('${book.id}')" 
-                    class="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs py-1.5 px-2 rounded hover:from-blue-600 hover:to-cyan-600 transition"
+                    class="flex-1 ${getCompletionButtonColor(book)} text-white text-xs py-1.5 px-2 rounded transition"
                     title="완성도 확인"
                 >
                     <i class="fas fa-check-circle mr-1"></i>확인
@@ -7782,6 +7782,93 @@ function applyBookFilters() {
             </div>
         </div>
     `).join('');
+}
+
+// 동화책 완성도 계산 (간단 버전)
+function calculateCompletionRate(book) {
+    if (!book || !book.pages) return 0;
+    
+    // 사용 가능한 언어 목록
+    const availableLanguages = ['ko'];
+    if (book.translations && typeof book.translations === 'object') {
+        availableLanguages.push(...Object.keys(book.translations));
+    }
+    
+    // 각 항목 카운트
+    const characterTotal = book.characters?.length || 0;
+    const characterWithImage = book.characters?.filter(c => c.referenceImage).length || 0;
+    
+    const keyObjectTotal = book.key_objects?.length || 0;
+    const keyObjectWithImage = book.keyObjectImages?.filter(img => img?.imageUrl).length || 0;
+    
+    const pageTotal = book.pages.length;
+    const illustrationCount = book.pages.filter(p => p.illustrationImage).length;
+    
+    // 언어별 텍스트/TTS 카운트
+    let textCount = 0;
+    let ttsCount = 0;
+    
+    availableLanguages.forEach(lang => {
+        book.pages.forEach((page, idx) => {
+            // 텍스트 체크
+            if (lang === 'ko') {
+                if (page.text && page.text.trim()) textCount++;
+            } else {
+                const translatedText = book.translations?.[lang]?.[idx];
+                if (translatedText && typeof translatedText === 'string' && translatedText.trim()) {
+                    textCount++;
+                }
+            }
+            
+            // TTS 체크
+            if (lang === 'ko') {
+                if (page.audioUrl) ttsCount++;
+            } else {
+                if (page.translatedAudioUrls?.[lang]) ttsCount++;
+            }
+        });
+    });
+    
+    // 총 항목 및 완료 항목
+    const totalItems = 
+        characterTotal + 
+        keyObjectTotal + 
+        pageTotal + // 삽화
+        (availableLanguages.length * pageTotal) + // 텍스트
+        (availableLanguages.length * pageTotal) + // TTS
+        1; // 표지
+    
+    const completedItems = 
+        characterWithImage + 
+        keyObjectWithImage + 
+        illustrationCount + 
+        textCount + 
+        ttsCount + 
+        (book.coverImage ? 1 : 0);
+    
+    return totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+}
+
+// 완성도에 따른 버튼 색상 반환
+function getCompletionButtonColor(book) {
+    const rate = calculateCompletionRate(book);
+    
+    if (rate >= 90) {
+        // 90% 이상: 진한 파란색
+        return 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800';
+    } else if (rate >= 70) {
+        // 70-89%: 파란색
+        return 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600';
+    } else if (rate >= 50) {
+        // 50-69%: 초록색
+        return 'bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600';
+    } else if (rate >= 30) {
+        // 30-49%: 주황색
+        return 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600';
+    } else {
+        // 0-29%: 빨간색
+        return 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600';
+    }
 }
 
 // 동화책 완성도 확인 팝업
