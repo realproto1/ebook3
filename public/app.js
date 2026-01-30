@@ -2735,14 +2735,32 @@ function displayStorybook(storybook) {
                                     <audio controls class="w-full h-10 md:h-12">
                                         <source src="${getPageTTS(page, currentLanguage)}" type="audio/wav">
                                     </audio>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button 
+                                            onclick="downloadAudio('${getPageTTS(page, currentLanguage)}', '${storybook.title}_${currentLanguage}_페이지_${page.pageNumber}.wav')"
+                                            class="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 active:bg-green-800 transition text-xs md:text-sm shadow"
+                                        >
+                                            <i class="fas fa-download mr-1"></i>다운로드
+                                        </button>
+                                        <button 
+                                            onclick="openTTSUploadModal(${idx})"
+                                            class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition text-xs md:text-sm shadow"
+                                        >
+                                            <i class="fas fa-upload mr-1"></i>업로드
+                                        </button>
+                                    </div>
+                                </div>
+                                ` : `
+                                <div class="space-y-2">
+                                    <p class="text-xs text-gray-500 text-center py-3 bg-white rounded-lg border border-blue-200">TTS 생성 버튼을 클릭하세요</p>
                                     <button 
-                                        onclick="downloadAudio('${getPageTTS(page, currentLanguage)}', '${storybook.title}_${currentLanguage}_페이지_${page.pageNumber}.wav')"
-                                        class="w-full bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 active:bg-green-800 transition text-xs md:text-sm shadow"
+                                        onclick="openTTSUploadModal(${idx})"
+                                        class="w-full bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition text-xs md:text-sm shadow"
                                     >
-                                        <i class="fas fa-download mr-1"></i>오디오 다운로드
+                                        <i class="fas fa-upload mr-1"></i>TTS 업로드
                                     </button>
                                 </div>
-                                ` : `<p class="text-xs text-gray-500 text-center py-3 bg-white rounded-lg border border-blue-200">TTS 생성 버튼을 클릭하세요</p>`}
+                                `}
                             </div>
 
                             <!-- 3️⃣ 삽화 섹션 -->
@@ -3387,6 +3405,145 @@ function closeIllustrationUploadModal() {
     currentUploadPageIndex = null;
     currentUploadCharIndex = null;
     currentUploadType = 'illustration';
+}
+
+// TTS 업로드 모달 열기
+let currentTTSUploadPageIndex = null;
+let currentTTSUploadTab = 'file';
+
+function openTTSUploadModal(pageIndex) {
+    currentTTSUploadPageIndex = pageIndex;
+    const modal = document.getElementById('ttsUploadModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // 기본 탭으로 설정
+    switchTTSUploadTab('file');
+}
+
+// TTS 업로드 모달 닫기
+function closeTTSUploadModal() {
+    const modal = document.getElementById('ttsUploadModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    
+    // 입력 초기화
+    document.getElementById('ttsFileInput').value = '';
+    document.getElementById('ttsUrlInput').value = '';
+    currentTTSUploadPageIndex = null;
+}
+
+// TTS 업로드 탭 전환
+function switchTTSUploadTab(tab) {
+    currentTTSUploadTab = tab;
+    
+    const fileTab = document.getElementById('ttsUploadTabFile');
+    const urlTab = document.getElementById('ttsUploadTabUrl');
+    const fileContent = document.getElementById('ttsUploadContentFile');
+    const urlContent = document.getElementById('ttsUploadContentUrl');
+    
+    if (tab === 'file') {
+        fileTab.classList.add('border-blue-600', 'text-blue-600');
+        fileTab.classList.remove('text-gray-600');
+        urlTab.classList.remove('border-blue-600', 'text-blue-600');
+        urlTab.classList.add('text-gray-600');
+        
+        fileContent.classList.remove('hidden');
+        urlContent.classList.add('hidden');
+    } else {
+        urlTab.classList.add('border-blue-600', 'text-blue-600');
+        urlTab.classList.remove('text-gray-600');
+        fileTab.classList.remove('border-blue-600', 'text-blue-600');
+        fileTab.classList.add('text-gray-600');
+        
+        urlContent.classList.remove('hidden');
+        fileContent.classList.add('hidden');
+    }
+}
+
+// TTS 오디오 업로드 실행
+async function uploadTTSAudio() {
+    if (currentTTSUploadPageIndex === null) {
+        alert('페이지가 선택되지 않았습니다.');
+        return;
+    }
+    
+    try {
+        let audioUrl = '';
+        
+        if (currentTTSUploadTab === 'file') {
+            // 파일 업로드
+            const fileInput = document.getElementById('ttsFileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('오디오 파일을 선택하세요.');
+                return;
+            }
+            
+            // 파일 업로드 API 호출
+            const formData = new FormData();
+            formData.append('audio', file);
+            formData.append('storybookId', currentStorybook.id);
+            formData.append('storybookTitle', currentStorybook.title);
+            formData.append('pageNumber', currentStorybook.pages[currentTTSUploadPageIndex].pageNumber);
+            formData.append('language', currentLanguage);
+            
+            showNotification('오디오 업로드 중...', 'info');
+            
+            const response = await fetch('/api/upload-tts', {
+                method: 'POST',
+                headers: {
+                    'x-api-key': API_KEY
+                },
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error('오디오 업로드 실패');
+            }
+            
+            const result = await response.json();
+            audioUrl = result.audioUrl;
+            
+        } else {
+            // URL 입력
+            const urlInput = document.getElementById('ttsUrlInput');
+            audioUrl = urlInput.value.trim();
+            
+            if (!audioUrl) {
+                alert('오디오 URL을 입력하세요.');
+                return;
+            }
+        }
+        
+        // 페이지에 오디오 URL 저장
+        const page = currentStorybook.pages[currentTTSUploadPageIndex];
+        
+        if (currentLanguage === 'ko') {
+            page.audioUrl = audioUrl;
+        } else {
+            if (!page.translatedAudioUrls) {
+                page.translatedAudioUrls = {};
+            }
+            page.translatedAudioUrls[currentLanguage] = audioUrl;
+        }
+        
+        // R2에 저장
+        await saveStorybookToR2(currentStorybook);
+        
+        // UI 업데이트
+        displayStorybook(currentStorybook);
+        
+        // 모달 닫기
+        closeTTSUploadModal();
+        
+        showNotification('✅ TTS 오디오가 업로드되었습니다!', 'success');
+        
+    } catch (error) {
+        console.error('TTS 업로드 오류:', error);
+        showNotification('❌ TTS 업로드 실패: ' + error.message, 'error');
+    }
 }
 
 // 업로드 탭 전환

@@ -643,6 +643,44 @@ app.post('/api/upload-audio', async (req, res) => {
   }
 });
 
+// TTS 파일 업로드 API
+app.post('/api/upload-tts', upload.single('audio'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: '오디오 파일이 없습니다.' });
+    }
+    
+    const { storybookId, storybookTitle, pageNumber, language } = req.body;
+    
+    // 파일명 생성
+    const timestamp = Date.now();
+    const safeTitle = (storybookTitle || '').replace(/[^a-zA-Z0-9가-힣]/g, '');
+    const ext = req.file.originalname.split('.').pop() || 'wav';
+    const audioFilename = `${storybookId}-${safeTitle}-tts-${language}-page${pageNumber}-${timestamp}.${ext}`;
+    
+    console.log(`🎵 Uploading TTS audio: ${audioFilename}`);
+    
+    // R2에 업로드
+    const audioUrl = await uploadBufferToR2(
+      req.file.buffer,
+      audioFilename,
+      req.file.mimetype || 'audio/wav'
+    );
+    
+    res.json({
+      success: true,
+      audioUrl: audioUrl
+    });
+    
+  } catch (error) {
+    console.error('TTS 업로드 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // 1. 동화책 스토리 생성 API
 app.post('/api/generate-storybook', requireAPIKey, async (req, res) => {
   try {
