@@ -2627,7 +2627,7 @@ function displayStorybook(storybook) {
                     </button>
                     
                     <button 
-                        onclick="downloadAllIllustrationTexts()"
+                        onclick="downloadAllText()"
                         class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-3.5 rounded-lg hover:from-purple-600 hover:to-purple-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
                     >
                         <i class="fas fa-file-alt text-xl"></i>
