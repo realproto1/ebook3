@@ -552,8 +552,27 @@
                 console.log('✅ 스토리 로드 완료:', storyData.title);
                 document.getElementById('storyTitle').textContent = storyData.title || '동화책';
 
-                // Vocabulary에서 글자 추출 (Key Objects 대신)
-                const vocabulary = storyData.vocabulary || [];
+                // Vocabulary 또는 key_objects에서 글자 추출
+                let vocabulary = [];
+                
+                // 1. educational_content.vocabulary 확인
+                if (storyData.educational_content && storyData.educational_content.vocabulary) {
+                    vocabulary = storyData.educational_content.vocabulary;
+                    console.log('📚 educational_content.vocabulary 사용:', vocabulary.length);
+                } 
+                // 2. vocabulary 직접 확인
+                else if (storyData.vocabulary && Array.isArray(storyData.vocabulary)) {
+                    vocabulary = storyData.vocabulary;
+                    console.log('📚 vocabulary 직접 사용:', vocabulary.length);
+                }
+                // 3. key_objects 사용 (fallback)
+                else if (storyData.key_objects && Array.isArray(storyData.key_objects)) {
+                    vocabulary = storyData.key_objects.map(obj => ({
+                        korean: obj.korean || obj.name || obj,
+                        word: obj.name || obj.korean || obj
+                    }));
+                    console.log('📚 key_objects 사용:', vocabulary.length);
+                }
                 
                 if (vocabulary.length === 0) {
                     alert('단어장이 없습니다.');
@@ -564,11 +583,14 @@
                 // 각 단어에서 한 글자씩 추출
                 characters = [];
                 vocabulary.forEach(vocabItem => {
-                    const korean = vocabItem.korean;
-                    const word = vocabItem.word; // 영어 단어
+                    // 객체 또는 문자열 처리
+                    const korean = vocabItem.korean || vocabItem.name || vocabItem;
+                    const word = vocabItem.word || vocabItem.name || vocabItem; // 영어 단어
+                    
+                    if (!korean) return;
                     
                     // 공백 제거하고 각 글자를 분리
-                    const chars = korean.replace(/\s/g, '').split('');
+                    const chars = korean.toString().replace(/\s/g, '').split('');
                     chars.forEach(char => {
                         characters.push({
                             char: char,
@@ -654,8 +676,54 @@
             return (matchingPixels / totalGuidePixels) * 100;
         }
         
+        // 효과음 재생 함수
+        function playSound(type) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            if (type === 'correct') {
+                // 정답 효과음: 밝은 3화음
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+                oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } else if (type === 'retry') {
+                // 재시도 효과음: 낮은 톤
+                oscillator.frequency.setValueAtTime(329.63, audioContext.currentTime); // E4
+                oscillator.frequency.setValueAtTime(293.66, audioContext.currentTime + 0.1); // D4
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } else if (type === 'complete') {
+                // 완료 효과음: 승리 팡파레
+                const frequencies = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                frequencies.forEach((freq, i) => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.frequency.setValueAtTime(freq, audioContext.currentTime + i * 0.15);
+                    gain.gain.setValueAtTime(0.2, audioContext.currentTime + i * 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.15 + 0.3);
+                    osc.start(audioContext.currentTime + i * 0.15);
+                    osc.stop(audioContext.currentTime + i * 0.15 + 0.3);
+                });
+            }
+        }
+        
         // 정답 피드백 표시
         function showCorrectFeedback(callback) {
+            // 정답 효과음 재생
+            playSound('correct');
+            
             const feedback = document.createElement('div');
             feedback.style.cssText = `
                 position: fixed;
@@ -682,6 +750,9 @@
         
         // 재시도 피드백 표시
         function showRetryFeedback(accuracy) {
+            // 재시도 효과음 재생
+            playSound('retry');
+            
             const feedback = document.createElement('div');
             feedback.style.cssText = `
                 position: fixed;
@@ -785,6 +856,9 @@
 
         // 결과 표시
         function showResults() {
+            // 완료 효과음 재생
+            playSound('complete');
+            
             const progress = 100;
             document.getElementById('progressFill').style.width = `${progress}%`;
             document.getElementById('progressText').textContent = `${progress}%`;
