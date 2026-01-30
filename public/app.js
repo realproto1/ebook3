@@ -7664,6 +7664,7 @@ function updateStorybookCategory(category) {
 // 📚 검색 및 필터 기능
 let currentCategoryFilter = '';  // 현재 선택된 카테고리
 let currentSearchText = '';      // 현재 검색어
+let currentSortOption = 'title'; // 현재 정렬 옵션 (title|completion|latest)
 
 // 카테고리별 필터링
 function filterByCategory(category) {
@@ -7692,6 +7693,13 @@ function filterBooks() {
     console.log(`🔍 검색: "${currentSearchText}"`);
     
     // 필터 적용
+    applyBookFilters();
+}
+
+// 정렬 옵션 변경
+function applySortOption(sortOption) {
+    console.log(`🔄 정렬 옵션: ${sortOption}`);
+    currentSortOption = sortOption;
     applyBookFilters();
 }
 
@@ -7725,11 +7733,30 @@ function applyBookFilters() {
     }
     
     // 정렬
-    filteredBooks.sort((a, b) => {
-        const titleA = (a.title || '').toLowerCase();
-        const titleB = (b.title || '').toLowerCase();
-        return titleA.localeCompare(titleB, 'ko');
-    });
+    if (currentSortOption === 'title') {
+        // 가나다순 (제목)
+        filteredBooks.sort((a, b) => {
+            const titleA = (a.title || '').toLowerCase();
+            const titleB = (b.title || '').toLowerCase();
+            return titleA.localeCompare(titleB, 'ko');
+        });
+    } else if (currentSortOption === 'completion') {
+        // 완성도순 (높은순)
+        filteredBooks.sort((a, b) => {
+            const rateA = calculateCompletionRate(a);
+            const rateB = calculateCompletionRate(b);
+            return rateB - rateA; // 높은 순
+        });
+    } else if (currentSortOption === 'latest') {
+        // 최신순 (생성일)
+        filteredBooks.sort((a, b) => {
+            const timeA = a.id ? parseInt(a.id) : 0;
+            const timeB = b.id ? parseInt(b.id) : 0;
+            return timeB - timeA; // 최신 순
+        });
+    }
+    
+    console.log(`📊 정렬 적용: ${currentSortOption} (${filteredBooks.length}개)`);
     
     // 빈 결과 처리
     if (filteredBooks.length === 0) {
