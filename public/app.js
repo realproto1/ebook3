@@ -7792,6 +7792,23 @@ function checkStorybookStatus(bookId) {
         return;
     }
     
+    // 사용 가능한 언어 목록 (한국어 + 번역 언어들)
+    const availableLanguages = ['ko'];
+    if (book.translations && typeof book.translations === 'object') {
+        availableLanguages.push(...Object.keys(book.translations));
+    }
+    
+    // 언어 이름 매핑
+    const languageNames = {
+        'ko': '한국어',
+        'en': '영어',
+        'ja': '일본어',
+        'zh': '중국어',
+        'es': '스페인어',
+        'fr': '프랑스어',
+        'de': '독일어'
+    };
+    
     // 상태 체크
     const status = {
         // 캐릭터 레퍼런스
@@ -7806,21 +7823,38 @@ function checkStorybookStatus(bookId) {
             withImage: book.keyObjectImages?.filter(img => img?.imageUrl).length || 0,
             missing: []
         },
-        // 페이지
-        pages: {
+        // 페이지 삽화
+        illustrations: {
             total: book.pages?.length || 0,
-            withText: book.pages?.filter(p => p.text && p.text.trim()).length || 0,
             withIllustration: book.pages?.filter(p => p.illustrationImage).length || 0,
-            withTTS: book.pages?.filter(p => p.audioUrl).length || 0,
-            missingText: [],
-            missingIllustration: [],
-            missingTTS: []
+            missing: []
         },
+        // 언어별 페이지 텍스트
+        textByLanguage: {},
+        // 언어별 페이지 TTS
+        ttsByLanguage: {},
         // 표지
         cover: {
             hasImage: !!book.coverImage
         }
     };
+    
+    // 언어별 텍스트/TTS 상태 초기화
+    availableLanguages.forEach(lang => {
+        status.textByLanguage[lang] = {
+            language: languageNames[lang] || lang,
+            total: book.pages?.length || 0,
+            withText: 0,
+            missing: []
+        };
+        
+        status.ttsByLanguage[lang] = {
+            language: languageNames[lang] || lang,
+            total: book.pages?.length || 0,
+            withTTS: 0,
+            missing: []
+        };
+    });
     
     // 캐릭터 레퍼런스 누락 항목
     if (book.characters) {
@@ -7841,35 +7875,79 @@ function checkStorybookStatus(bookId) {
         });
     }
     
-    // 페이지 누락 항목
+    // 페이지 삽화 누락 항목
     if (book.pages) {
         book.pages.forEach((page, idx) => {
             const pageNum = idx + 1;
-            if (!page.text || !page.text.trim()) {
-                status.pages.missingText.push(`페이지 ${pageNum}`);
-            }
+            
+            // 삽화 체크
             if (!page.illustrationImage) {
-                status.pages.missingIllustration.push(`페이지 ${pageNum}`);
+                status.illustrations.missing.push(`페이지 ${pageNum}`);
             }
-            if (!page.audioUrl) {
-                status.pages.missingTTS.push(`페이지 ${pageNum}`);
-            }
+            
+            // 언어별 텍스트 체크
+            availableLanguages.forEach(lang => {
+                let hasText = false;
+                
+                if (lang === 'ko') {
+                    // 한국어: 원본 텍스트
+                    hasText = page.text && page.text.trim();
+                } else {
+                    // 번역 언어
+                    hasText = book.translations?.[lang]?.[idx] && book.translations[lang][idx].trim();
+                }
+                
+                if (hasText) {
+                    status.textByLanguage[lang].withText++;
+                } else {
+                    status.textByLanguage[lang].missing.push(`페이지 ${pageNum}`);
+                }
+            });
+            
+            // 언어별 TTS 체크
+            availableLanguages.forEach(lang => {
+                let hasTTS = false;
+                
+                if (lang === 'ko') {
+                    // 한국어: 원본 audioUrl
+                    hasTTS = !!page.audioUrl;
+                } else {
+                    // 번역 언어
+                    hasTTS = !!page.translatedAudioUrls?.[lang];
+                }
+                
+                if (hasTTS) {
+                    status.ttsByLanguage[lang].withTTS++;
+                } else {
+                    status.ttsByLanguage[lang].missing.push(`페이지 ${pageNum}`);
+                }
+            });
         });
     }
     
-    // 완성도 계산
+    // 완성도 계산 (언어별 텍스트/TTS 포함)
+    const totalTextItems = availableLanguages.length * (book.pages?.length || 0);
+    const completedTextItems = availableLanguages.reduce((sum, lang) => 
+        sum + status.textByLanguage[lang].withText, 0);
+    
+    const totalTTSItems = availableLanguages.length * (book.pages?.length || 0);
+    const completedTTSItems = availableLanguages.reduce((sum, lang) => 
+        sum + status.ttsByLanguage[lang].withTTS, 0);
+    
     const totalItems = 
         status.characterReferences.total + 
         status.keyObjects.total + 
-        status.pages.total * 3 + // 텍스트, 삽화, TTS
+        status.illustrations.total + 
+        totalTextItems + 
+        totalTTSItems + 
         1; // 표지
     
     const completedItems = 
         status.characterReferences.withImage + 
         status.keyObjects.withImage + 
-        status.pages.withText + 
-        status.pages.withIllustration + 
-        status.pages.withTTS + 
+        status.illustrations.withIllustration + 
+        completedTextItems + 
+        completedTTSItems + 
         (status.cover.hasImage ? 1 : 0);
     
     const completionRate = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
@@ -7946,47 +8024,59 @@ function checkStorybookStatus(bookId) {
                         ` : '<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 핵심 단어에 이미지 있음</p>'}
                     </div>
                     
-                    <!-- 페이지 텍스트 -->
-                    <div class="border-2 ${status.pages.missingText.length === 0 ? 'border-green-500' : 'border-red-500'} rounded-xl p-4">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="font-bold text-gray-800 flex items-center">
-                                <i class="fas fa-align-left mr-2 text-purple-500"></i>페이지 텍스트
-                            </h3>
-                            <span class="text-sm font-semibold">${status.pages.withText}/${status.pages.total}</span>
-                        </div>
-                        ${status.pages.missingText.length > 0 ? `
-                            <p class="text-sm text-red-600 mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>텍스트 누락:</p>
-                            <p class="text-sm text-gray-700 ml-4">${status.pages.missingText.join(', ')}</p>
-                        ` : '<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 페이지에 텍스트 있음</p>'}
-                    </div>
-                    
-                    <!-- 페이지 삽화 -->
-                    <div class="border-2 ${status.pages.missingIllustration.length === 0 ? 'border-green-500' : 'border-red-500'} rounded-xl p-4">
+                    <!-- 페이지 삽화 (순서 변경: 텍스트보다 먼저) -->
+                    <div class="border-2 ${status.illustrations.missing.length === 0 ? 'border-green-500' : 'border-red-500'} rounded-xl p-4">
                         <div class="flex items-center justify-between mb-2">
                             <h3 class="font-bold text-gray-800 flex items-center">
                                 <i class="fas fa-image mr-2 text-pink-500"></i>페이지 삽화
                             </h3>
-                            <span class="text-sm font-semibold">${status.pages.withIllustration}/${status.pages.total}</span>
+                            <span class="text-sm font-semibold">${status.illustrations.withIllustration}/${status.illustrations.total}</span>
                         </div>
-                        ${status.pages.missingIllustration.length > 0 ? `
+                        ${status.illustrations.missing.length > 0 ? `
                             <p class="text-sm text-red-600 mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>삽화 누락:</p>
-                            <p class="text-sm text-gray-700 ml-4">${status.pages.missingIllustration.join(', ')}</p>
+                            <p class="text-sm text-gray-700 ml-4">${status.illustrations.missing.join(', ')}</p>
                         ` : '<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 페이지에 삽화 있음</p>'}
                     </div>
                     
-                    <!-- 페이지 TTS -->
-                    <div class="border-2 ${status.pages.missingTTS.length === 0 ? 'border-green-500' : 'border-yellow-500'} rounded-xl p-4">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="font-bold text-gray-800 flex items-center">
-                                <i class="fas fa-volume-up mr-2 text-teal-500"></i>페이지 TTS 음성
-                            </h3>
-                            <span class="text-sm font-semibold">${status.pages.withTTS}/${status.pages.total}</span>
+                    <!-- 언어별 페이지 텍스트 -->
+                    ${availableLanguages.map(lang => {
+                        const langStatus = status.textByLanguage[lang];
+                        const allComplete = langStatus.missing.length === 0;
+                        return `
+                        <div class="border-2 ${allComplete ? 'border-green-500' : 'border-red-500'} rounded-xl p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-bold text-gray-800 flex items-center">
+                                    <i class="fas fa-align-left mr-2 text-purple-500"></i>페이지 텍스트 (${langStatus.language})
+                                </h3>
+                                <span class="text-sm font-semibold">${langStatus.withText}/${langStatus.total}</span>
+                            </div>
+                            ${langStatus.missing.length > 0 ? `
+                                <p class="text-sm text-red-600 mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>텍스트 누락:</p>
+                                <p class="text-sm text-gray-700 ml-4">${langStatus.missing.join(', ')}</p>
+                            ` : `<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 페이지에 ${langStatus.language} 텍스트 있음</p>`}
                         </div>
-                        ${status.pages.missingTTS.length > 0 ? `
-                            <p class="text-sm text-yellow-600 mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>TTS 누락:</p>
-                            <p class="text-sm text-gray-700 ml-4">${status.pages.missingTTS.join(', ')}</p>
-                        ` : '<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 페이지에 TTS 음성 있음</p>'}
-                    </div>
+                        `;
+                    }).join('')}
+                    
+                    <!-- 언어별 페이지 TTS -->
+                    ${availableLanguages.map(lang => {
+                        const langStatus = status.ttsByLanguage[lang];
+                        const allComplete = langStatus.missing.length === 0;
+                        return `
+                        <div class="border-2 ${allComplete ? 'border-green-500' : 'border-yellow-500'} rounded-xl p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-bold text-gray-800 flex items-center">
+                                    <i class="fas fa-volume-up mr-2 text-teal-500"></i>페이지 TTS 음성 (${langStatus.language})
+                                </h3>
+                                <span class="text-sm font-semibold">${langStatus.withTTS}/${langStatus.total}</span>
+                            </div>
+                            ${langStatus.missing.length > 0 ? `
+                                <p class="text-sm text-yellow-600 mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>TTS 누락:</p>
+                                <p class="text-sm text-gray-700 ml-4">${langStatus.missing.join(', ')}</p>
+                            ` : `<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 페이지에 ${langStatus.language} TTS 음성 있음</p>`}
+                        </div>
+                        `;
+                    }).join('')}
                     
                     <!-- 요약 -->
                     <div class="bg-gray-50 rounded-xl p-4 border-2 border-gray-200">
