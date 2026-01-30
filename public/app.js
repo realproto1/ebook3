@@ -7753,16 +7753,11 @@ function applyBookFilters() {
             <!-- 액션 버튼 -->
             <div class="flex gap-1">
                 <button 
-                    onclick="openReader('${book.id}')" 
-                    class="flex-1 bg-gradient-to-r from-green-500 to-teal-500 text-white text-xs py-1.5 px-2 rounded hover:from-green-600 hover:to-teal-600 transition"
+                    onclick="checkStorybookStatus('${book.id}')" 
+                    class="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs py-1.5 px-2 rounded hover:from-blue-600 hover:to-cyan-600 transition"
+                    title="완성도 확인"
                 >
-                    <i class="fas fa-book-open mr-1"></i>보기
-                </button>
-                <button 
-                    onclick="openQuiz('${book.id}')" 
-                    class="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs py-1.5 px-2 rounded hover:from-yellow-600 hover:to-orange-600 transition"
-                >
-                    <i class="fas fa-graduation-cap mr-1"></i>퀴즈
+                    <i class="fas fa-check-circle mr-1"></i>확인
                 </button>
                 <button 
                     onclick="selectStorybook('${book.id}')" 
@@ -7772,13 +7767,280 @@ function applyBookFilters() {
                 </button>
                 <button 
                     onclick="duplicateStorybookById('${book.id}')" 
-                    class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs py-1.5 px-2 rounded hover:from-blue-600 hover:to-indigo-600 transition"
+                    class="bg-gradient-to-r from-green-500 to-teal-500 text-white text-xs py-1.5 px-2 rounded hover:from-green-600 hover:to-teal-600 transition"
                     title="복사"
                 >
                     <i class="fas fa-copy"></i>
                 </button>
+                <button 
+                    onclick="deleteStorybook('${book.id}')" 
+                    class="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs py-1.5 px-2 rounded hover:from-red-600 hover:to-pink-600 transition"
+                    title="삭제"
+                >
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
         </div>
     `).join('');
+}
+
+// 동화책 완성도 확인 팝업
+function checkStorybookStatus(bookId) {
+    const book = storybooks.find(b => b.id === bookId);
+    if (!book) {
+        alert('동화책을 찾을 수 없습니다.');
+        return;
+    }
+    
+    // 상태 체크
+    const status = {
+        // 캐릭터 레퍼런스
+        characterReferences: {
+            total: book.characters?.length || 0,
+            withImage: book.characters?.filter(c => c.referenceImage).length || 0,
+            missing: []
+        },
+        // 핵심 단어
+        keyObjects: {
+            total: book.key_objects?.length || 0,
+            withImage: book.keyObjectImages?.filter(img => img?.imageUrl).length || 0,
+            missing: []
+        },
+        // 페이지
+        pages: {
+            total: book.pages?.length || 0,
+            withText: book.pages?.filter(p => p.text && p.text.trim()).length || 0,
+            withIllustration: book.pages?.filter(p => p.illustrationImage).length || 0,
+            withTTS: book.pages?.filter(p => p.audioUrl).length || 0,
+            missingText: [],
+            missingIllustration: [],
+            missingTTS: []
+        },
+        // 표지
+        cover: {
+            hasImage: !!book.coverImage
+        }
+    };
+    
+    // 캐릭터 레퍼런스 누락 항목
+    if (book.characters) {
+        book.characters.forEach((char, idx) => {
+            if (!char.referenceImage) {
+                status.characterReferences.missing.push(`${idx + 1}. ${char.name}`);
+            }
+        });
+    }
+    
+    // 핵심 단어 이미지 누락 항목
+    if (book.key_objects) {
+        book.key_objects.forEach((obj, idx) => {
+            const hasImage = book.keyObjectImages?.[idx]?.imageUrl;
+            if (!hasImage) {
+                status.keyObjects.missing.push(`${idx + 1}. ${obj.korean || obj.name}`);
+            }
+        });
+    }
+    
+    // 페이지 누락 항목
+    if (book.pages) {
+        book.pages.forEach((page, idx) => {
+            const pageNum = idx + 1;
+            if (!page.text || !page.text.trim()) {
+                status.pages.missingText.push(`페이지 ${pageNum}`);
+            }
+            if (!page.illustrationImage) {
+                status.pages.missingIllustration.push(`페이지 ${pageNum}`);
+            }
+            if (!page.audioUrl) {
+                status.pages.missingTTS.push(`페이지 ${pageNum}`);
+            }
+        });
+    }
+    
+    // 완성도 계산
+    const totalItems = 
+        status.characterReferences.total + 
+        status.keyObjects.total + 
+        status.pages.total * 3 + // 텍스트, 삽화, TTS
+        1; // 표지
+    
+    const completedItems = 
+        status.characterReferences.withImage + 
+        status.keyObjects.withImage + 
+        status.pages.withText + 
+        status.pages.withIllustration + 
+        status.pages.withTTS + 
+        (status.cover.hasImage ? 1 : 0);
+    
+    const completionRate = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+    
+    // 팝업 HTML 생성
+    const popupHTML = `
+        <div id="statusPopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="closeStatusPopup()">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+                <!-- 헤더 -->
+                <div class="sticky top-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 rounded-t-2xl">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold mb-2">
+                                <i class="fas fa-check-circle mr-2"></i>${book.title}
+                            </h2>
+                            <p class="text-sm opacity-90">완성도: ${completionRate}%</p>
+                        </div>
+                        <button onclick="closeStatusPopup()" class="text-white hover:text-gray-200 text-2xl">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- 진행률 바 -->
+                    <div class="mt-4 bg-white bg-opacity-20 rounded-full h-4 overflow-hidden">
+                        <div class="bg-white h-full transition-all duration-500" style="width: ${completionRate}%"></div>
+                    </div>
+                </div>
+                
+                <!-- 내용 -->
+                <div class="p-6 space-y-6">
+                    <!-- 표지 -->
+                    <div class="border-2 ${status.cover.hasImage ? 'border-green-500' : 'border-red-500'} rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-image mr-2 text-indigo-500"></i>표지 이미지
+                            </h3>
+                            <span class="text-2xl">${status.cover.hasImage ? '✅' : '❌'}</span>
+                        </div>
+                        ${status.cover.hasImage ? 
+                            '<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>표지 이미지 있음</p>' :
+                            '<p class="text-sm text-red-600"><i class="fas fa-exclamation-triangle mr-1"></i>표지 이미지 없음</p>'
+                        }
+                    </div>
+                    
+                    <!-- 캐릭터 레퍼런스 -->
+                    <div class="border-2 ${status.characterReferences.missing.length === 0 ? 'border-green-500' : 'border-yellow-500'} rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-user-friends mr-2 text-blue-500"></i>캐릭터 레퍼런스
+                            </h3>
+                            <span class="text-sm font-semibold">${status.characterReferences.withImage}/${status.characterReferences.total}</span>
+                        </div>
+                        ${status.characterReferences.missing.length > 0 ? `
+                            <p class="text-sm text-yellow-600 mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>이미지 누락:</p>
+                            <ul class="text-sm text-gray-700 ml-4 space-y-1">
+                                ${status.characterReferences.missing.map(item => `<li>• ${item}</li>`).join('')}
+                            </ul>
+                        ` : '<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 캐릭터에 레퍼런스 이미지 있음</p>'}
+                    </div>
+                    
+                    <!-- 핵심 단어 -->
+                    <div class="border-2 ${status.keyObjects.missing.length === 0 ? 'border-green-500' : 'border-yellow-500'} rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-cube mr-2 text-orange-500"></i>핵심 단어 이미지
+                            </h3>
+                            <span class="text-sm font-semibold">${status.keyObjects.withImage}/${status.keyObjects.total}</span>
+                        </div>
+                        ${status.keyObjects.missing.length > 0 ? `
+                            <p class="text-sm text-yellow-600 mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>이미지 누락:</p>
+                            <ul class="text-sm text-gray-700 ml-4 space-y-1">
+                                ${status.keyObjects.missing.map(item => `<li>• ${item}</li>`).join('')}
+                            </ul>
+                        ` : '<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 핵심 단어에 이미지 있음</p>'}
+                    </div>
+                    
+                    <!-- 페이지 텍스트 -->
+                    <div class="border-2 ${status.pages.missingText.length === 0 ? 'border-green-500' : 'border-red-500'} rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-align-left mr-2 text-purple-500"></i>페이지 텍스트
+                            </h3>
+                            <span class="text-sm font-semibold">${status.pages.withText}/${status.pages.total}</span>
+                        </div>
+                        ${status.pages.missingText.length > 0 ? `
+                            <p class="text-sm text-red-600 mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>텍스트 누락:</p>
+                            <p class="text-sm text-gray-700 ml-4">${status.pages.missingText.join(', ')}</p>
+                        ` : '<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 페이지에 텍스트 있음</p>'}
+                    </div>
+                    
+                    <!-- 페이지 삽화 -->
+                    <div class="border-2 ${status.pages.missingIllustration.length === 0 ? 'border-green-500' : 'border-red-500'} rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-image mr-2 text-pink-500"></i>페이지 삽화
+                            </h3>
+                            <span class="text-sm font-semibold">${status.pages.withIllustration}/${status.pages.total}</span>
+                        </div>
+                        ${status.pages.missingIllustration.length > 0 ? `
+                            <p class="text-sm text-red-600 mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>삽화 누락:</p>
+                            <p class="text-sm text-gray-700 ml-4">${status.pages.missingIllustration.join(', ')}</p>
+                        ` : '<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 페이지에 삽화 있음</p>'}
+                    </div>
+                    
+                    <!-- 페이지 TTS -->
+                    <div class="border-2 ${status.pages.missingTTS.length === 0 ? 'border-green-500' : 'border-yellow-500'} rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-volume-up mr-2 text-teal-500"></i>페이지 TTS 음성
+                            </h3>
+                            <span class="text-sm font-semibold">${status.pages.withTTS}/${status.pages.total}</span>
+                        </div>
+                        ${status.pages.missingTTS.length > 0 ? `
+                            <p class="text-sm text-yellow-600 mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>TTS 누락:</p>
+                            <p class="text-sm text-gray-700 ml-4">${status.pages.missingTTS.join(', ')}</p>
+                        ` : '<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 페이지에 TTS 음성 있음</p>'}
+                    </div>
+                    
+                    <!-- 요약 -->
+                    <div class="bg-gray-50 rounded-xl p-4 border-2 border-gray-200">
+                        <h3 class="font-bold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-chart-pie mr-2 text-indigo-500"></i>전체 요약
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                                <p class="text-gray-600">총 항목</p>
+                                <p class="text-xl font-bold text-gray-800">${totalItems}개</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">완료 항목</p>
+                                <p class="text-xl font-bold text-green-600">${completedItems}개</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">누락 항목</p>
+                                <p class="text-xl font-bold text-red-600">${totalItems - completedItems}개</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">완성도</p>
+                                <p class="text-xl font-bold text-purple-600">${completionRate}%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 푸터 -->
+                <div class="sticky bottom-0 bg-gray-50 p-6 rounded-b-2xl border-t">
+                    <button 
+                        onclick="closeStatusPopup()" 
+                        class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-bold hover:from-purple-700 hover:to-pink-700 transition"
+                    >
+                        <i class="fas fa-check mr-2"></i>확인
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 팝업 추가
+    const existingPopup = document.getElementById('statusPopup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', popupHTML);
+}
+
+// 완성도 확인 팝업 닫기
+function closeStatusPopup() {
+    const popup = document.getElementById('statusPopup');
+    if (popup) {
+        popup.remove();
+    }
 }
 
