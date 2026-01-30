@@ -217,6 +217,9 @@ function showPage(pageIndex) {
         return;
     }
     
+    // 페이지 전환 시 TTS 중지
+    stopTTS();
+    
     // TTS 버튼 표시/숨김
     const ttsButton = document.getElementById('tts-button-header');
     if (ttsButton) {
