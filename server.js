@@ -602,6 +602,47 @@ app.post('/api/upload-image', upload.single('image'), async (req, res) => {
   }
 });
 
+// 오디오 파일 업로드 API
+app.post('/api/upload-audio', async (req, res) => {
+  try {
+    const { audioData, filename, storybookId, storybookTitle } = req.body;
+    
+    if (!audioData) {
+      return res.status(400).json({ success: false, error: '오디오 데이터가 없습니다.' });
+    }
+    
+    // Base64 디코딩
+    const base64Data = audioData.replace(/^data:audio\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    // 파일명 생성
+    const timestamp = Date.now();
+    const safeTitle = (storybookTitle || '').replace(/[^a-zA-Z0-9가-힣]/g, '');
+    const audioFilename = filename || `${storybookId}-${safeTitle}-audio-${timestamp}.wav`;
+    
+    console.log(`🎵 Uploading audio: ${audioFilename}`);
+    
+    // R2에 업로드
+    const audioUrl = await uploadBufferToR2(
+      buffer,
+      audioFilename,
+      'audio/wav'
+    );
+    
+    res.json({
+      success: true,
+      audioUrl: audioUrl
+    });
+    
+  } catch (error) {
+    console.error('오디오 업로드 오류:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // 1. 동화책 스토리 생성 API
 app.post('/api/generate-storybook', requireAPIKey, async (req, res) => {
   try {

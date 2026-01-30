@@ -3866,6 +3866,20 @@ async function batchUploadTTSFiles(files, sortedPages) {
                 const pageIndex = currentStorybook.pages.findIndex(p => p.pageNumber === page.pageNumber);
                 if (pageIndex !== -1) {
                     currentStorybook.pages[pageIndex].audioUrl = response.data.audioUrl;
+                    
+                    // 즉시 저장 및 UI 업데이트
+                    saveCurrentStorybook();
+                    
+                    // 해당 페이지의 TTS 버튼 영역만 업데이트
+                    const ttsButtonDiv = document.querySelector(`#page-card-${pageIndex} .tts-button-area`);
+                    if (ttsButtonDiv) {
+                        ttsButtonDiv.innerHTML = `
+                            <div class="flex items-center gap-2 text-sm text-green-600">
+                                <i class="fas fa-check-circle"></i>
+                                <span>TTS 업로드 완료</span>
+                            </div>
+                        `;
+                    }
                 }
                 
                 successCount++;
