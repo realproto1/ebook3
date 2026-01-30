@@ -5411,6 +5411,18 @@ function downloadAllText() {
     // 각 언어별로 파일 생성 및 다운로드
     availableLanguages.forEach(lang => {
         const langName = languageNames[lang] || lang;
+        
+        // 디버깅: 번역 데이터 구조 확인
+        if (lang !== 'ko') {
+            console.log(`🔍 ${langName} 번역 데이터 구조:`, {
+                exists: !!currentStorybook.translations?.[lang],
+                type: typeof currentStorybook.translations?.[lang],
+                isArray: Array.isArray(currentStorybook.translations?.[lang]),
+                keys: currentStorybook.translations?.[lang] ? Object.keys(currentStorybook.translations[lang]).slice(0, 5) : [],
+                sample: currentStorybook.translations?.[lang]?.[0] || currentStorybook.translations?.[lang]?.[1]
+            });
+        }
+        
         let textContent = `${currentStorybook.title} (${langName})\n\n`;
         textContent += `대상 연령: ${currentStorybook.targetAge}세\n`;
         textContent += `그림체: ${currentStorybook.artStyle}\n\n`;
@@ -5427,9 +5439,45 @@ function downloadAllText() {
             } else {
                 // 번역 텍스트
                 if (currentStorybook.translations && 
-                    currentStorybook.translations[lang] && 
-                    currentStorybook.translations[lang][idx]) {
-                    pageText = currentStorybook.translations[lang][idx];
+                    currentStorybook.translations[lang]) {
+                    
+                    // translations[lang]이 배열인 경우
+                    if (Array.isArray(currentStorybook.translations[lang])) {
+                        const translationItem = currentStorybook.translations[lang][idx];
+                        
+                        // 번역 항목이 객체인 경우 (예: {text: "..."})
+                        if (translationItem && typeof translationItem === 'object') {
+                            pageText = translationItem.text || '(번역 없음)';
+                        }
+                        // 번역 항목이 문자열인 경우
+                        else if (typeof translationItem === 'string') {
+                            pageText = translationItem;
+                        }
+                        else {
+                            pageText = '(번역 없음)';
+                        }
+                    } 
+                    // translations[lang]이 객체인 경우 (페이지 번호를 키로 사용)
+                    else if (typeof currentStorybook.translations[lang] === 'object') {
+                        const pageNum = page.pageNumber || (idx + 1);
+                        const translationItem = currentStorybook.translations[lang][pageNum] || 
+                                                currentStorybook.translations[lang][idx];
+                        
+                        // 번역 항목이 객체인 경우
+                        if (translationItem && typeof translationItem === 'object') {
+                            pageText = translationItem.text || '(번역 없음)';
+                        }
+                        // 번역 항목이 문자열인 경우
+                        else if (typeof translationItem === 'string') {
+                            pageText = translationItem;
+                        }
+                        else {
+                            pageText = '(번역 없음)';
+                        }
+                    }
+                    else {
+                        pageText = '(번역 없음)';
+                    }
                 } else {
                     pageText = `(번역 없음)`;
                 }
