@@ -4089,19 +4089,28 @@ async function generateCharacterReference(charIndex) {
             errorMsg = 'API 키 오류: Gemini API 키가 만료되었거나 유효하지 않습니다. 새로운 API 키가 필요합니다.';
         }
         
-        refDiv.innerHTML = `
-            <div class="p-4 text-center">
-                <i class="fas fa-exclamation-triangle text-white text-2xl mb-2"></i>
-                <p class="text-white text-xs font-bold mt-2">⚠️ 이미지 생성 실패</p>
-                <p class="text-white text-xs opacity-75 mt-1">${errorMsg}</p>
-                <button onclick="generateCharacterReference(${charIndex})" class="mt-3 px-4 py-2 bg-white text-purple-600 rounded text-xs font-semibold hover:bg-opacity-90 transition">
-                    <i class="fas fa-redo mr-1"></i>재시도
-                </button>
-            </div>
-        `;
-        
-        // 알림도 표시
-        showNotification('❌ ' + errorMsg, 'error');
+        // 기존 이미지가 있으면 유지하고 에러 메시지만 표시
+        if (character.referenceImage) {
+            // UI 업데이트하여 기존 이미지 복원
+            renderCharacterImageWithHistory(charIndex);
+            // 에러 알림
+            showNotification('error', '재생성 실패', `${errorMsg}\n기존 이미지가 유지됩니다.`);
+        } else {
+            // 기존 이미지가 없으면 재시도 버튼 표시
+            refDiv.innerHTML = `
+                <div class="p-4 text-center">
+                    <i class="fas fa-exclamation-triangle text-white text-2xl mb-2"></i>
+                    <p class="text-white text-xs font-bold mt-2">⚠️ 이미지 생성 실패</p>
+                    <p class="text-white text-xs opacity-75 mt-1">${errorMsg}</p>
+                    <button onclick="generateCharacterReference(${charIndex})" class="mt-3 px-4 py-2 bg-white text-purple-600 rounded text-xs font-semibold hover:bg-opacity-90 transition">
+                        <i class="fas fa-redo mr-1"></i>재시도
+                    </button>
+                </div>
+            `;
+            
+            // 알림도 표시
+            showNotification('error', '생성 실패', errorMsg);
+        }
     }
 }
 
@@ -5039,18 +5048,27 @@ async function generateIllustration(pageIndex) {
             errorMessage = error.message;
         }
         
-        illustrationDiv.innerHTML = `
-            <div class="p-6 text-center">
-                <p class="text-red-600 text-sm mb-2 font-bold">⚠️ 이미지 생성 실패</p>
-                <p class="text-gray-700 text-xs mb-2">${errorMessage}</p>
-                <button 
-                    onclick="generateIllustration(${pageIndex})"
-                    class="mt-3 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm"
-                >
-                    <i class="fas fa-redo mr-2"></i>재시도
-                </button>
-            </div>
-        `;
+        // 기존 이미지가 있으면 유지하고 에러 메시지만 표시
+        if (page.illustrationImage) {
+            // displayStorybook을 호출하여 기존 이미지 복원
+            displayStorybook(currentStorybook);
+            // 에러 알림
+            showNotification('error', '재생성 실패', `${errorMessage}\n기존 이미지가 유지됩니다.`);
+        } else {
+            // 기존 이미지가 없으면 재시도 버튼 표시
+            illustrationDiv.innerHTML = `
+                <div class="p-6 text-center">
+                    <p class="text-red-600 text-sm mb-2 font-bold">⚠️ 이미지 생성 실패</p>
+                    <p class="text-gray-700 text-xs mb-2">${errorMessage}</p>
+                    <button 
+                        onclick="generateIllustration(${pageIndex})"
+                        class="mt-3 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm"
+                    >
+                        <i class="fas fa-redo mr-2"></i>재시도
+                    </button>
+                </div>
+            `;
+        }
     }
 }
 
@@ -6484,18 +6502,28 @@ async function generateSingleKeyObjectImage(objIndex) {
     } catch (error) {
         console.error(`Key Object 이미지 생성 오류 (${obj.name}):`, error);
         
-        objImgDiv.innerHTML = `
-            <div class="text-center p-4">
-                <i class="fas fa-exclamation-circle text-red-500 text-3xl mb-2"></i>
-                <p class="text-red-600 text-xs mb-2">생성 실패</p>
-                <button 
-                    onclick="generateSingleKeyObjectImage(${objIndex})"
-                    class="bg-orange-500 text-white px-3 py-1 rounded text-xs hover:bg-orange-600"
-                >
-                    <i class="fas fa-redo mr-1"></i>재시도
-                </button>
-            </div>
-        `;
+        // 기존 이미지가 있는지 확인
+        const existingImage = currentStorybook.keyObjectImages && currentStorybook.keyObjectImages[objIndex];
+        
+        if (existingImage && existingImage.imageUrl) {
+            // 기존 이미지가 있으면 유지하고 에러 알림만 표시
+            objImgDiv.innerHTML = `<img src="${existingImage.imageUrl}" alt="${obj.name}" class="w-full h-full object-cover rounded-lg"/>`;
+            showNotification('error', '재생성 실패', `${obj.korean} 이미지 재생성에 실패했습니다.\n기존 이미지가 유지됩니다.`);
+        } else {
+            // 기존 이미지가 없으면 재시도 버튼 표시
+            objImgDiv.innerHTML = `
+                <div class="text-center p-4">
+                    <i class="fas fa-exclamation-circle text-red-500 text-3xl mb-2"></i>
+                    <p class="text-red-600 text-xs mb-2">생성 실패</p>
+                    <button 
+                        onclick="generateSingleKeyObjectImage(${objIndex})"
+                        class="bg-orange-500 text-white px-3 py-1 rounded text-xs hover:bg-orange-600"
+                    >
+                        <i class="fas fa-redo mr-1"></i>재시도
+                    </button>
+                </div>
+            `;
+        }
         
         return {
             index: objIndex,
