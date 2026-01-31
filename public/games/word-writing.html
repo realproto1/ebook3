@@ -401,6 +401,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script>
+        // 개발 모드 플래그 (프로덕션에서는 false로 설정)
+        const DEBUG_MODE = false;
+        
         let storyData = null;
         let currentCharIndex = 0;
         let correctChars = 0;
@@ -424,7 +427,7 @@
         // Canvas 초기화
         function initCanvas() {
             canvas = document.getElementById('drawingCanvas');
-            ctx = canvas.getContext('2d');
+            ctx = canvas.getContext('2d', { willReadFrequently: true });
             
             // 고해상도 디스플레이 지원
             const rect = canvas.getBoundingClientRect();
@@ -553,7 +556,7 @@
                     guidePixelCount++;
                 }
             }
-            console.log(`🖼️ 가이드 이미지 생성: "${char}" - 픽셀 수: ${guidePixelCount}`);
+            if (DEBUG_MODE) console.log(`🖼️ 가이드 이미지 생성: "${char}" - 픽셀 수: ${guidePixelCount}`);
             
             // ⚠️ 가이드 글자는 CSS로 표시하고, 캔버스에는 그리지 않음!
             // 대신 배경으로 표시
@@ -587,11 +590,11 @@
         // 스토리 데이터 로드
         async function loadStory() {
             try {
-                console.log('📚 스토리 로딩 중:', storyId);
+                if (DEBUG_MODE) console.log('📚 스토리 로딩 중:', storyId);
                 const response = await axios.get(`/api/storybooks/${storyId}`);
                 storyData = response.data;
                 
-                console.log('✅ 스토리 로드 완료:', storyData.title);
+                if (DEBUG_MODE) console.log('✅ 스토리 로드 완료:', storyData.title);
                 document.getElementById('storyTitle').textContent = storyData.title || '동화책';
 
                 // Vocabulary 또는 key_objects에서 글자 추출
@@ -600,12 +603,12 @@
                 // 1. educational_content.vocabulary 확인
                 if (storyData.educational_content && storyData.educational_content.vocabulary) {
                     vocabulary = storyData.educational_content.vocabulary;
-                    console.log('📚 educational_content.vocabulary 사용:', vocabulary.length);
+                    if (DEBUG_MODE) console.log('📚 educational_content.vocabulary 사용:', vocabulary.length);
                 } 
                 // 2. vocabulary 직접 확인
                 else if (storyData.vocabulary && Array.isArray(storyData.vocabulary)) {
                     vocabulary = storyData.vocabulary;
-                    console.log('📚 vocabulary 직접 사용:', vocabulary.length);
+                    if (DEBUG_MODE) console.log('📚 vocabulary 직접 사용:', vocabulary.length);
                 }
                 // 3. key_objects 사용 (fallback)
                 else if (storyData.key_objects && Array.isArray(storyData.key_objects)) {
@@ -613,7 +616,7 @@
                         korean: obj.korean || obj.name || obj,
                         word: obj.name || obj.korean || obj
                     }));
-                    console.log('📚 key_objects 사용:', vocabulary.length);
+                    if (DEBUG_MODE) console.log('📚 key_objects 사용:', vocabulary.length);
                 }
                 
                 if (vocabulary.length === 0) {
@@ -718,7 +721,7 @@
             
             // 디버깅 로그
             const accuracy = totalGuidePixels === 0 ? 0 : (matchingPixels / totalGuidePixels) * 100;
-            console.log(`📊 정확도 계산: 가이드 픽셀=${totalGuidePixels}, 매칭 픽셀=${matchingPixels}, 정확도=${accuracy.toFixed(1)}%`);
+            if (DEBUG_MODE) console.log(`📊 정확도 계산: 가이드 픽셀=${totalGuidePixels}, 매칭 픽셀=${matchingPixels}, 정확도=${accuracy.toFixed(1)}%`);
             
             // 정확도 계산 (0~100)
             if (totalGuidePixels === 0) return 0;
@@ -858,7 +861,7 @@
                     correctChars++;
                     document.getElementById('correctCount').textContent = correctChars;
                     
-                    console.log(`✅ 자동 정답 인정! 정확도: ${accuracy.toFixed(1)}%`);
+                    if (DEBUG_MODE) console.log(`✅ 자동 정답 인정! 정확도: ${accuracy.toFixed(1)}%`);
                     
                     // 정답 애니메이션 표시
                     showCorrectFeedback(() => {
