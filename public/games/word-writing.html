@@ -650,6 +650,9 @@
         // 글자 렌더링
         function renderChar() {
             const charData = characters[currentCharIndex];
+            
+            // 자동 넘김 플래그 초기화
+            autoAdvanceTriggered = false;
 
             // 글자 번호 업데이트
             document.getElementById('charNumber').textContent = `글자 ${currentCharIndex + 1}`;
@@ -814,6 +817,8 @@
         }
         
         // 실시간 정답률 업데이트
+        let autoAdvanceTriggered = false; // 자동 넘김 중복 방지
+        
         function updateRealtimeAccuracy() {
             if (!guideImageData) return;
             
@@ -825,19 +830,39 @@
                 realtimeDiv.textContent = `현재 정확도: ${accuracy.toFixed(1)}%`;
                 
                 // 정확도에 따라 색상 변경
-                if (accuracy >= 70) {
+                if (accuracy >= 75) {
                     realtimeDiv.style.color = '#4caf50'; // 녹색
                 } else if (accuracy >= 50) {
                     realtimeDiv.style.color = '#ff9800'; // 주황색
                 } else {
                     realtimeDiv.style.color = '#fcb69f'; // 기본색
                 }
+                
+                // 75% 이상이면 자동으로 정답 처리 및 다음 문제로
+                if (accuracy >= 75 && !autoAdvanceTriggered) {
+                    autoAdvanceTriggered = true;
+                    totalAttempts++;
+                    correctChars++;
+                    document.getElementById('correctCount').textContent = correctChars;
+                    
+                    console.log(`✅ 자동 정답 인정! 정확도: ${accuracy.toFixed(1)}%`);
+                    
+                    // 정답 애니메이션 표시
+                    showCorrectFeedback(() => {
+                        currentCharIndex++;
+                        if (currentCharIndex < characters.length) {
+                            renderChar();
+                        } else {
+                            showResults();
+                        }
+                    });
+                }
             } else {
                 realtimeDiv.textContent = '';
             }
         }
         
-        // 그림 확인 (무조건 정답 처리)
+        // 그림 확인 (정확도 확인 후 정답 판정)
         function checkDrawing() {
             totalAttempts++;
 
@@ -858,19 +883,35 @@
                 return;
             }
 
-            // 무조건 정답 처리!
-            correctChars++;
-            document.getElementById('correctCount').textContent = correctChars;
+            // 픽셀 비교로 정확도 측정
+            if (!guideImageData) {
+                alert('가이드 데이터가 없습니다.');
+                return;
+            }
             
-            // 정답 표시
-            showCorrectFeedback(() => {
-                currentCharIndex++;
-                if (currentCharIndex < characters.length) {
-                    renderChar();
-                } else {
-                    showResults();
-                }
-            });
+            const accuracy = calculateAccuracy(imageData, guideImageData);
+            const threshold = 70; // 70% 이상이면 정답
+            
+            console.log(`정확도: ${accuracy.toFixed(1)}%`);
+            
+            if (accuracy >= threshold) {
+                // 정답! 자동으로 다음 글자로
+                correctChars++;
+                document.getElementById('correctCount').textContent = correctChars;
+                
+                // 간단한 정답 표시
+                showCorrectFeedback(() => {
+                    currentCharIndex++;
+                    if (currentCharIndex < characters.length) {
+                        renderChar();
+                    } else {
+                        showResults();
+                    }
+                });
+            } else {
+                // 다시 시도
+                showRetryFeedback(accuracy);
+            }
         }
 
         // 글자 건너뛰기
