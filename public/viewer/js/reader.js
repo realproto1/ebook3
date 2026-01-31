@@ -930,6 +930,10 @@ async function enterImageFullscreen() {
         display: block;
     `;
     
+    // 페이지 범위 계산 (버튼 핸들러에서 사용)
+    const firstPage = currentBook.hasCoverPage ? -1 : 0;
+    const lastPage = currentBook.pages.length - 1;
+    
     // 이전 페이지 버튼
     const prevBtn = document.createElement('button');
     prevBtn.id = 'fullscreen-prev-btn';
@@ -958,12 +962,16 @@ async function enterImageFullscreen() {
     `;
     prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
     prevBtn.onclick = async () => {
-        // 전체화면 종료 후 페이지 변경
-        exitImageFullscreen();
-        // 잠시 대기 후 페이지 이동 (showPage 내부에서 autoPlayTTS 자동 호출됨)
-        setTimeout(() => {
-            previousPage();
-        }, 100);
+        // Fullscreen 유지하면서 페이지만 변경
+        // TTS 중지
+        stopTTS();
+        
+        // 현재 페이지 업데이트 및 표시
+        if (currentPage > firstPage) {
+            showPage(currentPage - 1);
+            // 버튼 상태도 업데이트
+            updateButtonStates();
+        }
     };
     
     // 다음 페이지 버튼
@@ -994,17 +1002,17 @@ async function enterImageFullscreen() {
     `;
     nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
     nextBtn.onclick = async () => {
-        // 전체화면 종료 후 페이지 변경
-        exitImageFullscreen();
-        // 잠시 대기 후 페이지 이동 (showPage 내부에서 autoPlayTTS 자동 호출됨)
-        setTimeout(() => {
-            nextPage();
-        }, 100);
+        // Fullscreen 유지하면서 페이지만 변경
+        // TTS 중지
+        stopTTS();
+        
+        // 현재 페이지 업데이트 및 표시
+        if (currentPage < lastPage) {
+            showPage(currentPage + 1);
+            // 버튼 상태도 업데이트
+            updateButtonStates();
+        }
     };
-    
-    // 페이지가 첫 페이지/마지막 페이지인 경우 버튼 비활성화
-    const firstPage = currentBook.hasCoverPage ? -1 : 0;
-    const lastPage = currentBook.pages.length - 1;
     
     // 버튼 활성화 상태 업데이트 함수
     function updateButtonStates() {
