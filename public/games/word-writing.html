@@ -824,16 +824,16 @@
                 realtimeDiv.textContent = `현재 정확도: ${accuracy.toFixed(1)}%`;
                 
                 // 정확도에 따라 색상 변경
-                if (accuracy >= 75) {
+                if (accuracy >= 85) {
                     realtimeDiv.style.color = '#4caf50'; // 녹색
-                } else if (accuracy >= 50) {
+                } else if (accuracy >= 60) {
                     realtimeDiv.style.color = '#ff9800'; // 주황색
                 } else {
                     realtimeDiv.style.color = '#fcb69f'; // 기본색
                 }
                 
-                // 75% 이상이면 자동으로 정답 처리 및 다음 문제로
-                if (accuracy >= 75 && !autoAdvanceTriggered) {
+                // 85% 이상이면 자동으로 정답 처리 및 다음 문제로
+                if (accuracy >= 85 && !autoAdvanceTriggered) {
                     autoAdvanceTriggered = true;
                     totalAttempts++;
                     correctChars++;
