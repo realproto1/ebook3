@@ -287,6 +287,9 @@ function showPage(pageIndex) {
     // 본문 페이지 처리
     const page = currentBook.pages[pageIndex];
     
+    // currentPage 즉시 업데이트 (텍스트 표시보다 먼저)
+    currentPage = pageIndex;
+    
     console.log(`📄 Showing page ${pageIndex + 1}/${currentBook.pages.length}`);
     
     // 페이지 전환 애니메이션
@@ -323,9 +326,6 @@ function showPage(pageIndex) {
     imageEl.style.transform = 'translateX(100px)';
     textEl.style.opacity = '0';
     textEl.style.transform = 'translateX(100px)';
-    
-    // currentPage 업데이트
-    currentPage = pageIndex;
     
     // Enter 애니메이션 (페이드인만)
     requestAnimationFrame(() => {
