@@ -99,8 +99,11 @@
         }
 
         .canvas-container {
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             margin: 30px 0;
+            min-height: 450px;
         }
 
         #drawingCanvas {
@@ -110,6 +113,8 @@
             background: white;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             touch-action: none;
+            max-width: 100%;
+            height: auto;
         }
 
         .control-buttons {
@@ -338,6 +343,16 @@
                 아래 캔버스에 글자를 따라 그려보세요
             </div>
 
+            <!-- 실시간 정답률 표시 -->
+            <div id="realtimeAccuracy" style="
+                text-align: center;
+                font-size: 18px;
+                font-weight: bold;
+                color: #fcb69f;
+                margin: 10px 0;
+                min-height: 30px;
+            "></div>
+
             <div class="canvas-container">
                 <canvas id="drawingCanvas" width="400" height="400"></canvas>
             </div>
@@ -424,7 +439,7 @@
 
             // 그리기 설정
             ctx.strokeStyle = '#333';
-            ctx.lineWidth = 8;
+            ctx.lineWidth = 15; // 펜 두께 증가 (8 → 15)
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
@@ -461,6 +476,9 @@
 
             lastX = x;
             lastY = y;
+            
+            // 실시간 정답률 계산
+            updateRealtimeAccuracy();
         }
 
         function stopDrawing() {
@@ -492,10 +510,25 @@
 
             lastX = x;
             lastY = y;
+            
+            // 실시간 정답률 계산
+            updateRealtimeAccuracy();
+        }
+            ctx.lineTo(x, y);
+            ctx.stroke();
+
+            lastX = x;
+            lastY = y;
         }
 
         function clearCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 실시간 정답률 초기화
+            const realtimeDiv = document.getElementById('realtimeAccuracy');
+            if (realtimeDiv) {
+                realtimeDiv.textContent = '';
+            }
         }
 
         // 가이드 이미지 데이터 저장용
@@ -780,7 +813,31 @@
             }, 1500);
         }
         
-        // 그림 확인 (픽셀 비교)
+        // 실시간 정답률 업데이트
+        function updateRealtimeAccuracy() {
+            if (!guideImageData) return;
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const accuracy = calculateAccuracy(imageData, guideImageData);
+            
+            const realtimeDiv = document.getElementById('realtimeAccuracy');
+            if (accuracy > 0) {
+                realtimeDiv.textContent = `현재 정확도: ${accuracy.toFixed(1)}%`;
+                
+                // 정확도에 따라 색상 변경
+                if (accuracy >= 70) {
+                    realtimeDiv.style.color = '#4caf50'; // 녹색
+                } else if (accuracy >= 50) {
+                    realtimeDiv.style.color = '#ff9800'; // 주황색
+                } else {
+                    realtimeDiv.style.color = '#fcb69f'; // 기본색
+                }
+            } else {
+                realtimeDiv.textContent = '';
+            }
+        }
+        
+        // 그림 확인 (무조건 정답 처리)
         function checkDrawing() {
             totalAttempts++;
 
@@ -801,35 +858,19 @@
                 return;
             }
 
-            // 픽셀 비교로 정확도 측정
-            if (!guideImageData) {
-                alert('가이드 데이터가 없습니다.');
-                return;
-            }
+            // 무조건 정답 처리!
+            correctChars++;
+            document.getElementById('correctCount').textContent = correctChars;
             
-            const accuracy = calculateAccuracy(imageData, guideImageData);
-            const threshold = 70; // 70% 이상이면 정답
-            
-            console.log(`정확도: ${accuracy.toFixed(1)}%`);
-            
-            if (accuracy >= threshold) {
-                // 정답! 자동으로 다음 글자로
-                correctChars++;
-                document.getElementById('correctCount').textContent = correctChars;
-                
-                // 간단한 정답 표시
-                showCorrectFeedback(() => {
-                    currentCharIndex++;
-                    if (currentCharIndex < characters.length) {
-                        renderChar();
-                    } else {
-                        showResults();
-                    }
-                });
-            } else {
-                // 다시 시도
-                showRetryFeedback(accuracy);
-            }
+            // 정답 표시
+            showCorrectFeedback(() => {
+                currentCharIndex++;
+                if (currentCharIndex < characters.length) {
+                    renderChar();
+                } else {
+                    showResults();
+                }
+            });
         }
 
         // 글자 건너뛰기
