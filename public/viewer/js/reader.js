@@ -952,11 +952,11 @@ async function enterImageFullscreen() {
     `;
     prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
     prevBtn.onclick = async () => {
-        // 전체화면 내에서 페이지 변경
-        previousPage();
-        // 잠시 대기 후 전체화면 다시 진입
-        setTimeout(async () => {
-            await enterImageFullscreen();
+        // 전체화면 종료 후 페이지 변경
+        exitImageFullscreen();
+        // 잠시 대기 후 페이지 이동 (showPage 내부에서 autoPlayTTS 자동 호출됨)
+        setTimeout(() => {
+            previousPage();
         }, 100);
     };
     
@@ -988,11 +988,11 @@ async function enterImageFullscreen() {
     `;
     nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
     nextBtn.onclick = async () => {
-        // 전체화면 내에서 페이지 변경
-        nextPage();
-        // 잠시 대기 후 전체화면 다시 진입
-        setTimeout(async () => {
-            await enterImageFullscreen();
+        // 전체화면 종료 후 페이지 변경
+        exitImageFullscreen();
+        // 잠시 대기 후 페이지 이동 (showPage 내부에서 autoPlayTTS 자동 호출됨)
+        setTimeout(() => {
+            nextPage();
         }, 100);
     };
     
@@ -1144,11 +1144,14 @@ async function enterImageFullscreen() {
     }
     
     // 전체화면 진입 후 TTS 자동재생 (표지가 아닌 경우)
-    if (currentPage !== -1) {
+    // 단, 이미 TTS가 재생 중이면 다시 시작하지 않음
+    if (currentPage !== -1 && !currentAudio) {
         console.log('🎵 전체화면 모드에서 TTS 자동재생 시작');
         setTimeout(() => {
             autoPlayTTS();
         }, 500);
+    } else if (currentAudio) {
+        console.log('ℹ️ TTS가 이미 재생 중이므로 자동재생을 건너뜁니다');
     }
     
     console.log('📺 이미지 전체화면 진입 (오버레이 방식)');
