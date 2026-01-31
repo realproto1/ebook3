@@ -359,6 +359,12 @@ function showPage(pageIndex) {
             }
         }, 350); // 페이드인 애니메이션 시간 (300ms) + 버퍼
     }
+    
+    // fullscreen 상태에서도 오버레이 이미지/텍스트 업데이트
+    if (isImageFullscreen) {
+        console.log('📺 Fullscreen 오버레이 업데이트');
+        updateFullscreenOverlay();
+    }
 }
 
 // 진행률 업데이트
@@ -1072,6 +1078,7 @@ async function enterImageFullscreen() {
     
     // 텍스트 오버레이 - overlay의 직계 자식으로 배치
     const textOverlay = document.createElement('div');
+    textOverlay.className = 'fullscreen-text';  // 클래스 추가 (업데이트용)
     
     // 모바일 여부 체크
     const isMobile = window.innerWidth <= 768;
@@ -1182,6 +1189,62 @@ function exitImageFullscreen() {
     
     console.log('📺 이미지 전체화면 종료');
 }
+
+// Fullscreen 오버레이 내용 업데이트 (페이지 전환 시)
+function updateFullscreenOverlay() {
+    const overlay = document.getElementById('fullscreen-overlay');
+    if (!overlay) {
+        console.warn('⚠️ Fullscreen 오버레이를 찾을 수 없습니다');
+        return;
+    }
+    
+    // 현재 페이지 정보
+    const pageImage = document.getElementById('page-image');
+    const pageText = document.getElementById('page-text');
+    
+    if (!pageImage) {
+        console.error('❌ 페이지 이미지를 찾을 수 없습니다');
+        return;
+    }
+    
+    // 오버레이 내부의 이미지 찾기
+    const fullImage = overlay.querySelector('img');
+    const fullText = overlay.querySelector('.fullscreen-text');
+    
+    if (fullImage) {
+        // 페이드아웃
+        fullImage.style.transition = 'opacity 0.2s ease-out';
+        fullImage.style.opacity = '0';
+        
+        setTimeout(() => {
+            // 이미지 업데이트
+            fullImage.src = pageImage.src;
+            fullImage.alt = pageImage.alt;
+            
+            // 페이드인
+            fullImage.style.opacity = '1';
+            console.log('✅ Fullscreen 이미지 업데이트 완료');
+        }, 200);
+    }
+    
+    if (fullText && pageText) {
+        // 페이드아웃
+        fullText.style.transition = 'opacity 0.2s ease-out';
+        fullText.style.opacity = '0';
+        
+        setTimeout(() => {
+            // 텍스트 업데이트
+            fullText.textContent = pageText.textContent;
+            
+            // 페이드인
+            fullText.style.opacity = '1';
+            console.log('✅ Fullscreen 텍스트 업데이트 완료');
+        }, 200);
+    }
+    
+    console.log('📺 Fullscreen 오버레이 업데이트 완료');
+}
+
 
 // 현재 언어에 맞는 페이지 텍스트 가져오기
 function getPageText(page, lang) {
