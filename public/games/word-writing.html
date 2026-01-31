@@ -871,16 +871,16 @@
                 realtimeDiv.textContent = `현재 정확도: ${accuracy.toFixed(1)}%`;
                 
                 // 정확도에 따라 색상 변경
-                if (accuracy >= 85) {
+                if (accuracy >= 90) {
                     realtimeDiv.style.color = '#4caf50'; // 녹색
-                } else if (accuracy >= 60) {
+                } else if (accuracy >= 70) {
                     realtimeDiv.style.color = '#ff9800'; // 주황색
                 } else {
                     realtimeDiv.style.color = '#fcb69f'; // 기본색
                 }
                 
-                // 85% 이상이면 자동으로 정답 처리 및 다음 문제로
-                if (accuracy >= 85 && !autoAdvanceTriggered) {
+                // 90% 이상이면 자동으로 정답 처리 및 다음 문제로
+                if (accuracy >= 90 && !autoAdvanceTriggered) {
                     autoAdvanceTriggered = true;
                     totalAttempts++;
                     correctChars++;
@@ -931,7 +931,7 @@
             }
             
             const accuracy = calculateAccuracy(imageData, guideImageData);
-            const threshold = 70; // 70% 이상이면 정답
+            const threshold = 80; // 80% 이상이면 정답 (자동 넘김은 90%)
             
             console.log(`정확도: ${accuracy.toFixed(1)}%`);
             
