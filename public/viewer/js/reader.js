@@ -39,134 +39,23 @@ function preloadNextPages(currentPageIndex) {
         }
     }
     
-    // 프리로드 실행
-    let loadedCount = 0;
-    let skippedCount = 0;
-    
+    // 프리로드 실행 (백그라운드에서 조용히)
     totalToPreload.forEach((pageIndex) => {
         const page = currentBook.pages[pageIndex];
         if (page && page.illustrationImage) {
             // 이미 프리로드된 경우 건너뛰기
             if (preloadedImages[pageIndex]) {
-                skippedCount++;
                 return;
             }
             
             // 새 Image 객체 생성 및 프리로드
             const img = new Image();
             img.src = page.illustrationImage;
-            img.onload = () => {
-                loadedCount++;
-                updatePreloadProgress(loadedCount, totalToPreload.length - skippedCount);
-            };
-            img.onerror = () => {
-                console.error(`❌ 프리로드 실패: 페이지 ${pageIndex + 1}`);
-                loadedCount++;
-                updatePreloadProgress(loadedCount, totalToPreload.length - skippedCount);
-            };
             preloadedImages[pageIndex] = img;
             
             console.log(`🔄 프리로딩: 페이지 ${pageIndex + 1}/${currentBook.pages.length}`);
         }
     });
-    
-    // 즉시 프리로드 진행률 표시 시작
-    if (totalToPreload.length - skippedCount > 0) {
-        showPreloadProgress();
-    }
-}
-
-// 프리로드 진행률 업데이트
-function updatePreloadProgress(loaded, total) {
-    const percentage = Math.round((loaded / total) * 100);
-    const indicator = document.getElementById('preload-indicator');
-    
-    if (indicator) {
-        const progressBar = indicator.querySelector('.preload-progress-bar');
-        const progressText = indicator.querySelector('.preload-progress-text');
-        
-        if (progressBar) {
-            progressBar.style.width = `${percentage}%`;
-        }
-        if (progressText) {
-            progressText.textContent = `${percentage}%`;
-        }
-        
-        // 100% 완료되면 2초 후 숨김
-        if (percentage >= 100) {
-            setTimeout(() => {
-                hidePreloadProgress();
-            }, 2000);
-        }
-    }
-}
-
-// 프리로드 진행률 표시
-function showPreloadProgress() {
-    let indicator = document.getElementById('preload-indicator');
-    
-    // 이미 있으면 표시만
-    if (indicator) {
-        indicator.style.display = 'block';
-        indicator.style.opacity = '1';
-        return;
-    }
-    
-    // 새로 생성
-    indicator = document.createElement('div');
-    indicator.id = 'preload-indicator';
-    indicator.style.cssText = `
-        position: fixed;
-        bottom: 80px;
-        right: 20px;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 8px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        z-index: 10000;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        transition: opacity 0.3s ease;
-    `;
-    
-    indicator.innerHTML = `
-        <i class="fas fa-download" style="font-size: 14px; color: #4ade80;"></i>
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="
-                width: 60px;
-                height: 4px;
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 2px;
-                overflow: hidden;
-            ">
-                <div class="preload-progress-bar" style="
-                    height: 100%;
-                    width: 0%;
-                    background: linear-gradient(90deg, #4ade80, #22c55e);
-                    transition: width 0.3s ease;
-                "></div>
-            </div>
-            <span class="preload-progress-text" style="min-width: 30px; text-align: right;">0%</span>
-        </div>
-    `;
-    
-    document.body.appendChild(indicator);
-}
-
-// 프리로드 진행률 숨김
-function hidePreloadProgress() {
-    const indicator = document.getElementById('preload-indicator');
-    if (indicator) {
-        indicator.style.opacity = '0';
-        setTimeout(() => {
-            indicator.style.display = 'none';
-        }, 300);
-    }
 }
 
 // 모바일 주소창/네비게이션 숨기기
