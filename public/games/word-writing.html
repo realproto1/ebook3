@@ -442,7 +442,7 @@
 
             // 그리기 설정
             ctx.strokeStyle = '#333';
-            ctx.lineWidth = 15; // 펜 두께 증가 (8 → 15)
+            ctx.lineWidth = 25; // 펜 두께 증가 (사용자 쓰기 편의성 향상)
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
@@ -698,23 +698,48 @@
         function calculateAccuracy(userImageData, guideImageData) {
             const userPixels = userImageData.data;
             const guidePixels = guideImageData.data;
+            const width = guideImageData.width;
+            const height = guideImageData.height;
             
             let totalGuidePixels = 0;
             let matchingPixels = 0;
+            
+            // 주변 픽셀 검사 반경 (펜 두께 고려)
+            const searchRadius = 12; // 25px 펜 두께의 절반
             
             // 가이드 글자의 모든 픽셀 위치를 찾고,
             // 사용자가 그린 부분과 얼마나 겹치는지 확인
             for (let i = 0; i < guidePixels.length; i += 4) {
                 const guideAlpha = guidePixels[i + 3];
-                const userAlpha = userPixels[i + 3];
                 
                 // 가이드에 픽셀이 있는 위치
                 if (guideAlpha > 50) {
                     totalGuidePixels++;
                     
-                    // 사용자도 그 위치에 그렸으면 매칭
-                    if (userAlpha > 50) {
-                        matchingPixels++;
+                    // 현재 픽셀 좌표
+                    const pixelIndex = i / 4;
+                    const x = pixelIndex % width;
+                    const y = Math.floor(pixelIndex / width);
+                    
+                    // 주변 영역 검사 (펜 두께를 고려한 반경)
+                    let foundMatch = false;
+                    for (let dy = -searchRadius; dy <= searchRadius && !foundMatch; dy++) {
+                        for (let dx = -searchRadius; dx <= searchRadius && !foundMatch; dx++) {
+                            const nx = x + dx;
+                            const ny = y + dy;
+                            
+                            // 경계 체크
+                            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                                const ni = (ny * width + nx) * 4;
+                                const userAlpha = userPixels[ni + 3];
+                                
+                                // 원형 반경 내에서 사용자가 그렸으면 매칭
+                                if (userAlpha > 50 && (dx * dx + dy * dy) <= searchRadius * searchRadius) {
+                                    matchingPixels++;
+                                    foundMatch = true;
+                                }
+                            }
+                        }
                     }
                 }
             }
