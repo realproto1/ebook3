@@ -10,6 +10,44 @@ let hasCoverPage = false; // 표지 페이지 존재 여부
 let backgroundMusic = null; // 배경음악 Audio 객체
 let backgroundMusicList = []; // 배경음악 목록
 let isBackgroundMusicPlaying = false; // 배경음악 재생 상태
+let preloadedImages = {}; // 프리로드된 이미지 캐시 {pageIndex: Image}
+
+// 이미지 프리로딩 함수
+function preloadNextPages(currentPageIndex) {
+    if (!currentBook || !currentBook.pages) {
+        return;
+    }
+    
+    const lastPage = currentBook.pages.length - 1;
+    
+    // 표지 페이지(-1)인 경우 첫 페이지(0)부터 시작
+    const startIndex = currentPageIndex === -1 ? 0 : currentPageIndex + 1;
+    
+    // 다음 페이지와 그 다음 페이지 (2개) 프리로드
+    for (let i = 0; i < 2; i++) {
+        const nextIndex = startIndex + i;
+        
+        // 범위 체크
+        if (nextIndex > lastPage || nextIndex < 0) {
+            break;
+        }
+        
+        const nextPage = currentBook.pages[nextIndex];
+        if (nextPage && nextPage.illustrationImage) {
+            // 이미 프리로드된 경우 건너뛰기
+            if (preloadedImages[nextIndex]) {
+                continue;
+            }
+            
+            // 새 Image 객체 생성 및 프리로드
+            const img = new Image();
+            img.src = nextPage.illustrationImage;
+            preloadedImages[nextIndex] = img;
+            
+            console.log(`🔄 프리로딩: 페이지 ${nextIndex + 1}/${currentBook.pages.length}`);
+        }
+    }
+}
 
 // 모바일 주소창/네비게이션 숨기기
 function hideAddressBar() {
@@ -192,6 +230,9 @@ async function loadBook() {
                 });
             }
             
+            // 프리로딩 캐시 초기화
+            preloadedImages = {};
+            
             // 항상 첫 페이지(0번)부터 시작
             showPage(0);
         }
@@ -282,6 +323,10 @@ function showPage(pageIndex) {
         
         updateProgress();
         updateNavigationButtons();
+        
+        // 표지에서 첫 페이지(0)와 두 번째 페이지(1) 프리로드
+        preloadNextPages(-1);
+        
         return;
     }
     
@@ -377,6 +422,11 @@ function showPage(pageIndex) {
     if (isImageFullscreen) {
         console.log('📺 Fullscreen 오버레이 업데이트');
         updateFullscreenOverlay();
+    }
+    
+    // 다음 페이지 이미지 프리로드 (본문 페이지만)
+    if (pageIndex >= 0) {
+        preloadNextPages(pageIndex);
     }
 }
 
