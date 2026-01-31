@@ -530,31 +530,9 @@
         
         // 가이드 글자 그리기 (회색 반투명) + 참조 이미지 생성
         function drawGuideChar(char) {
-            ctx.save();
-            
-            // 회색 반투명으로 설정
-            ctx.fillStyle = 'rgba(200, 200, 200, 0.3)';
-            ctx.strokeStyle = 'rgba(150, 150, 150, 0.5)';
-            ctx.lineWidth = 2;
-            
-            // 글자 크기 설정
+            // ⭐ 먼저 별도의 캔버스에 진한 글자로 그려서 참조 이미지 생성 (픽셀 비교용)
             const fontSize = canvas.width * 0.6; // 캔버스 너비의 60%
-            ctx.font = `bold ${fontSize}px 'Noto Sans KR', sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
             
-            // 캔버스 중앙에 글자 그리기
-            const x = canvas.width / 2;
-            const y = canvas.height / 2;
-            
-            // 외곽선 먼저 그리기
-            ctx.strokeText(char, x, y);
-            // 그 다음 채우기
-            ctx.fillText(char, x, y);
-            
-            ctx.restore();
-            
-            // 별도의 캔버스에 진한 글자로 그려서 참조 이미지 생성 (픽셀 비교용)
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = canvas.width;
             tempCanvas.height = canvas.height;
@@ -567,6 +545,43 @@
             tempCtx.fillText(char, tempCanvas.width / 2, tempCanvas.height / 2);
             
             guideImageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // 디버깅: 가이드 이미지 픽셀 수 확인
+            let guidePixelCount = 0;
+            for (let i = 0; i < guideImageData.data.length; i += 4) {
+                if (guideImageData.data[i + 3] > 50) {
+                    guidePixelCount++;
+                }
+            }
+            console.log(`🖼️ 가이드 이미지 생성: "${char}" - 픽셀 수: ${guidePixelCount}`);
+            
+            // ⚠️ 가이드 글자는 CSS로 표시하고, 캔버스에는 그리지 않음!
+            // 대신 배경으로 표시
+            const guideOverlay = document.getElementById('guideOverlay');
+            if (!guideOverlay) {
+                const overlay = document.createElement('div');
+                overlay.id = 'guideOverlay';
+                overlay.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    pointer-events: none;
+                    font-size: ${fontSize * (400 / canvas.width)}px;
+                    font-weight: bold;
+                    font-family: 'Noto Sans KR', sans-serif;
+                    color: rgba(200, 200, 200, 0.3);
+                    text-shadow: 0 0 2px rgba(150, 150, 150, 0.5);
+                    z-index: 1;
+                `;
+                canvas.parentElement.style.position = 'relative';
+                canvas.parentElement.appendChild(overlay);
+            }
+            document.getElementById('guideOverlay').textContent = char;
         }
 
         // 스토리 데이터 로드
@@ -701,9 +716,13 @@
                 }
             }
             
+            // 디버깅 로그
+            const accuracy = totalGuidePixels === 0 ? 0 : (matchingPixels / totalGuidePixels) * 100;
+            console.log(`📊 정확도 계산: 가이드 픽셀=${totalGuidePixels}, 매칭 픽셀=${matchingPixels}, 정확도=${accuracy.toFixed(1)}%`);
+            
             // 정확도 계산 (0~100)
             if (totalGuidePixels === 0) return 0;
-            return (matchingPixels / totalGuidePixels) * 100;
+            return accuracy;
         }
         
         // 효과음 재생 함수
