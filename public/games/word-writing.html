@@ -514,12 +514,6 @@
             // 실시간 정답률 계산
             updateRealtimeAccuracy();
         }
-            ctx.lineTo(x, y);
-            ctx.stroke();
-
-            lastX = x;
-            lastY = y;
-        }
 
         function clearCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
