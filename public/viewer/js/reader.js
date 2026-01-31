@@ -246,38 +246,39 @@ function showPage(pageIndex) {
         // 페이지 전환 애니메이션
         const imageEl = document.getElementById('page-image');
         const textEl = document.getElementById('page-text');
-        const imageContainer = document.getElementById('page-image-container');
-        
-        // 즉시 내용 변경 (페이드아웃 없이)
-        imageContainer.style.visibility = 'hidden';
-        
-        // 표지 이미지 설정
-        imageEl.src = currentBook.coverImage;
-        imageEl.alt = `${currentBook.title} 표지`;
-        
-        // 표지에는 텍스트 오버레이 숨김
-        textEl.textContent = '';
-        
-        // 시작 위치 설정 (오른쪽에서 시작)
-        imageEl.style.opacity = '0';
-        imageEl.style.transform = 'translateX(100px)';
-        textEl.style.opacity = '0';
-        textEl.style.transform = 'translateX(100px)';
         
         // currentPage 업데이트
         currentPage = pageIndex;
         
-        // Enter 애니메이션 (페이드인만)
-        requestAnimationFrame(() => {
-            imageContainer.style.visibility = 'visible';
+        // 1단계: 먼저 페이드아웃
+        imageEl.style.transition = 'opacity 0.15s ease-out';
+        textEl.style.transition = 'opacity 0.15s ease-out';
+        imageEl.style.opacity = '0';
+        textEl.style.opacity = '0';
+        
+        // 2단계: 150ms 후 내용 변경
+        setTimeout(() => {
+            // 표지 이미지 설정
+            imageEl.src = currentBook.coverImage;
+            imageEl.alt = `${currentBook.title} 표지`;
             
-            requestAnimationFrame(() => {
+            // 표지에는 텍스트 오버레이 숨김
+            textEl.textContent = '';
+            
+            // 3단계: 이미지 로드 대기
+            if (imageEl.complete) {
+                fadeInCover();
+            } else {
+                imageEl.onload = fadeInCover;
+                imageEl.onerror = fadeInCover;
+            }
+            
+            function fadeInCover() {
+                // 4단계: 페이드인
+                imageEl.style.transition = 'opacity 0.3s ease-in';
                 imageEl.style.opacity = '1';
-                imageEl.style.transform = 'translateX(0)';
-                textEl.style.opacity = '0'; // 표지에는 텍스트 숨김
-                textEl.style.transform = 'translateX(0)';
-            });
-        });
+            }
+        }, 150);
         
         updateProgress();
         updateNavigationButtons();
@@ -297,48 +298,60 @@ function showPage(pageIndex) {
     const textEl = document.getElementById('page-text');
     const imageContainer = document.getElementById('page-image-container');
     
-    // 즉시 내용 변경 (페이드아웃 없이)
-    imageContainer.style.visibility = 'hidden';
-    
-    // 내용 변경
-    if (page.illustrationImage) {
-        imageEl.src = page.illustrationImage;
-        imageEl.alt = `Page ${pageIndex + 1}`;
-    } else {
-        imageEl.src = '';
-        imageEl.alt = '이미지 없음';
-    }
-    
-    // 현재 언어에 맞는 텍스트 표시
-    const pageText = getPageText(page, currentLanguage);
-    console.log(`📝 페이지 ${pageIndex + 1} 텍스트:`, {
-        currentLanguage,
-        pageNumber: page.pageNumber,
-        hasTranslations: !!currentBook.translations,
-        hasCurrentLangTranslation: !!currentBook.translations?.[currentLanguage],
-        originalText: page.text?.substring(0, 30),
-        translatedText: pageText?.substring(0, 30)
-    });
-    textEl.textContent = pageText || '텍스트가 없습니다.';
-    
-    // 시작 위치 설정 (오른쪽에서 시작)
+    // 1단계: 먼저 페이드아웃 (이전 페이지 완전히 숨김)
+    imageEl.style.transition = 'opacity 0.15s ease-out';
+    textEl.style.transition = 'opacity 0.15s ease-out';
     imageEl.style.opacity = '0';
-    imageEl.style.transform = 'translateX(100px)';
     textEl.style.opacity = '0';
-    textEl.style.transform = 'translateX(100px)';
     
-    // Enter 애니메이션 (페이드인만)
-    requestAnimationFrame(() => {
-        imageContainer.style.visibility = 'visible';
+    // 2단계: 150ms 후 내용 변경 (완전히 사라진 후)
+    setTimeout(() => {
+        // 내용 변경
+        if (page.illustrationImage) {
+            imageEl.src = page.illustrationImage;
+            imageEl.alt = `Page ${pageIndex + 1}`;
+        } else {
+            imageEl.src = '';
+            imageEl.alt = '이미지 없음';
+        }
         
-        requestAnimationFrame(() => {
-            // Enter 애니메이션 (페이드인 + 중앙으로 이동)
-            imageEl.style.opacity = '1';
-            imageEl.style.transform = 'translateX(0)';
-            textEl.style.opacity = '1';
-            textEl.style.transform = 'translateX(0)';
+        // 현재 언어에 맞는 텍스트 표시
+        const pageText = getPageText(page, currentLanguage);
+        console.log(`📝 페이지 ${pageIndex + 1} 텍스트:`, {
+            currentLanguage,
+            pageNumber: page.pageNumber,
+            hasTranslations: !!currentBook.translations,
+            hasCurrentLangTranslation: !!currentBook.translations?.[currentLanguage],
+            originalText: page.text?.substring(0, 30),
+            translatedText: pageText?.substring(0, 30)
         });
-    });
+        textEl.textContent = pageText || '텍스트가 없습니다.';
+        
+        // 3단계: 이미지 로드 대기 (새 이미지가 준비되면)
+        if (page.illustrationImage) {
+            // 이미지가 이미 캐시에 있으면 즉시 로드, 아니면 로드 완료 대기
+            if (imageEl.complete) {
+                // 이미 로드됨
+                fadeInNewPage();
+            } else {
+                // 로드 대기
+                imageEl.onload = fadeInNewPage;
+                imageEl.onerror = fadeInNewPage; // 로드 실패해도 표시
+            }
+        } else {
+            // 이미지 없으면 바로 페이드인
+            fadeInNewPage();
+        }
+        
+        function fadeInNewPage() {
+            // 4단계: 페이드인 애니메이션
+            imageEl.style.transition = 'opacity 0.3s ease-in';
+            textEl.style.transition = 'opacity 0.3s ease-in';
+            imageEl.style.opacity = '1';
+            textEl.style.opacity = '1';
+        }
+    }, 150);
+
     
     // 진행률 업데이트 (즉시)
     updateProgress();
