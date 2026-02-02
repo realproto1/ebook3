@@ -4545,31 +4545,23 @@ async function generateAllCharacterReferences() {
     }
 }
 
-// 캐릭터 레퍼런스 생성
+/**
+ * 캐릭터 레퍼런스 생성 (간소화 버전)
+ */
 async function generateCharacterReference(charIndex) {
     const character = currentStorybook.characters[charIndex];
     const refDiv = document.getElementById(`char-ref-${charIndex}`);
+    const customPrompt = document.getElementById(`char-prompt-${charIndex}`)?.value.trim() || character.description;
     
-    const promptTextarea = document.getElementById(`char-prompt-${charIndex}`);
-    const customPrompt = promptTextarea ? promptTextarea.value.trim() : character.description;
-    
-    // 로딩 UI 표시
     showLoadingUI(refDiv, 'AI가 이미지 생성 중...');
 
     try {
         const isRegeneration = !!character.referenceImage;
-        const prompt = buildCharacterPrompt(customPrompt, currentStorybook.artStyle, imageSettings, isRegeneration);
-        
-        console.log(`🎨 캐릭터 "${character.name}" 이미지 생성 ${isRegeneration ? '(재생성)' : '(초기 생성)'}`);
-        console.log('🤖 사용 모델:', imageSettings.characterModel || 'gemini-3-pro-image-preview');
+        console.log(`🎨 캐릭터 "${character.name}" ${isRegeneration ? '재생성' : '생성'} - 모델: ${imageSettings.characterModel}`);
         
         // API 호출
         const response = await axios.post('/api/generate-character-image', {
-            character: {
-                name: character.name,
-                description: customPrompt,
-                age: character.age
-            },
+            character: { name: character.name, description: customPrompt, age: character.age },
             artStyle: currentStorybook.artStyle || '디즈니 스타일',
             settings: {
                 aspectRatio: '16:9',
@@ -4580,42 +4572,29 @@ async function generateCharacterReference(charIndex) {
             storybookTitle: currentStorybook.title
         });
         
-        if (response.data.success && response.data.imageUrl) {
-            const imageUrl = response.data.imageUrl;
-            console.log(`📥 이미지 생성 완료: ${imageUrl}`);
-            
-            // 히스토리 관리
-            if (!character.imageHistory) {
-                character.imageHistory = [];
-            }
-            character.imageHistory = manageImageHistory(
-                character.imageHistory, 
-                imageUrl, 
-                character.referenceImage
-            );
-            
-            // 이미지 업데이트
-            currentStorybook.characters[charIndex].referenceImage = imageUrl;
-            await saveCurrentStorybook();
-            
-            // UI 업데이트
-            renderCharacterImageWithHistory(charIndex);
-            
-        } else {
+        if (!response.data.success || !response.data.imageUrl) {
             throw new Error(response.data.error || '이미지 URL을 받지 못했습니다.');
         }
+        
+        const imageUrl = response.data.imageUrl;
+        console.log(`📥 이미지 생성 완료: ${imageUrl}`);
+        
+        // 히스토리 관리 및 업데이트
+        character.imageHistory = manageImageHistory(
+            character.imageHistory || [], 
+            imageUrl, 
+            character.referenceImage
+        );
+        currentStorybook.characters[charIndex].referenceImage = imageUrl;
+        
+        await saveCurrentStorybook();
+        renderCharacterImageWithHistory(charIndex);
 
     } catch (error) {
         console.error('캐릭터 이미지 생성 실패:', error);
+        const errorMsg = error.response?.data?.error || error.message || '알 수 없는 오류';
         
-        let errorMsg = error.response?.data?.error || error.message || '알 수 없는 오류';
-        
-        // API 키 관련 에러 처리
-        if (errorMsg.includes('API key') || errorMsg.includes('403') || errorMsg.includes('PERMISSION_DENIED')) {
-            errorMsg = 'API 키 오류: Gemini API 키가 만료되었거나 유효하지 않습니다.';
-        }
-        
-        // 기존 이미지가 있으면 유지
+        // 기존 이미지 유지 또는 에러 표시
         if (character.referenceImage) {
             renderCharacterImageWithHistory(charIndex);
             showNotification('error', '재생성 실패', `${errorMsg}\n기존 이미지가 유지됩니다.`);
@@ -5164,22 +5143,22 @@ async function generateAllIllustrationsSequential() {
 }
 
 // 모든 TTS 생성 (순차적)
+/**
+ * 모든 페이지 TTS 순차 생성 (간소화 버전)
+ */
 async function generateAllTTS() {
-    if (!currentStorybook || !currentStorybook.pages || currentStorybook.pages.length === 0) {
+    const pages = currentStorybook?.pages;
+    
+    if (!pages || pages.length === 0) {
         alert('동화책 페이지가 없습니다.');
         return;
     }
     
-    // 현재 언어의 TTS가 없는 페이지 필터링
-    const pagesToGenerate = currentStorybook.pages.filter(page => {
+    // TTS가 없는 페이지 필터링
+    const pagesToGenerate = pages.filter(page => {
         const pageText = getPageText(page, currentLanguage);
         const pageTTS = getPageTTS(page, currentLanguage);
-        
-        // 디버깅 로그
-        console.log(`📄 Page ${page.pageNumber}: text=${!!pageText && pageText.trim() !== ''}, tts=${!!pageTTS}`);
-        
-        // 텍스트가 있고 TTS가 없는 경우
-        return pageText && pageText.trim() !== '' && !pageTTS;
+        return pageText?.trim() && !pageTTS;
     });
     
     if (pagesToGenerate.length === 0) {
@@ -5187,10 +5166,8 @@ async function generateAllTTS() {
         return;
     }
     
-    const estimatedTime = pagesToGenerate.length * 3; // 페이지당 약 3초
-    const geminiModel = imageSettings.geminiTTSModel || 'gemini-2.0-flash-exp';
-    const geminiModelDisplay = geminiModel.replace('gemini-', 'Gemini ').replace('-exp', ' Exp').replace('-tts', ' TTS');
-    if (!confirm(`${pagesToGenerate.length}개의 페이지 TTS를 생성하시겠습니까?\n\n모델: ${geminiModelDisplay}\n음성: ${imageSettings.ttsModel}\n언어: ${currentLanguage}\n예상 소요 시간: 약 ${estimatedTime}초`)) {
+    const estimatedTime = pagesToGenerate.length * 3;
+    if (!confirm(`${pagesToGenerate.length}개의 페이지 TTS를 생성하시겠습니까?\n\n언어: ${currentLanguage}\n예상 소요 시간: 약 ${estimatedTime}초`)) {
         return;
     }
     
@@ -5201,16 +5178,13 @@ async function generateAllTTS() {
         
         console.log(`🎤 모든 TTS 생성 시작 (${totalPages}개 페이지, 언어: ${currentLanguage})`);
         
-        // 순차적으로 페이지별 TTS 생성
-        for (let i = 0; i < currentStorybook.pages.length; i++) {
-            const page = currentStorybook.pages[i];
+        // 순차적으로 TTS 생성
+        for (let i = 0; i < pages.length; i++) {
+            const page = pages[i];
             const pageText = getPageText(page, currentLanguage);
             const pageTTS = getPageTTS(page, currentLanguage);
             
-            // 텍스트가 없거나 이미 TTS가 있으면 건너뛰기
-            if (!pageText || pageText.trim() === '' || pageTTS) {
-                continue;
-            }
+            if (!pageText?.trim() || pageTTS) continue;
             
             // 버튼 업데이트
             const ttsButton = document.getElementById(`tts-btn-${i}`);
@@ -5220,65 +5194,50 @@ async function generateAllTTS() {
             }
             
             try {
-                console.log(`🎤 페이지 ${page.pageNumber} TTS 생성 중... (${currentLanguage})`);
+                console.log(`🎤 페이지 ${page.pageNumber} TTS 생성 중...`);
                 
-                // TTS 생성 API 호출
                 const response = await axios.post('/api/generate-tts', {
                     text: pageText,
                     language: currentLanguage,
-                    geminiModel: imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts',  // Gemini TTS 생성 모델
-                    model: imageSettings.ttsModel || 'Aoede',  // TTS Voice (Puck, Kore 등)
+                    geminiModel: imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts',
+                    model: imageSettings.ttsModel || 'Aoede',
                     voiceConfig: imageSettings.ttsVoiceConfig,
                     storybookId: currentStorybook?.id,
                     storybookTitle: currentStorybook?.title,
                     pageNumber: page.pageNumber
-                }, {
-                    timeout: 180000 // 3분 타임아웃
-                });
+                }, { timeout: 180000 });
                 
                 if (response.data.success && response.data.audioUrl) {
-                    // TTS 저장 (언어별로 저장)
-                    if (!currentStorybook.pages[i].ttsAudio) {
-                        currentStorybook.pages[i].ttsAudio = {};
-                    }
+                    // TTS 저장
+                    pages[i].ttsAudio = pages[i].ttsAudio || {};
                     
                     if (currentLanguage === 'ko') {
-                        // 한국어는 기본 위치에 저장
-                        currentStorybook.pages[i].ttsAudio.url = response.data.audioUrl;
-                        currentStorybook.pages[i].ttsAudio.model = imageSettings.ttsModel;
-                        currentStorybook.pages[i].audioUrl = response.data.audioUrl;
+                        pages[i].ttsAudio.url = response.data.audioUrl;
+                        pages[i].ttsAudio.model = imageSettings.ttsModel;
+                        pages[i].audioUrl = response.data.audioUrl;
                     } else {
-                        // 다른 언어는 언어 코드로 저장
-                        if (!currentStorybook.pages[i].ttsAudio[currentLanguage]) {
-                            currentStorybook.pages[i].ttsAudio[currentLanguage] = {};
-                        }
-                        currentStorybook.pages[i].ttsAudio[currentLanguage].url = response.data.audioUrl;
-                        currentStorybook.pages[i].ttsAudio[currentLanguage].model = imageSettings.ttsModel;
+                        pages[i].ttsAudio[currentLanguage] = {
+                            url: response.data.audioUrl,
+                            model: imageSettings.ttsModel
+                        };
                     }
                     
                     successCount++;
-                    console.log(`✅ 페이지 ${page.pageNumber} TTS 생성 완료 (${currentLanguage})`);
+                    console.log(`✅ 페이지 ${page.pageNumber} TTS 생성 완료`);
                     
                     // 5페이지마다 중간 저장 및 1분 휴식
                     if (successCount % 5 === 0) {
                         try {
                             console.log(`💾 중간 저장 중... (${successCount}개 완료)`);
                             await saveToR2(currentStorybook);
-                            console.log(`✅ 중간 저장 완료 (${successCount}개)`);
                         } catch (saveError) {
-                            console.error(`⚠️ 중간 저장 실패 (TTS는 메모리에 유지):`, saveError.message);
-                            // 저장 실패해도 계속 진행
+                            console.warn(`⚠️ 중간 저장 실패:`, saveError.message);
                         }
                         
-                        // API 할당량 보호를 위해 1분 휴식
                         if (successCount < totalPages) {
-                            console.log(`⏸️ API 할당량 보호: 60초 대기 중... (${successCount}/${totalPages})`);
-                            showNotification('info', '잠시 대기 중...', `API 할당량 보호를 위해 60초 대기합니다. (${successCount}/${totalPages} 완료)`);
-                            
-                            // 60초 대기
+                            console.log(`⏸️ API 할당량 보호: 60초 대기 중...`);
+                            showNotification('info', '잠시 대기 중...', `API 할당량 보호를 위해 60초 대기합니다.`);
                             await new Promise(resolve => setTimeout(resolve, 60000));
-                            
-                            console.log(`✅ 대기 완료, 계속 진행합니다.`);
                         }
                     }
                 } else {
@@ -5289,22 +5248,15 @@ async function generateAllTTS() {
                 failCount++;
                 console.error(`❌ 페이지 ${page.pageNumber} TTS 생성 실패:`, error);
                 
-                // 에러 메시지 추출
-                let errorMessage = error.message || '알 수 없는 오류';
-                if (error.response?.data?.error) {
-                    errorMessage = error.response.data.error;
-                }
+                const errorMessage = error.response?.data?.error || error.message || '알 수 없는 오류';
                 
-                // 할당량 초과 에러 감지
-                if (errorMessage.includes('quota') || errorMessage.includes('Quota') || error.response?.status === 429) {
-                    console.error('🚫 API 할당량 초과! 더 이상 진행할 수 없습니다.');
-                    showNotification('error', 'API 할당량 초과', 'Gemini TTS API 일일 할당량을 초과했습니다. 내일 다시 시도하거나 Google AI Studio에서 할당량을 늘려주세요.');
-                    
-                    // 진행 중단
+                // 할당량 초과 감지
+                if (errorMessage.includes('quota') || error.response?.status === 429) {
+                    console.error('🚫 API 할당량 초과!');
+                    showNotification('error', 'API 할당량 초과', 'Gemini TTS API 일일 할당량을 초과했습니다.');
                     break;
                 }
                 
-                // 버튼 복원
                 if (ttsButton) {
                     ttsButton.innerHTML = '<i class="fas fa-volume-up mr-1"></i>음성 생성';
                     ttsButton.disabled = false;
@@ -5315,24 +5267,20 @@ async function generateAllTTS() {
         // 최종 저장
         if (successCount > 0) {
             try {
-                console.log('💾 최종 저장 중...');
                 await saveToR2(currentStorybook);
-                console.log('✅ 최종 저장 완료');
             } catch (saveError) {
                 console.error('❌ 최종 저장 실패:', saveError);
-                showNotification('warning', '저장 실패', 'TTS는 생성되었지만 최종 저장에 실패했습니다.');
+                showNotification('warning', '저장 실패', 'TTS는 생성되었지만 저장에 실패했습니다.');
             }
         }
         
-        // UI 업데이트
         displayStorybook(currentStorybook);
         
         // 결과 알림
         if (successCount > 0) {
             showNotification('success', '모든 TTS 생성 완료! 🎤', `${successCount}개의 페이지 음성이 생성되었습니다.${failCount > 0 ? ` (${failCount}개 실패)` : ''}`);
         } else if (failCount > 0) {
-            // 모두 실패한 경우 상세 에러 메시지
-            showNotification('error', 'TTS 생성 실패', `모든 페이지(${failCount}개)에서 TTS 생성에 실패했습니다. API 할당량을 확인해주세요.`);
+            showNotification('error', 'TTS 생성 실패', `모든 페이지에서 TTS 생성에 실패했습니다. API 할당량을 확인해주세요.`);
         }
         
         console.log(`✅ 모든 TTS 생성 완료: 성공 ${successCount}개, 실패 ${failCount}개`);
@@ -6303,37 +6251,34 @@ Example: For "Apple", show only a red apple fruit. No text.`;
 }
 
 // 모든 단어 이미지 생성 (병렬)
+/**
+ * 모든 단어 이미지 병렬 생성 (간소화 버전)
+ */
 async function generateAllVocabularyImages() {
-    if (!currentStorybook.educational_content || !currentStorybook.educational_content.vocabulary) {
+    const vocabulary = currentStorybook.educational_content?.vocabulary;
+    
+    if (!vocabulary || vocabulary.length === 0) {
         alert('단어 목록이 없습니다.');
         return;
     }
     
-    const vocabulary = currentStorybook.educational_content.vocabulary;
-    
-    if (!confirm(`${vocabulary.length}개의 단어 이미지를 병렬로 생성하시겠습니까?\n\n모든 이미지가 동시에 생성되어 빠릅니다.`)) {
+    if (!confirm(`${vocabulary.length}개의 단어 이미지를 병렬로 생성하시겠습니까?`)) {
         return;
     }
     
-    console.log('모든 단어 이미지를 병렬로 생성 시작...');
+    console.log('🎨 모든 단어 이미지 병렬 생성 시작...');
     
-    // 병렬로 모든 이미지 생성
-    const promises = vocabulary.map((_, index) => 
-        generateSingleVocabularyImage(index)
-    );
-    
-    // 모든 생성 완료 대기
-    const results = await Promise.all(promises);
+    // 병렬 생성
+    const results = await Promise.all(vocabulary.map((_, index) => generateSingleVocabularyImage(index)));
     
     // 결과 집계
-    const successCount = results.filter(r => r && r.success).length;
-    const failCount = results.filter(r => r && !r.success).length;
+    const successCount = results.filter(r => r?.success).length;
+    const failCount = results.length - successCount;
     
-    if (failCount > 0) {
-        alert(`단어 이미지 생성 완료!\n\n성공: ${successCount}개\n실패: ${failCount}개\n\n실패한 이미지는 개별적으로 재시도할 수 있습니다.`);
-    } else {
-        alert(`모든 단어 이미지 생성이 완료되었습니다! (${successCount}개)`);
-    }
+    alert(failCount > 0 
+        ? `단어 이미지 생성 완료!\n성공: ${successCount}개, 실패: ${failCount}개` 
+        : `모든 단어 이미지 생성 완료! (${successCount}개)`
+    );
 }
 
 // 모든 단어 이미지 다운로드
@@ -7060,36 +7005,34 @@ async function generateSingleKeyObjectImage(objIndex) {
 }
 
 // 모든 Key Object 이미지 생성
+/**
+ * 모든 Key Object 이미지 병렬 생성 (간소화 버전)
+ */
 async function generateAllKeyObjectImages() {
-    if (!currentStorybook || !currentStorybook.key_objects || currentStorybook.key_objects.length === 0) {
+    const keyObjects = currentStorybook?.key_objects;
+    
+    if (!keyObjects || keyObjects.length === 0) {
         alert('Key Object 정보가 없습니다.');
         return;
     }
     
-    if (!confirm(`${currentStorybook.key_objects.length}개의 Key Object 이미지를 동시에 생성하시겠습니까?`)) {
+    if (!confirm(`${keyObjects.length}개의 Key Object 이미지를 동시에 생성하시겠습니까?`)) {
         return;
     }
     
-    console.log(`🎨 Generating all ${currentStorybook.key_objects.length} Key Object images in parallel...`);
+    console.log(`🎨 ${keyObjects.length}개 Key Object 이미지 병렬 생성 시작...`);
     
     // keyObjectImages 배열 초기화
-    if (!currentStorybook.keyObjectImages) {
-        currentStorybook.keyObjectImages = new Array(currentStorybook.key_objects.length);
-    }
+    currentStorybook.keyObjectImages = currentStorybook.keyObjectImages || new Array(keyObjects.length);
     
-    // ⭐ 병렬 생성 (Promise.all 사용)
-    const promises = [];
-    for (let i = 0; i < currentStorybook.key_objects.length; i++) {
-        promises.push(generateSingleKeyObjectImage(i));
-    }
-    
+    // 병렬 생성
     try {
-        const results = await Promise.all(promises);
-        const successCount = results.filter(r => r.success).length;
-        console.log(`✅ All Key Object images generated: ${successCount}/${currentStorybook.key_objects.length} succeeded`);
-        alert(`모든 Key Object 이미지 생성 완료!\n성공: ${successCount}/${currentStorybook.key_objects.length}개`);
+        const results = await Promise.all(keyObjects.map((_, i) => generateSingleKeyObjectImage(i)));
+        const successCount = results.filter(r => r?.success).length;
+        console.log(`✅ Key Object 이미지 생성 완료: ${successCount}/${keyObjects.length}`);
+        alert(`모든 Key Object 이미지 생성 완료!\n성공: ${successCount}/${keyObjects.length}개`);
     } catch (error) {
-        console.error('❌ Error generating Key Object images:', error);
+        console.error('❌ Key Object 이미지 생성 실패:', error);
         alert('일부 이미지 생성에 실패했습니다. 개별적으로 다시 시도해주세요.');
     }
 }
