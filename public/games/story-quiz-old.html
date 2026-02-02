@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>핵심 사물 퀴즈 - 탱고북</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .game-header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .story-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .game-area {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .question-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .key-object-image {
+            width: 100%;
+            max-width: 300px;
+            height: 300px;
+            object-fit: contain;
+            border-radius: 15px;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .question-text {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option-button {
+            background: white;
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .option-button:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .option-button.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .option-button.correct {
+            border-color: #4caf50;
+            background: #e8f5e9;
+            animation: correctPulse 0.5s ease;
+        }
+
+        .option-button.incorrect {
+            border-color: #f44336;
+            background: #ffebee;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-modal.show {
+            display: flex;
+        }
+
+        .result-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-score {
+            font-size: 60px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .result-message {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 10px;
+            }
+
+            .story-title {
+                font-size: 20px;
+            }
+
+            .question-text {
+                font-size: 18px;
+            }
+
+            .option-button {
+                padding: 15px;
+                font-size: 16px;
+            }
+
+            .key-object-image {
+                max-width: 250px;
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 뒤로가기 버튼 -->
+    <div class="back-button" onclick="goBack()">
+        <i class="fas fa-arrow-left" style="font-size: 24px; color: #667eea;"></i>
+    </div>
+
+    <div class="game-container">
+        <!-- 게임 헤더 -->
+        <div class="game-header">
+            <div class="story-title" id="storyTitle">동화책</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                <div style="font-size: 16px; color: #666;">
+                    <i class="fas fa-gamepad"></i>
+                    <span id="currentQuestion">1</span> / <span id="totalQuestions">5</span>
+                </div>
+                <div style="font-size: 16px; color: #4caf50; font-weight: bold;">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="correctCount">0</span>개 정답
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%;">
+                    <span id="progressText">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 게임 영역 -->
+        <div class="game-area" id="gameArea">
+            <div class="question-number" id="questionNumber">문제 1</div>
+            <img id="keyObjectImage" class="key-object-image" src="" alt="핵심 사물">
+            <div class="question-text" id="questionText">이 사물의 이름은 무엇일까요?</div>
+            <div class="options-container" id="optionsContainer">
+                <!-- 선택지가 동적으로 추가됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 결과 모달 -->
+    <div class="result-modal" id="resultModal">
+        <div class="result-content">
+            <i class="fas fa-trophy" style="font-size: 80px; color: #ffd700;"></i>
+            <div class="result-score" id="resultScore">5 / 5</div>
+            <div class="result-message" id="resultMessage">완벽해요! 🎉</div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="restartGame()">
+                    <i class="fas fa-redo"></i> 다시 하기
+                </button>
+                <button class="btn btn-secondary" onclick="goBack()">
+                    <i class="fas fa-list"></i> 게임 목록
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <script>
+        let storyData = null;
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+        let quizQuestions = [];
+        let answered = false;
+
+        // URL에서 스토리 ID 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const storyId = urlParams.get('story') || urlParams.get('id');
+
+        if (!storyId) {
+            alert('스토리 ID가 없습니다.');
+            goBack();
+        }
+
+        // 스토리 데이터 로드
+        async function loadStory() {
+            try {
+                console.log('📚 스토리 로딩 중:', storyId);
+                const response = await axios.get(`/api/storybooks/${storyId}`);
+                storyData = response.data;
+                
+                console.log('✅ 스토리 로드 완료:', storyData.title);
+                document.getElementById('storyTitle').textContent = storyData.title || '동화책';
+
+                // 퀴즈 데이터 생성
+                if (storyData.quizzes && storyData.quizzes.length > 0) {
+                    quizQuestions = storyData.quizzes;
+                } else if (storyData.keyObjectImages && storyData.keyObjectImages.length > 0) {
+                    // keyObjectImages에서 퀴즈 생성
+                    quizQuestions = storyData.keyObjectImages
+                        .filter(obj => obj.imageUrl && obj.success)
+                        .map(obj => ({
+                            question: `이 사물의 이름은 무엇일까요?`,
+                            imageUrl: obj.imageUrl,
+                            correctAnswer: obj.name,
+                            options: generateOptions(obj.name, storyData.keyObjectImages)
+                        }));
+                } else {
+                    alert('퀴즈 데이터가 없습니다.');
+                    goBack();
+                    return;
+                }
+
+                if (quizQuestions.length === 0) {
+                    alert('퀴즈 문제가 없습니다.');
+                    goBack();
+                    return;
+                }
+
+                document.getElementById('totalQuestions').textContent = quizQuestions.length;
+                renderQuestion();
+            } catch (error) {
+                console.error('❌ 스토리 로드 실패:', error);
+                alert('동화책을 불러오는데 실패했습니다.');
+                goBack();
+            }
+        }
+
+        // 오답 선택지 생성
+        function generateOptions(correctAnswer, allObjects) {
+            const otherObjects = allObjects
+                .filter(obj => obj.name !== correctAnswer && obj.success)
+                .map(obj => obj.name);
+            
+            // 최소 3개의 오답 선택지 필요
+            const wrongOptions = [];
+            while (wrongOptions.length < 3 && otherObjects.length > 0) {
+                const randomIndex = Math.floor(Math.random() * otherObjects.length);
+                wrongOptions.push(otherObjects.splice(randomIndex, 1)[0]);
+            }
+
+            // 오답이 부족하면 기본 오답 추가
+            const defaultWrongOptions = ['마법 지팡이', '황금 사과', '마법 구슬', '비밀 열쇠', '신비한 상자'];
+            while (wrongOptions.length < 3) {
+                const randomDefault = defaultWrongOptions[Math.floor(Math.random() * defaultWrongOptions.length)];
+                if (!wrongOptions.includes(randomDefault) && randomDefault !== correctAnswer) {
+                    wrongOptions.push(randomDefault);
+                }
+            }
+
+            // 정답과 오답을 섞어서 반환
+            const options = [correctAnswer, ...wrongOptions];
+            return shuffleArray(options);
+        }
+
+        // 배열 섞기
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // 문제 렌더링
+        function renderQuestion() {
+            answered = false;
+            const question = quizQuestions[currentQuestionIndex];
+            
+            // 문제 번호 업데이트
+            document.getElementById('questionNumber').textContent = `문제 ${currentQuestionIndex + 1}`;
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+
+            // 진행률 업데이트
+            const progress = ((currentQuestionIndex) / quizQuestions.length) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `${Math.round(progress)}%`;
+
+            // 이미지 설정
+            const imageUrl = question.imageUrl || question.relatedKeyObject?.imageUrl || '';
+            document.getElementById('keyObjectImage').src = imageUrl;
+            document.getElementById('keyObjectImage').alt = question.correctAnswer || '핵심 사물';
+
+            // 질문 텍스트
+            document.getElementById('questionText').textContent = question.question || '이 사물의 이름은 무엇일까요?';
+
+            // 선택지 렌더링
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            const options = question.options || [];
+            options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-button';
+                button.textContent = option;
+                button.onclick = () => selectOption(option, question.correctAnswer, button);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        // 선택지 선택
+        function selectOption(selected, correct, button) {
+            if (answered) return;
+            answered = true;
+
+            const isCorrect = selected === correct;
+            
+            // 모든 버튼 비활성화
+            const allButtons = document.querySelectorAll('.option-button');
+            allButtons.forEach(btn => {
+                btn.style.pointerEvents = 'none';
+                if (btn.textContent === correct) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            if (isCorrect) {
+                button.classList.add('correct');
+                correctAnswers++;
+                document.getElementById('correctCount').textContent = correctAnswers;
+            } else {
+                button.classList.add('incorrect');
+            }
+
+            // 1.5초 후 다음 문제로
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < quizQuestions.length) {
+                    renderQuestion();
+                } else {
+                    showResults();
+                }
+            }, 1500);
+        }
+
+        // 결과 표시
+        function showResults() {
+            const progress = 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `${progress}%`;
+
+            document.getElementById('resultScore').textContent = `${correctAnswers} / ${quizQuestions.length}`;
+            
+            let message = '';
+            const percentage = (correctAnswers / quizQuestions.length) * 100;
+            if (percentage === 100) {
+                message = '완벽해요! 🎉';
+            } else if (percentage >= 80) {
+                message = '정말 잘했어요! 👏';
+            } else if (percentage >= 60) {
+                message = '좋아요! 💪';
+            } else {
+                message = '다시 한번 도전해보세요! 📚';
+            }
+            
+            document.getElementById('resultMessage').textContent = message;
+            document.getElementById('resultModal').classList.add('show');
+        }
+
+        // 게임 재시작
+        function restartGame() {
+            currentQuestionIndex = 0;
+            correctAnswers = 0;
+            document.getElementById('correctCount').textContent = '0';
+            document.getElementById('resultModal').classList.remove('show');
+            renderQuestion();
+        }
+
+        // 뒤로가기
+        function goBack() {
+            window.history.back();
+        }
+
+        // 페이지 로드 시 실행
+        loadStory();
+    </script>
+</body>
+</html>
