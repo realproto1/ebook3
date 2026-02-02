@@ -6199,27 +6199,29 @@ Requirements:
 Example: For "Apple", show only a red apple fruit. No text.`;
         }
 
-        // 서버 API를 통해 이미지 생성 (보안)
-        const response = await axios.post('/api/generate-vocabulary-images', {
-            vocabularyItems: [{
-                word: word,
-                korean: korean,
-                definition: vocabItem.definition || '',
-                example: vocabItem.example || ''
-            }],
-            artStyle: currentStorybook.artStyle || '디즈니 스타일',
-            settings: {
-                aspectRatio: '16:9',
-                enforceNoText: true,
-                keyObjectModel: imageSettings.keyObjectModel || 'gemini-3-pro-image-preview'
-            },
-            customPrompt: prompt,
+        // ImageService를 통해 이미지 생성
+        const service = imageService || window.imageService;
+        if (!service) {
+            throw new Error('ImageService가 로드되지 않았습니다.');
+        }
+        
+        const result = await service.generateVocabulary({
+            word: word,
+            korean: korean,
+            prompt: prompt
+        }, {
+            model: imageSettings.vocabularyModel || 'gemini-3-pro-image-preview',
+            aspectRatio: '1:1',
             storybookId: currentStorybook.id,
-            storybookTitle: currentStorybook.title
+            storybookTitle: currentStorybook.title,
+            onStart: (element) => {
+                if (element) {
+                    element.innerHTML = '<div class="flex flex-col items-center justify-center h-full p-4"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-2"></div><p class="text-gray-600 text-xs">생성 중...</p></div>';
+                }
+            }
         });
         
-        if (response.data.success && response.data.results && response.data.results[0] && response.data.results[0].success) {
-            const result = response.data.results[0];
+        if (result && result.success && result.imageUrl) {
             const imageUrl = result.imageUrl;
             
             // vocabularyImages 배열 초기화
@@ -6250,7 +6252,7 @@ Example: For "Apple", show only a red apple fruit. No text.`;
             
             return { index: wordIndex, success: true, imageUrl: imageUrl };
         } else {
-            const errorMsg = response.data.error || result.error || '이미지 생성 실패';
+            const errorMsg = result?.error || 'ImageService에서 이미지 URL을 받지 못했습니다.';
             throw new Error(errorMsg);
         }
         
@@ -6947,27 +6949,31 @@ async function generateSingleKeyObjectImage(objIndex) {
     try {
         console.log(`🎨 Generating Key Object image for: ${obj.name} (${obj.korean})`);
         
-        // 🔥 서버 API 호출 (R2 업로드 포함)
-        const response = await axios.post('/api/generate-key-object', {
-            keyObject: {
-                name: obj.name,
-                description: obj.description,
-                korean: obj.korean,
-                size: obj.size
-            },
-            artStyle: currentStorybook.artStyle || '디즈니 스타일',
-            settings: {
-                aspectRatio: imageSettings.aspectRatio || '1:1',
-                enforceNoText: true,
-                additionalPrompt: imageSettings.additionalPrompt,
-                keyObjectModel: imageSettings.keyObjectModel || 'gemini-3-pro-image-preview'  // Key Object 모델 전달
-            },
+        // ImageService를 통해 이미지 생성
+        const service = imageService || window.imageService;
+        if (!service) {
+            throw new Error('ImageService가 로드되지 않았습니다.');
+        }
+        
+        const result = await service.generateKeyObject({
+            name: obj.name || obj.korean,
+            description: obj.description,
+            korean: obj.korean,
+            prompt: obj.description
+        }, {
+            model: imageSettings.keyObjectModel || 'gemini-3-pro-image-preview',
+            aspectRatio: imageSettings.aspectRatio || '1:1',
             storybookId: currentStorybook.id,
-            storybookTitle: currentStorybook.title
+            storybookTitle: currentStorybook.title,
+            onStart: (element) => {
+                if (element) {
+                    element.innerHTML = '<div class="flex flex-col items-center justify-center h-full p-4"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mb-2"></div><p class="text-gray-600 text-xs">생성 중...</p></div>';
+                }
+            }
         });
         
-        if (response.data.success && response.data.imageUrl) {
-            const imageUrl = response.data.imageUrl; // R2 URL
+        if (result && result.success && result.imageUrl) {
+            const imageUrl = result.imageUrl;
             
             // keyObjectImages 배열 초기화
             if (!currentStorybook.keyObjectImages) {
@@ -6999,7 +7005,7 @@ async function generateSingleKeyObjectImage(objIndex) {
                 imageUrl: imageUrl
             };
         } else {
-            throw new Error(response.data.error || '이미지 URL을 받지 못했습니다.');
+            throw new Error(result?.error || 'ImageService에서 이미지 URL을 받지 못했습니다.');
         }
     } catch (error) {
         console.error(`Key Object 이미지 생성 오류 (${obj.name}):`, error);
