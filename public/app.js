@@ -5477,6 +5477,7 @@ async function generateIllustration(pageIndex) {
             storybookId: currentStorybook.id,
             storybookTitle: currentStorybook.title,
             additionalPrompt: imageSettings.additionalPrompt,
+            targetElement: illustrationDiv,  // ✅ DOM 요소 전달
             onStart: (element) => {
                 if (element) {
                     showLoadingUI(element, 'AI가 삽화를 생성하는 중...');
@@ -5513,8 +5514,44 @@ async function generateIllustration(pageIndex) {
             currentStorybook.pages[pageIndex].editNote = editNote; // 수정사항 저장
             saveCurrentStorybook();
             
-            // ✨ 이미지만 업데이트 (전체 다시 렌더링 안 함)
-            illustrationDiv.innerHTML = `<img src="${imageUrl}" alt="삽화 ${pageIndex + 1}" class="w-full h-full object-cover rounded-lg"/>`;
+            // ✨ 히스토리 포함하여 이미지 업데이트
+            const history = page.illustrationHistory || [];
+            const historyHTML = history.length > 0 ? `
+                <div class="w-20 overflow-y-auto space-y-2 p-1" style="scrollbar-width: thin; scrollbar-color: rgba(34, 197, 94, 0.5) rgba(34, 197, 94, 0.1);">
+                    ${history.map((url, histIdx) => `
+                        <div class="relative group cursor-pointer border-2 border-transparent hover:border-green-400 rounded transition" onclick="selectIllustrationFromHistory(${pageIndex}, ${histIdx})" title="이전 버전 ${histIdx + 1}">
+                            <img src="${url}" alt="이전 ${histIdx + 1}" class="w-full h-16 object-cover rounded"/>
+                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition rounded flex items-center justify-center">
+                                <i class="fas fa-check text-white text-xs opacity-0 group-hover:opacity-100 transition"></i>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '';
+            
+            illustrationDiv.innerHTML = `
+                <div class="flex gap-2 h-full">
+                    <div class="flex-1 relative group">
+                        <img src="${imageUrl}" alt="삽화 ${pageIndex + 1}" class="w-full h-auto cursor-pointer" onclick="toggleImageDeleteButton('page-${pageIndex}')"/>
+                        <button 
+                            id="page-${pageIndex}-delete-btn"
+                            onclick="event.stopPropagation(); deletePageIllustration(${pageIndex})"
+                            class="hidden absolute top-3 right-3 bg-red-500 bg-opacity-90 text-white w-10 h-10 rounded-full hover:bg-opacity-100 transition shadow-lg flex items-center justify-center z-10"
+                            title="이미지 삭제"
+                        >
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button 
+                            onclick="downloadImage('${imageUrl}', '${currentStorybook.title}_페이지_${pageIndex + 1}.png')"
+                            class="absolute bottom-3 right-3 bg-white bg-opacity-90 text-green-600 w-11 h-11 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                            title="다운로드"
+                        >
+                            <i class="fas fa-download text-base"></i>
+                        </button>
+                    </div>
+                    ${historyHTML}
+                </div>
+            `;
             console.log('✅ 삽화 생성 완료 및 화면 업데이트');
         } else {
             throw new Error(result?.error || 'ImageService에서 이미지 URL을 받지 못했습니다.');
