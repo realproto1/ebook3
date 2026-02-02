@@ -5287,6 +5287,13 @@ async function generateIllustration(pageIndex) {
     const artStyle = document.getElementById(`artstyle-${pageIndex}`)?.value || currentStorybook.artStyle;
     const editNote = document.getElementById(`edit-note-${pageIndex}`)?.value.trim() || '';
     
+    // scene_structure 빌드
+    const sceneStructure = {
+        characters: document.getElementById(`scene-characters-${pageIndex}`)?.value || page.scene_characters || '',
+        background: document.getElementById(`scene-background-${pageIndex}`)?.value || page.scene_background || '',
+        atmosphere: document.getElementById(`scene-atmosphere-${pageIndex}`)?.value || page.scene_atmosphere || ''
+    };
+    
     // 2. 캐릭터 레퍼런스 준비
     const characterReferences = currentStorybook.characters
         .filter(char => char.referenceImage)
