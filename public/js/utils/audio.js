@@ -152,3 +152,7 @@ if (typeof window !== 'undefined') {
     window.AudioPlayer = AudioPlayer;
     window.audioPlayer = audioPlayer;
 }
+
+// ES6 모듈 export
+export { AudioPlayer, audioPlayer };
+export default audioPlayer;

@@ -135,3 +135,7 @@ if (typeof window !== 'undefined') {
     window.API = API;
     window.api = api;
 }
+
+// ES6 모듈 export
+export { API, api };
+export default api;

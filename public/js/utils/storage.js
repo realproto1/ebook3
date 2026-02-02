@@ -136,3 +136,7 @@ class Storage {
 if (typeof window !== 'undefined') {
     window.Storage = Storage;
 }
+
+// ES6 모듈 export
+export { Storage };
+export default Storage;

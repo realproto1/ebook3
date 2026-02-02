@@ -283,3 +283,7 @@ class DOM {
 if (typeof window !== 'undefined') {
     window.DOM = DOM;
 }
+
+// ES6 모듈 export
+export { DOM };
+export default DOM;
