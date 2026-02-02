@@ -4624,21 +4624,6 @@ async function generateCharacterReference(charIndex) {
         }
     }
 }
-                <div class="p-4 text-center">
-                    <i class="fas fa-exclamation-triangle text-white text-2xl mb-2"></i>
-                    <p class="text-white text-xs font-bold mt-2">⚠️ 이미지 생성 실패</p>
-                    <p class="text-white text-xs opacity-75 mt-1">${errorMsg}</p>
-                    <button onclick="generateCharacterReference(${charIndex})" class="mt-3 px-4 py-2 bg-white text-purple-600 rounded text-xs font-semibold hover:bg-opacity-90 transition">
-                        <i class="fas fa-redo mr-1"></i>재시도
-                    </button>
-                </div>
-            `;
-            
-            // 알림도 표시
-            showNotification('error', '생성 실패', errorMsg);
-        }
-    }
-}
 
 // 캐릭터 이미지를 히스토리와 함께 렌더링
 function renderCharacterImageWithHistory(charIndex) {
