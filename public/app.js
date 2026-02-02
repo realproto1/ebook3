@@ -9245,6 +9245,47 @@ document.addEventListener('DOMContentLoaded', () => {
     loadBackgroundMusicList();
 });
 
+    // ============================================
+    // 전역 함수 노출 (HTML onclick에서 사용)
+    // ============================================
+    window.selectStorybook = selectStorybook;
+    window.deleteStorybook = deleteStorybook;
+    window.duplicateStorybook = duplicateStorybook;
+    window.createNewStorybook = createNewStorybook;
+    window.generateStorybook = generateStorybook;
+    window.generateCoverImage = generateCoverImage;
+    window.regenerateCoverImage = regenerateCoverImage;
+    window.generateCharacterReference = generateCharacterReference;
+    window.generateAllCharacterReferences = generateAllCharacterReferences;
+    window.generateIllustration = generateIllustration;
+    window.generatePageTTS = generatePageTTS;
+    window.generateAllTTS = generateAllTTS;
+    window.generateQuiz = generateQuiz;
+    window.generateVocabularyImages = generateVocabularyImages;
+    window.generateAllVocabularyImages = generateAllVocabularyImages;
+    window.generateSingleVocabularyImage = generateSingleVocabularyImage;
+    window.generateAllKeyObjectImages = generateAllKeyObjectImages;
+    window.generateSingleKeyObjectImage = generateSingleKeyObjectImage;
+    window.saveCurrentStorybook = saveCurrentStorybook;
+    window.openPreview = openPreview;
+    window.downloadImage = downloadImage;
+    window.downloadAllCharacterReferences = downloadAllCharacterReferences;
+    window.downloadAllVocabularyImages = downloadAllVocabularyImages;
+    window.playTTS = playTTS;
+    window.stopTTS = stopTTS;
+    window.updateStoryTitle = updateStoryTitle;
+    window.updateCoverPrompt = updateCoverPrompt;
+    window.addCharacter = addCharacter;
+    window.deleteCharacter = deleteCharacter;
+    window.addPage = addPage;
+    window.deletePage = deletePage;
+    window.goBack = goBack;
+    window.toggleLanguage = toggleLanguage;
+    window.openBackgroundMusicModal = openBackgroundMusicModal;
+    window.closeBackgroundMusicModal = closeBackgroundMusicModal;
+    window.selectBackgroundMusic = selectBackgroundMusic;
+    window.removeBackgroundMusic = removeBackgroundMusic;
+    
     })(); // IIFE 종료
 } else {
     console.warn('⚠️ app.js: 모듈 로드 대기 중... 전역 변수로 fallback');
