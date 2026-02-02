@@ -9240,11 +9240,6 @@ function selectBackgroundMusic(musicId) {
     saveCurrentStorybook();
 }
 
-// 페이지 로드 시 배경음악 목록 로드
-document.addEventListener('DOMContentLoaded', () => {
-    loadBackgroundMusicList();
-});
-
     // ============================================
     // 전역 함수 노출 (HTML onclick에서 사용)
     // ============================================
@@ -9285,9 +9280,17 @@ document.addEventListener('DOMContentLoaded', () => {
     window.closeBackgroundMusicModal = closeBackgroundMusicModal;
     window.selectBackgroundMusic = selectBackgroundMusic;
     window.removeBackgroundMusic = removeBackgroundMusic;
+    window.loadBackgroundMusicList = loadBackgroundMusicList;
     
     })(); // IIFE 종료
 } else {
     console.warn('⚠️ app.js: 모듈 로드 대기 중... 전역 변수로 fallback');
 }
+
+// 페이지 로드 시 배경음악 목록 로드 (IIFE 외부)
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.loadBackgroundMusicList) {
+        window.loadBackgroundMusicList();
+    }
+});
 
