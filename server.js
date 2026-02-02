@@ -2920,20 +2920,37 @@ app.get('/api/config', (req, res) => {
 // 5. Key Object 이미지 생성
 app.post('/api/generate-key-object', requireAPIKey, async (req, res) => {
   try {
-    const { keyObject, artStyle, settings = {}, storybookId = '', storybookTitle = '' } = req.body;
+    // 두 가지 형식 지원:
+    // 1. { keyObject: { name, description, ... }, ... }
+    // 2. { name, description, prompt, ... }
+    let keyObject;
+    if (req.body.keyObject) {
+      // 기존 형식
+      keyObject = req.body.keyObject;
+    } else {
+      // 새로운 형식 (ImageService)
+      keyObject = {
+        name: req.body.name,
+        description: req.body.description || req.body.prompt || req.body.name,
+        prompt: req.body.prompt || req.body.description || req.body.name
+      };
+    }
+    
+    const { artStyle, settings = {}, storybookId = '', storybookTitle = '' } = req.body;
     
     // 설정값 - Key Object는 항상 4:3 비율로 고정
-    const aspectRatio = '4:3';  // 고정값: 4:3 (주요 사물 일러스트에 적합)
+    const aspectRatio = req.body.aspectRatio || '4:3';  // ImageService에서 전달된 aspectRatio 우선 사용
     const enforceNoText = settings.enforceNoText !== false;
     const additionalPrompt = settings.additionalPrompt || '';
-    const modelName = settings.keyObjectModel || 'gemini-3-pro-image-preview';  // Key Object 이미지 생성 모델
+    const modelName = req.body.model || settings.keyObjectModel || 'gemini-3-pro-image-preview';  // ImageService에서 전달된 model 우선 사용
     
     console.log('📐 Key Object aspect ratio (fixed):', aspectRatio);
     console.log('🤖 Key Object model:', modelName);
+    console.log('🔑 Key Object data:', keyObject);
     
     // keyObject.description을 영어로 번역 (한글인 경우)
     let descriptionEn = keyObject.description;
-    if (/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(keyObject.description)) {
+    if (descriptionEn && /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(descriptionEn)) {
       console.log('Translating key object description to English...');
       const translateUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
       const translateResponse = await fetch(translateUrl, {
