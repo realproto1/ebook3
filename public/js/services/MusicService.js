@@ -26,7 +26,7 @@
          */
         async loadMusicList() {
             try {
-                const response = await this.api.get('/api/background-music');
+                const response = await axios.get('/api/background-music');
                 
                 if (response.data.success) {
                     this.musicList = response.data.music;
@@ -60,7 +60,7 @@
                 formData.append('title', title);
                 formData.append('audio', file);
                 
-                const response = await this.api.post('/api/background-music', formData, {
+                const response = await axios.post('/api/background-music', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -85,7 +85,7 @@
          */
         async deleteMusic(id) {
             try {
-                const response = await this.api.delete(`/api/background-music/${id}`);
+                const response = await axios.delete(`/api/background-music/${id}`);
                 
                 if (response.data.success) {
                     console.log('✅ 배경음악이 삭제되었습니다:', id);
