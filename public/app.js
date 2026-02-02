@@ -34,6 +34,13 @@ if (window.api) {
         const storyService = window.storyService;
         const imageService = window.imageService;
         const ttsService = window.ttsService;
+        
+        // StorybookManager 초기화
+        const storybookManager = new window.StorybookManager({
+            api,
+            storage: Storage,
+            storyService
+        });
 
 // ============================================
 // 전역 변수
@@ -95,17 +102,13 @@ function showErrorUI(element, error) {
  * 동화책 저장 (간편 래퍼)
  */
 async function saveCurrentStorybook() {
-    if (!currentStorybook || !currentStorybook.id) {
-        console.warn('⚠️ 저장할 동화책이 없습니다.');
-        return;
-    }
-    
     try {
-        await axios.put(`/api/storybooks/${currentStorybook.id}`, currentStorybook);
-        console.log('✅ 동화책 저장 완료:', currentStorybook.title);
+        // StorybookManager 사용
+        await storybookManager.saveCurrentStorybook(currentStorybook);
+        return true;
     } catch (error) {
         console.error('❌ 동화책 저장 실패:', error);
-        throw error;
+        return false;
     }
 }
 
@@ -1159,71 +1162,20 @@ function resetSettings() {
 async function loadStorybooks() {
     console.log('🔧 loadStorybooks() 시작');
     
-    // 로딩 인디케이터 표시
-    const loadingEl = document.getElementById('bookListLoading');
-    const bookListEl = document.getElementById('bookList');
-    if (loadingEl) {
-        loadingEl.classList.remove('hidden');
-    }
-    
-    // ❌ localStorage 로딩 비활성화 - R2만 사용
-    console.log('ℹ️ localStorage 로딩 비활성화됨. R2만 사용합니다.');
-    storybooks = []; // 빈 배열로 시작
-    
-    // R2에서 최신 목록 가져오기
     try {
-        console.log('📚 R2 API 호출 시작: GET /api/storybooks');
-        const startTime = Date.now();
-        const response = await axios.get('/api/storybooks');
-        console.log('📡 R2 API 응답:', response.data, `(${Date.now() - startTime}ms)`);
+        // StorybookManager 사용
+        const books = await storybookManager.loadStorybooks();
+        storybooks = books;
+        storybookManager.storybooks = storybooks; // 동기화
         
-        if (response.data.success && response.data.storybooks) {
-            const r2Books = response.data.storybooks;
-            console.log(`✅ R2에서 ${r2Books.length}권의 동화책을 찾았습니다`);
-            console.log('📋 R2 동화책 목록:', r2Books.map(b => `${b.title} (ID: ${b.id})`).join(', '));
-            
-            // 🚀 병렬로 모든 동화책 상세 정보 로드 (훨씬 빠름!)
-            console.log('⚡ 모든 동화책을 병렬로 로드 시작...');
-            const detailStartTime = Date.now();
-            
-            const detailPromises = r2Books.map(meta => 
-                axios.get(`/api/storybooks/${meta.id}`)
-                    .then(response => {
-                        console.log(`✅ ${meta.title} 로드 성공`);
-                        return response.data;
-                    })
-                    .catch(error => {
-                        console.error(`❌ 동화책 ${meta.id} 로드 실패:`, error);
-                        return null;
-                    })
-            );
-            
-            const fullBooks = (await Promise.all(detailPromises)).filter(book => book !== null);
-            
-            const detailElapsed = Date.now() - detailStartTime;
-            console.log(`📚 총 ${fullBooks.length}권의 동화책 로드 완료 (${detailElapsed}ms, 평균 ${Math.round(detailElapsed / fullBooks.length)}ms/권)`);
-            
-            // R2 데이터를 storybooks에 설정
-            storybooks = fullBooks;
-            
-            // 화면 업데이트
-            console.log('🎨 화면 업데이트 중...');
-            renderBookList();
-            console.log('✅ 화면 업데이트 완료');
-        } else {
-            console.warn('⚠️ R2 응답 형식 오류:', response.data);
-        }
+        // 화면 업데이트
+        console.log('🎨 화면 업데이트 중...');
+        renderBookList();
+        console.log('✅ 화면 업데이트 완료');
     } catch (error) {
-        console.error('❌ R2 동화책 로드 실패:', error);
-        console.error('상세 에러:', error.response ? error.response.data : error.message);
-    } finally {
-        // 로딩 인디케이터 숨기기
-        if (loadingEl) {
-            loadingEl.classList.add('hidden');
-        }
+        console.error('❌ 동화책 로드 실패:', error);
     }
     
-    const totalElapsed = Date.now();
     console.log('🏁 loadStorybooks() 완료. 총 동화책:', storybooks.length, '권');
 }
 
@@ -1241,13 +1193,18 @@ function renderBookList() {
 }
 
 function selectStorybook(id) {
-    currentStorybook = storybooks.find(b => b.id === id);
-    if (currentStorybook) {
-        displayStorybook(currentStorybook);
+    const book = storybookManager.selectStorybook(id, (book) => {
+        currentStorybook = book;
+        displayStorybook(book);
         renderBookList();
         document.getElementById('createForm').style.display = 'none';
         // 모바일에서 사이드바 자동 닫기
         closeMobileSidebar();
+    });
+    
+    if (book) {
+        currentStorybook = book;
+        storybookManager.currentStorybook = book; // 동기화
     }
 }
 
@@ -1256,52 +1213,31 @@ async function deleteStorybook(id) {
     const storybook = storybooks.find(b => b.id === id);
     const title = storybook ? storybook.title : '이 동화책';
     
-    console.log(`🗑️ 삭제 요청: ID ${id}, 제목: ${title}`);
-    
-    // 명확한 확인 메시지
-    const confirmMessage = `⚠️ 정말로 삭제하시겠습니까?\n\n동화책: "${title}"\n\n이 작업은 되돌릴 수 없습니다.\n- 모든 페이지\n- 캐릭터 레퍼런스\n- 표지 이미지\n- 생성된 모든 콘텐츠\n\n위 내용이 영구적으로 삭제됩니다.`;
-    
-    if (confirm(confirmMessage)) {
-        console.log(`✅ 사용자 확인: 삭제 진행`);
-        try {
-            // R2에서 삭제
-            console.log(`🗑️ R2에서 삭제 시작: ID ${id}`);
-            console.log(`📡 API 호출: DELETE /api/storybooks/${id}`);
+    try {
+        // StorybookManager 사용
+        const deleted = await storybookManager.deleteStorybook(id, title);
+        
+        if (deleted) {
+            // 메모리 동기화
+            storybooks = storybookManager.storybooks;
             
-            const response = await axios.delete(`/api/storybooks/${id}`);
+            // 화면 업데이트
+            saveStorybooks();
+            renderBookList();
             
-            console.log(`📡 서버 응답:`, response.data);
-            
-            if (response.data.success) {
-                console.log(`✅ R2 삭제 완료`);
-                
-                // localStorage에서도 삭제
-                const beforeCount = storybooks.length;
-                storybooks = storybooks.filter(b => b.id !== id);
-                const afterCount = storybooks.length;
-                
-                console.log(`📊 동화책 목록 업데이트: ${beforeCount}권 → ${afterCount}권`);
-                
-                saveStorybooks();
-                renderBookList();
-                
-                if (currentStorybook && currentStorybook.id === id) {
-                    currentStorybook = null;
-                    document.getElementById('storybookResult').classList.add('hidden');
-                    document.getElementById('createForm').style.display = 'block';
-                }
-                
-                showNotification('success', `"${title}"이(가) 삭제되었습니다.`);
-            } else {
-                throw new Error(response.data.error || '삭제 실패');
+            // 현재 선택된 동화책이면 화면 리셋
+            if (currentStorybook && currentStorybook.id === id) {
+                currentStorybook = null;
+                storybookManager.currentStorybook = null;
+                document.getElementById('storybookResult').classList.add('hidden');
+                document.getElementById('createForm').style.display = 'block';
             }
-        } catch (error) {
-            console.error('❌ 삭제 오류:', error);
-            console.error('에러 상세:', error.response ? error.response.data : error.message);
-            showNotification('error', '동화책 삭제에 실패했습니다.');
+            
+            showNotification('success', `"${title}"이(가) 삭제되었습니다.`);
         }
-    } else {
-        console.log(`❌ 사용자 취소: 삭제 취소됨`);
+    } catch (error) {
+        console.error('❌ 삭제 오류:', error);
+        showNotification('error', '동화책 삭제에 실패했습니다.');
     }
 }
 
@@ -1513,96 +1449,28 @@ function duplicateStorybook() {
 
 // ID로 동화책 복사 (사이드바에서 호출)
 async function duplicateStorybookById(id) {
-    const book = storybooks.find(b => b.id === id);
-    if (!book) {
-        alert('동화책을 찾을 수 없습니다.');
-        return;
-    }
-    
-    // 사용자 입력 받기 (동화 이름, 그림 스타일)
-    const newTitle = prompt('새로운 동화책 제목을 입력하세요:', `${book.title} (복사본)`);
-    if (!newTitle) {
-        return; // 취소
-    }
-    
-    const newArtStyle = prompt('새로운 그림 스타일을 입력하세요:', book.artStyle || '디즈니 스타일');
-    if (!newArtStyle) {
-        return; // 취소
-    }
-    
-    // 깊은 복사
-    const duplicate = JSON.parse(JSON.stringify(book));
-    
-    // 새 ID 생성
-    duplicate.id = Date.now().toString();
-    
-    // 제목과 그림 스타일 업데이트
-    duplicate.title = newTitle;
-    duplicate.artStyle = newArtStyle;
-    
-    // 🔥 이미지 제거 (텍스트는 유지)
-    
-    // 캐릭터 레퍼런스 이미지만 제거
-    if (duplicate.characters && Array.isArray(duplicate.characters)) {
-        duplicate.characters.forEach(char => {
-            char.referenceImage = null;
-            char.imageHistory = []; // 히스토리도 초기화
-        });
-    }
-    
-    // Key Object 이미지 완전히 제거 (4단계)
-    // 1. vocabularyImages 배열 비우기
-    duplicate.vocabularyImages = [];
-    
-    // 2. keyObjectImages 배열 비우기 (화면에 표시되는 이미지)
-    duplicate.keyObjectImages = [];
-    
-    // 3. educational_content.vocabulary 안의 image 필드 제거
-    if (duplicate.educational_content && 
-        duplicate.educational_content.vocabulary && 
-        Array.isArray(duplicate.educational_content.vocabulary)) {
-        duplicate.educational_content.vocabulary.forEach(vocab => {
-            if (typeof vocab === 'object') {
-                delete vocab.image;
-                delete vocab.imageUrl; // imageUrl도 제거
-            }
-        });
-    }
-    
-    // 4. key_objects 배열의 image 필드도 제거 (혹시 있다면)
-    if (duplicate.key_objects && Array.isArray(duplicate.key_objects)) {
-        duplicate.key_objects.forEach(obj => {
-            if (typeof obj === 'object') {
-                delete obj.image;
-                delete obj.imageUrl;
-            }
-        });
-    }
-    
-    // 페이지 삽화 이미지와 artStyle 제거 (새 동화책 스타일 적용을 위해)
-    if (duplicate.pages && Array.isArray(duplicate.pages)) {
-        duplicate.pages.forEach(page => {
-            page.illustrationImage = null;
-            page.illustrationHistory = [];  // 히스토리도 초기화
-            delete page.artStyle; // ⚠️ 페이지별 artStyle 제거 (동화책 전역 스타일 사용)
-        });
-    }
-    
-    // 표지 이미지 제거
-    duplicate.coverImage = null;
-    
-    // 동화책 목록에 추가
-    storybooks.unshift(duplicate);
-    
-    // R2에 저장
     try {
-        console.log(`💾 R2에 복사본 저장: "${duplicate.title}" (ID: ${duplicate.id})`);
-        await saveToR2(duplicate);
-        console.log(`✅ R2 저장 완료`);
+        // StorybookManager 사용
+        const duplicate = await storybookManager.duplicateStorybook(id);
+        
+        if (duplicate) {
+            // 메모리 동기화
+            storybooks = storybookManager.storybooks;
+            
+            // 화면 업데이트
+            saveStorybooks();
+            renderBookList();
+            
+            // 새 동화책 선택
+            selectStorybook(duplicate.id);
+            
+            showNotification('success', '동화책 복사 완료', `"${duplicate.title}"이(가) 생성되었습니다.`);
+        }
     } catch (error) {
-        console.error('❌ R2 저장 오류:', error);
-        showNotification('error', 'DB 저장 실패', '복사본이 DB에 저장되지 않았습니다.');
+        console.error('❌ 복사 오류:', error);
+        showNotification('error', '동화책 복사에 실패했습니다.');
     }
+}
     
     // localStorage에도 저장
     saveStorybooks();
@@ -5589,55 +5457,29 @@ function saveCurrentStorybook() {
 
 // R2에 동화책 저장 (서버 API 호출) - 재시도 로직 포함
 async function saveToR2(storybook, retryCount = 0) {
-    const maxRetries = 3;
-    
     try {
-        console.log(`💾 R2 저장 시작: ${storybook.title}${retryCount > 0 ? ` (재시도 ${retryCount}/${maxRetries})` : ''}`);
+        // StorybookManager 사용
+        await storybookManager.saveToR2(storybook, retryCount);
         
-        const response = await axios.post('/api/storybooks', storybook, {
-            timeout: 300000, // 300초 타임아웃 (5분)
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (response.data.success) {
-            console.log(`✅ R2 저장 완료: ${storybook.title}`);
-            
-            // 공개된 동화책이면 뷰어 메타데이터도 업데이트
-            if (storybook.isPublic) {
-                console.log('🔄 공개 동화책 - 뷰어 메타데이터 업데이트 중...');
-                try {
-                    const metaResponse = await axios.post('/api/viewer/refresh-metadata');
-                    if (metaResponse.data.success) {
-                        console.log('✅ 뷰어 메타데이터 업데이트 완료');
-                    }
-                } catch (metaError) {
-                    console.warn('⚠️ 뷰어 메타데이터 업데이트 실패:', metaError.message);
+        // 공개된 동화책이면 뷰어 메타데이터도 업데이트
+        if (storybook.isPublic) {
+            console.log('🔄 공개 동화책 - 뷰어 메타데이터 업데이트 중...');
+            try {
+                const metaResponse = await axios.post('/api/viewer/refresh-metadata');
+                if (metaResponse.data.success) {
+                    console.log('✅ 뷰어 메타데이터 업데이트 완료');
                 }
+            } catch (metaError) {
+                console.warn('⚠️ 뷰어 메타데이터 업데이트 실패:', metaError.message);
             }
-            
-            return true; // 성공
-        } else {
-            console.error('R2 저장 실패:', response.data.error);
-            throw new Error(response.data.error || 'R2 저장 실패');
         }
+        
+        return true;
     } catch (error) {
-        console.error(`❌ R2 저장 오류 (시도 ${retryCount + 1}/${maxRetries + 1}):`, error.message);
-        
-        // 524 에러 또는 타임아웃인 경우 재시도
-        const shouldRetry = (
-            error.response?.status === 524 || 
-            error.code === 'ECONNABORTED' || 
-            error.message.includes('timeout')
-        ) && retryCount < maxRetries;
-        
-        if (shouldRetry) {
-            const waitTime = Math.min(5000 * Math.pow(2, retryCount), 30000); // 지수 백오프: 5초, 10초, 20초 (최대 30초)
-            console.log(`⏳ ${waitTime/1000}초 후 재시도...`);
-            await new Promise(resolve => setTimeout(resolve, waitTime));
-            return saveToR2(storybook, retryCount + 1); // 재귀 호출
-        } else {
+        console.error('❌ saveToR2 실패:', error);
+        throw error;
+    }
+}
             // 최대 재시도 횟수 초과 또는 재시도 불가능한 에러
             if (retryCount >= maxRetries) {
                 console.error('❌ 최대 재시도 횟수 초과');
