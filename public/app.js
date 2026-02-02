@@ -4862,21 +4862,22 @@ async function generateAllIllustrationsParallel() {
                     
                     console.log(`📸 캐릭터 레퍼런스 이미지: ${refImageUrls.length}개`, refImageUrls);
                     
-                    // 🔥 서버 API 호출 (R2 업로드 포함)
-                    const response = await axios.post('/api/generate-illustration', {
-                        page: pageData,
+                    // ImageService를 통해 삽화 생성
+                    const service = imageService || window.imageService;
+                    if (!service) {
+                        throw new Error('ImageService가 로드되지 않았습니다.');
+                    }
+                    
+                    const result = await service.generateIllustration(pageData, refImageUrls, {
+                        model: imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
+                        aspectRatio: imageSettings.aspectRatio || '16:9',
                         artStyle: artStyle,
-                        characterReferences: refImageUrls, // URL 배열 전달
-                        settings: {
-                            ...imageSettings,
-                            illustrationModel: imageSettings.illustrationModel || 'gemini-3-pro-image-preview'
-                        },
                         storybookId: currentStorybook.id,
-                        storybookTitle: currentStorybook.title
+                        storybookTitle: currentStorybook.title,
+                        additionalPrompt: imageSettings.additionalPrompt
                     });
                     
-                    if (response.data.success && response.data.imageUrl) {
-                        const result = response.data; // R2 URL 포함
+                    if (result && result.success && result.imageUrl) {
                         const page = currentStorybook.pages[pageIndex];
                         
                         // 기존 이미지가 있으면 히스토리에 추가
@@ -5070,22 +5071,23 @@ async function generateAllIllustrationsSequential() {
                     }
                 }
                 
-                // 🔥 서버 API 호출 (R2 업로드 포함)
-                const response = await axios.post('/api/generate-illustration', {
-                    page: pageData,
+                // ImageService를 통해 삽화 생성
+                const service = imageService || window.imageService;
+                if (!service) {
+                    throw new Error('ImageService가 로드되지 않았습니다.');
+                }
+                
+                const result = await service.generateIllustration(pageData, refImageUrls, {
+                    model: imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
+                    aspectRatio: imageSettings.aspectRatio || '16:9',
                     artStyle: artStyle,
-                    characterReferences: refImageUrls, // URL 배열 전달
-                    settings: {
-                        ...imageSettings,
-                        illustrationModel: imageSettings.illustrationModel || 'gemini-3-pro-image-preview'
-                    },
                     previousPages: previousPages,
                     storybookId: currentStorybook.id,
-                    storybookTitle: currentStorybook.title
+                    storybookTitle: currentStorybook.title,
+                    additionalPrompt: imageSettings.additionalPrompt
                 });
                 
-                if (response.data.success && response.data.imageUrl) {
-                    const result = response.data; // R2 URL 포함
+                if (result && result.success && result.imageUrl) {
                     const page = currentStorybook.pages[i];
                     
                     // 기존 이미지가 있으면 히스토리에 추가
@@ -5460,23 +5462,29 @@ async function generateIllustration(pageIndex) {
         
         console.log(`📊 최종 레퍼런스 이미지 개수: ${refImageUrls.length}`, refImageUrls);
 
-        // 🔥 서버 API 호출 (R2 업로드 포함)
-        const response = await axios.post('/api/generate-illustration', {
-            page: pageData,
+        // ImageService를 통해 삽화 생성
+        const service = imageService || window.imageService;
+        if (!service) {
+            throw new Error('ImageService가 로드되지 않았습니다.');
+        }
+        
+        const result = await service.generateIllustration(pageData, refImageUrls, {
+            model: imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
+            aspectRatio: imageSettings.aspectRatio || '16:9',
             artStyle: artStyle,
-            characterReferences: refImageUrls, // URL 배열 전달
-            settings: {
-                ...imageSettings,
-                illustrationModel: imageSettings.illustrationModel || 'gemini-3-pro-image-preview'
-            },
             editNote: editNote,
             previousPages: pageIndex > 0 ? [currentStorybook.pages[pageIndex - 1]] : [],
             storybookId: currentStorybook.id,
-            storybookTitle: currentStorybook.title
+            storybookTitle: currentStorybook.title,
+            additionalPrompt: imageSettings.additionalPrompt,
+            onStart: (element) => {
+                if (element) {
+                    showLoadingUI(element, 'AI가 삽화를 생성하는 중...');
+                }
+            }
         });
 
-        if (response.data.success && response.data.imageUrl) {
-            const result = response.data; // R2 URL 포함
+        if (result && result.success && result.imageUrl) {
             const imageUrl = result.imageUrl;
             
             // 히스토리 관리: 기존 이미지가 있으면 히스토리에 추가
@@ -5509,24 +5517,20 @@ async function generateIllustration(pageIndex) {
             illustrationDiv.innerHTML = `<img src="${imageUrl}" alt="삽화 ${pageIndex + 1}" class="w-full h-full object-cover rounded-lg"/>`;
             console.log('✅ 삽화 생성 완료 및 화면 업데이트');
         } else {
-            throw new Error(result.error || '이미지 URL을 받지 못했습니다.');
+            throw new Error(result?.error || 'ImageService에서 이미지 URL을 받지 못했습니다.');
         }
 
     } catch (error) {
         console.error('❌ 삽화 생성 실패:', error);
         
-        // 서버 응답에서 상세 에러 메시지 추출
-        let errorMessage = '이미지 생성 실패';
-        if (error.response && error.response.data) {
-            if (error.response.data.error) {
-                errorMessage = error.response.data.error;
-                console.error('📡 서버 에러 메시지:', errorMessage);
-            } else if (error.response.data.message) {
-                errorMessage = error.response.data.message;
-                console.error('📡 서버 에러 메시지:', errorMessage);
-            }
-        } else if (error.message) {
-            errorMessage = error.message;
+        // 에러 메시지 추출
+        let errorMessage = error.message || '이미지 생성 실패';
+        if (error.response?.data?.error) {
+            errorMessage = error.response.data.error;
+            console.error('📡 서버 에러 메시지:', errorMessage);
+        } else if (error.response?.data?.message) {
+            errorMessage = error.response.data.message;
+            console.error('📡 서버 에러 메시지:', errorMessage);
         }
         
         // 기존 이미지가 있으면 유지하고 에러 메시지만 표시
