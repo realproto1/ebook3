@@ -449,10 +449,6 @@ class ImageService {
             throw error;
         }
     }
-            console.error('generateVocabulary error:', error);
-            throw error;
-        }
-    }
 
     /**
      * 모든 Vocabulary 이미지 생성

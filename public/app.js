@@ -8,20 +8,27 @@
 // ============================================
 
 // author.html에서 로드한 모듈 사용
-const modules = window.__modules || {};
-const { api, Storage, audioPlayer, DOM, storyService, imageService, ttsService } = modules;
+// 전역 변수로 이미 로드됨 (window.api, window.imageService 등)
+// const 선언 시 충돌 방지를 위해 직접 window에서 참조
+const api = window.api;
+const Storage = window.Storage;
+const audioPlayer = window.audioPlayer;
+const DOM = window.DOM;
+const storyService = window.storyService;
+const imageService = window.imageService;
+const ttsService = window.ttsService;
 
 // 로그로 모듈 로드 확인
-if (modules.api) {
+if (api) {
     console.log('✅ app.js: 모듈 연결 성공');
     console.log('📦 로드된 모듈:', {
-        api: !!modules.api,
-        Storage: !!modules.Storage,
-        audioPlayer: !!modules.audioPlayer,
-        DOM: !!modules.DOM,
-        storyService: !!modules.storyService,
-        imageService: !!modules.imageService,
-        ttsService: !!modules.ttsService
+        api: !!api,
+        Storage: !!Storage,
+        audioPlayer: !!audioPlayer,
+        DOM: !!DOM,
+        storyService: !!storyService,
+        imageService: !!imageService,
+        ttsService: !!ttsService
     });
 } else {
     console.warn('⚠️ app.js: 모듈 로드 대기 중... 전역 변수로 fallback');
