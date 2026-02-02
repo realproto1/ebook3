@@ -373,6 +373,6 @@ if (typeof window !== 'undefined') {
     window.ttsService = ttsService;
 }
 
-// ES6 모듈 export
-export { TTSService, ttsService };
-export default ttsService;
+// ES6 모듈 export (주석 처리 - 일반 script 태그 사용)
+// export { TTSService, ttsService };
+// export default ttsService;

@@ -137,6 +137,6 @@ if (typeof window !== 'undefined') {
     window.Storage = Storage;
 }
 
-// ES6 모듈 export
-export { Storage };
-export default Storage;
+// ES6 모듈 export (주석 처리 - 일반 script 태그 사용)
+// export { Storage };
+// export default Storage;

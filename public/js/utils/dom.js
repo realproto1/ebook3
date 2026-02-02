@@ -284,6 +284,6 @@ if (typeof window !== 'undefined') {
     window.DOM = DOM;
 }
 
-// ES6 모듈 export
-export { DOM };
-export default DOM;
+// ES6 모듈 export (주석 처리 - 일반 script 태그 사용)
+// export { DOM };
+// export default DOM;

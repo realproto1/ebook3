@@ -153,6 +153,6 @@ if (typeof window !== 'undefined') {
     window.audioPlayer = audioPlayer;
 }
 
-// ES6 모듈 export
-export { AudioPlayer, audioPlayer };
-export default audioPlayer;
+// ES6 모듈 export (주석 처리 - 일반 script 태그 사용)
+// export { AudioPlayer, audioPlayer };
+// export default audioPlayer;

@@ -281,6 +281,6 @@ if (typeof window !== 'undefined') {
     window.storyService = storyService;
 }
 
-// ES6 모듈 export
-export { StoryService, storyService };
-export default storyService;
+// ES6 모듈 export (주석 처리 - 일반 script 태그 사용)
+// export { StoryService, storyService };
+// export default storyService;

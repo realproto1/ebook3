@@ -136,6 +136,6 @@ if (typeof window !== 'undefined') {
     window.api = api;
 }
 
-// ES6 모듈 export
-export { API, api };
-export default api;
+// ES6 모듈 export (주석 처리 - 일반 script 태그 사용)
+// export { API, api };
+// export default api;

@@ -581,6 +581,6 @@ if (typeof window !== 'undefined') {
     window.imageService = imageService;
 }
 
-// ES6 모듈 export
-export { ImageService, imageService };
-export default imageService;
+// ES6 모듈 export (주석 처리 - 일반 script 태그 사용)
+// export { ImageService, imageService };
+// export default imageService;
