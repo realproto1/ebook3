@@ -5345,30 +5345,39 @@ async function generateAllTTS() {
 }
 
 // 페이지 삽화 생성
-/**
- * 삽화 생성 (간소화 버전)
- */
 async function generateIllustration(pageIndex) {
     const page = currentStorybook.pages[pageIndex];
+    const sceneCombinedElem = document.getElementById(`scene-combined-${pageIndex}`);
+    const sceneDesc = sceneCombinedElem ? sceneCombinedElem.value : (page.scene_description || '');
+    const artStyleElem = document.getElementById(`artstyle-${pageIndex}`);
+    const artStyle = artStyleElem ? artStyleElem.value : currentStorybook.artStyle;
     const illustrationDiv = document.getElementById(`illustration-${pageIndex}`);
     
-    // 1. 입력 데이터 수집
-    const sceneDesc = document.getElementById(`scene-combined-${pageIndex}`)?.value || page.scene_description || '';
-    const artStyle = document.getElementById(`artstyle-${pageIndex}`)?.value || currentStorybook.artStyle;
-    const editNote = document.getElementById(`edit-note-${pageIndex}`)?.value.trim() || '';
+    // 수정사항 입력 필드 읽기
+    const editNoteElem = document.getElementById(`edit-note-${pageIndex}`);
+    const editNote = editNoteElem ? editNoteElem.value.trim() : '';
     
-    // 2. 캐릭터 레퍼런스 준비
+    // scene-combined에서 장면 구조 파싱
+    const sceneStructure = {
+        characters: '',
+        background: '',
+        atmosphere: ''
+    };
+    
     const characterReferences = currentStorybook.characters
         .filter(char => char.referenceImage)
-        .map(char => ({ name: char.name, description: char.description, referenceImage: char.referenceImage }));
+        .map(char => ({
+            name: char.name,
+            description: char.description,
+            referenceImage: char.referenceImage
+        }));
     
     if (characterReferences.length === 0) {
         alert('먼저 캐릭터 레퍼런스 이미지를 생성해주세요!');
         return;
     }
     
-    // 3. 로딩 UI 표시
-    showLoadingUI(illustrationDiv, 'AI가 삽화를 생성하는 중...');
+    illustrationDiv.innerHTML = '<div class="flex flex-col items-center justify-center h-full p-4"><div class="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mb-3"></div><p class="text-gray-600 text-sm font-semibold">AI가 삽화를 생성하는 중...</p><p class="text-gray-500 text-xs mt-1">실패 시 자동으로 재시도합니다</p></div>';
 
     try {
         // 클라이언트에서 직접 Gemini API 호출
