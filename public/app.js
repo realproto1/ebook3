@@ -5464,8 +5464,9 @@ async function generateIllustration(pageIndex) {
             currentStorybook.pages[pageIndex].editNote = editNote; // 수정사항 저장
             saveCurrentStorybook();
             
-            // displayStorybook을 호출하여 수정사항 입력 필드가 표시되도록 함
-            displayStorybook(currentStorybook);
+            // ✨ 이미지만 업데이트 (전체 다시 렌더링 안 함)
+            illustrationDiv.innerHTML = `<img src="${imageUrl}" alt="삽화 ${pageIndex + 1}" class="w-full h-full object-cover rounded-lg"/>`;
+            console.log('✅ 삽화 생성 완료 및 화면 업데이트');
         } else {
             throw new Error(result.error || '이미지 URL을 받지 못했습니다.');
         }
