@@ -101,16 +101,14 @@ export default class WordWritingGame extends GameBase {
      * 캔버스 초기화
      */
     initCanvas() {
-        // Canvas 요소 확인
-        const canvas = document.getElementById('drawingCanvas');
-        if (!canvas) {
-            throw new Error('Canvas element not found');
-        }
-
         // 캔버스 초기화
         const { canvas, ctx } = CanvasUtil.init('drawingCanvas', {
             willReadFrequently: true
         });
+
+        if (!canvas) {
+            throw new Error('Canvas element not found');
+        }
 
         this.canvas = canvas;
         this.ctx = ctx;
