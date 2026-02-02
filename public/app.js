@@ -30,6 +30,7 @@ if (window.api) {
         const Storage = window.Storage;
         const audioPlayer = window.audioPlayer;
         const DOM = window.DOM;
+        const UIHelper = window.UIHelper;
         const storyService = window.storyService;
         const imageService = window.imageService;
         const ttsService = window.ttsService;
@@ -5479,8 +5480,8 @@ async function generateIllustration(pageIndex) {
             additionalPrompt: imageSettings.additionalPrompt,
             targetElement: illustrationDiv,  // ✅ DOM 요소 전달
             onStart: (element) => {
-                if (element) {
-                    showLoadingUI(element, 'AI가 삽화를 생성하는 중...');
+                if (element && UIHelper) {
+                    UIHelper.showLoadingUI(element, 'AI가 삽화를 생성하는 중...');
                 }
             }
         });
@@ -5514,44 +5515,17 @@ async function generateIllustration(pageIndex) {
             currentStorybook.pages[pageIndex].editNote = editNote; // 수정사항 저장
             saveCurrentStorybook();
             
-            // ✨ 히스토리 포함하여 이미지 업데이트
-            const history = page.illustrationHistory || [];
-            const historyHTML = history.length > 0 ? `
-                <div class="w-20 overflow-y-auto space-y-2 p-1" style="scrollbar-width: thin; scrollbar-color: rgba(34, 197, 94, 0.5) rgba(34, 197, 94, 0.1);">
-                    ${history.map((url, histIdx) => `
-                        <div class="relative group cursor-pointer border-2 border-transparent hover:border-green-400 rounded transition" onclick="selectIllustrationFromHistory(${pageIndex}, ${histIdx})" title="이전 버전 ${histIdx + 1}">
-                            <img src="${url}" alt="이전 ${histIdx + 1}" class="w-full h-16 object-cover rounded"/>
-                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition rounded flex items-center justify-center">
-                                <i class="fas fa-check text-white text-xs opacity-0 group-hover:opacity-100 transition"></i>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            ` : '';
-            
-            illustrationDiv.innerHTML = `
-                <div class="flex gap-2 h-full">
-                    <div class="flex-1 relative group">
-                        <img src="${imageUrl}" alt="삽화 ${pageIndex + 1}" class="w-full h-auto cursor-pointer" onclick="toggleImageDeleteButton('page-${pageIndex}')"/>
-                        <button 
-                            id="page-${pageIndex}-delete-btn"
-                            onclick="event.stopPropagation(); deletePageIllustration(${pageIndex})"
-                            class="hidden absolute top-3 right-3 bg-red-500 bg-opacity-90 text-white w-10 h-10 rounded-full hover:bg-opacity-100 transition shadow-lg flex items-center justify-center z-10"
-                            title="이미지 삭제"
-                        >
-                            <i class="fas fa-times"></i>
-                        </button>
-                        <button 
-                            onclick="downloadImage('${imageUrl}', '${currentStorybook.title}_페이지_${pageIndex + 1}.png')"
-                            class="absolute bottom-3 right-3 bg-white bg-opacity-90 text-green-600 w-11 h-11 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
-                            title="다운로드"
-                        >
-                            <i class="fas fa-download text-base"></i>
-                        </button>
-                    </div>
-                    ${historyHTML}
-                </div>
-            `;
+            // ✨ UIHelper로 히스토리 포함하여 렌더링
+            if (UIHelper) {
+                UIHelper.renderIllustration(illustrationDiv, imageUrl, {
+                    pageIndex: pageIndex,
+                    storybookTitle: currentStorybook.title,
+                    history: page.illustrationHistory || []
+                });
+            } else {
+                // Fallback: UIHelper가 없으면 기본 렌더링
+                illustrationDiv.innerHTML = `<img src="${imageUrl}" alt="삽화 ${pageIndex + 1}" class="w-full h-full object-cover rounded-lg"/>`;
+            }
             console.log('✅ 삽화 생성 완료 및 화면 업데이트');
         } else {
             throw new Error(result?.error || 'ImageService에서 이미지 URL을 받지 못했습니다.');
@@ -6111,7 +6085,12 @@ async function generateSingleVocabularyImage(wordIndex) {
     const korean = typeof vocabItem === 'object' ? vocabItem.korean : '';
     const vocabImgDiv = document.getElementById(`vocab-img-${wordIndex}`);
     
-    vocabImgDiv.innerHTML = '<div class="flex flex-col items-center justify-center h-full p-4"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-2"></div><p class="text-gray-600 text-xs">생성 중...</p></div>';
+    // 로딩 UI 표시
+    if (UIHelper) {
+        UIHelper.showLoadingUI(vocabImgDiv, '생성 중...');
+    } else {
+        vocabImgDiv.innerHTML = '<div class="flex flex-col items-center justify-center h-full p-4"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-2"></div><p class="text-gray-600 text-xs">생성 중...</p></div>';
+    }
     
     try {
         // ⭐ 1. Key Objects에서 매칭 확인 (정확한 매칭만) - 우선 확인!
@@ -6160,8 +6139,18 @@ async function generateSingleVocabularyImage(wordIndex) {
                 
                 saveCurrentStorybook();
                 
-                const badge = '<span class="absolute top-1 right-1 bg-orange-500 text-white text-xs px-2 py-0.5 rounded">핵심사물</span>';
-                vocabImgDiv.innerHTML = `<div class="relative w-full h-full">${badge}<img src="${imageUrl}" alt="${word}" class="w-full h-full object-cover rounded-lg"/></div>`;
+                // UIHelper로 렌더링
+                if (UIHelper) {
+                    UIHelper.renderVocabularyImage(vocabImgDiv, imageUrl, {
+                        word: word,
+                        korean: korean,
+                        isKeyObject: true,
+                        reused: true
+                    });
+                } else {
+                    const badge = '<span class="absolute top-1 right-1 bg-orange-500 text-white text-xs px-2 py-0.5 rounded">핵심사물</span>';
+                    vocabImgDiv.innerHTML = `<div class="relative w-full h-full">${badge}<img src="${imageUrl}" alt="${word}" class="w-full h-full object-cover rounded-lg"/></div>`;
+                }
                 
                 console.log(`✅ Vocabulary image reused from Key Object: ${word}`);
                 return { index: wordIndex, success: true, imageUrl: imageUrl, reused: true };
@@ -6287,9 +6276,18 @@ Example: For "Apple", show only a red apple fruit. No text.`;
             
             saveCurrentStorybook();
             
-            // UI만 업데이트 (전체 재렌더링 안 함)
-            const badge = isKeyObject ? '<span class="absolute top-1 right-1 bg-green-500 text-white text-xs px-2 py-0.5 rounded">핵심사물</span>' : '';
-            vocabImgDiv.innerHTML = `<div class="relative">${badge}<img src="${imageUrl}" alt="${word}" class="w-full h-full object-cover rounded-lg"/></div>`;
+            // UIHelper로 렌더링
+            if (UIHelper) {
+                UIHelper.renderVocabularyImage(vocabImgDiv, imageUrl, {
+                    word: word,
+                    korean: korean,
+                    isKeyObject: isKeyObject,
+                    reused: false
+                });
+            } else {
+                const badge = isKeyObject ? '<span class="absolute top-1 right-1 bg-green-500 text-white text-xs px-2 py-0.5 rounded">핵심사물</span>' : '';
+                vocabImgDiv.innerHTML = `<div class="relative">${badge}<img src="${imageUrl}" alt="${word}" class="w-full h-full object-cover rounded-lg"/></div>`;
+            }
             
             return { index: wordIndex, success: true, imageUrl: imageUrl };
         } else {
@@ -6984,8 +6982,12 @@ async function generateSingleKeyObjectImage(objIndex) {
     
     if (!objImgDiv) return;
     
-    // 로딩 표시
-    objImgDiv.innerHTML = '<div class="flex flex-col items-center justify-center h-full p-4"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mb-2"></div><p class="text-gray-600 text-xs">생성 중...</p></div>';
+    // 로딩 UI 표시
+    if (UIHelper) {
+        UIHelper.showLoadingUI(objImgDiv, '생성 중...');
+    } else {
+        objImgDiv.innerHTML = '<div class="flex flex-col items-center justify-center h-full p-4"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mb-2"></div><p class="text-gray-600 text-xs">생성 중...</p></div>';
+    }
     
     try {
         console.log(`🎨 Generating Key Object image for: ${obj.name} (${obj.korean})`);
@@ -7032,8 +7034,16 @@ async function generateSingleKeyObjectImage(objIndex) {
             // 저장
             saveCurrentStorybook();
             
-            // UI 업데이트 - 해당 Key Object 이미지만 업데이트
-            objImgDiv.innerHTML = `<img src="${imageUrl}" alt="${obj.name}" class="w-full h-full object-cover rounded-lg"/>`;
+            // UIHelper로 렌더링
+            if (UIHelper) {
+                UIHelper.renderKeyObjectImage(objImgDiv, imageUrl, {
+                    name: obj.name,
+                    korean: obj.korean
+                });
+            } else {
+                objImgDiv.innerHTML = `<img src="${imageUrl}" alt="${obj.name}" class="w-full h-full object-cover rounded-lg"/>`;
+            }
+            
             
             console.log(`✅ Key Object "${obj.name}" 이미지 생성 완료 (R2 업로드 포함)`);
             
