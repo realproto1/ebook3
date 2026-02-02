@@ -9266,20 +9266,20 @@ function selectBackgroundMusic(musicId) {
     window.downloadImage = downloadImage;
     window.downloadAllCharacterReferences = downloadAllCharacterReferences;
     window.downloadAllVocabularyImages = downloadAllVocabularyImages;
-    window.playTTS = playTTS;
-    window.stopTTS = stopTTS;
-    window.updateStoryTitle = updateStoryTitle;
-    window.updateCoverPrompt = updateCoverPrompt;
-    window.addCharacter = addCharacter;
+    // window.playTTS = playTTS;  // ❌ 함수 정의 없음
+    // window.stopTTS = stopTTS;  // ❌ 함수 정의 없음
+    // window.updateStoryTitle = updateStoryTitle;  // ❌ 함수 정의 없음
+    // window.updateCoverPrompt = updateCoverPrompt;  // ❌ 함수 정의 없음
+    // window.addCharacter = addCharacter;  // ❌ 함수 정의 없음
     window.deleteCharacter = deleteCharacter;
-    window.addPage = addPage;
+    // window.addPage = addPage;  // ❌ 함수 정의 없음
     window.deletePage = deletePage;
-    window.goBack = goBack;
-    window.toggleLanguage = toggleLanguage;
+    // window.goBack = goBack;  // ❌ 함수 정의 없음
+    // window.toggleLanguage = toggleLanguage;  // ❌ 함수 정의 없음
     window.openBackgroundMusicModal = openBackgroundMusicModal;
     window.closeBackgroundMusicModal = closeBackgroundMusicModal;
     window.selectBackgroundMusic = selectBackgroundMusic;
-    window.removeBackgroundMusic = removeBackgroundMusic;
+    // window.removeBackgroundMusic = removeBackgroundMusic;  // ❌ 함수 정의 없음
     window.loadBackgroundMusicList = loadBackgroundMusicList;
     
     })(); // IIFE 종료
