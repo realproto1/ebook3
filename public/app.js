@@ -46,6 +46,12 @@ if (window.api) {
         const pageManager = new window.PageManager({
             storybookManager
         });
+        
+        // CharacterManager 초기화
+        const characterManager = new window.CharacterManager({
+            api,
+            storybookManager
+        });
 
 // ============================================
 // 전역 변수
@@ -3267,37 +3273,30 @@ function updateCharacterHeight(charIndex, height) {
 }
 
 function deleteCharacter(charIndex) {
-    if (confirm(`"${currentStorybook.characters[charIndex].name}" 캐릭터를 삭제하시겠습니까?`)) {
-        currentStorybook.characters.splice(charIndex, 1);
-        saveCurrentStorybook();
-        displayStorybook(currentStorybook);
+    try {
+        const deleted = characterManager.deleteCharacter(currentStorybook, charIndex);
+        if (deleted) {
+            saveCurrentStorybook();
+            displayStorybook(currentStorybook);
+        }
+    } catch (error) {
+        console.error('❌ 캐릭터 삭제 실패:', error);
+        alert(error.message);
     }
 }
 
 function addNewCharacter() {
-    const name = prompt('새 캐릭터 이름을 입력하세요:');
-    if (!name || !name.trim()) return;
-    
-    const description = prompt('캐릭터 외모 설명을 영어로 입력하세요:');
-    if (!description || !description.trim()) return;
-    
-    const role = prompt('캐릭터 역할을 입력하세요:');
-    
-    const heightStr = prompt('캐릭터 키를 입력하세요 (cm, 50-250):', '150');
-    const height = parseInt(heightStr) || 150;
-    
-    const newCharacter = {
-        name: name.trim(),
-        description: description.trim(),
-        role: role ? role.trim() : '기타',
-        height: Math.max(50, Math.min(250, height)),
-        referenceImage: null
-    };
-    
-    currentStorybook.characters.push(newCharacter);
-    saveCurrentStorybook();
-    displayStorybook(currentStorybook);
-    alert(`"${name}" 캐릭터가 추가되었습니다!`);
+    try {
+        const character = characterManager.addCharacter(currentStorybook);
+        if (character) {
+            saveCurrentStorybook();
+            displayStorybook(currentStorybook);
+            alert(`"${character.name}" 캐릭터가 추가되었습니다!`);
+        }
+    } catch (error) {
+        console.error('❌ 캐릭터 추가 실패:', error);
+        alert(error.message);
+    }
 }
 
 function updatePageText(pageIndex, newText) {
@@ -6980,83 +6979,22 @@ function toggleKeyObjectReference(pageIndex, objIndex) {
 
 // Key Object 추가
 async function addNewKeyObject() {
-    if (!currentStorybook.key_objects) {
-        currentStorybook.key_objects = [];
-    }
-    
-    // 사물 이름 입력받기
-    const objectName = prompt('핵심 사물의 이름을 입력하세요 (예: 사과, 호랑이, 성)\n\n⚠️ 반드시 명사(동물/물건)를 입력하세요.\n동사, 형용사, 추상적 개념은 안됩니다.');
-    
-    if (!objectName || objectName.trim() === '') {
-        return; // 취소
-    }
-    
-    const trimmedName = objectName.trim();
-    
-    // 임시 객체 추가 (로딩 중)
-    const newKeyObject = {
-        name: trimmedName,
-        korean: trimmedName,
-        size: "medium",
-        sizeCm: 100,
-        description: "🔄 설명 생성 중...",
-        example: "🔄 예문 생성 중..."
-    };
-    
-    currentStorybook.key_objects.push(newKeyObject);
-    saveCurrentStorybook();
-    displayStorybook(currentStorybook);
-    
-    // 동화 텍스트 수집
-    const storyText = currentStorybook.pages.map(p => p.text || '').join('\n\n');
-    
-    if (!storyText || storyText.trim().length === 0) {
-        alert('동화 텍스트가 없어서 설명을 자동 생성할 수 없습니다.\n수동으로 설명과 예문을 입력해주세요.');
-        newKeyObject.description = "이 사물의 상세한 시각적 설명을 입력하세요.";
-        newKeyObject.example = "이 사물이 등장하는 예시 문장을 입력하세요.";
-        saveCurrentStorybook();
-        displayStorybook(currentStorybook);
-        return;
-    }
-    
     try {
-        console.log(`🔍 핵심 사물 설명 자동 생성: ${trimmedName}`);
+        const keyObject = await characterManager.addKeyObject(currentStorybook, getAPIKey);
         
-        // API 호출로 설명과 예문 생성
-        const response = await axios.post('/api/generate-keyobject-description', {
-            objectName: trimmedName,
-            storyText: storyText
-        }, {
-            headers: {
-                'X-API-Key': getAPIKey()
-            }
-        });
-        
-        if (response.data.success) {
-            // 생성된 설명과 예문 적용
-            const objIndex = currentStorybook.key_objects.length - 1;
-            currentStorybook.key_objects[objIndex].description = response.data.description;
-            currentStorybook.key_objects[objIndex].example = response.data.example;
-            
+        if (keyObject) {
             saveCurrentStorybook();
             displayStorybook(currentStorybook);
             
-            showNotification('success', '핵심 사물 추가 완료!', `"${trimmedName}"의 설명과 예문이 자동 생성되었습니다.`);
-            console.log(`✅ 설명: ${response.data.description}`);
-            console.log(`✅ 예문: ${response.data.example}`);
-        } else {
-            throw new Error(response.data.error || '설명 생성 실패');
+            if (keyObject.description.includes('🔄') === false) {
+                showNotification('success', '핵심 사물 추가 완료!', `"${keyObject.name}"의 설명과 예문이 자동 생성되었습니다.`);
+            }
         }
-        
     } catch (error) {
-        console.error('설명 생성 오류:', error);
+        console.error('❌ Key Object 추가 실패:', error);
         alert(`설명 자동 생성에 실패했습니다.\n수동으로 설명과 예문을 입력해주세요.\n\n오류: ${error.message}`);
         
-        // 실패 시 기본값으로 설정
-        const objIndex = currentStorybook.key_objects.length - 1;
-        currentStorybook.key_objects[objIndex].description = "이 사물의 상세한 시각적 설명을 입력하세요.";
-        currentStorybook.key_objects[objIndex].example = "이 사물이 등장하는 예시 문장을 입력하세요.";
-        
+        // 실패해도 화면 업데이트
         saveCurrentStorybook();
         displayStorybook(currentStorybook);
     }
@@ -7064,18 +7002,16 @@ async function addNewKeyObject() {
 
 // Key Object 삭제
 function deleteKeyObject(objIndex) {
-    if (confirm(`"${currentStorybook.key_objects[objIndex].name}" 사물을 삭제하시겠습니까?`)) {
-        currentStorybook.key_objects.splice(objIndex, 1);
-        
-        // 이미지도 함께 삭제
-        if (currentStorybook.keyObjectImages && currentStorybook.keyObjectImages[objIndex]) {
-            currentStorybook.keyObjectImages.splice(objIndex, 1);
+    try {
+        const deleted = characterManager.deleteKeyObject(currentStorybook, objIndex);
+        if (deleted) {
+            saveCurrentStorybook();
+            displayStorybook(currentStorybook);
+            alert('Key Object가 삭제되었습니다.');
         }
-        
-        saveCurrentStorybook();
-        displayStorybook(currentStorybook);
-        
-        alert('Key Object가 삭제되었습니다.');
+    } catch (error) {
+        console.error('❌ Key Object 삭제 실패:', error);
+        alert(error.message);
     }
 }
 
@@ -8836,44 +8772,32 @@ document.addEventListener('click', (e) => {
 
 // 캐릭터 레퍼런스 이미지 삭제
 async function deleteCharacterImage(charIndex) {
-    if (!confirm('이 캐릭터의 레퍼런스 이미지를 삭제하시겠습니까?')) {
-        return;
+    try {
+        const deleted = await characterManager.deleteCharacterImage(currentStorybook, charIndex);
+        if (deleted) {
+            saveCurrentStorybook();
+            displayStorybook(currentStorybook);
+            showNotification('success', '이미지 삭제 완료', '캐릭터 레퍼런스 이미지가 삭제되었습니다.');
+        }
+    } catch (error) {
+        console.error('❌ 이미지 삭제 실패:', error);
+        alert(error.message);
     }
-    
-    if (!currentStorybook.characters || !currentStorybook.characters[charIndex]) {
-        alert('캐릭터를 찾을 수 없습니다.');
-        return;
-    }
-    
-    // 이미지 삭제
-    currentStorybook.characters[charIndex].referenceImage = null;
-    
-    // 저장 및 화면 갱신
-    saveCurrentStorybook();
-    displayStorybook(currentStorybook);
-    
-    showNotification('success', '이미지 삭제 완료', '캐릭터 레퍼런스 이미지가 삭제되었습니다.');
 }
 
 // 핵심 단어 이미지 삭제
 async function deleteKeyObjectImage(objIndex) {
-    if (!confirm('이 핵심 단어의 이미지를 삭제하시겠습니까?')) {
-        return;
+    try {
+        const deleted = await characterManager.deleteKeyObjectImage(currentStorybook, objIndex);
+        if (deleted) {
+            saveCurrentStorybook();
+            displayStorybook(currentStorybook);
+            showNotification('success', '이미지 삭제 완료', '핵심 단어 이미지가 삭제되었습니다.');
+        }
+    } catch (error) {
+        console.error('❌ 이미지 삭제 실패:', error);
+        alert(error.message);
     }
-    
-    if (!currentStorybook.keyObjectImages || !currentStorybook.keyObjectImages[objIndex]) {
-        alert('이미지를 찾을 수 없습니다.');
-        return;
-    }
-    
-    // 이미지 삭제
-    currentStorybook.keyObjectImages[objIndex] = null;
-    
-    // 저장 및 화면 갱신
-    saveCurrentStorybook();
-    displayStorybook(currentStorybook);
-    
-    showNotification('success', '이미지 삭제 완료', '핵심 단어 이미지가 삭제되었습니다.');
 }
 
 // 페이지 삽화 이미지 삭제
