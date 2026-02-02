@@ -1,4 +1,22 @@
+/**
+ * app.js - 탱고북 동화책 생성 에디터
+ * 리팩토링: 모듈 통합 버전
+ */
+
+// ============================================
+// 모듈 Import (선택적 사용)
+// ============================================
+// import { API, api } from './js/core/api.js';
+// import { Storage } from './js/utils/storage.js';
+// import { audioPlayer } from './js/utils/audio.js';
+// import { DOM } from './js/utils/dom.js';
+// import { StoryService } from './js/services/StoryService.js';
+// import { ImageService } from './js/services/ImageService.js';
+// import { TTSService } from './js/services/TTSService.js';
+
+// ============================================
 // 전역 변수
+// ============================================
 let storybooks = [];
 let currentStorybook = null;
 let currentLanguage = 'ko'; // 현재 표시 중인 언어 (기본: 한국어)
