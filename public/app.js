@@ -8888,6 +8888,38 @@ function selectBackgroundMusic(musicId) {
     // ============================================
     // 전역 함수 노출 (HTML onclick에서 사용)
     // ============================================
+    window.toggleSection = toggleSection;
+    window.togglePageSection = togglePageSection;
+    window.resetCoverPrompt = resetCoverPrompt;
+    window.addNewCharacter = addNewCharacter;
+    window.addNewKeyObject = addNewKeyObject;
+    window.addNewPage = addNewPage;
+    window.deleteKeyObject = deleteKeyObject;
+    window.openCoverUploadModal = openCoverUploadModal;
+    window.openBatchUploadModal = openBatchUploadModal;
+    window.openBatchTTSUploadModal = openBatchTTSUploadModal;
+    window.openTTSUploadModal = openTTSUploadModal;
+    window.bulkUploadKeyObjectImages = bulkUploadKeyObjectImages;
+    window.cancelBatchUpload = cancelBatchUpload;
+    window.duplicateStorybookById = duplicateStorybookById;
+    window.addReviewNewPage = addReviewNewPage;
+    window.deleteReviewPage = deleteReviewPage;
+    window.switchLanguage = switchLanguage;
+    window.switchReviewLanguage = switchReviewLanguage;
+    window.translateAllPages = translateAllPages;
+    window.translateSinglePage = translateSinglePage;
+    window.togglePublicStatus = togglePublicStatus;
+    window.checkStorybookStatus = checkStorybookStatus;
+    window.closeStatusPopup = closeStatusPopup;
+    window.addLanguageFromTab = addLanguageFromTab;
+    window.toggleAddLanguageDropdown = toggleAddLanguageDropdown;
+    window.deleteBackgroundMusic = deleteBackgroundMusic;
+    window.deleteQuiz = deleteQuiz;
+    window.showQuizAnswer = showQuizAnswer;
+    window.downloadAllAudio = downloadAllAudio;
+    window.downloadAudio = downloadAudio;
+    window.downloadAllText = downloadAllText;
+    window.showGenerationModeHelp = showGenerationModeHelp;
     window.selectStorybook = selectStorybook;
     window.deleteStorybook = deleteStorybook;
     window.duplicateStorybook = duplicateStorybook;
