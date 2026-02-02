@@ -4,15 +4,19 @@
  */
 
 // ============================================
-// 모듈 Import
+// 모듈 Import (author.html에서 전역으로 로드)
 // ============================================
-import { API, api } from './js/core/api.js';
-import { Storage } from './js/utils/storage.js';
-import { audioPlayer } from './js/utils/audio.js';
-import { DOM } from './js/utils/dom.js';
-import { storyService } from './js/services/StoryService.js';
-import { imageService } from './js/services/ImageService.js';
-import { ttsService } from './js/services/TTSService.js';
+
+// author.html에서 로드한 모듈 사용
+const modules = window.__modules || {};
+const { api, Storage, audioPlayer, DOM, storyService, imageService, ttsService } = modules;
+
+// 로그로 모듈 로드 확인
+if (modules.api) {
+    console.log('✅ app.js: 모듈 연결 성공');
+} else {
+    console.warn('⚠️ app.js: 모듈 로드 대기 중... 전역 변수로 fallback');
+}
 
 // ============================================
 // 전역 변수
