@@ -1482,31 +1482,6 @@ async function duplicateStorybookById(id) {
         showNotification('error', '동화책 복사에 실패했습니다.');
     }
 }
-    
-    // localStorage에도 저장
-    saveStorybooks();
-    
-    // 복사본 선택 및 화면 업데이트
-    currentStorybook = duplicate;
-    renderBookList();
-    displayStorybook(duplicate);
-    
-    // 복사본이 있는 위치로 스크롤
-    setTimeout(() => {
-        const activeElement = document.querySelector('.book-item.active');
-        if (activeElement) {
-            activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }, 100);
-    
-    console.log(`✅ 동화책 복사 완료: "${duplicate.title}" (ID: ${duplicate.id})`);
-    console.log(`   - 새 제목: ${newTitle}`);
-    console.log(`   - 새 그림 스타일: ${newArtStyle}`);
-    console.log(`   - 이미지 제거됨: 캐릭터, Key Objects, 삽화, 표지`);
-    
-    // 복사 완료 알림
-    showNotification('success', '복사 완료!', `"${duplicate.title}"이 생성되었습니다. 이미지를 새로 생성해주세요.`);
-}
 
 // 알림 표시 함수
 function showNotification(type, title, message) {
