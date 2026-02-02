@@ -67,6 +67,10 @@ if (window.api) {
         // TranslationService 초기화
         const translationService = new window.TranslationService();
         translationService.init({ api });
+        
+        // DownloadService 초기화
+        const downloadService = new window.DownloadService();
+        downloadService.init({ api });
 
 // ============================================
 // 전역 변수
@@ -5361,33 +5365,14 @@ function openPreview() {
 // 다운로드 함수들
 // 모든 캐릭터 레퍼런스 다운로드
 async function downloadAllCharacterReferences() {
-    const characters = currentStorybook.characters.filter(char => char.referenceImage);
-    
-    if (characters.length === 0) {
-        alert('다운로드할 캐릭터 레퍼런스가 없습니다.');
-        return;
+    try {
+        await downloadService.downloadAllCharacterReferences(currentStorybook);
+        const count = currentStorybook.characters.filter(c => c.referenceImage).length;
+        showNotification('success', '다운로드 완료', `${count}개의 캐릭터 레퍼런스를 다운로드했습니다.`);
+    } catch (error) {
+        console.error('❌ 다운로드 실패:', error);
+        alert(error.message);
     }
-    
-    for (const char of characters) {
-        try {
-            const filename = `캐릭터_${char.name}.png`;
-            const downloadUrl = `/api/download-image?url=${encodeURIComponent(char.referenceImage)}&filename=${encodeURIComponent(filename)}`;
-            
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            
-            // 다운로드 간 짧은 지연
-            await new Promise(resolve => setTimeout(resolve, 300));
-        } catch (error) {
-            console.error(`Download error for ${char.name}:`, error);
-        }
-    }
-    
-    showNotification('success', '다운로드 완료', `${characters.length}개의 캐릭터 레퍼런스를 다운로드했습니다.`);
 }
 
 async function downloadAllIllustrations() {
@@ -5424,10 +5409,14 @@ async function downloadAllIllustrations() {
 }
 
 function downloadAllText() {
-    if (!currentStorybook || !currentStorybook.pages || currentStorybook.pages.length === 0) {
-        alert('다운로드할 텍스트가 없습니다.');
-        return;
+    try {
+        downloadService.downloadAllText(currentStorybook);
+        showNotification('success', '다운로드 완료', '전체 텍스트를 다운로드했습니다.');
+    } catch (error) {
+        console.error('❌ 다운로드 실패:', error);
+        alert(error.message);
     }
+}
     
     // 사용 가능한 언어 목록
     const availableLanguages = ['ko'];
@@ -5677,14 +5666,7 @@ async function translateAllText() {
 
 async function downloadImage(imageUrl, filename) {
     try {
-        const downloadUrl = `/api/download-image?url=${encodeURIComponent(imageUrl)}&filename=${encodeURIComponent(filename)}`;
-        
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        await downloadService.downloadImage(imageUrl, filename);
     } catch (error) {
         console.error('Download error:', error);
         alert('이미지 다운로드에 실패했습니다.');
