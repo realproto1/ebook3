@@ -1447,6 +1447,10 @@
     <script defer src="/js/services/StoryService.js?v=1770052540"></script>
     <script defer src="/js/services/ImageService.js?v=1770052540"></script>
     <script defer src="/js/services/TTSService.js?v=1770052540"></script>
+    <script defer src="/js/services/TranslationService.js?v=1770057800"></script>
+    <script defer src="/js/services/QuizService.js?v=1770057800"></script>
+    <script defer src="/js/services/MusicService.js?v=1770057800"></script>
+    <script defer src="/js/services/DownloadService.js?v=1770057800"></script>
     
     <script>
         // 전역 변수 확인 및 __modules 설정
@@ -1458,12 +1462,15 @@
             UIHelper: window.UIHelper,
             storyService: window.storyService,
             imageService: window.imageService,
-            ttsService: window.ttsService
+            ttsService: window.ttsService,
+            translationService: window.TranslationService,
+            musicService: window.MusicService,
+            downloadService: window.DownloadService
         };
         
         console.log('✅ 모듈 로드 완료', window.__modules);
     </script>
     
-    <script defer src="/app.js?v=1770056616"></script>
+    <script defer src="/app.js?v=1770057448"></script>
 </body>
 </html>

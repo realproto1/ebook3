@@ -34,6 +34,9 @@ if (window.api) {
         const storyService = window.storyService;
         const imageService = window.imageService;
         const ttsService = window.ttsService;
+        const translationService = window.TranslationService;
+        const musicService = window.MusicService;
+        const downloadService = window.DownloadService;
         
         // StorybookManager 초기화
         const storybookManager = new window.StorybookManager({
@@ -52,6 +55,18 @@ if (window.api) {
             api,
             storybookManager
         });
+        
+        // QuizService 초기화
+        const quizService = new window.QuizService();
+        quizService.init({ api });
+        
+        // MusicService 초기화
+        const musicService = new window.MusicService();
+        musicService.init({ api });
+        
+        // TranslationService 초기화
+        const translationService = new window.TranslationService();
+        translationService.init({ api });
 
 // ============================================
 // 전역 변수
@@ -1779,21 +1794,13 @@ async function addLanguageTranslation() {
     }
     
     // 이미 번역된 언어인지 확인
-    const available = getAvailableLanguages();
+    const available = translationService.getAvailableLanguages(currentStorybook);
     if (available.includes(targetLang)) {
         alert('이미 해당 언어로 번역되어 있습니다.');
         return;
     }
     
-    const langNames = {
-        en: 'English',
-        zh: '中文',
-        ja: '日本語',
-        es: 'Español',
-        fr: 'Français'
-    };
-    
-    const langName = langNames[targetLang] || targetLang;
+    const langName = translationService.getLanguageName(targetLang);
     const estimatedTime = Math.ceil(currentStorybook.pages.length * 2);
     
     if (!confirm(`${langName}로 번역하시겠습니까?\n\n예상 소요 시간: 약 ${estimatedTime}초\n${currentStorybook.pages.length}개 페이지의 텍스트가 번역됩니다.`)) {
@@ -1807,52 +1814,32 @@ async function addLanguageTranslation() {
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>번역 중...';
         button.disabled = true;
         
-        console.log(`🌐 Starting translation to ${targetLang}...`);
+        // TranslationService 호출
+        const result = await translationService.translateStorybook(currentStorybook, targetLang);
         
-        const response = await axios.post('/api/translate-storybook', {
-            storybook: currentStorybook,
-            targetLanguage: targetLang
-        });
+        // 저장
+        saveCurrentStorybook();
         
-        if (response.data.success) {
-            // translations 객체 업데이트
-            if (!currentStorybook.translations) {
-                currentStorybook.translations = {};
-            }
-            
-            // 번역된 페이지 저장
-            currentStorybook.translations[targetLang] = response.data.translatedPages.map((translatedText, idx) => ({
-                pageNumber: currentStorybook.pages[idx].pageNumber,
-                text: translatedText
-            }));
-            
-            // languages 배열 업데이트
-            if (!currentStorybook.languages) {
-                currentStorybook.languages = ['ko'];
-            }
-            if (!currentStorybook.languages.includes(targetLang)) {
-                currentStorybook.languages.push(targetLang);
-            }
-            
-            // 저장
-            saveCurrentStorybook();
-            
-            // UI 업데이트
-            displayStorybook(currentStorybook);
-            
-            // 새로 추가된 언어로 전환
-            currentLanguage = targetLang;
-            displayStorybook(currentStorybook);
-            
-            showNotification('success', '번역 완료!', `${langName} 번역이 완료되었습니다.`);
-            
-            console.log(`✅ Translation to ${targetLang} completed`);
-        } else {
-            throw new Error(response.data.error || '번역 실패');
-        }
+        // UI 업데이트
+        displayStorybook(currentStorybook);
+        
+        // 새로 추가된 언어로 전환
+        currentLanguage = targetLang;
+        displayStorybook(currentStorybook);
+        
+        showNotification('success', '번역 완료!', `${langName} 번역이 완료되었습니다.`);
+        
+        // 버튼 복원
+        button.innerHTML = originalText;
+        button.disabled = false;
     } catch (error) {
         console.error('❌ Translation error:', error);
         alert('번역 중 오류가 발생했습니다: ' + (error.response?.data?.error || error.message));
+        
+        // 버튼 복원
+        const button = event.target;
+        button.innerHTML = '<i class="fas fa-language mr-1"></i>번역';
+        button.disabled = false;
     }
 }
 
@@ -6559,79 +6546,35 @@ async function executeRegenerate() {
 
 // 퀴즈 생성
 async function generateQuiz(count = 5) {
-    if (!currentStorybook || !currentStorybook.pages || currentStorybook.pages.length === 0) {
-        alert('동화책을 먼저 생성해주세요.');
-        return;
-    }
-    
-    // Key Objects 체크
-    if (!currentStorybook.key_objects || currentStorybook.key_objects.length === 0) {
-        alert('퀴즈를 생성하려면 먼저 Key Objects(핵심 사물)를 생성해주세요.\n\n"Key Objects(핵심 사물)" 섹션에서 사물을 추가할 수 있습니다.');
-        return;
-    }
-    
     const quizContainer = document.getElementById('quiz-container');
-    if (!quizContainer) return;
-    
-    // 로딩 표시
-    quizContainer.innerHTML = `
-        <div class="text-center py-8">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <p class="text-gray-600">Key Objects 기반 퀴즈를 생성하고 있습니다...</p>
-            <p class="text-xs text-gray-500 mt-2">Key Objects: ${currentStorybook.key_objects.map(obj => obj.name).join(', ')}</p>
-        </div>
-    `;
     
     try {
-        console.log(`🎯 Generating ${count} quiz questions based on Key Objects...`);
-        console.log('📦 Key Objects:', currentStorybook.key_objects.map(obj => obj.name).join(', '));
+        // 로딩 UI 렌더링
+        quizService.renderLoadingUI(quizContainer, currentStorybook);
         
-        const response = await axios.post('/api/generate-quiz', {
-            storybook: currentStorybook,
-            count: count
-        });
+        // 퀴즈 생성
+        const quizzes = await quizService.generateQuiz(currentStorybook, count);
         
-        if (response.data.success && response.data.quizzes) {
-            // quizzes 배열 초기화 (없으면)
-            if (!currentStorybook.quizzes) {
-                currentStorybook.quizzes = [];
-            }
-            
-            // 새로운 퀴즈 추가
-            currentStorybook.quizzes.push(...response.data.quizzes);
-            
-            // 저장
-            saveCurrentStorybook();
-            
-            // UI 업데이트
-            displayStorybook(currentStorybook);
-            
-            console.log(`✅ Generated ${response.data.quizzes.length} Key Object-based quiz questions`);
-            
-            // 성공 메시지
-            const successQuizzes = response.data.quizzes.filter(q => q.relatedKeyObject).length;
-            if (successQuizzes > 0) {
-                console.log(`🔑 ${successQuizzes}개의 퀴즈가 Key Objects와 연결되었습니다.`);
-            }
-        } else {
-            throw new Error('퀴즈 생성 실패');
+        // quizzes 배열 초기화 (없으면)
+        if (!currentStorybook.quizzes) {
+            currentStorybook.quizzes = [];
         }
+        
+        // 새로운 퀴즈 추가
+        currentStorybook.quizzes.push(...quizzes);
+        
+        // 저장
+        saveCurrentStorybook();
+        
+        // UI 업데이트
+        displayStorybook(currentStorybook);
+        
     } catch (error) {
         console.error('퀴즈 생성 오류:', error);
+        alert(error.message);
         
-        quizContainer.innerHTML = `
-            <div class="text-center py-8 text-red-600">
-                <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
-                <p>퀴즈 생성 중 오류가 발생했습니다.</p>
-                <p class="text-sm mt-2">${error.response?.data?.error || error.message}</p>
-                <button 
-                    onclick="generateQuiz()"
-                    class="mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
-                >
-                    <i class="fas fa-redo mr-1"></i>다시 시도
-                </button>
-            </div>
-        `;
+        // 에러 UI 렌더링
+        quizService.renderErrorUI(quizContainer, error);
     }
 }
 
@@ -7581,19 +7524,6 @@ async function translateSinglePage(pageIndex) {
         return;
     }
     
-    if (currentLanguage === 'ko') {
-        alert('한국어는 번역할 필요가 없습니다.');
-        return;
-    }
-    
-    const page = currentStorybook.pages[pageIndex];
-    const sourceText = page.text;
-    
-    if (!sourceText || sourceText.trim() === '') {
-        alert('번역할 텍스트가 없습니다.');
-        return;
-    }
-    
     // 번역 버튼 찾기
     const translateBtn = document.querySelector(`[data-translate-page="${pageIndex}"]`);
     if (translateBtn) {
@@ -7602,59 +7532,29 @@ async function translateSinglePage(pageIndex) {
     }
     
     try {
-        const response = await axios.post('/api/translate-page', {
-            text: sourceText,
-            targetLanguage: currentLanguage,
-            context: {
-                title: currentStorybook.title,
-                theme: currentStorybook.theme,
-                characters: currentStorybook.characters ? currentStorybook.characters.map(c => c.name).join(', ') : ''
-            }
-        }, {
-            timeout: 30000  // 30초
-        });
+        // TranslationService 호출
+        const result = await translationService.translateSinglePage(currentStorybook, pageIndex, currentLanguage);
         
-        if (response.data.success) {
-            // translations 업데이트
-            if (!currentStorybook.translations) {
-                currentStorybook.translations = {};
-            }
-            if (!currentStorybook.translations[currentLanguage]) {
-                currentStorybook.translations[currentLanguage] = currentStorybook.pages.map(p => ({
-                    pageNumber: p.pageNumber,
-                    text: ''
-                }));
-            }
-            
-            // 해당 페이지 번역 텍스트 저장
-            const translationPage = currentStorybook.translations[currentLanguage].find(p => p.pageNumber === page.pageNumber);
-            if (translationPage) {
-                translationPage.text = response.data.translatedText;
-            }
-            
-            // ✅ 실시간 UI 업데이트 - 해당 페이지의 textarea만 업데이트 (전체 리렌더링 방지)
-            const pageTextarea = document.querySelector(`textarea[onchange*="updatePageText(${pageIndex},"]`);
-            if (pageTextarea) {
-                pageTextarea.value = response.data.translatedText;
-                console.log(`🔄 페이지 ${page.pageNumber} textarea 업데이트 완료`);
-            }
-            
-            // 저장
-            saveCurrentStorybook();
-            
-            // 버튼 복원
-            if (translateBtn) {
-                translateBtn.disabled = false;
-                translateBtn.innerHTML = '<i class="fas fa-language mr-1"></i>번역';
-            }
-            
-            showNotification('success', '번역 완료', `페이지 ${page.pageNumber} 번역이 완료되었습니다.`);
-        } else {
-            throw new Error(response.data.error || '번역 실패');
+        // ✅ 실시간 UI 업데이트 - 해당 페이지의 textarea만 업데이트 (전체 리렌더링 방지)
+        const pageTextarea = document.querySelector(`textarea[onchange*="updatePageText(${pageIndex},"]`);
+        if (pageTextarea) {
+            pageTextarea.value = result.translatedText;
+            console.log(`🔄 페이지 ${currentStorybook.pages[pageIndex].pageNumber} textarea 업데이트 완료`);
         }
+        
+        // 저장
+        saveCurrentStorybook();
+        
+        // 버튼 복원
+        if (translateBtn) {
+            translateBtn.disabled = false;
+            translateBtn.innerHTML = '<i class="fas fa-language mr-1"></i>번역';
+        }
+        
+        showNotification('success', '번역 완료', `페이지 ${currentStorybook.pages[pageIndex].pageNumber} 번역이 완료되었습니다.`);
     } catch (error) {
         console.error('페이지 번역 실패:', error);
-        alert(`번역 실패: ${error.response?.data?.error || error.message}`);
+        alert(`번역 실패: ${error.message}`);
         
         // 버튼 복원
         if (translateBtn) {
@@ -8726,13 +8626,9 @@ function closeBackgroundMusicModal() {
 // 배경음악 목록 로드
 async function loadBackgroundMusicList() {
     try {
-        const response = await axios.get('/api/background-music');
-        
-        if (response.data.success) {
-            backgroundMusicList = response.data.music;
-            renderBackgroundMusicList();
-            updateBackgroundMusicSelect();
-        }
+        backgroundMusicList = await musicService.loadMusicList();
+        renderBackgroundMusicList();
+        updateBackgroundMusicSelect();
     } catch (error) {
         console.error('❌ 배경음악 목록 로드 오류:', error);
     }
@@ -8741,52 +8637,13 @@ async function loadBackgroundMusicList() {
 // 배경음악 목록 렌더링
 function renderBackgroundMusicList() {
     const listEl = document.getElementById('backgroundMusicList');
-    
-    if (backgroundMusicList.length === 0) {
-        listEl.innerHTML = `
-            <div class="text-center py-8 text-gray-400">
-                <i class="fas fa-music text-4xl mb-2"></i>
-                <p>등록된 배경음악이 없습니다.</p>
-            </div>
-        `;
-        return;
-    }
-    
-    listEl.innerHTML = backgroundMusicList.map(music => `
-        <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:border-purple-300 transition">
-            <div class="flex items-center gap-3 flex-1">
-                <i class="fas fa-music text-purple-500"></i>
-                <div class="flex-1">
-                    <p class="font-semibold text-gray-800">${music.title}</p>
-                    <audio controls class="w-full mt-1" style="height: 30px;">
-                        <source src="${music.url}" type="audio/mpeg">
-                    </audio>
-                </div>
-            </div>
-            <button 
-                onclick="deleteBackgroundMusic('${music.id}')"
-                class="ml-3 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm"
-                title="삭제"
-            >
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
-    `).join('');
+    musicService.renderMusicList(listEl);
 }
 
 // 배경음악 선택 드롭다운 업데이트
 function updateBackgroundMusicSelect() {
     const selectEl = document.getElementById('backgroundMusicSelect');
-    
-    selectEl.innerHTML = '<option value="">배경음악 없음</option>' + 
-        backgroundMusicList.map(music => `
-            <option value="${music.id}">${music.title}</option>
-        `).join('');
-    
-    // 현재 동화책에 선택된 배경음악이 있으면 선택
-    if (currentStorybook && currentStorybook.backgroundMusicId) {
-        selectEl.value = currentStorybook.backgroundMusicId;
-    }
+    musicService.updateMusicSelect(selectEl, currentStorybook?.backgroundMusicId);
 }
 
 // 배경음악 업로드
@@ -8795,39 +8652,17 @@ async function uploadBackgroundMusic() {
     const fileInput = document.getElementById('bgmFile');
     const file = fileInput.files[0];
     
-    if (!title) {
-        alert('제목을 입력해주세요.');
-        return;
-    }
-    
-    if (!file) {
-        alert('오디오 파일을 선택해주세요.');
-        return;
-    }
-    
     try {
-        const formData = new FormData();
-        formData.append('title', title);
-        formData.append('audio', file);
+        await musicService.uploadMusic(title, file);
         
-        const response = await axios.post('/api/background-music', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        });
+        alert('✅ 배경음악이 추가되었습니다!');
         
-        if (response.data.success) {
-            alert('✅ 배경음악이 추가되었습니다!');
-            
-            // 입력 필드 초기화
-            document.getElementById('bgmTitle').value = '';
-            document.getElementById('bgmFile').value = '';
-            
-            // 목록 새로고침
-            await loadBackgroundMusicList();
-        } else {
-            alert('❌ 업로드 실패: ' + response.data.error);
-        }
+        // 입력 필드 초기화
+        document.getElementById('bgmTitle').value = '';
+        document.getElementById('bgmFile').value = '';
+        
+        // 목록 새로고침
+        await loadBackgroundMusicList();
     } catch (error) {
         console.error('❌ 배경음악 업로드 오류:', error);
         alert('❌ 업로드 실패: ' + error.message);
@@ -8841,14 +8676,9 @@ async function deleteBackgroundMusic(id) {
     }
     
     try {
-        const response = await axios.delete(`/api/background-music/${id}`);
-        
-        if (response.data.success) {
-            alert('✅ 배경음악이 삭제되었습니다.');
-            await loadBackgroundMusicList();
-        } else {
-            alert('❌ 삭제 실패: ' + response.data.error);
-        }
+        await musicService.deleteMusic(id);
+        alert('✅ 배경음악이 삭제되었습니다.');
+        await loadBackgroundMusicList();
     } catch (error) {
         console.error('❌ 배경음악 삭제 오류:', error);
         alert('❌ 삭제 실패: ' + error.message);
@@ -8866,20 +8696,7 @@ function selectBackgroundMusic(musicId) {
     
     // 선택된 배경음악 정보 표시
     const selectedEl = document.getElementById('selectedBackgroundMusic');
-    if (musicId) {
-        const music = backgroundMusicList.find(m => m.id === musicId);
-        if (music) {
-            selectedEl.innerHTML = `
-                <i class="fas fa-check-circle text-green-600 mr-1"></i>
-                선택됨: <strong>${music.title}</strong>
-            `;
-        }
-    } else {
-        selectedEl.innerHTML = `
-            <i class="fas fa-info-circle mr-1"></i>
-            배경음악 없음
-        `;
-    }
+    musicService.displaySelectedMusic(selectedEl, musicId);
     
     // 저장
     saveCurrentStorybook();
