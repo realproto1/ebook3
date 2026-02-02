@@ -4430,6 +4430,11 @@ async function generateAllCharacterReferences() {
     
     try {
         // ✨ ImageService를 사용한 병렬 캐릭터 생성
+        const service = imageService || window.imageService;
+        if (!service) {
+            throw new Error('ImageService가 로드되지 않았습니다. 페이지를 새로고침 해주세요.');
+        }
+        
         const promises = currentStorybook.characters.map(async (char, i) => {
             if (char.referenceImage) {
                 return { index: i, success: true, imageUrl: char.referenceImage, skipped: true };
@@ -4442,7 +4447,7 @@ async function generateAllCharacterReferences() {
                 console.log(`🎨 캐릭터 "${char.name}" 이미지 생성 시작 (배치 생성)`);
                 
                 // ✨ ImageService 사용!
-                const result = await imageService.generateCharacter({
+                const result = await service.generateCharacter({
                     name: char.name,
                     description: customPrompt,
                     age: char.age
@@ -4541,8 +4546,13 @@ async function generateCharacterReference(charIndex) {
         const isRegeneration = !!character.referenceImage;
         console.log(`🎨 캐릭터 "${character.name}" ${isRegeneration ? '재생성' : '생성'} - 모델: ${imageSettings.characterModel}`);
         
-        // ✨ ImageService 사용!
-        const result = await imageService.generateCharacter({
+        // ✨ ImageService 사용 (fallback 체크)
+        const service = imageService || window.imageService;
+        if (!service) {
+            throw new Error('ImageService가 로드되지 않았습니다. 페이지를 새로고침 해주세요.');
+        }
+        
+        const result = await service.generateCharacter({
             name: character.name,
             description: customPrompt,
             age: character.age
@@ -5178,8 +5188,13 @@ async function generateAllTTS() {
             try {
                 console.log(`🎤 페이지 ${page.pageNumber} TTS 생성 중...`);
                 
-                // ✨ TTSService 사용!
-                const result = await ttsService.generatePageTTS(page, {
+                // ✨ TTSService 사용 (fallback 체크)
+                const service = ttsService || window.ttsService;
+                if (!service) {
+                    throw new Error('TTSService가 로드되지 않았습니다. 페이지를 새로고침 해주세요.');
+                }
+                
+                const result = await service.generatePageTTS(page, {
                     model: imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts',
                     voice: imageSettings.ttsModel || 'Aoede',
                     voiceConfig: imageSettings.ttsVoiceConfig,
