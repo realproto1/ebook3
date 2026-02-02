@@ -4429,59 +4429,41 @@ async function generateAllCharacterReferences() {
     });
     
     try {
-        // 모든 캐릭터를 병렬로 생성
+        // ✨ ImageService를 사용한 병렬 캐릭터 생성
         const promises = currentStorybook.characters.map(async (char, i) => {
+            if (char.referenceImage) {
+                return { index: i, success: true, imageUrl: char.referenceImage, skipped: true };
+            }
+            
             try {
                 const promptTextarea = document.getElementById(`char-prompt-${i}`);
                 const customPrompt = promptTextarea ? promptTextarea.value.trim() : char.description;
                 
                 console.log(`🎨 캐릭터 "${char.name}" 이미지 생성 시작 (배치 생성)`);
                 
-                // 🔥 서버 API 호출 (R2 업로드 포함)
-                console.log(`📤 API 요청 - storybookId: ${currentStorybook.id}, title: ${currentStorybook.title}`);
-                
-                const response = await axios.post('/api/generate-character-image', {
-                    character: {
-                        name: char.name,
-                        description: customPrompt,
-                        age: char.age
-                    },
+                // ✨ ImageService 사용!
+                const result = await imageService.generateCharacter({
+                    name: char.name,
+                    description: customPrompt,
+                    age: char.age
+                }, {
+                    model: imageSettings.characterModel || 'gemini-3-pro-image-preview',
                     artStyle: currentStorybook.artStyle || '디즈니 스타일',
-                    settings: {
-                        aspectRatio: '16:9',
-                        enforceNoText: true,
-                        characterModel: imageSettings.characterModel || 'gemini-3-pro-image-preview'
-                    },
+                    aspectRatio: '16:9',
                     storybookId: currentStorybook.id,
                     storybookTitle: currentStorybook.title
                 });
                 
-                if (response.data.success && response.data.imageUrl) {
-                    const imageUrl = response.data.imageUrl; // R2 URL
-                    console.log(`📥 API 응답 - imageUrl: ${imageUrl}`);
-                    currentStorybook.characters[i].referenceImage = imageUrl;
-                    console.log(`✅ 캐릭터 "${char.name}" 이미지 생성 완료 (R2 업로드 포함)`);
-                    return { index: i, success: true, imageUrl: imageUrl };
+                if (result.success && result.imageUrl) {
+                    currentStorybook.characters[i].referenceImage = result.imageUrl;
+                    console.log(`✅ 캐릭터 "${char.name}" 이미지 생성 완료`);
+                    return { index: i, success: true, imageUrl: result.imageUrl };
                 } else {
-                    throw new Error(response.data.error || '이미지 URL을 받지 못했습니다.');
+                    throw new Error(result.error || '이미지 URL을 받지 못했습니다.');
                 }
             } catch (error) {
                 console.error(`❌ 캐릭터 ${i} 생성 실패:`, error);
-                
-                // 서버 응답에서 상세 에러 메시지 추출
-                let errorMessage = '이미지 생성 실패';
-                if (error.response && error.response.data) {
-                    if (error.response.data.error) {
-                        errorMessage = error.response.data.error;
-                        console.error('📡 서버 에러 메시지:', errorMessage);
-                    } else if (error.response.data.message) {
-                        errorMessage = error.response.data.message;
-                        console.error('📡 서버 에러 메시지:', errorMessage);
-                    }
-                } else if (error.message) {
-                    errorMessage = error.message;
-                }
-                
+                const errorMessage = error.message || '이미지 생성 실패';
                 return { index: i, success: false, error: errorMessage };
             }
         });
@@ -4546,7 +4528,7 @@ async function generateAllCharacterReferences() {
 }
 
 /**
- * 캐릭터 레퍼런스 생성 (간소화 버전)
+ * 캐릭터 레퍼런스 생성 (ImageService 사용)
  */
 async function generateCharacterReference(charIndex) {
     const character = currentStorybook.characters[charIndex];
@@ -4559,24 +4541,24 @@ async function generateCharacterReference(charIndex) {
         const isRegeneration = !!character.referenceImage;
         console.log(`🎨 캐릭터 "${character.name}" ${isRegeneration ? '재생성' : '생성'} - 모델: ${imageSettings.characterModel}`);
         
-        // API 호출
-        const response = await axios.post('/api/generate-character-image', {
-            character: { name: character.name, description: customPrompt, age: character.age },
+        // ✨ ImageService 사용!
+        const result = await imageService.generateCharacter({
+            name: character.name,
+            description: customPrompt,
+            age: character.age
+        }, {
+            model: imageSettings.characterModel || 'gemini-3-pro-image-preview',
             artStyle: currentStorybook.artStyle || '디즈니 스타일',
-            settings: {
-                aspectRatio: '16:9',
-                enforceNoText: true,
-                characterModel: imageSettings.characterModel || 'gemini-3-pro-image-preview'
-            },
+            aspectRatio: '16:9',
             storybookId: currentStorybook.id,
             storybookTitle: currentStorybook.title
         });
         
-        if (!response.data.success || !response.data.imageUrl) {
-            throw new Error(response.data.error || '이미지 URL을 받지 못했습니다.');
+        if (!result.success || !result.imageUrl) {
+            throw new Error(result.error || '이미지 URL을 받지 못했습니다.');
         }
         
-        const imageUrl = response.data.imageUrl;
+        const imageUrl = result.imageUrl;
         console.log(`📥 이미지 생성 완료: ${imageUrl}`);
         
         // 히스토리 관리 및 업데이트
@@ -5196,28 +5178,28 @@ async function generateAllTTS() {
             try {
                 console.log(`🎤 페이지 ${page.pageNumber} TTS 생성 중...`);
                 
-                const response = await axios.post('/api/generate-tts', {
-                    text: pageText,
-                    language: currentLanguage,
-                    geminiModel: imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts',
-                    model: imageSettings.ttsModel || 'Aoede',
+                // ✨ TTSService 사용!
+                const result = await ttsService.generatePageTTS(page, {
+                    model: imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts',
+                    voice: imageSettings.ttsModel || 'Aoede',
                     voiceConfig: imageSettings.ttsVoiceConfig,
+                    language: currentLanguage,
                     storybookId: currentStorybook?.id,
                     storybookTitle: currentStorybook?.title,
                     pageNumber: page.pageNumber
-                }, { timeout: 180000 });
+                });
                 
-                if (response.data.success && response.data.audioUrl) {
+                if (result.success && result.audioUrl) {
                     // TTS 저장
                     pages[i].ttsAudio = pages[i].ttsAudio || {};
                     
                     if (currentLanguage === 'ko') {
-                        pages[i].ttsAudio.url = response.data.audioUrl;
+                        pages[i].ttsAudio.url = result.audioUrl;
                         pages[i].ttsAudio.model = imageSettings.ttsModel;
-                        pages[i].audioUrl = response.data.audioUrl;
+                        pages[i].audioUrl = result.audioUrl;
                     } else {
                         pages[i].ttsAudio[currentLanguage] = {
-                            url: response.data.audioUrl,
+                            url: result.audioUrl,
                             model: imageSettings.ttsModel
                         };
                     }

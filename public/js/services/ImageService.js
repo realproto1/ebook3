@@ -59,19 +59,36 @@ class ImageService {
      * @param {Object} options
      * @returns {Promise<Object>}
      */
+    /**
+     * 캐릭터 레퍼런스 이미지 생성
+     * @param {Object} character - 캐릭터 정보 { name, description, age }
+     * @param {Object} options - 생성 옵션
+     * @returns {Promise<Object>} { success, imageUrl, error }
+     */
     async generateCharacter(character, options = {}) {
         try {
             const {
                 model = DEFAULT_IMAGE_SETTINGS.characterModel,
-                aspectRatio = '1:1'
+                aspectRatio = '16:9',
+                artStyle = '디즈니 스타일',
+                storybookId = null,
+                storybookTitle = null
             } = options;
 
-            const response = await api.post('/api/generate-character', {
-                name: character.name,
-                description: character.description,
-                prompt: character.prompt,
-                model,
-                aspectRatio
+            const response = await api.post('/api/generate-character-image', {
+                character: {
+                    name: character.name,
+                    description: character.description || character.prompt,
+                    age: character.age
+                },
+                artStyle,
+                settings: {
+                    aspectRatio,
+                    enforceNoText: true,
+                    characterModel: model
+                },
+                storybookId,
+                storybookTitle
             }, {
                 errorMessage: '캐릭터 이미지를 생성할 수 없습니다.'
             });
@@ -82,12 +99,12 @@ class ImageService {
                 this.uploadHistory.characters[charId] = [];
             }
             this.uploadHistory.characters[charId].unshift({
-                url: response.imageUrl,
-                prompt: character.prompt,
+                url: response.data.imageUrl,
+                prompt: character.description || character.prompt,
                 timestamp: new Date().toISOString()
             });
 
-            return response;
+            return response.data;
         } catch (error) {
             console.error('generateCharacter error:', error);
             throw error;

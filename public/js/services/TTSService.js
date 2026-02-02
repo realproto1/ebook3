@@ -25,17 +25,24 @@ class TTSService {
                 model = DEFAULT_IMAGE_SETTINGS.geminiTTSModel,
                 voice = DEFAULT_IMAGE_SETTINGS.ttsModel,
                 voiceConfig = DEFAULT_IMAGE_SETTINGS.ttsVoiceConfig,
-                language = 'ko'
+                language = 'ko',
+                storybookId,
+                storybookTitle,
+                pageNumber
             } = options;
 
             const response = await api.post('/api/generate-tts', {
                 text: page.audio_text || page.text,
-                model,
-                voice,
+                geminiModel: model,
+                model: voice,
                 voiceConfig,
-                language
+                language,
+                storybookId,
+                storybookTitle,
+                pageNumber
             }, {
-                errorMessage: 'TTS를 생성할 수 없습니다.'
+                errorMessage: 'TTS를 생성할 수 없습니다.',
+                timeout: 180000
             });
 
             // 히스토리 저장
