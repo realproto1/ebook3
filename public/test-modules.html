@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>모듈 테스트 - 탱고북</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            background: white;
+        }
+        .test-result {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .test-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        .test-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+        .test-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">
+            <i class="fas fa-flask text-purple-600"></i>
+            모듈 테스트
+        </h1>
+        <p class="text-gray-600 mb-8">리팩토링된 모듈들이 정상 작동하는지 확인합니다.</p>
+
+        <!-- 테스트 결과 요약 -->
+        <div id="testSummary" class="mb-8 p-6 bg-white rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold mb-4">테스트 진행 중...</h2>
+            <div id="summaryContent"></div>
+        </div>
+
+        <!-- Phase 1: 공통 모듈 테스트 -->
+        <div class="test-section">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-check-circle text-green-600"></i>
+                Phase 1: 공통 모듈
+            </h2>
+            
+            <div id="test-api" class="mb-4">
+                <h3 class="font-semibold text-lg mb-2">1. API 모듈</h3>
+                <button onclick="testAPI()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <i class="fas fa-play"></i> API 테스트 실행
+                </button>
+                <div id="result-api" class="test-result" style="display:none;"></div>
+            </div>
+
+            <div id="test-storage" class="mb-4">
+                <h3 class="font-semibold text-lg mb-2">2. Storage 유틸</h3>
+                <button onclick="testStorage()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <i class="fas fa-play"></i> Storage 테스트 실행
+                </button>
+                <div id="result-storage" class="test-result" style="display:none;"></div>
+            </div>
+
+            <div id="test-audio" class="mb-4">
+                <h3 class="font-semibold text-lg mb-2">3. Audio 유틸</h3>
+                <button onclick="testAudio()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <i class="fas fa-play"></i> Audio 테스트 실행
+                </button>
+                <div id="result-audio" class="test-result" style="display:none;"></div>
+            </div>
+
+            <div id="test-dom" class="mb-4">
+                <h3 class="font-semibold text-lg mb-2">4. DOM 유틸</h3>
+                <button onclick="testDOM()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <i class="fas fa-play"></i> DOM 테스트 실행
+                </button>
+                <div id="result-dom" class="test-result" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Phase 2: 핵심 모듈 테스트 -->
+        <div class="test-section">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-book text-purple-600"></i>
+                Phase 2: 핵심 모듈
+            </h2>
+            
+            <div id="test-models" class="mb-4">
+                <h3 class="font-semibold text-lg mb-2">1. Config & Models</h3>
+                <button onclick="testModels()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    <i class="fas fa-play"></i> Models 테스트 실행
+                </button>
+                <div id="result-models" class="test-result" style="display:none;"></div>
+            </div>
+
+            <div id="test-storybook" class="mb-4">
+                <h3 class="font-semibold text-lg mb-2">2. Storybook 모델</h3>
+                <button onclick="testStorybook()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    <i class="fas fa-play"></i> Storybook 테스트 실행
+                </button>
+                <div id="result-storybook" class="test-result" style="display:none;"></div>
+            </div>
+
+            <div id="test-service" class="mb-4">
+                <h3 class="font-semibold text-lg mb-2">3. StoryService</h3>
+                <button onclick="testStoryService()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    <i class="fas fa-play"></i> Service 테스트 실행
+                </button>
+                <div id="result-service" class="test-result" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- 전체 실행 버튼 -->
+        <div class="text-center mt-8">
+            <button onclick="runAllTests()" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-lg text-xl font-bold hover:from-purple-700 hover:to-blue-700 shadow-lg">
+                <i class="fas fa-rocket"></i> 모든 테스트 실행
+            </button>
+        </div>
+    </div>
+
+    <!-- 모듈 로드 -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    
+    <!-- Phase 1 모듈 -->
+    <script src="/js/core/api.js"></script>
+    <script src="/js/utils/storage.js"></script>
+    <script src="/js/utils/audio.js"></script>
+    <script src="/js/utils/dom.js"></script>
+    
+    <!-- Phase 2 모듈 -->
+    <script src="/js/config/models.js"></script>
+    <script src="/js/models/Storybook.js"></script>
+    <script src="/js/services/StoryService.js"></script>
+
+    <!-- 테스트 스크립트 -->
+    <script>
+        let testResults = {
+            total: 0,
+            passed: 0,
+            failed: 0
+        };
+
+        function showResult(elementId, success, message) {
+            const el = document.getElementById(elementId);
+            el.style.display = 'block';
+            el.className = `test-result ${success ? 'test-success' : 'test-error'}`;
+            el.innerHTML = `<strong>${success ? '✓ 통과' : '✗ 실패'}:</strong> ${message}`;
+            
+            testResults.total++;
+            if (success) testResults.passed++;
+            else testResults.failed++;
+            
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const summaryEl = document.getElementById('summaryContent');
+            const passRate = testResults.total > 0 
+                ? Math.round((testResults.passed / testResults.total) * 100) 
+                : 0;
+            
+            summaryEl.innerHTML = `
+                <div class="grid grid-cols-4 gap-4 text-center">
+                    <div class="p-4 bg-blue-50 rounded">
+                        <div class="text-3xl font-bold text-blue-600">${testResults.total}</div>
+                        <div class="text-sm text-gray-600">전체 테스트</div>
+                    </div>
+                    <div class="p-4 bg-green-50 rounded">
+                        <div class="text-3xl font-bold text-green-600">${testResults.passed}</div>
+                        <div class="text-sm text-gray-600">통과</div>
+                    </div>
+                    <div class="p-4 bg-red-50 rounded">
+                        <div class="text-3xl font-bold text-red-600">${testResults.failed}</div>
+                        <div class="text-sm text-gray-600">실패</div>
+                    </div>
+                    <div class="p-4 bg-purple-50 rounded">
+                        <div class="text-3xl font-bold text-purple-600">${passRate}%</div>
+                        <div class="text-sm text-gray-600">성공률</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // API 모듈 테스트
+        function testAPI() {
+            try {
+                if (typeof API === 'undefined' || typeof api === 'undefined') {
+                    throw new Error('API 모듈이 로드되지 않았습니다.');
+                }
+                
+                // API 인스턴스 확인
+                if (!(api instanceof API)) {
+                    throw new Error('api 인스턴스가 올바르지 않습니다.');
+                }
+                
+                // 메서드 확인
+                const methods = ['get', 'post', 'put', 'delete', 'uploadFile'];
+                methods.forEach(method => {
+                    if (typeof api[method] !== 'function') {
+                        throw new Error(`api.${method} 메서드가 없습니다.`);
+                    }
+                });
+                
+                showResult('result-api', true, 'API 모듈이 정상적으로 로드되었습니다. 모든 메서드가 존재합니다.');
+            } catch (error) {
+                showResult('result-api', false, error.message);
+            }
+        }
+
+        // Storage 유틸 테스트
+        function testStorage() {
+            try {
+                if (typeof Storage === 'undefined') {
+                    throw new Error('Storage 유틸이 로드되지 않았습니다.');
+                }
+                
+                // 저장 테스트
+                const testData = { name: '테스트', value: 123 };
+                Storage.set('test_key', testData);
+                
+                // 읽기 테스트
+                const retrieved = Storage.get('test_key');
+                if (JSON.stringify(retrieved) !== JSON.stringify(testData)) {
+                    throw new Error('Storage 데이터가 일치하지 않습니다.');
+                }
+                
+                // 삭제 테스트
+                Storage.remove('test_key');
+                if (Storage.has('test_key')) {
+                    throw new Error('Storage 삭제가 작동하지 않습니다.');
+                }
+                
+                showResult('result-storage', true, 'Storage 유틸이 정상적으로 작동합니다. (저장, 읽기, 삭제 성공)');
+            } catch (error) {
+                showResult('result-storage', false, error.message);
+            }
+        }
+
+        // Audio 유틸 테스트
+        function testAudio() {
+            try {
+                if (typeof AudioPlayer === 'undefined' || typeof audioPlayer === 'undefined') {
+                    throw new Error('AudioPlayer가 로드되지 않았습니다.');
+                }
+                
+                // 메서드 확인
+                const methods = ['correct', 'retry', 'complete', 'click', 'error'];
+                methods.forEach(method => {
+                    if (typeof audioPlayer[method] !== 'function') {
+                        throw new Error(`audioPlayer.${method} 메서드가 없습니다.`);
+                    }
+                });
+                
+                // 효과음 재생 (사용자 인터랙션 없이는 재생 안 될 수 있음)
+                audioPlayer.click();
+                
+                showResult('result-audio', true, 'AudioPlayer가 정상적으로 로드되었습니다. 모든 메서드가 존재합니다.');
+            } catch (error) {
+                showResult('result-audio', false, error.message);
+            }
+        }
+
+        // DOM 유틸 테스트
+        function testDOM() {
+            try {
+                if (typeof DOM === 'undefined') {
+                    throw new Error('DOM 유틸이 로드되지 않았습니다.');
+                }
+                
+                // 요소 생성 테스트
+                const testDiv = DOM.create('div', { id: 'test-div', class: 'test-class' }, '테스트 내용');
+                if (!testDiv || testDiv.tagName !== 'DIV') {
+                    throw new Error('DOM.create가 작동하지 않습니다.');
+                }
+                
+                // 클래스 확인
+                if (!testDiv.classList.contains('test-class')) {
+                    throw new Error('클래스 설정이 작동하지 않습니다.');
+                }
+                
+                showResult('result-dom', true, 'DOM 유틸이 정상적으로 작동합니다. (요소 생성, 속성 설정 성공)');
+            } catch (error) {
+                showResult('result-dom', false, error.message);
+            }
+        }
+
+        // Models 테스트
+        function testModels() {
+            try {
+                if (typeof IMAGE_MODELS === 'undefined' || typeof TTS_MODELS === 'undefined') {
+                    throw new Error('모델 설정이 로드되지 않았습니다.');
+                }
+                
+                if (!Array.isArray(IMAGE_MODELS) || IMAGE_MODELS.length === 0) {
+                    throw new Error('IMAGE_MODELS가 비어있습니다.');
+                }
+                
+                if (!Array.isArray(TTS_MODELS) || TTS_MODELS.length === 0) {
+                    throw new Error('TTS_MODELS가 비어있습니다.');
+                }
+                
+                if (typeof ModelSelector === 'undefined') {
+                    throw new Error('ModelSelector 클래스가 로드되지 않았습니다.');
+                }
+                
+                showResult('result-models', true, `모델 설정이 정상 로드되었습니다. (이미지 모델: ${IMAGE_MODELS.length}개, TTS 모델: ${TTS_MODELS.length}개)`);
+            } catch (error) {
+                showResult('result-models', false, error.message);
+            }
+        }
+
+        // Storybook 모델 테스트
+        function testStorybook() {
+            try {
+                if (typeof Storybook === 'undefined') {
+                    throw new Error('Storybook 클래스가 로드되지 않았습니다.');
+                }
+                
+                // 빈 동화책 생성
+                const book = Storybook.createEmpty();
+                if (!book || !(book instanceof Storybook)) {
+                    throw new Error('동화책 생성이 실패했습니다.');
+                }
+                
+                // 페이지 추가
+                book.addPage({ text: '테스트 페이지' });
+                if (book.pages.length !== 1) {
+                    throw new Error('페이지 추가가 작동하지 않습니다.');
+                }
+                
+                // 완성도 계산
+                const rate = book.calculateCompletionRate();
+                if (typeof rate !== 'number') {
+                    throw new Error('완성도 계산이 작동하지 않습니다.');
+                }
+                
+                // 검증
+                const validation = book.validate();
+                if (typeof validation.valid !== 'boolean') {
+                    throw new Error('검증이 작동하지 않습니다.');
+                }
+                
+                showResult('result-storybook', true, `Storybook 모델이 정상 작동합니다. (페이지: ${book.pages.length}개, 완성도: ${rate}%)`);
+            } catch (error) {
+                showResult('result-storybook', false, error.message);
+            }
+        }
+
+        // StoryService 테스트
+        function testStoryService() {
+            try {
+                if (typeof StoryService === 'undefined' || typeof storyService === 'undefined') {
+                    throw new Error('StoryService가 로드되지 않았습니다.');
+                }
+                
+                // 메서드 확인
+                const methods = ['fetchAll', 'fetchById', 'create', 'update', 'delete', 'filter', 'sort'];
+                methods.forEach(method => {
+                    if (typeof storyService[method] !== 'function') {
+                        throw new Error(`storyService.${method} 메서드가 없습니다.`);
+                    }
+                });
+                
+                // 필터링 테스트 (로컬)
+                const filtered = storyService.filter({ status: 'all' });
+                if (!Array.isArray(filtered)) {
+                    throw new Error('필터링이 작동하지 않습니다.');
+                }
+                
+                showResult('result-service', true, 'StoryService가 정상적으로 로드되었습니다. 모든 메서드가 존재합니다.');
+            } catch (error) {
+                showResult('result-service', false, error.message);
+            }
+        }
+
+        // 모든 테스트 실행
+        async function runAllTests() {
+            testResults = { total: 0, passed: 0, failed: 0 };
+            
+            testAPI();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            testStorage();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            testAudio();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            testDOM();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            testModels();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            testStorybook();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            testStoryService();
+            
+            // 최종 요약 표시
+            setTimeout(() => {
+                if (testResults.failed === 0) {
+                    alert(`🎉 축하합니다! 모든 테스트를 통과했습니다! (${testResults.passed}/${testResults.total})`);
+                } else {
+                    alert(`⚠️ 일부 테스트가 실패했습니다. (통과: ${testResults.passed}, 실패: ${testResults.failed})`);
+                }
+            }, 1000);
+        }
+
+        // 페이지 로드 시 초기화
+        updateSummary();
+    </script>
+</body>
+</html>
