@@ -14,6 +14,15 @@ const { api, Storage, audioPlayer, DOM, storyService, imageService, ttsService }
 // 로그로 모듈 로드 확인
 if (modules.api) {
     console.log('✅ app.js: 모듈 연결 성공');
+    console.log('📦 로드된 모듈:', {
+        api: !!modules.api,
+        Storage: !!modules.Storage,
+        audioPlayer: !!modules.audioPlayer,
+        DOM: !!modules.DOM,
+        storyService: !!modules.storyService,
+        imageService: !!modules.imageService,
+        ttsService: !!modules.ttsService
+    });
 } else {
     console.warn('⚠️ app.js: 모듈 로드 대기 중... 전역 변수로 fallback');
 }
@@ -4548,7 +4557,17 @@ async function generateCharacterReference(charIndex) {
         
         // ✨ ImageService 사용 (fallback 체크)
         const service = imageService || window.imageService;
+        console.log('🔍 ImageService 체크:', {
+            fromModules: !!imageService,
+            fromWindow: !!window.imageService,
+            service: !!service
+        });
+        
         if (!service) {
+            console.error('❌ ImageService를 찾을 수 없습니다:', {
+                modules: window.__modules,
+                imageService: window.imageService
+            });
             throw new Error('ImageService가 로드되지 않았습니다. 페이지를 새로고침 해주세요.');
         }
         

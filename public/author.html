@@ -1435,23 +1435,30 @@
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script src="/gemini-client.js?v=20250120-deprecated"></script>
     
-    <!-- 모듈 먼저 로드 -->
-    <script type="module">
-        // 모듈 import하여 전역으로 노출
-        import { api } from './js/core/api.js';
-        import { Storage } from './js/utils/storage.js';
-        import { audioPlayer } from './js/utils/audio.js';
-        import { DOM } from './js/utils/dom.js';
-        import { storyService } from './js/services/StoryService.js';
-        import { imageService } from './js/services/ImageService.js';
-        import { ttsService } from './js/services/TTSService.js';
+    <!-- 모듈 먼저 로드 (직접 script 태그로) -->
+    <script src="/js/core/api.js"></script>
+    <script src="/js/utils/storage.js"></script>
+    <script src="/js/utils/audio.js"></script>
+    <script src="/js/utils/dom.js"></script>
+    <script src="/js/services/StoryService.js"></script>
+    <script src="/js/services/ImageService.js"></script>
+    <script src="/js/services/TTSService.js"></script>
+    
+    <script>
+        // 전역 변수 확인 및 __modules 설정
+        window.__modules = {
+            api: window.api,
+            Storage: window.Storage,
+            audioPlayer: window.audioPlayer,
+            DOM: window.DOM,
+            storyService: window.storyService,
+            imageService: window.imageService,
+            ttsService: window.ttsService
+        };
         
-        // 전역으로 노출 (app.js에서 사용)
-        window.__modules = { api, Storage, audioPlayer, DOM, storyService, imageService, ttsService };
-        
-        console.log('✅ 모듈 로드 완료');
+        console.log('✅ 모듈 로드 완료', window.__modules);
     </script>
     
-    <script src="/app.js?v=20250202-service-fallback"></script>
+    <script src="/app.js?v=20250202-debug-modules"></script>
 </body>
 </html>
