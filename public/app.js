@@ -9273,7 +9273,7 @@ function selectBackgroundMusic(musicId) {
     // window.addCharacter = addCharacter;  // ❌ 함수 정의 없음
     window.deleteCharacter = deleteCharacter;
     // window.addPage = addPage;  // ❌ 함수 정의 없음
-    window.deletePage = deletePage;
+    // window.deletePage = deletePage;  // ❌ 함수 정의 없음
     // window.goBack = goBack;  // ❌ 함수 정의 없음
     // window.toggleLanguage = toggleLanguage;  // ❌ 함수 정의 없음
     window.openBackgroundMusicModal = openBackgroundMusicModal;
