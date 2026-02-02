@@ -63,17 +63,32 @@ class ImageService {
      * 캐릭터 레퍼런스 이미지 생성
      * @param {Object} character - 캐릭터 정보 { name, description, age }
      * @param {Object} options - 생성 옵션
+     * @param {Function} options.onStart - 시작 콜백 (element) => void
+     * @param {Function} options.onProgress - 진행 콜백 (element, progress) => void
+     * @param {Function} options.onComplete - 완료 콜백 (element, imageUrl) => void
+     * @param {Function} options.onError - 에러 콜백 (element, error) => void
+     * @param {HTMLElement} options.targetElement - 로딩 UI를 표시할 DOM 요소
      * @returns {Promise<Object>} { success, imageUrl, error }
      */
     async generateCharacter(character, options = {}) {
+        const {
+            model = DEFAULT_IMAGE_SETTINGS.characterModel,
+            aspectRatio = '16:9',
+            artStyle = '디즈니 스타일',
+            storybookId = null,
+            storybookTitle = null,
+            onStart = null,
+            onProgress = null,
+            onComplete = null,
+            onError = null,
+            targetElement = null
+        } = options;
+
         try {
-            const {
-                model = DEFAULT_IMAGE_SETTINGS.characterModel,
-                aspectRatio = '16:9',
-                artStyle = '디즈니 스타일',
-                storybookId = null,
-                storybookTitle = null
-            } = options;
+            // 시작 콜백 호출
+            if (onStart && targetElement) {
+                onStart(targetElement);
+            }
 
             const response = await api.post('/api/generate-character-image', {
                 character: {
@@ -99,14 +114,25 @@ class ImageService {
                 this.uploadHistory.characters[charId] = [];
             }
             this.uploadHistory.characters[charId].unshift({
-                url: response.data.imageUrl,
+                url: response.imageUrl,
                 prompt: character.description || character.prompt,
                 timestamp: new Date().toISOString()
             });
 
-            return response.data;
+            // 완료 콜백 호출
+            if (onComplete && targetElement) {
+                onComplete(targetElement, response.imageUrl);
+            }
+
+            return response;
         } catch (error) {
             console.error('generateCharacter error:', error);
+            
+            // 에러 콜백 호출
+            if (onError && targetElement) {
+                onError(targetElement, error);
+            }
+            
             throw error;
         }
     }
@@ -140,41 +166,78 @@ class ImageService {
      * @param {Object} page
      * @param {Array} characterReferences
      * @param {Object} options
+     * @param {Function} options.onStart - 시작 콜백
+     * @param {Function} options.onComplete - 완료 콜백
+     * @param {Function} options.onError - 에러 콜백
+     * @param {HTMLElement} options.targetElement - 대상 DOM 요소
      * @returns {Promise<Object>}
      */
     async generateIllustration(page, characterReferences = [], options = {}) {
+        const {
+            model = DEFAULT_IMAGE_SETTINGS.illustrationModel,
+            aspectRatio = '16:9',
+            additionalPrompt = '',
+            artStyle = '디즈니 스타일',
+            settings = {},
+            editNote = '',
+            previousPages = [],
+            storybookId = null,
+            storybookTitle = null,
+            onStart = null,
+            onComplete = null,
+            onError = null,
+            targetElement = null
+        } = options;
+
         try {
-            const {
-                model = DEFAULT_IMAGE_SETTINGS.illustrationModel,
-                aspectRatio = '16:9',
-                additionalPrompt = ''
-            } = options;
+            // 시작 콜백 호출
+            if (onStart && targetElement) {
+                onStart(targetElement);
+            }
 
             const response = await api.post('/api/generate-illustration', {
-                text: page.text,
-                prompt: page.image_prompt,
+                page,
+                artStyle,
                 characterReferences,
-                model,
-                aspectRatio,
+                settings: {
+                    ...settings,
+                    illustrationModel: model,
+                    aspectRatio
+                },
+                editNote,
+                previousPages,
+                storybookId,
+                storybookTitle,
                 additionalPrompt
             }, {
                 errorMessage: '삽화를 생성할 수 없습니다.'
             });
 
             // 히스토리 저장
-            const pageId = page.id || page.order;
+            const pageId = page.id || page.order || page.pageNumber;
             if (!this.uploadHistory.illustrations[pageId]) {
                 this.uploadHistory.illustrations[pageId] = [];
             }
             this.uploadHistory.illustrations[pageId].unshift({
                 url: response.imageUrl,
-                prompt: page.image_prompt,
+                prompt: page.scene_description || page.image_prompt,
                 timestamp: new Date().toISOString()
             });
+
+            // 완료 콜백 호출
+            if (onComplete && targetElement) {
+                onComplete(targetElement, response.imageUrl);
+            }
 
             return response;
         } catch (error) {
             console.error('generateIllustration error:', error);
+            
+            // 에러 콜백 호출
+            if (onError && targetElement) {
+                onError(targetElement, error);
+            }
+            
             throw error;
         }
     }
@@ -248,11 +311,20 @@ class ImageService {
      * @returns {Promise<Object>}
      */
     async generateKeyObject(keyObject, options = {}) {
+        const {
+            model = DEFAULT_IMAGE_SETTINGS.keyObjectModel,
+            aspectRatio = '1:1',
+            onStart = null,
+            onComplete = null,
+            onError = null,
+            targetElement = null
+        } = options;
+
         try {
-            const {
-                model = DEFAULT_IMAGE_SETTINGS.keyObjectModel,
-                aspectRatio = '1:1'
-            } = options;
+            // 시작 콜백 호출
+            if (onStart && targetElement) {
+                onStart(targetElement);
+            }
 
             const response = await api.post('/api/generate-key-object', {
                 name: keyObject.name || keyObject.korean,
@@ -275,9 +347,20 @@ class ImageService {
                 timestamp: new Date().toISOString()
             });
 
+            // 완료 콜백 호출
+            if (onComplete && targetElement) {
+                onComplete(targetElement, response.imageUrl);
+            }
+
             return response;
         } catch (error) {
             console.error('generateKeyObject error:', error);
+            
+            // 에러 콜백 호출
+            if (onError && targetElement) {
+                onError(targetElement, error);
+            }
+            
             throw error;
         }
     }
@@ -313,11 +396,20 @@ class ImageService {
      * @returns {Promise<Object>}
      */
     async generateVocabulary(word, options = {}) {
+        const {
+            model = DEFAULT_IMAGE_SETTINGS.vocabularyModel,
+            aspectRatio = '1:1',
+            onStart = null,
+            onComplete = null,
+            onError = null,
+            targetElement = null
+        } = options;
+
         try {
-            const {
-                model = DEFAULT_IMAGE_SETTINGS.vocabularyModel,
-                aspectRatio = '1:1'
-            } = options;
+            // 시작 콜백 호출
+            if (onStart && targetElement) {
+                onStart(targetElement);
+            }
 
             const response = await api.post('/api/generate-vocabulary', {
                 korean: word.korean,
@@ -340,8 +432,23 @@ class ImageService {
                 timestamp: new Date().toISOString()
             });
 
+            // 완료 콜백 호출
+            if (onComplete && targetElement) {
+                onComplete(targetElement, response.imageUrl);
+            }
+
             return response;
         } catch (error) {
+            console.error('generateVocabulary error:', error);
+            
+            // 에러 콜백 호출
+            if (onError && targetElement) {
+                onError(targetElement, error);
+            }
+            
+            throw error;
+        }
+    }
             console.error('generateVocabulary error:', error);
             throw error;
         }
