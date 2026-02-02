@@ -1905,7 +1905,9 @@ function displayStorybook(storybook) {
     
     // UIHelper로 배경음악 섹션 렌더링
     html += UIHelper.renderMusicSection(storybook);
-
+    
+    // 나머지 섹션 (캐릭터, 표지, Key Object 등)
+    html += `
         <div class="bg-white rounded-3xl shadow-2xl p-4 md:p-10 mb-8">
             <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0 mb-4 md:mb-6">
                 <div class="flex-1">
