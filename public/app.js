@@ -34,9 +34,6 @@ if (window.api) {
         const storyService = window.storyService;
         const imageService = window.imageService;
         const ttsService = window.ttsService;
-        const translationService = window.TranslationService;
-        const musicService = window.MusicService;
-        const downloadService = window.DownloadService;
         
         // StorybookManager 초기화
         const storybookManager = new window.StorybookManager({
