@@ -9246,10 +9246,10 @@ function selectBackgroundMusic(musicId) {
     window.selectStorybook = selectStorybook;
     window.deleteStorybook = deleteStorybook;
     window.duplicateStorybook = duplicateStorybook;
-    window.createNewStorybook = createNewStorybook;
+    // window.createNewStorybook = createNewStorybook;  // ❌ 함수 정의 없음
     window.generateStorybook = generateStorybook;
     window.generateCoverImage = generateCoverImage;
-    window.regenerateCoverImage = regenerateCoverImage;
+    // window.regenerateCoverImage = regenerateCoverImage;  // ❌ 함수 정의 없음
     window.generateCharacterReference = generateCharacterReference;
     window.generateAllCharacterReferences = generateAllCharacterReferences;
     window.generateIllustration = generateIllustration;
