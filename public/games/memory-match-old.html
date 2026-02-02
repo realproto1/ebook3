@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사물 카드 매칭 - 탱고북</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .game-header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .story-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f5576c;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            gap: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .memory-card {
+            aspect-ratio: 3/4;
+            position: relative;
+            cursor: pointer;
+            perspective: 1000px;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .memory-card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .memory-card.matched .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .memory-card.matched {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 60px;
+        }
+
+        .card-back {
+            background: white;
+            transform: rotateY(180deg);
+            padding: 10px;
+        }
+
+        .card-back.image-card {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 70%;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .card-back.text-card {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            word-break: keep-all;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .card-korean {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .card-english {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-modal.show {
+            display: flex;
+        }
+
+        .result-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .result-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .result-stat {
+            text-align: center;
+        }
+
+        .result-stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #f5576c;
+        }
+
+        .result-stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .cards-container {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+
+            .card-back.text-card {
+                padding: 10px;
+            }
+
+            .card-korean {
+                font-size: 16px;
+            }
+
+            .card-english {
+                font-size: 12px;
+            }
+
+            .card-front {
+                font-size: 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cards-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 뒤로가기 버튼 -->
+    <div class="back-button" onclick="goBack()">
+        <i class="fas fa-arrow-left" style="font-size: 24px; color: #f5576c;"></i>
+    </div>
+
+    <div class="game-container">
+        <!-- 게임 헤더 -->
+        <div class="game-header">
+            <div class="story-title" id="storyTitle">동화책</div>
+            <div class="game-stats">
+                <div class="stat-item">
+                    <i class="fas fa-gamepad" style="color: #f5576c;"></i>
+                    <span id="movesCount">0</span>번 시도
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-check-circle" style="color: #4caf50;"></i>
+                    <span id="matchedCount">0</span> / <span id="totalPairs">6</span> 매칭
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-clock" style="color: #ff9800;"></i>
+                    <span id="timeDisplay">0:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 카드 영역 -->
+        <div class="cards-container" id="cardsContainer">
+            <!-- 카드가 동적으로 추가됩니다 -->
+        </div>
+    </div>
+
+    <!-- 결과 모달 -->
+    <div class="result-modal" id="resultModal">
+        <div class="result-content">
+            <div class="result-icon">🎉</div>
+            <div class="result-title">완료!</div>
+            <div class="result-stats">
+                <div class="result-stat">
+                    <div class="result-stat-value" id="finalMoves">0</div>
+                    <div class="result-stat-label">시도 횟수</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-stat-value" id="finalTime">0:00</div>
+                    <div class="result-stat-label">소요 시간</div>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="restartGame()">
+                    <i class="fas fa-redo"></i> 다시 하기
+                </button>
+                <button class="btn btn-secondary" onclick="goBack()">
+                    <i class="fas fa-list"></i> 게임 목록
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <script>
+        let storyData = null;
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let moves = 0;
+        let startTime = null;
+        let timerInterval = null;
+        let isProcessing = false;
+
+        // URL에서 스토리 ID 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const storyId = urlParams.get('story') || urlParams.get('id');
+
+        if (!storyId) {
+            alert('스토리 ID가 없습니다.');
+            goBack();
+        }
+
+        // 스토리 데이터 로드
+        async function loadStory() {
+            try {
+                console.log('📚 스토리 로딩 중:', storyId);
+                const response = await axios.get(`/api/storybooks/${storyId}`);
+                storyData = response.data;
+                
+                console.log('✅ 스토리 로드 완료:', storyData.title);
+                document.getElementById('storyTitle').textContent = storyData.title || '동화책';
+
+                // Key Objects 이미지 확인
+                const keyObjects = storyData.keyObjectImages?.filter(obj => obj.imageUrl && obj.success) || [];
+                
+                if (keyObjects.length < 4) {
+                    alert('Key Objects 이미지가 부족합니다. (최소 4개 필요)');
+                    goBack();
+                    return;
+                }
+
+                // 6쌍(12장)의 카드 생성
+                generateCards(keyObjects);
+                startTimer();
+            } catch (error) {
+                console.error('❌ 스토리 로드 실패:', error);
+                alert('동화책을 불러오는데 실패했습니다.');
+                goBack();
+            }
+        }
+
+        // 카드 생성
+        function generateCards(keyObjects) {
+            // 최대 6개의 Key Objects 선택
+            const selectedObjects = keyObjects.slice(0, 6);
+            document.getElementById('totalPairs').textContent = selectedObjects.length;
+
+            const cardPairs = [];
+
+            // 각 Key Object마다 이미지 카드와 텍스트 카드 생성
+            selectedObjects.forEach((obj, index) => {
+                // 이미지 카드
+                cardPairs.push({
+                    id: `img-${index}`,
+                    pairId: index,
+                    type: 'image',
+                    imageUrl: obj.imageUrl,
+                    name: obj.name
+                });
+
+                // 텍스트 카드
+                cardPairs.push({
+                    id: `text-${index}`,
+                    pairId: index,
+                    type: 'text',
+                    name: obj.name,
+                    korean: obj.korean || obj.name
+                });
+            });
+
+            // 카드 섞기
+            cards = shuffleArray(cardPairs);
+            renderCards();
+        }
+
+        // 배열 섞기
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // 카드 렌더링
+        function renderCards() {
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = '';
+
+            cards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'memory-card';
+                cardElement.dataset.index = index;
+                cardElement.onclick = () => flipCard(index);
+
+                const cardInner = document.createElement('div');
+                cardInner.className = 'card-inner';
+
+                // 앞면 (물음표)
+                const cardFront = document.createElement('div');
+                cardFront.className = 'card-face card-front';
+                cardFront.innerHTML = '<i class="fas fa-question"></i>';
+
+                // 뒷면 (이미지 또는 텍스트)
+                const cardBack = document.createElement('div');
+                cardBack.className = `card-face card-back ${card.type}-card`;
+
+                if (card.type === 'image') {
+                    cardBack.innerHTML = `<img src="${card.imageUrl}" alt="${card.korean || card.name}" class="card-image">`;
+                } else {
+                    cardBack.innerHTML = `
+                        <div class="card-korean">${card.korean || card.name}</div>
+                        <div class="card-english">${card.name}</div>
+                    `;
+                }
+
+                cardInner.appendChild(cardFront);
+                cardInner.appendChild(cardBack);
+                cardElement.appendChild(cardInner);
+                container.appendChild(cardElement);
+            });
+        }
+
+        // 카드 뒤집기
+        function flipCard(index) {
+            if (isProcessing) return;
+            
+            const card = cards[index];
+            const cardElement = document.querySelector(`.memory-card[data-index="${index}"]`);
+
+            // 이미 뒤집혔거나 매칭된 카드는 무시
+            if (cardElement.classList.contains('flipped') || cardElement.classList.contains('matched')) {
+                return;
+            }
+
+            // 카드 뒤집기
+            cardElement.classList.add('flipped');
+            flippedCards.push({ index, card });
+
+            // 2장의 카드가 뒤집혔을 때
+            if (flippedCards.length === 2) {
+                isProcessing = true;
+                moves++;
+                document.getElementById('movesCount').textContent = moves;
+                checkMatch();
+            }
+        }
+
+        // 매칭 확인
+        function checkMatch() {
+            const [first, second] = flippedCards;
+
+            if (first.card.pairId === second.card.pairId) {
+                // 매칭 성공
+                setTimeout(() => {
+                    const firstElement = document.querySelector(`.memory-card[data-index="${first.index}"]`);
+                    const secondElement = document.querySelector(`.memory-card[data-index="${second.index}"]`);
+                    
+                    firstElement.classList.add('matched');
+                    secondElement.classList.add('matched');
+
+                    matchedPairs++;
+                    document.getElementById('matchedCount').textContent = matchedPairs;
+
+                    flippedCards = [];
+                    isProcessing = false;
+
+                    // 모든 쌍이 매칭되면 게임 종료
+                    if (matchedPairs === cards.length / 2) {
+                        setTimeout(showResults, 500);
+                    }
+                }, 500);
+            } else {
+                // 매칭 실패
+                setTimeout(() => {
+                    const firstElement = document.querySelector(`.memory-card[data-index="${first.index}"]`);
+                    const secondElement = document.querySelector(`.memory-card[data-index="${second.index}"]`);
+                    
+                    firstElement.classList.remove('flipped');
+                    secondElement.classList.remove('flipped');
+
+                    flippedCards = [];
+                    isProcessing = false;
+                }, 1000);
+            }
+        }
+
+        // 타이머 시작
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timeDisplay').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        // 타이머 정지
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        // 결과 표시
+        function showResults() {
+            stopTimer();
+            
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            document.getElementById('finalMoves').textContent = moves;
+            document.getElementById('finalTime').textContent = timeString;
+            document.getElementById('resultModal').classList.add('show');
+        }
+
+        // 게임 재시작
+        function restartGame() {
+            // 초기화
+            matchedPairs = 0;
+            moves = 0;
+            flippedCards = [];
+            isProcessing = false;
+            
+            document.getElementById('movesCount').textContent = '0';
+            document.getElementById('matchedCount').textContent = '0';
+            document.getElementById('resultModal').classList.remove('show');
+
+            // 카드 재생성
+            if (storyData && storyData.keyObjectImages) {
+                const keyObjects = storyData.keyObjectImages.filter(obj => obj.imageUrl && obj.success);
+                generateCards(keyObjects);
+            }
+
+            // 타이머 재시작
+            stopTimer();
+            startTimer();
+        }
+
+        // 뒤로가기
+        function goBack() {
+            stopTimer();
+            window.history.back();
+        }
+
+        // 페이지 로드 시 실행
+        loadStory();
+    </script>
+</body>
+</html>
