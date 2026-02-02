@@ -9,30 +9,30 @@
 
 // author.html에서 로드한 모듈 사용
 // 전역 변수로 이미 로드됨 (window.api, window.imageService 등)
-// const 선언 시 충돌 방지를 위해 직접 window에서 참조
-const api = window.api;
-const Storage = window.Storage;
-const audioPlayer = window.audioPlayer;
-const DOM = window.DOM;
-const storyService = window.storyService;
-const imageService = window.imageService;
-const ttsService = window.ttsService;
 
 // 로그로 모듈 로드 확인
-if (api) {
+if (window.api) {
     console.log('✅ app.js: 모듈 연결 성공');
     console.log('📦 로드된 모듈:', {
-        api: !!api,
-        Storage: !!Storage,
-        audioPlayer: !!audioPlayer,
-        DOM: !!DOM,
-        storyService: !!storyService,
-        imageService: !!imageService,
-        ttsService: !!ttsService
+        api: !!window.api,
+        Storage: !!window.Storage,
+        audioPlayer: !!window.audioPlayer,
+        DOM: !!window.DOM,
+        storyService: !!window.storyService,
+        imageService: !!window.imageService,
+        ttsService: !!window.ttsService
     });
-} else {
-    console.warn('⚠️ app.js: 모듈 로드 대기 중... 전역 변수로 fallback');
-}
+    
+    // IIFE로 감싸서 지역 변수 사용 (전역 충돌 방지)
+    (function() {
+        // 지역 변수로 alias 생성
+        const api = window.api;
+        const Storage = window.Storage;
+        const audioPlayer = window.audioPlayer;
+        const DOM = window.DOM;
+        const storyService = window.storyService;
+        const imageService = window.imageService;
+        const ttsService = window.ttsService;
 
 // ============================================
 // 전역 변수
@@ -9244,4 +9244,9 @@ function selectBackgroundMusic(musicId) {
 document.addEventListener('DOMContentLoaded', () => {
     loadBackgroundMusicList();
 });
+
+    })(); // IIFE 종료
+} else {
+    console.warn('⚠️ app.js: 모듈 로드 대기 중... 전역 변수로 fallback');
+}
 
