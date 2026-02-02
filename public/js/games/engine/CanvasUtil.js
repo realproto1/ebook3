@@ -288,3 +288,6 @@ class CanvasUtil {
 if (typeof window !== 'undefined') {
     window.CanvasUtil = CanvasUtil;
 }
+
+// ES6 module export
+export default CanvasUtil;

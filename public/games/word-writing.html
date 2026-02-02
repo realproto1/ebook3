@@ -99,87 +99,91 @@
         }
 
         .canvas-container {
+            position: relative;
             display: flex;
             justify-content: center;
-            align-items: center;
-            margin: 30px 0;
-            min-height: 450px;
+            margin: 20px 0;
         }
 
         #drawingCanvas {
             border: 3px solid #fcb69f;
             border-radius: 15px;
             cursor: crosshair;
-            background: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             touch-action: none;
-            max-width: 100%;
-            height: auto;
+            background: white;
+        }
+
+        #guideOverlay {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+            opacity: 0.15;
+            font-size: 300px;
+            font-weight: bold;
+            color: #fcb69f;
+            font-family: 'Noto Sans KR', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .control-buttons {
             display: flex;
             gap: 10px;
             justify-content: center;
-            margin-top: 20px;
+            margin: 20px 0;
             flex-wrap: wrap;
         }
 
         .btn {
             padding: 12px 24px;
-            border-radius: 10px;
+            border: none;
+            border-radius: 25px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            border: none;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .btn-warning {
-            background: #ff9800;
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background: #f57c00;
+        .btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(252, 182, 159, 0.4);
-        }
-
-        .btn-secondary {
-            background: #e0e0e0;
-            color: #333;
-        }
-
-        .btn-secondary:hover {
-            background: #d0d0d0;
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
         }
 
         .btn-success {
-            background: #4caf50;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
         }
 
-        .btn-success:hover {
-            background: #45a049;
+        .btn-secondary {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
         }
 
         .stats {
             display: flex;
             justify-content: space-around;
             margin-top: 20px;
-            padding: 15px;
-            background: #f5f5f5;
-            border-radius: 10px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
         }
 
         .stat-item {
@@ -187,22 +191,15 @@
         }
 
         .stat-value {
-            font-size: 24px;
+            font-size: 32px;
             font-weight: bold;
             color: #fcb69f;
         }
 
         .stat-label {
-            font-size: 12px;
+            font-size: 14px;
             color: #666;
             margin-top: 5px;
-        }
-
-        .instruction {
-            text-align: center;
-            color: #666;
-            margin: 15px 0;
-            font-size: 14px;
         }
 
         .result-modal {
@@ -212,10 +209,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.8);
             z-index: 1000;
-            align-items: center;
             justify-content: center;
+            align-items: center;
         }
 
         .result-modal.show {
@@ -226,25 +223,20 @@
             background: white;
             border-radius: 20px;
             padding: 40px;
-            max-width: 400px;
-            width: 90%;
             text-align: center;
-            animation: slideUp 0.3s ease;
+            max-width: 400px;
+            animation: bounceIn 0.5s ease;
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         .result-score {
-            font-size: 60px;
+            font-size: 48px;
             font-weight: bold;
             color: #fcb69f;
             margin: 20px 0;
@@ -252,7 +244,6 @@
 
         .result-message {
             font-size: 24px;
-            font-weight: bold;
             color: #333;
             margin-bottom: 30px;
         }
@@ -263,108 +254,81 @@
             justify-content: center;
         }
 
-        .back-button {
+        .feedback-message {
             position: fixed;
-            top: 20px;
-            left: 20px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 100;
-            transition: all 0.3s ease;
+            padding: 30px 50px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            font-size: 48px;
+            font-weight: bold;
+            z-index: 999;
+            animation: fadeInOut 1s ease;
         }
 
-        .back-button:hover {
-            transform: scale(1.1);
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
         }
 
-        @media (max-width: 768px) {
-            .game-container {
-                padding: 10px;
-            }
+        .feedback-correct {
+            color: #4CAF50;
+        }
 
-            .target-char {
-                font-size: 80px;
-            }
+        .feedback-retry {
+            color: #ff9800;
+        }
 
-            #drawingCanvas {
-                width: 100% !important;
-                max-width: 300px;
-            }
-
-            .key-object-image {
-                max-width: 150px;
-                height: 150px;
-            }
+        /* 실시간 정확도 표시 */
+        #realTimeAccuracy {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #fcb69f;
+            margin: 10px 0;
+            min-height: 30px;
         }
     </style>
 </head>
 <body>
-    <!-- 뒤로가기 버튼 -->
-    <div class="back-button" onclick="goBack()">
-        <i class="fas fa-arrow-left" style="font-size: 24px; color: #fcb69f;"></i>
-    </div>
-
     <div class="game-container">
-        <!-- 게임 헤더 -->
         <div class="game-header">
-            <div class="story-title" id="storyTitle">동화책</div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                <div style="font-size: 16px; color: #666;">
-                    <i class="fas fa-pen"></i>
-                    글자 <span id="currentChar">1</span> / <span id="totalChars">5</span>
-                </div>
-                <div style="font-size: 16px; color: #4caf50; font-weight: bold;">
-                    <i class="fas fa-check-circle"></i>
-                    <span id="correctCount">0</span>개 완성
-                </div>
-            </div>
+            <button class="btn btn-secondary" onclick="goBack()" style="position: absolute; top: 20px; left: 20px;">
+                <i class="fas fa-arrow-left"></i> 돌아가기
+            </button>
+            <div class="story-title" id="storyTitle">글자 따라 쓰기</div>
             <div class="progress-bar">
-                <div class="progress-fill" id="progressFill" style="width: 0%;">
-                    <span id="progressText">0%</span>
-                </div>
+                <div class="progress-fill" id="progressFill" style="width: 0%;">0%</div>
             </div>
         </div>
 
-        <!-- 게임 영역 -->
-        <div class="game-area" id="gameArea">
-            <div class="char-number" id="charNumber">글자 1</div>
-            <img id="keyObjectImage" class="key-object-image" src="" alt="핵심 사물">
-            <div class="target-char" id="targetChar">장</div>
+        <div class="game-area">
+            <div class="char-number" id="charNumber">1 / 5</div>
             
-            <div class="instruction">
-                <i class="fas fa-info-circle"></i>
-                아래 캔버스에 글자를 따라 그려보세요
-            </div>
+            <img id="keyObjectImage" class="key-object-image" style="display: none;">
+            
+            <div class="target-char" id="targetChar"></div>
 
-            <!-- 실시간 정답률 표시 -->
-            <div id="realtimeAccuracy" style="
-                text-align: center;
-                font-size: 18px;
-                font-weight: bold;
-                color: #fcb69f;
-                margin: 10px 0;
-                min-height: 30px;
-            "></div>
+            <!-- 실시간 정확도 표시 -->
+            <div id="realTimeAccuracy"></div>
 
             <div class="canvas-container">
                 <canvas id="drawingCanvas" width="400" height="400"></canvas>
             </div>
 
             <div class="control-buttons">
-                <button class="btn btn-warning" onclick="clearCanvas()">
+                <button class="btn btn-warning" id="clearBtn">
                     <i class="fas fa-eraser"></i> 지우기
                 </button>
-                <button class="btn btn-success" onclick="checkDrawing()">
+                <button class="btn btn-success" id="checkBtn">
                     <i class="fas fa-check"></i> 확인
                 </button>
-                <button class="btn btn-secondary" onclick="skipChar()">
+                <button class="btn btn-secondary" id="skipBtn">
                     <i class="fas fa-forward"></i> 건너뛰기
                 </button>
             </div>
@@ -389,7 +353,7 @@
             <div class="result-score" id="resultScore">5 / 5</div>
             <div class="result-message" id="resultMessage">완벽해요! 🎉</div>
             <div class="button-group">
-                <button class="btn btn-primary" onclick="restartGame()">
+                <button class="btn btn-primary" id="restartBtn">
                     <i class="fas fa-redo"></i> 다시 하기
                 </button>
                 <button class="btn btn-secondary" onclick="goBack()">
@@ -400,629 +364,82 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-    <script>
-        // 개발 모드 플래그 (프로덕션에서는 false로 설정)
-        const DEBUG_MODE = false;
-        
-        let storyData = null;
-        let currentCharIndex = 0;
-        let correctChars = 0;
-        let characters = [];
-        let totalAttempts = 0;
-        let canvas = null;
-        let ctx = null;
-        let isDrawing = false;
-        let lastX = 0;
-        let lastY = 0;
+    <script type="module">
+        // 모듈 import
+        import { API } from '/js/core/api.js';
+        import { Storage } from '/js/utils/storage.js';
+        import { audioPlayer } from '/js/utils/audio.js';
+        import { DOM } from '/js/utils/dom.js';
+        import WordWritingGame from '/js/games/WordWritingGame.js';
 
-        // URL에서 스토리 ID 가져오기
-        const urlParams = new URLSearchParams(window.location.search);
-        const storyId = urlParams.get('story') || urlParams.get('id');
-
-        if (!storyId) {
-            alert('스토리 ID가 없습니다.');
-            goBack();
-        }
-
-        // Canvas 초기화
-        function initCanvas() {
-            canvas = document.getElementById('drawingCanvas');
-            ctx = canvas.getContext('2d', { willReadFrequently: true });
-            
-            // 고해상도 디스플레이 지원
-            const rect = canvas.getBoundingClientRect();
-            const dpr = window.devicePixelRatio || 1;
-            
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-            ctx.scale(dpr, dpr);
-            
-            canvas.style.width = rect.width + 'px';
-            canvas.style.height = rect.height + 'px';
-
-            // 그리기 설정
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 25; // 펜 두께 증가 (사용자 쓰기 편의성 향상)
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-
-            // 마우스 이벤트
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseout', stopDrawing);
-
-            // 터치 이벤트
-            canvas.addEventListener('touchstart', handleTouchStart);
-            canvas.addEventListener('touchmove', handleTouchMove);
-            canvas.addEventListener('touchend', stopDrawing);
-        }
-
-        function startDrawing(e) {
-            isDrawing = true;
-            const rect = canvas.getBoundingClientRect();
-            lastX = e.clientX - rect.left;
-            lastY = e.clientY - rect.top;
-        }
-
-        function draw(e) {
-            if (!isDrawing) return;
-            
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(x, y);
-            ctx.stroke();
-
-            lastX = x;
-            lastY = y;
-            
-            // 실시간 정답률 계산
-            updateRealtimeAccuracy();
-        }
-
-        function stopDrawing() {
-            isDrawing = false;
-        }
-
-        function handleTouchStart(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            lastX = touch.clientX - rect.left;
-            lastY = touch.clientY - rect.top;
-            isDrawing = true;
-        }
-
-        function handleTouchMove(e) {
-            e.preventDefault();
-            if (!isDrawing) return;
-
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
-
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(x, y);
-            ctx.stroke();
-
-            lastX = x;
-            lastY = y;
-            
-            // 실시간 정답률 계산
-            updateRealtimeAccuracy();
-        }
-
-        function clearCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // 실시간 정답률 초기화
-            const realtimeDiv = document.getElementById('realtimeAccuracy');
-            if (realtimeDiv) {
-                realtimeDiv.textContent = '';
+        // 전역 함수 (HTML onclick 이벤트용)
+        window.goBack = function() {
+            const storyId = game?.storyId;
+            if (storyId) {
+                window.location.href = `/games.html?id=${storyId}`;
+            } else {
+                window.history.back();
             }
-        }
+        };
 
-        // 가이드 이미지 데이터 저장용
-        let guideImageData = null;
-        
-        // 가이드 글자 그리기 (회색 반투명) + 참조 이미지 생성
-        function drawGuideChar(char) {
-            // ⭐ 먼저 별도의 캔버스에 진한 글자로 그려서 참조 이미지 생성 (픽셀 비교용)
-            const fontSize = canvas.width * 0.6; // 캔버스 너비의 60%
-            
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = canvas.width;
-            tempCanvas.height = canvas.height;
-            const tempCtx = tempCanvas.getContext('2d');
-            
-            tempCtx.fillStyle = '#000000';
-            tempCtx.font = `bold ${fontSize}px 'Noto Sans KR', sans-serif`;
-            tempCtx.textAlign = 'center';
-            tempCtx.textBaseline = 'middle';
-            tempCtx.fillText(char, tempCanvas.width / 2, tempCanvas.height / 2);
-            
-            guideImageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-            
-            // 디버깅: 가이드 이미지 픽셀 수 확인
-            let guidePixelCount = 0;
-            for (let i = 0; i < guideImageData.data.length; i += 4) {
-                if (guideImageData.data[i + 3] > 50) {
-                    guidePixelCount++;
-                }
-            }
-            if (DEBUG_MODE) console.log(`🖼️ 가이드 이미지 생성: "${char}" - 픽셀 수: ${guidePixelCount}`);
-            
-            // ⚠️ 가이드 글자는 CSS로 표시하고, 캔버스에는 그리지 않음!
-            // 대신 배경으로 표시
-            const guideOverlay = document.getElementById('guideOverlay');
-            if (!guideOverlay) {
-                const overlay = document.createElement('div');
-                overlay.id = 'guideOverlay';
-                overlay.style.cssText = `
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    pointer-events: none;
-                    font-size: ${fontSize * (400 / canvas.width)}px;
-                    font-weight: bold;
-                    font-family: 'Noto Sans KR', sans-serif;
-                    color: rgba(200, 200, 200, 0.3);
-                    text-shadow: 0 0 2px rgba(150, 150, 150, 0.5);
-                    z-index: 1;
-                `;
-                canvas.parentElement.style.position = 'relative';
-                canvas.parentElement.appendChild(overlay);
-            }
-            document.getElementById('guideOverlay').textContent = char;
-        }
+        // 게임 인스턴스
+        let game = null;
 
-        // 스토리 데이터 로드
-        async function loadStory() {
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', async () => {
             try {
-                if (DEBUG_MODE) console.log('📚 스토리 로딩 중:', storyId);
-                const response = await axios.get(`/api/storybooks/${storyId}`);
-                storyData = response.data;
-                
-                if (DEBUG_MODE) console.log('✅ 스토리 로드 완료:', storyData.title);
-                document.getElementById('storyTitle').textContent = storyData.title || '동화책';
+                // URL에서 storyId 추출
+                const urlParams = new URLSearchParams(window.location.search);
+                const storyId = urlParams.get('story') || urlParams.get('id');
 
-                // Vocabulary 또는 key_objects에서 글자 추출
-                let vocabulary = [];
-                
-                // 1. educational_content.vocabulary 확인
-                if (storyData.educational_content && storyData.educational_content.vocabulary) {
-                    vocabulary = storyData.educational_content.vocabulary;
-                    if (DEBUG_MODE) console.log('📚 educational_content.vocabulary 사용:', vocabulary.length);
-                } 
-                // 2. vocabulary 직접 확인
-                else if (storyData.vocabulary && Array.isArray(storyData.vocabulary)) {
-                    vocabulary = storyData.vocabulary;
-                    if (DEBUG_MODE) console.log('📚 vocabulary 직접 사용:', vocabulary.length);
-                }
-                // 3. key_objects 사용 (fallback)
-                else if (storyData.key_objects && Array.isArray(storyData.key_objects)) {
-                    vocabulary = storyData.key_objects.map(obj => ({
-                        korean: obj.korean || obj.name || obj,
-                        word: obj.name || obj.korean || obj
-                    }));
-                    if (DEBUG_MODE) console.log('📚 key_objects 사용:', vocabulary.length);
-                }
-                
-                if (vocabulary.length === 0) {
-                    alert('단어장이 없습니다.');
-                    goBack();
+                if (!storyId) {
+                    alert('스토리 ID가 없습니다.');
+                    window.history.back();
                     return;
                 }
 
-                // 각 단어에서 한 글자씩 추출
-                characters = [];
-                vocabulary.forEach(vocabItem => {
-                    // 객체 또는 문자열 처리
-                    const korean = vocabItem.korean || vocabItem.name || vocabItem;
-                    const word = vocabItem.word || vocabItem.name || vocabItem; // 영어 단어
-                    
-                    if (!korean) return;
-                    
-                    // 공백 제거하고 각 글자를 분리
-                    const chars = korean.toString().replace(/\s/g, '').split('');
-                    chars.forEach(char => {
-                        characters.push({
-                            char: char,
-                            word: korean,
-                            englishWord: word,
-                            imageUrl: null // vocabulary에는 이미지가 없음
-                        });
-                    });
+                // 게임 초기화
+                game = new WordWritingGame({
+                    storyId: storyId,
+                    debug: false
                 });
 
-                // 최대 10개로 제한
-                characters = characters.slice(0, 10);
+                await game.init();
 
-                document.getElementById('totalChars').textContent = characters.length;
-                initCanvas();
-                renderChar();
+                // 이벤트 리스너 등록
+                setupEventListeners();
+
             } catch (error) {
-                console.error('❌ 스토리 로드 실패:', error);
-                alert('동화책을 불러오는데 실패했습니다.');
-                goBack();
+                console.error('게임 초기화 실패:', error);
+                alert('게임을 불러오는데 실패했습니다.');
+                window.history.back();
             }
-        }
-
-        // 글자 렌더링
-        function renderChar() {
-            const charData = characters[currentCharIndex];
-            
-            // 자동 넘김 플래그 초기화
-            autoAdvanceTriggered = false;
-
-            // 글자 번호 업데이트
-            document.getElementById('charNumber').textContent = `글자 ${currentCharIndex + 1}`;
-            document.getElementById('currentChar').textContent = currentCharIndex + 1;
-
-            // 진행률 업데이트
-            const progress = (currentCharIndex / characters.length) * 100;
-            document.getElementById('progressFill').style.width = `${progress}%`;
-            document.getElementById('progressText').textContent = `${Math.round(progress)}%`;
-
-            // 이미지 설정 (이미지가 있을 경우에만)
-            const imgElement = document.getElementById('keyObjectImage');
-            if (charData.imageUrl) {
-                imgElement.src = charData.imageUrl;
-                imgElement.alt = charData.word;
-                imgElement.style.display = 'block';
-            } else {
-                imgElement.style.display = 'none';
-            }
-
-            // 목표 글자 표시
-            document.getElementById('targetChar').textContent = charData.char;
-
-            // 캔버스 초기화 및 가이드 글자 그리기
-            clearCanvas();
-            drawGuideChar(charData.char);
-            updateStats();
-        }
-
-        // 픽셀 비교를 통한 정확도 측정
-        function calculateAccuracy(userImageData, guideImageData) {
-            const userPixels = userImageData.data;
-            const guidePixels = guideImageData.data;
-            const width = guideImageData.width;
-            const height = guideImageData.height;
-            
-            let totalGuidePixels = 0;
-            let matchingPixels = 0;
-            
-            // 주변 픽셀 검사 반경 (펜 두께 고려)
-            const searchRadius = 12; // 25px 펜 두께의 절반
-            
-            // 가이드 글자의 모든 픽셀 위치를 찾고,
-            // 사용자가 그린 부분과 얼마나 겹치는지 확인
-            for (let i = 0; i < guidePixels.length; i += 4) {
-                const guideAlpha = guidePixels[i + 3];
-                
-                // 가이드에 픽셀이 있는 위치
-                if (guideAlpha > 50) {
-                    totalGuidePixels++;
-                    
-                    // 현재 픽셀 좌표
-                    const pixelIndex = i / 4;
-                    const x = pixelIndex % width;
-                    const y = Math.floor(pixelIndex / width);
-                    
-                    // 주변 영역 검사 (펜 두께를 고려한 반경)
-                    let foundMatch = false;
-                    for (let dy = -searchRadius; dy <= searchRadius && !foundMatch; dy++) {
-                        for (let dx = -searchRadius; dx <= searchRadius && !foundMatch; dx++) {
-                            const nx = x + dx;
-                            const ny = y + dy;
-                            
-                            // 경계 체크
-                            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                                const ni = (ny * width + nx) * 4;
-                                const userAlpha = userPixels[ni + 3];
-                                
-                                // 원형 반경 내에서 사용자가 그렸으면 매칭
-                                if (userAlpha > 50 && (dx * dx + dy * dy) <= searchRadius * searchRadius) {
-                                    matchingPixels++;
-                                    foundMatch = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // 디버깅 로그
-            const accuracy = totalGuidePixels === 0 ? 0 : (matchingPixels / totalGuidePixels) * 100;
-            if (DEBUG_MODE) console.log(`📊 정확도 계산: 가이드 픽셀=${totalGuidePixels}, 매칭 픽셀=${matchingPixels}, 정확도=${accuracy.toFixed(1)}%`);
-            
-            // 정확도 계산 (0~100)
-            if (totalGuidePixels === 0) return 0;
-            return accuracy;
-        }
-        
-        // 효과음 재생 함수
-        function playSound(type) {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            if (type === 'correct') {
-                // 정답 효과음: 밝은 3화음
-                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
-                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
-                oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.3);
-            } else if (type === 'retry') {
-                // 재시도 효과음: 낮은 톤
-                oscillator.frequency.setValueAtTime(329.63, audioContext.currentTime); // E4
-                oscillator.frequency.setValueAtTime(293.66, audioContext.currentTime + 0.1); // D4
-                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.2);
-            } else if (type === 'complete') {
-                // 완료 효과음: 승리 팡파레
-                const frequencies = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-                frequencies.forEach((freq, i) => {
-                    const osc = audioContext.createOscillator();
-                    const gain = audioContext.createGain();
-                    osc.connect(gain);
-                    gain.connect(audioContext.destination);
-                    osc.frequency.setValueAtTime(freq, audioContext.currentTime + i * 0.15);
-                    gain.gain.setValueAtTime(0.2, audioContext.currentTime + i * 0.15);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.15 + 0.3);
-                    osc.start(audioContext.currentTime + i * 0.15);
-                    osc.stop(audioContext.currentTime + i * 0.15 + 0.3);
-                });
-            }
-        }
-        
-        // 정답 피드백 표시
-        function showCorrectFeedback(callback) {
-            // 정답 효과음 재생
-            playSound('correct');
-            
-            const feedback = document.createElement('div');
-            feedback.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(34, 197, 94, 0.95);
-                color: white;
-                padding: 30px 50px;
-                border-radius: 20px;
-                font-size: 32px;
-                font-weight: bold;
-                z-index: 10000;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            `;
-            feedback.innerHTML = '✓ 정답!';
-            document.body.appendChild(feedback);
-            
-            setTimeout(() => {
-                feedback.remove();
-                if (callback) callback();
-            }, 1000);
-        }
-        
-        // 재시도 피드백 표시
-        function showRetryFeedback(accuracy) {
-            // 재시도 효과음 재생
-            playSound('retry');
-            
-            const feedback = document.createElement('div');
-            feedback.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(239, 68, 68, 0.95);
-                color: white;
-                padding: 30px 50px;
-                border-radius: 20px;
-                font-size: 24px;
-                font-weight: bold;
-                z-index: 10000;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                text-align: center;
-            `;
-            feedback.innerHTML = `
-                정확도: ${accuracy.toFixed(1)}%<br>
-                <span style="font-size: 18px; margin-top: 10px; display: block;">다시 시도해보세요!</span>
-            `;
-            document.body.appendChild(feedback);
-            
-            setTimeout(() => {
-                feedback.remove();
-            }, 1500);
-        }
-        
-        // 실시간 정답률 업데이트
-        let autoAdvanceTriggered = false; // 자동 넘김 중복 방지
-        
-        function updateRealtimeAccuracy() {
-            if (!guideImageData) return;
-            
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const accuracy = calculateAccuracy(imageData, guideImageData);
-            
-            const realtimeDiv = document.getElementById('realtimeAccuracy');
-            if (accuracy > 0) {
-                realtimeDiv.textContent = `현재 정확도: ${accuracy.toFixed(1)}%`;
-                
-                // 정확도에 따라 색상 변경
-                if (accuracy >= 90) {
-                    realtimeDiv.style.color = '#4caf50'; // 녹색
-                } else if (accuracy >= 70) {
-                    realtimeDiv.style.color = '#ff9800'; // 주황색
-                } else {
-                    realtimeDiv.style.color = '#fcb69f'; // 기본색
-                }
-                
-                // 90% 이상이면 자동으로 정답 처리 및 다음 문제로
-                if (accuracy >= 90 && !autoAdvanceTriggered) {
-                    autoAdvanceTriggered = true;
-                    totalAttempts++;
-                    correctChars++;
-                    document.getElementById('correctCount').textContent = correctChars;
-                    
-                    if (DEBUG_MODE) console.log(`✅ 자동 정답 인정! 정확도: ${accuracy.toFixed(1)}%`);
-                    
-                    // 정답 애니메이션 표시
-                    showCorrectFeedback(() => {
-                        currentCharIndex++;
-                        if (currentCharIndex < characters.length) {
-                            renderChar();
-                        } else {
-                            showResults();
-                        }
-                    });
-                }
-            } else {
-                realtimeDiv.textContent = '';
-            }
-        }
-        
-        // 그림 확인 (정확도 확인 후 정답 판정)
-        function checkDrawing() {
-            totalAttempts++;
-
-            // 캔버스에 그림이 있는지 확인
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const pixels = imageData.data;
-            let hasDrawing = false;
-
-            for (let i = 3; i < pixels.length; i += 4) {
-                if (pixels[i] > 0) {
-                    hasDrawing = true;
-                    break;
-                }
-            }
-
-            if (!hasDrawing) {
-                alert('글자를 그려주세요!');
-                return;
-            }
-
-            // 픽셀 비교로 정확도 측정
-            if (!guideImageData) {
-                alert('가이드 데이터가 없습니다.');
-                return;
-            }
-            
-            const accuracy = calculateAccuracy(imageData, guideImageData);
-            const threshold = 80; // 80% 이상이면 정답 (자동 넘김은 90%)
-            
-            console.log(`정확도: ${accuracy.toFixed(1)}%`);
-            
-            if (accuracy >= threshold) {
-                // 정답! 자동으로 다음 글자로
-                correctChars++;
-                document.getElementById('correctCount').textContent = correctChars;
-                
-                // 간단한 정답 표시
-                showCorrectFeedback(() => {
-                    currentCharIndex++;
-                    if (currentCharIndex < characters.length) {
-                        renderChar();
-                    } else {
-                        showResults();
-                    }
-                });
-            } else {
-                // 다시 시도
-                showRetryFeedback(accuracy);
-            }
-        }
-
-        // 글자 건너뛰기
-        function skipChar() {
-            totalAttempts++;
-            currentCharIndex++;
-            
-            if (currentCharIndex < characters.length) {
-                renderChar();
-            } else {
-                showResults();
-            }
-        }
-
-        // 통계 업데이트
-        function updateStats() {
-            const completion = characters.length > 0 
-                ? Math.round((correctChars / characters.length) * 100)
-                : 0;
-            
-            document.getElementById('accuracyValue').textContent = `${completion}%`;
-            document.getElementById('attemptsValue').textContent = totalAttempts;
-        }
-
-        // 결과 표시
-        function showResults() {
-            // 완료 효과음 재생
-            playSound('complete');
-            
-            const progress = 100;
-            document.getElementById('progressFill').style.width = `${progress}%`;
-            document.getElementById('progressText').textContent = `${progress}%`;
-
-            document.getElementById('resultScore').textContent = `${correctChars} / ${characters.length}`;
-            
-            const percentage = (correctChars / characters.length) * 100;
-            let message = '';
-            if (percentage === 100) {
-                message = '완벽해요! 🎉';
-            } else if (percentage >= 80) {
-                message = '정말 잘했어요! 👏';
-            } else if (percentage >= 60) {
-                message = '좋아요! 💪';
-            } else {
-                message = '다시 한번 도전해보세요! 📚';
-            }
-            
-            document.getElementById('resultMessage').textContent = message;
-            document.getElementById('resultModal').classList.add('show');
-        }
-
-        // 게임 재시작
-        function restartGame() {
-            currentCharIndex = 0;
-            correctChars = 0;
-            totalAttempts = 0;
-            document.getElementById('correctCount').textContent = '0';
-            document.getElementById('resultModal').classList.remove('show');
-            renderChar();
-        }
-
-        // 뒤로가기
-        function goBack() {
-            window.history.back();
-        }
-
-        // 페이지 로드 시 실행
-        window.addEventListener('load', () => {
-            loadStory();
         });
+
+        /**
+         * 이벤트 리스너 설정
+         */
+        function setupEventListeners() {
+            // 지우기 버튼
+            document.getElementById('clearBtn').addEventListener('click', () => {
+                game.clearCanvas();
+            });
+
+            // 확인 버튼
+            document.getElementById('checkBtn').addEventListener('click', () => {
+                game.checkDrawing();
+            });
+
+            // 건너뛰기 버튼
+            document.getElementById('skipBtn').addEventListener('click', () => {
+                game.skipChar();
+            });
+
+            // 다시 하기 버튼
+            document.getElementById('restartBtn').addEventListener('click', () => {
+                game.restartGame();
+            });
+        }
     </script>
 </body>
 </html>

@@ -313,3 +313,6 @@ class GameBase {
 if (typeof window !== 'undefined') {
     window.GameBase = GameBase;
 }
+
+// ES6 module export
+export default GameBase;
