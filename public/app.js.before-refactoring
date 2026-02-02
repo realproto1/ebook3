@@ -4,15 +4,15 @@
  */
 
 // ============================================
-// 모듈 Import
+// 모듈 Import (선택적 사용)
 // ============================================
-import { API, api } from './js/core/api.js';
-import { Storage } from './js/utils/storage.js';
-import { audioPlayer } from './js/utils/audio.js';
-import { DOM } from './js/utils/dom.js';
-import { storyService } from './js/services/StoryService.js';
-import { imageService } from './js/services/ImageService.js';
-import { ttsService } from './js/services/TTSService.js';
+// import { API, api } from './js/core/api.js';
+// import { Storage } from './js/utils/storage.js';
+// import { audioPlayer } from './js/utils/audio.js';
+// import { DOM } from './js/utils/dom.js';
+// import { StoryService } from './js/services/StoryService.js';
+// import { ImageService } from './js/services/ImageService.js';
+// import { TTSService } from './js/services/TTSService.js';
 
 // ============================================
 // 전역 변수
@@ -38,107 +38,6 @@ let imageSettings = {
     ttsVoiceConfig: '여성 목소리, 부드럽고 따뜻한 톤, 동화 낭독 스타일, 적당한 속도로 또박또박, 어린이가 이해하기 쉽게'  // TTS 음성 설정
 };
 
-// ============================================
-// 공통 헬퍼 함수
-// ============================================
-
-/**
- * 로딩 UI 표시
- */
-function showLoadingUI(element, message = 'AI가 작업 중...') {
-    if (!element) return;
-    element.innerHTML = `
-        <div class="flex flex-col items-center justify-center h-full p-3">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-2"></div>
-            <p class="text-white text-sm font-semibold">${message}</p>
-            <p class="text-white text-xs opacity-75 mt-1">실패 시 자동으로 재시도합니다</p>
-        </div>
-    `;
-}
-
-/**
- * 에러 UI 표시
- */
-function showErrorUI(element, error) {
-    if (!element) return;
-    const errorMsg = error?.message || error || '알 수 없는 오류';
-    element.innerHTML = `
-        <div class="flex flex-col items-center justify-center h-full p-3 bg-red-50">
-            <i class="fas fa-exclamation-circle text-red-500 text-4xl mb-2"></i>
-            <p class="text-red-700 text-sm font-semibold text-center">${errorMsg}</p>
-        </div>
-    `;
-}
-
-/**
- * 동화책 저장 (간편 래퍼)
- */
-async function saveCurrentStorybook() {
-    if (!currentStorybook || !currentStorybook.id) {
-        console.warn('⚠️ 저장할 동화책이 없습니다.');
-        return;
-    }
-    
-    try {
-        await axios.put(`/api/storybooks/${currentStorybook.id}`, currentStorybook);
-        console.log('✅ 동화책 저장 완료:', currentStorybook.title);
-    } catch (error) {
-        console.error('❌ 동화책 저장 실패:', error);
-        throw error;
-    }
-}
-
-/**
- * 이미지 히스토리 관리 (최대 10개 유지)
- */
-function manageImageHistory(historyArray, newImageUrl, oldImageUrl) {
-    if (!historyArray) return [];
-    
-    // 기존 이미지가 있으면 히스토리에 추가
-    if (oldImageUrl) {
-        historyArray.unshift(oldImageUrl);
-        
-        // 10개 초과 시 가장 오래된 이미지 삭제
-        if (historyArray.length > 10) {
-            const oldestImageUrl = historyArray[10];
-            
-            // 서버에 삭제 요청 (비동기, 실패해도 계속 진행)
-            if (oldestImageUrl && oldestImageUrl.includes('r2.dev')) {
-                axios.delete('/api/cleanup-image', {
-                    data: { imageUrl: oldestImageUrl }
-                }).catch(err => {
-                    console.warn('⚠️ 히스토리 이미지 삭제 실패:', err.message);
-                });
-            }
-            
-            // 배열에서 제거
-            historyArray = historyArray.slice(0, 10);
-            console.log('🗑️ 오래된 히스토리 이미지 정리 완료');
-        }
-    }
-    
-    return historyArray;
-}
-
-/**
- * 프로그레스 바 업데이트
- */
-function updateProgressBar(percentage, message = '') {
-    const progressBar = document.querySelector('.progress-bar');
-    const progressText = document.querySelector('.progress-text');
-    
-    if (progressBar) {
-        progressBar.style.width = `${percentage}%`;
-    }
-    
-    if (progressText && message) {
-        progressText.textContent = message;
-    }
-}
-
-// ============================================
-// API 키 및 모델 설정
-// ============================================
 // API 키 가져오기 함수
 function getAPIKey() {
     // localStorage에서 커스텀 API 키 확인
@@ -4549,17 +4448,32 @@ async function generateCharacterReference(charIndex) {
     const promptTextarea = document.getElementById(`char-prompt-${charIndex}`);
     const customPrompt = promptTextarea ? promptTextarea.value.trim() : character.description;
     
-    // 로딩 UI 표시
-    showLoadingUI(refDiv, 'AI가 이미지 생성 중...');
+    refDiv.innerHTML = '<div class="flex flex-col items-center justify-center h-full p-3"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-2"></div><p class="text-white text-sm font-semibold">AI가 이미지 생성 중...</p><p class="text-white text-xs opacity-75 mt-1">실패 시 자동으로 재시도합니다</p></div>';
 
     try {
+        // 재생성 여부 판단 (기존 이미지가 있으면 재생성 모드)
         const isRegeneration = !!character.referenceImage;
+        
+        // 클라이언트에서 직접 Gemini API 호출
         const prompt = buildCharacterPrompt(customPrompt, currentStorybook.artStyle, imageSettings, isRegeneration);
         
-        console.log(`🎨 캐릭터 "${character.name}" 이미지 생성 ${isRegeneration ? '(재생성)' : '(초기 생성)'}`);
-        console.log('🤖 사용 모델:', imageSettings.characterModel || 'gemini-3-pro-image-preview');
+        // 재생성인 경우 기존 이미지를 레퍼런스로 추가
+        const refImageUrls = [];
+        if (character.referenceImage) {
+            console.log('🔄 캐릭터 재생성 모드: 기존 이미지를 레퍼런스로 추가');
+            refImageUrls.push(character.referenceImage);
+        }
         
-        // API 호출
+        console.log(`🎨 캐릭터 "${character.name}" 이미지 생성 ${isRegeneration ? '(재생성 모드 - 사용자 수정사항 반영)' : '(초기 생성)'}`);
+        console.log('🤖 사용 모델:', imageSettings.characterModel || 'gemini-3-pro-image-preview');
+        console.log('📝 프롬프트:', customPrompt.substring(0, 100) + '...');
+        if (refImageUrls.length > 0) {
+            console.log('🖼️ 참조 이미지:', refImageUrls.length, '개');
+        }
+        
+        // 🔥 서버 API 호출 (R2 업로드 포함)
+        console.log(`📤 단일 생성 API 요청 - storybookId: ${currentStorybook.id}, title: ${currentStorybook.title}`);
+        
         const response = await axios.post('/api/generate-character-image', {
             character: {
                 name: character.name,
@@ -4577,24 +4491,41 @@ async function generateCharacterReference(charIndex) {
         });
         
         if (response.data.success && response.data.imageUrl) {
-            const imageUrl = response.data.imageUrl;
-            console.log(`📥 이미지 생성 완료: ${imageUrl}`);
+            const imageUrl = response.data.imageUrl; // R2 URL
+            console.log(`📥 단일 생성 API 응답 - imageUrl: ${imageUrl}`);
             
-            // 히스토리 관리
+            // 히스토리에 추가 (최대 10개 유지)
             if (!character.imageHistory) {
                 character.imageHistory = [];
             }
-            character.imageHistory = manageImageHistory(
-                character.imageHistory, 
-                imageUrl, 
-                character.referenceImage
-            );
             
-            // 이미지 업데이트
+            // 현재 이미지가 있으면 히스토리에 추가
+            if (character.referenceImage) {
+                character.imageHistory.unshift(character.referenceImage);
+                
+                // 10개 초과 시 가장 오래된 이미지 삭제 요청
+                if (character.imageHistory.length > 10) {
+                    const oldestImageUrl = character.imageHistory[10];
+                    
+                    // 서버에 삭제 요청 (비동기, 실패해도 계속 진행)
+                    if (oldestImageUrl && oldestImageUrl.includes('r2.dev')) {
+                        axios.delete('/api/cleanup-image', {
+                            data: { imageUrl: oldestImageUrl }
+                        }).catch(err => {
+                            console.warn('⚠️ 히스토리 이미지 삭제 실패:', err.message);
+                        });
+                    }
+                    
+                    // 배열에서 제거
+                    character.imageHistory = character.imageHistory.slice(0, 10);
+                    console.log('🗑️ 오래된 히스토리 이미지 정리 완료');
+                }
+            }
+            
             currentStorybook.characters[charIndex].referenceImage = imageUrl;
-            await saveCurrentStorybook();
+            saveCurrentStorybook();
             
-            // UI 업데이트
+            // UI 업데이트 - 히스토리 포함
             renderCharacterImageWithHistory(charIndex);
             
         } else {
@@ -4602,24 +4533,29 @@ async function generateCharacterReference(charIndex) {
         }
 
     } catch (error) {
-        console.error('캐릭터 이미지 생성 실패:', error);
+        console.error('Error:', error);
         
-        let errorMsg = error.response?.data?.error || error.message || '알 수 없는 오류';
+        let errorMsg = error.message || '알 수 없는 오류';
+        
+        // 서버에서 온 상세 에러 메시지 추출
+        if (error.response && error.response.data && error.response.data.error) {
+            errorMsg = error.response.data.error;
+        }
         
         // API 키 관련 에러 처리
         if (errorMsg.includes('API key') || errorMsg.includes('403') || errorMsg.includes('PERMISSION_DENIED')) {
-            errorMsg = 'API 키 오류: Gemini API 키가 만료되었거나 유효하지 않습니다.';
+            errorMsg = 'API 키 오류: Gemini API 키가 만료되었거나 유효하지 않습니다. 새로운 API 키가 필요합니다.';
         }
         
-        // 기존 이미지가 있으면 유지
+        // 기존 이미지가 있으면 유지하고 에러 메시지만 표시
         if (character.referenceImage) {
+            // UI 업데이트하여 기존 이미지 복원
             renderCharacterImageWithHistory(charIndex);
+            // 에러 알림
             showNotification('error', '재생성 실패', `${errorMsg}\n기존 이미지가 유지됩니다.`);
         } else {
-            showErrorUI(refDiv, errorMsg);
-        }
-    }
-}
+            // 기존 이미지가 없으면 재시도 버튼 표시
+            refDiv.innerHTML = `
                 <div class="p-4 text-center">
                     <i class="fas fa-exclamation-triangle text-white text-2xl mb-2"></i>
                     <p class="text-white text-xs font-bold mt-2">⚠️ 이미지 생성 실패</p>

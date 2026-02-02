@@ -280,3 +280,7 @@ if (typeof window !== 'undefined') {
     window.StoryService = StoryService;
     window.storyService = storyService;
 }
+
+// ES6 모듈 export
+export { StoryService, storyService };
+export default storyService;

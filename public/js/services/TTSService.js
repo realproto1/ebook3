@@ -365,3 +365,7 @@ if (typeof window !== 'undefined') {
     window.TTSService = TTSService;
     window.ttsService = ttsService;
 }
+
+// ES6 모듈 export
+export { TTSService, ttsService };
+export default ttsService;

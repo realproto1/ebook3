@@ -456,3 +456,7 @@ if (typeof window !== 'undefined') {
     window.ImageService = ImageService;
     window.imageService = imageService;
 }
+
+// ES6 모듈 export
+export { ImageService, imageService };
+export default imageService;
