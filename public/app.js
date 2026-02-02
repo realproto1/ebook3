@@ -5424,15 +5424,6 @@ async function saveToR2(storybook, retryCount = 0) {
         throw error;
     }
 }
-            // 최대 재시도 횟수 초과 또는 재시도 불가능한 에러
-            if (retryCount >= maxRetries) {
-                console.error('❌ 최대 재시도 횟수 초과');
-                showNotification('error', 'R2 저장 실패', `${maxRetries + 1}번의 시도 후에도 저장에 실패했습니다. 나중에 다시 시도해주세요.`);
-            }
-            throw error; // 에러 전파
-        }
-    }
-}
 
 // 미리보기 함수
 function openPreview() {
