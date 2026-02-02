@@ -6472,9 +6472,9 @@ async function generateSingleKeyObjectImage(objIndex) {
         
         const result = await service.generateKeyObject({
             name: obj.name || obj.korean,
-            description: obj.description,
-            korean: obj.korean,
-            prompt: obj.description
+            description: obj.description || obj.korean || obj.name,  // fallback 추가
+            korean: obj.korean || obj.name,
+            prompt: obj.description || obj.korean || obj.name
         }, {
             model: imageSettings.keyObjectModel || 'gemini-3-pro-image-preview',
             aspectRatio: imageSettings.aspectRatio || '1:1',
