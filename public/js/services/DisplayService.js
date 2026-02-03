@@ -517,7 +517,7 @@ class DisplayService {
             
             const ttsSection = displayTTSAudio ? 
                 `<div class="bg-white rounded-lg p-3 border border-green-200">
-                    <audio controls class="w-full" style="height: 32px;">
+                    <audio id="tts-player-${idx}" controls class="w-full" style="height: 32px;">
                         <source src="${displayTTSAudio}" type="audio/mpeg">
                     </audio>
                 </div>` :
@@ -599,12 +599,14 @@ class DisplayService {
                             
                             <div class="flex gap-2 mb-2">
                                 <button 
+                                    id="tts-btn-${idx}"
                                     onclick="generatePageTTS(${idx})"
                                     class="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition text-sm"
                                 >
                                     <i class="fas fa-magic mr-1"></i>${displayTTSAudio ? '재생성' : '생성'}
                                 </button>
                                 <button 
+                                    id="tts-upload-btn-${idx}"
                                     onclick="uploadPageTTS(${idx})"
                                     class="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
                                 >
