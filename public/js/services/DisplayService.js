@@ -499,334 +499,285 @@ class DisplayService {
         const imageSettings = this.imageSettings;
         const currentLanguage = window.currentLanguage || 'ko';
         
-        return `
-        <!-- 페이지 섹션 -->
-        <div class="bg-white rounded-3xl shadow-2xl p-10 mb-8">
-            <!-- 제목 -->
-            <h3 class="text-3xl font-bold text-gray-800 cursor-pointer flex items-center mb-6" onclick="toggleSection('pages-section')">
-                <i id="pages-section-icon" class="fas fa-chevron-down mr-2 text-sm transition-transform"></i>
-                <i class="fas fa-book mr-2 text-purple-500"></i>
-                스토리 페이지 (\${storybook.pages.length}페이지)
-            </h3>
+        // 페이지 카드 렌더링을 별도 함수로
+        const renderPageCard = (page, idx) => {
+            // 현재 언어의 텍스트 가져오기
+            let displayText = page.text || '';
+            let displayTTSAudio = page.tts_audio || null;
             
-            <!-- 설정 옵션 -->
-            <div class="mb-6 space-y-4">
-                <div class="flex items-center gap-4 flex-wrap">
-                    <div class="flex items-center gap-2">
-                        <label class="text-sm text-gray-600">이미지 모델:</label>
-                        \${createModelSelect('illustration', imageSettings.illustrationModel || 'gemini-3-pro-image-preview', 'updateIllustrationModel(this.value)')}
+            if (currentLanguage !== 'ko') {
+                if (storybook.translations && 
+                    storybook.translations[currentLanguage] && 
+                    storybook.translations[currentLanguage][idx]) {
+                    const translation = storybook.translations[currentLanguage][idx];
+                    displayText = translation.text || translation || '';
+                    displayTTSAudio = translation.tts_audio || null;
+                }
+            }
+            
+            const ttsSection = displayTTSAudio ? 
+                `<div class="bg-white rounded-lg p-3 border border-green-200">
+                    <audio controls class="w-full" style="height: 32px;">
+                        <source src="${displayTTSAudio}" type="audio/mpeg">
+                    </audio>
+                </div>` :
+                `<div class="bg-gray-100 rounded-lg p-3 text-center text-gray-500 text-sm">
+                    <i class="fas fa-microphone-slash mr-1"></i>TTS 음성이 없습니다
+                </div>`;
+                
+            const illustrationSection = page.illustrationImage ?
+                `<div class="relative group">
+                    <img src="${page.illustrationImage}" alt="페이지 ${idx + 1}" class="w-full h-full object-cover" />
+                    <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition">
+                        <button 
+                            onclick="downloadImage('${page.illustrationImage}', 'page-${idx + 1}-illustration.png')"
+                            class="bg-white text-purple-600 p-2 rounded-lg shadow-lg hover:bg-purple-50 transition"
+                            title="다운로드"
+                        >
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>` :
+                `<div class="flex items-center justify-center h-[200px] text-gray-400">
+                    <div class="text-center">
+                        <i class="fas fa-image text-4xl mb-2"></i>
+                        <p class="text-sm">삽화 생성 대기중</p>
+                    </div>
+                </div>`;
+            
+            return `
+            <div class="border-2 border-purple-200 rounded-xl p-6 bg-gradient-to-br from-purple-50 to-pink-50"
+                 draggable="true"
+                 data-page-index="${idx}"
+                 ondragstart="handleDragStart(event)"
+                 ondragover="handleDragOver(event)"
+                 ondragenter="handleDragEnter(event)"
+                 ondragleave="handleDragLeave(event)"
+                 ondragend="handleDragEnd(event)"
+                 ondrop="handleDrop(event)">
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="text-xl font-bold text-purple-800 flex items-center gap-2">
+                        <i class="fas fa-grip-vertical text-gray-400 cursor-move" title="드래그하여 순서 변경"></i>
+                        <i class="fas fa-file-alt"></i>
+                        페이지 ${idx + 1}
+                    </h4>
+                    <div class="flex gap-2">
+                        <button 
+                            onclick="deletePage(${idx})"
+                            class="text-red-600 hover:text-red-800 px-3 py-1 rounded-lg hover:bg-red-50 transition text-sm"
+                            title="페이지 삭제"
+                        >
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </div>
                 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- 텍스트 편집 영역 -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-align-left mr-1"></i>텍스트:
+                            </label>
+                            <textarea 
+                                id="page-text-${currentLanguage}-${idx}"
+                                onblur="updatePageText(${idx}, this.value, '${currentLanguage}')"
+                                class="w-full p-3 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                rows="4"
+                                placeholder="페이지 텍스트를 입력하세요..."
+                            >${displayText}</textarea>
+                        </div>
+                        
+                        <!-- TTS 영역 -->
+                        <div class="border-t pt-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="text-sm font-semibold text-gray-700">
+                                    <i class="fas fa-volume-up mr-1"></i>TTS 음성:
+                                </label>
+                                ${createTTSModelSelect(imageSettings.ttsModel || 'Aoede', idx)}
+                            </div>
+                            
+                            <div class="flex gap-2 mb-2">
+                                <button 
+                                    onclick="generatePageTTS(${idx})"
+                                    class="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition text-sm"
+                                >
+                                    <i class="fas fa-magic mr-1"></i>${displayTTSAudio ? '재생성' : '생성'}
+                                </button>
+                                <button 
+                                    onclick="uploadPageTTS(${idx})"
+                                    class="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
+                                >
+                                    <i class="fas fa-upload mr-1"></i>업로드
+                                </button>
+                            </div>
+                            
+                            ${ttsSection}
+                        </div>
+                    </div>
+                    
+                    <!-- 삽화 영역 -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-image mr-1"></i>삽화:
+                            </label>
+                            
+                            <div class="flex gap-2 mb-2">
+                                <button 
+                                    onclick="generateIllustration(${idx})"
+                                    class="flex-1 bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-700 transition text-sm"
+                                >
+                                    <i class="fas fa-magic mr-1"></i>${page.illustrationImage ? '재생성' : '생성'}
+                                </button>
+                                <button 
+                                    onclick="uploadIllustration(${idx})"
+                                    class="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
+                                >
+                                    <i class="fas fa-upload mr-1"></i>업로드
+                                </button>
+                            </div>
+                            
+                            <div class="bg-white rounded-lg overflow-hidden border-2 border-purple-200 min-h-[200px]">
+                                ${illustrationSection}
+                            </div>
+                        </div>
+                        
+                        <!-- 삽화 프롬프트 -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-wand-magic-sparkles mr-1"></i>삽화 프롬프트:
+                            </label>
+                            <textarea 
+                                id="page-illust-prompt-${idx}"
+                                onblur="updatePageIllustrationPrompt(${idx}, this.value)"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                                rows="3"
+                                placeholder="삽화 프롬프트를 입력하세요..."
+                            >${page.illustrationPrompt || ''}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        };
+        
+        // 언어 탭 HTML 생성
+        let availableLanguages = storybook.languages || [];
+        if (storybook.translations && typeof storybook.translations === 'object') {
+            const translationLangs = Object.keys(storybook.translations);
+            availableLanguages = ['ko', ...translationLangs].filter((v, i, a) => a.indexOf(v) === i);
+        }
+        if (availableLanguages.length === 0) {
+            availableLanguages = ['ko'];
+        }
+        
+        const languageNames = {
+            'ko': '🇰🇷 한국어',
+            'en': '🇺🇸 English',
+            'zh': '🇨🇳 中文',
+            'ja': '🇯🇵 日본어',
+            'es': '🇪🇸 Español',
+            'fr': '🇫🇷 Français'
+        };
+        
+        const languageTabs = availableLanguages.map(lang => {
+            const isActive = lang === currentLanguage;
+            return `
+                <button 
+                    onclick="switchLanguage('${lang}')"
+                    class="px-6 py-3 font-semibold transition-all relative ${isActive ? 'text-purple-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}"
+                    style="${isActive ? 'border-bottom: 3px solid rgb(147, 51, 234); margin-bottom: -1px;' : ''}"
+                >
+                    ${languageNames[lang] || lang}
+                </button>
+            `;
+        }).join('');
+        
+        const addLanguageOptions = ['en', 'zh', 'ja', 'es', 'fr']
+            .filter(lang => !availableLanguages.includes(lang))
+            .map(lang => `
+                <button 
+                    onclick="addLanguageFromTab('${lang}')"
+                    class="w-full text-left px-3 py-2 hover:bg-purple-50 rounded text-sm transition"
+                >
+                    ${languageNames[lang]}
+                </button>
+            `).join('');
+        
+        return `
+        <!-- 페이지 섹션 -->
+        <div class="bg-white rounded-3xl shadow-2xl p-10 mb-8">
+            <h3 class="text-3xl font-bold text-gray-800 cursor-pointer flex items-center mb-6" onclick="toggleSection('pages-section')">
+                <i id="pages-section-icon" class="fas fa-chevron-down mr-2 text-sm transition-transform"></i>
+                <i class="fas fa-book mr-2 text-purple-500"></i>
+                스토리 페이지 (${storybook.pages.length}페이지)
+            </h3>
+            
+            <div class="mb-6 space-y-4">
+                <div class="flex items-center gap-4">
+                    <label class="text-sm text-gray-600">이미지 모델:</label>
+                    ${createModelSelect('illustration', imageSettings.illustrationModel || 'gemini-3-pro-image-preview', 'updateIllustrationModel(this.value)')}
+                </div>
+                
                 <!-- 언어 탭 -->
-                \${(() => {
-                    // languages 배열이 있으면 사용, 없으면 translations에서 추출
-                    let availableLanguages = storybook.languages || [];
-                    
-                    // translations가 있으면 언어 목록에 추가
-                    if (storybook.translations && typeof storybook.translations === 'object') {
-                        const translationLangs = Object.keys(storybook.translations);
-                        availableLanguages = ['ko', ...translationLangs].filter((v, i, a) => a.indexOf(v) === i); // 중복 제거
-                    }
-                    
-                    // 언어가 없으면 한국어 기본
-                    if (availableLanguages.length === 0) {
-                        availableLanguages = ['ko'];
-                    }
-                    
-                    return \`
-                        <div class="border-b border-gray-200 -mx-10 px-10 mb-6">
-                            <div class="flex items-center justify-between gap-1">
-                                <div class="flex items-center gap-1">
-                                    \${availableLanguages.map(lang => {
-                                        const languageNames = {
-                                            'ko': '🇰🇷 한국어',
-                                            'en': '🇺🇸 English',
-                                            'zh': '🇨🇳 中文',
-                                            'ja': '🇯🇵 日본어',
-                                            'es': '🇪🇸 Español',
-                                            'fr': '🇫🇷 Français'
-                                        };
-                                        const isActive = lang === currentLanguage;
-                                        return \`
-                                            <button 
-                                                onclick="switchLanguage('\${lang}')"
-                                                class="px-6 py-3 font-semibold transition-all relative \${
-                                                    isActive 
-                                                    ? 'text-purple-600' 
-                                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                                                }"
-                                                style="\${isActive ? 'border-bottom: 3px solid rgb(147, 51, 234); margin-bottom: -1px;' : ''}"
-                                            >
-                                                \${languageNames[lang] || lang}
-                                            </button>
-                                        \`;
-                                    }).join('')}
-                                    
-                                    <!-- 언어 추가 버튼 -->
-                                    <div class="relative ml-2">
-                                    <button 
-                                        onclick="toggleAddLanguageDropdown()"
-                                        class="px-4 py-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all font-semibold text-sm border-2 border-dashed border-gray-300 hover:border-purple-400"
-                                        title="언어 추가"
-                                    >
-                                        <i class="fas fa-plus mr-1"></i>언어 추가
-                                    </button>
-                                    
-                                    <!-- 드롭다운 메뉴 -->
-                                    <div id="add-language-dropdown" class="hidden absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 min-w-[200px]">
-                                        <div class="p-3">
-                                            <p class="text-xs text-gray-600 mb-2">추가할 언어 선택</p>
-                                            \${['en', 'zh', 'ja', 'es', 'fr'].filter(lang => !availableLanguages.includes(lang)).map(lang => {
-                                                const langNames = {
-                                                    en: '🇺🇸 English',
-                                                    zh: '🇨🇳 中文',
-                                                    ja: '🇯🇵 日본어',
-                                                    es: '🇪🇸 Español',
-                                                    fr: '🇫🇷 Français'
-                                                };
-                                                return \`
-                                                    <button 
-                                                        onclick="addLanguageFromTab('\${lang}')"
-                                                        class="w-full text-left px-3 py-2 hover:bg-purple-50 rounded text-sm transition"
-                                                    >
-                                                        \${langNames[lang]}
-                                                    </button>
-                                                \`;
-                                            }).join('')}
-                                            \${availableLanguages.length >= 6 ? '<p class="text-xs text-gray-500 p-2">모든 언어가 추가되었습니다</p>' : ''}
-                                        </div>
+                <div class="border-b border-gray-200 -mx-10 px-10 mb-6">
+                    <div class="flex items-center justify-between gap-1">
+                        <div class="flex items-center gap-1">
+                            ${languageTabs}
+                            
+                            <div class="relative ml-2">
+                                <button 
+                                    onclick="toggleAddLanguageDropdown()"
+                                    class="px-4 py-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all font-semibold text-sm border-2 border-dashed border-gray-300 hover:border-purple-400"
+                                >
+                                    <i class="fas fa-plus mr-1"></i>언어 추가
+                                </button>
+                                
+                                <div id="add-language-dropdown" class="hidden absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 min-w-[200px]">
+                                    <div class="p-3">
+                                        <p class="text-xs text-gray-600 mb-2">추가할 언어 선택</p>
+                                        ${addLanguageOptions}
+                                        ${availableLanguages.length >= 6 ? '<p class="text-xs text-gray-500 p-2">모든 언어가 추가되었습니다</p>' : ''}
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- 언어별 일괄 작업 버튼 -->
-                            <div class="flex gap-2 mt-4 pb-4">
-                                <button 
-                                    onclick="translateAllPages()"
-                                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-semibold flex items-center gap-2"
-                                    title="모든 페이지를 현재 선택된 언어로 번역"
-                                >
-                                    <i class="fas fa-language"></i>
-                                    전체 번역
-                                </button>
-                                <button 
-                                    onclick="generateAllTTS()"
-                                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold flex items-center gap-2"
-                                    title="모든 페이지의 TTS 음성 생성"
-                                >
-                                    <i class="fas fa-volume-up"></i>
-                                    전체 TTS 생성
-                                </button>
-                                <button 
-                                    onclick="downloadAllText()"
-                                    class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-semibold flex items-center gap-2"
-                                    title="모든 페이지의 텍스트 다운로드"
-                                >
-                                    <i class="fas fa-download"></i>
-                                    전체 텍스트 다운로드
-                                </button>
-                            </div>
                         </div>
-                    \`;
-                })()}
+                    </div>
+                    
+                    <div class="flex gap-2 mt-4 pb-4">
+                        <button onclick="translateAllPages()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-semibold flex items-center gap-2">
+                            <i class="fas fa-language"></i>전체 번역
+                        </button>
+                        <button onclick="generateAllTTS()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold flex items-center gap-2">
+                            <i class="fas fa-volume-up"></i>전체 TTS 생성
+                        </button>
+                        <button onclick="downloadAllText()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-semibold flex items-center gap-2">
+                            <i class="fas fa-download"></i>전체 텍스트 다운로드
+                        </button>
+                    </div>
+                </div>
                 
-                <!-- 일괄 작업 버튼 -->
                 <div class="flex gap-2 flex-wrap">
-                    <button 
-                        onclick="generateAllIllustrationsSequential()"
-                        class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-semibold"
-                        title="모든 페이지의 삽화를 순차적으로 생성"
-                    >
+                    <button onclick="generateAllIllustrationsSequential()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-semibold">
                         <i class="fas fa-image mr-1"></i>모든 삽화 생성
                     </button>
-                    <button 
-                        onclick="downloadAllIllustrations()"
-                        class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold"
-                    >
+                    <button onclick="downloadAllIllustrations()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold">
                         <i class="fas fa-download mr-1"></i>모든 삽화 다운로드
                     </button>
-                    <button 
-                        onclick="openBatchIllustrationUpload()"
-                        class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-semibold"
-                    >
+                    <button onclick="openBatchIllustrationUpload()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-semibold">
                         <i class="fas fa-upload mr-1"></i>일괄 업로드
                     </button>
                 </div>
             </div>
             
-            <!-- 페이지 목록 -->
             <div id="pages-section-content">
                 <div id="pages-container" class="space-y-6">
-                    \${storybook.pages.map((page, idx) => {
-                        // 현재 언어의 텍스트 가져오기
-                        let displayText = page.text || '';
-                        let displayTTSAudio = page.tts_audio || null;
-                        
-                        if (currentLanguage !== 'ko') {
-                            if (storybook.translations && 
-                                storybook.translations[currentLanguage] && 
-                                storybook.translations[currentLanguage][idx]) {
-                                const translation = storybook.translations[currentLanguage][idx];
-                                displayText = translation.text || translation || '';
-                                displayTTSAudio = translation.tts_audio || null;
-                            }
-                        }
-                        
-                        return \`
-                        <div class="border-2 border-purple-200 rounded-xl p-6 bg-gradient-to-br from-purple-50 to-pink-50"
-                             draggable="true"
-                             data-page-index="\${idx}"
-                             ondragstart="handleDragStart(event)"
-                             ondragover="handleDragOver(event)"
-                             ondragenter="handleDragEnter(event)"
-                             ondragleave="handleDragLeave(event)"
-                             ondragend="handleDragEnd(event)"
-                             ondrop="handleDrop(event)">
-                            <div class="flex justify-between items-center mb-4">
-                                <h4 class="text-xl font-bold text-purple-800 flex items-center gap-2">
-                                    <i class="fas fa-grip-vertical text-gray-400 cursor-move" title="드래그하여 순서 변경"></i>
-                                    <i class="fas fa-file-alt"></i>
-                                    페이지 \${idx + 1}
-                                </h4>
-                                <div class="flex gap-2">
-                                    <button 
-                                        onclick="deletePage(\${idx})"
-                                        class="text-red-600 hover:text-red-800 px-3 py-1 rounded-lg hover:bg-red-50 transition text-sm"
-                                        title="페이지 삭제"
-                                    >
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- 텍스트 편집 영역 -->
-                                <div class="space-y-4">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                            <i class="fas fa-align-left mr-1"></i>텍스트:
-                                        </label>
-                                        <textarea 
-                                            id="page-text-\${currentLanguage}-\${idx}"
-                                            onblur="updatePageText(\${idx}, this.value, '\${currentLanguage}')"
-                                            class="w-full p-3 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                            rows="4"
-                                            placeholder="페이지 텍스트를 입력하세요..."
-                                        >\${displayText}</textarea>
-                                    </div>
-                                    
-                                    <!-- TTS 영역 -->
-                                    <div class="border-t pt-4">
-                                        <div class="flex items-center justify-between mb-2">
-                                            <label class="text-sm font-semibold text-gray-700">
-                                                <i class="fas fa-volume-up mr-1"></i>TTS 음성:
-                                            </label>
-                                            \${createTTSModelSelect(imageSettings.ttsModel || 'Aoede', idx)}
-                                        </div>
-                                        
-                                        <div class="flex gap-2 mb-2">
-                                            <button 
-                                                onclick="generatePageTTS(\${idx})"
-                                                class="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition text-sm"
-                                            >
-                                                <i class="fas fa-magic mr-1"></i>\${displayTTSAudio ? '재생성' : '생성'}
-                                            </button>
-                                            <button 
-                                                onclick="uploadPageTTS(\${idx})"
-                                                class="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
-                                            >
-                                                <i class="fas fa-upload mr-1"></i>업로드
-                                            </button>
-                                        </div>
-                                        
-                                        \${displayTTSAudio ? \`
-                                            <div class="bg-white rounded-lg p-3 border border-green-200">
-                                                <audio controls class="w-full" style="height: 32px;">
-                                                    <source src="\${displayTTSAudio}" type="audio/mpeg">
-                                                </audio>
-                                            </div>
-                                        \` : \`
-                                            <div class="bg-gray-100 rounded-lg p-3 text-center text-gray-500 text-sm">
-                                                <i class="fas fa-microphone-slash mr-1"></i>TTS 음성이 없습니다
-                                            </div>
-                                        \`}
-                                    </div>
-                                </div>
-                                
-                                <!-- 삽화 영역 -->
-                                <div class="space-y-4">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                            <i class="fas fa-image mr-1"></i>삽화:
-                                        </label>
-                                        
-                                        <div class="flex gap-2 mb-2">
-                                            <button 
-                                                onclick="generateIllustration(\${idx})"
-                                                class="flex-1 bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-700 transition text-sm"
-                                            >
-                                                <i class="fas fa-magic mr-1"></i>\${page.illustrationImage ? '재생성' : '생성'}
-                                            </button>
-                                            <button 
-                                                onclick="uploadIllustration(\${idx})"
-                                                class="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
-                                            >
-                                                <i class="fas fa-upload mr-1"></i>업로드
-                                            </button>
-                                        </div>
-                                        
-                                        <div class="bg-white rounded-lg overflow-hidden border-2 border-purple-200 min-h-[200px]">
-                                            \${page.illustrationImage ? \`
-                                                <div class="relative group">
-                                                    <img src="\${page.illustrationImage}" alt="페이지 \${idx + 1}" class="w-full h-full object-cover" />
-                                                    <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition">
-                                                        <button 
-                                                            onclick="downloadImage('\${page.illustrationImage}', 'page-\${idx + 1}-illustration.png')"
-                                                            class="bg-white text-purple-600 p-2 rounded-lg shadow-lg hover:bg-purple-50 transition"
-                                                            title="다운로드"
-                                                        >
-                                                            <i class="fas fa-download"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            \` : \`
-                                                <div class="flex items-center justify-center h-[200px] text-gray-400">
-                                                    <div class="text-center">
-                                                        <i class="fas fa-image text-4xl mb-2"></i>
-                                                        <p class="text-sm">삽화 생성 대기중</p>
-                                                    </div>
-                                                </div>
-                                            \`}
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- 삽화 프롬프트 -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                            <i class="fas fa-wand-magic-sparkles mr-1"></i>삽화 프롬프트:
-                                        </label>
-                                        <textarea 
-                                            id="page-illust-prompt-\${idx}"
-                                            onblur="updatePageIllustrationPrompt(\${idx}, this.value)"
-                                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-                                            rows="3"
-                                            placeholder="삽화 프롬프트를 입력하세요..."
-                                        >\${page.illustrationPrompt || ''}</textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        \`;
-                    }).join('')}
+                    ${storybook.pages.map((page, idx) => renderPageCard(page, idx)).join('')}
                 </div>
                 
-                <!-- 페이지 추가 버튼 -->
                 <div class="mt-6 flex justify-center">
-                    <button 
-                        onclick="addNewPage()"
-                        class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition font-semibold"
-                    >
+                    <button onclick="addNewPage()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition font-semibold">
                         <i class="fas fa-plus mr-2"></i>페이지 추가
                     </button>
                 </div>
