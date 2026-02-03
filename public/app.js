@@ -4952,10 +4952,16 @@ function renderReviewLanguageContents() {
                     ${pages.map((page, pageIdx) => {
                         // 페이지 텍스트 추출 (객체 또는 문자열)
                         let pageText = '';
+                        let illustrationPrompt = '';
+                        
                         if (typeof page === 'string') {
                             pageText = page;
                         } else if (page && typeof page === 'object') {
                             pageText = page.text || '';
+                            // 한국어인 경우에만 장면 설명 가져오기 (번역본에는 없음)
+                            if (lang === 'ko') {
+                                illustrationPrompt = page.illustrationPrompt || '';
+                            }
                         }
                         
                         return `
@@ -4984,12 +4990,30 @@ function renderReviewLanguageContents() {
                                     <i class="fas fa-trash mr-1"></i>삭제
                                 </button>
                             </div>
-                            <textarea
-                                id="review-page-text-${lang}-${pageIdx}"
-                                class="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition resize-y text-sm"
-                                rows="2"
-                                onchange="updateReviewPageText('${lang}', ${pageIdx}, this.value)"
-                            >${pageText}</textarea>
+                            
+                            <!-- 스토리 텍스트 -->
+                            <div class="mb-2">
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">
+                                    <i class="fas fa-book-open mr-1"></i>스토리 텍스트
+                                </label>
+                                <textarea
+                                    id="review-page-text-${lang}-${pageIdx}"
+                                    class="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition resize-y text-sm"
+                                    rows="2"
+                                    onchange="updateReviewPageText('${lang}', ${pageIdx}, this.value)"
+                                >${pageText}</textarea>
+                            </div>
+                            
+                            ${lang === 'ko' && illustrationPrompt ? `
+                            <!-- 장면 설명 (한국어만) -->
+                            <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-2">
+                                <label class="block text-xs font-semibold text-blue-700 mb-1">
+                                    <i class="fas fa-palette mr-1"></i>장면 설명
+                                </label>
+                                <div class="text-xs text-blue-900 leading-relaxed whitespace-pre-wrap">${illustrationPrompt}</div>
+                            </div>
+                            ` : ''}
+                            
                             <p class="text-[10px] text-gray-400 mt-1">
                                 <i class="fas fa-info-circle mr-1"></i>
                                 텍스트 수정 후 다른 곳 클릭 시 자동 저장
