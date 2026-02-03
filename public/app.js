@@ -8497,6 +8497,9 @@ function selectBackgroundMusic(musicId) {
     window.handleDragEnd = handleDragEnd;
     window.handleDrop = handleDrop;
     
+    // 기타 UI 핸들러 전역 노출
+    window.handleArtStyleChange = handleArtStyleChange;
+    
     })(); // IIFE 종료
 } else {
     console.warn('⚠️ app.js: 모듈 로드 대기 중... 전역 변수로 fallback');
