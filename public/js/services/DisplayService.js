@@ -30,11 +30,13 @@ class DisplayService {
                             <i id="character-section-icon" class="fas fa-chevron-down mr-2 text-sm transition-transform"></i>
                             <i class="fas fa-users mr-2 text-purple-500"></i>
                             캐릭터 레퍼런스
+                            <i class="fas fa-info-circle ml-2 text-gray-400 text-sm cursor-pointer hover:text-purple-500" 
+                               onclick="event.stopPropagation(); const el = document.getElementById('character-info'); el.style.display = el.style.display === 'none' ? 'block' : 'none';"
+                               title="도움말"></i>
                         </h3>
-                        <p class="text-xs md:text-base text-gray-600">
-                            <i class="fas fa-info-circle mr-2"></i>
-                            <span class="hidden sm:inline">각 캐릭터의 레퍼런스 이미지를 생성하면 삽화에서 일관된 모습을 유지할 수 있어요.</span>
-                            <span class="sm:hidden">레퍼런스 이미지로 일관성 유지</span>
+                        <p id="character-info" class="text-xs md:text-sm text-gray-600 mb-2" style="display: none;">
+                            <i class="fas fa-lightbulb mr-1 text-yellow-500"></i>
+                            각 캐릭터의 레퍼런스 이미지를 생성하면 삽화에서 일관된 모습을 유지할 수 있어요.
                         </p>
                         ${createModelSelect('character', this.imageSettings.characterModel || 'gemini-3-pro-image-preview', 'updateCharacterModel(this.value)')}
                     </div>
@@ -188,11 +190,13 @@ class DisplayService {
                         <i id="cover-section-icon" class="fas fa-chevron-down mr-2 text-sm transition-transform"></i>
                         <i class="fas fa-book-open mr-2 text-indigo-500"></i>
                         표지 이미지
+                        <i class="fas fa-info-circle ml-2 text-gray-400 text-sm cursor-pointer hover:text-indigo-500" 
+                           onclick="event.stopPropagation(); const el = document.getElementById('cover-info'); el.style.display = el.style.display === 'none' ? 'block' : 'none';"
+                           title="도움말"></i>
                     </h3>
-                    <p class="text-xs md:text-base text-gray-600">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        <span class="hidden sm:inline">동화책의 첫인상을 결정하는 표지 이미지를 생성해요. 캐릭터를 선택하면 참조해서 그려요.</span>
-                        <span class="sm:hidden">표지 이미지 생성</span>
+                    <p id="cover-info" class="text-xs md:text-sm text-gray-600 mb-2" style="display: none;">
+                        <i class="fas fa-lightbulb mr-1 text-yellow-500"></i>
+                        동화책의 첫인상을 결정하는 표지 이미지를 생성해요. 캐릭터를 선택하면 참조해서 그려요.
                     </p>
                     ${createModelSelect('cover', this.imageSettings.coverModel || 'gemini-3-pro-image-preview', 'updateCoverModel(this.value)')}
                 </div>
@@ -355,11 +359,13 @@ class DisplayService {
                         <i id="keyobject-section-icon" class="fas fa-chevron-right mr-2 text-sm transition-transform"></i>
                         <i class="fas fa-cube mr-2 text-orange-500"></i>
                         핵심 사물 (Key Objects)
+                        <i class="fas fa-info-circle ml-2 text-gray-400 text-sm cursor-pointer hover:text-orange-500" 
+                           onclick="event.stopPropagation(); const el = document.getElementById('keyobject-info'); el.style.display = el.style.display === 'none' ? 'block' : 'none';"
+                           title="도움말"></i>
                     </h3>
-                    <p class="text-xs md:text-base text-gray-600">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        <span class="hidden sm:inline">스토리에서 중요한 물건들을 미리 생성하면 삽화에서 일관되게 표현할 수 있어요.</span>
-                        <span class="sm:hidden">핵심 사물로 일관성 유지</span>
+                    <p id="keyobject-info" class="text-xs md:text-sm text-gray-600 mb-2" style="display: none;">
+                        <i class="fas fa-lightbulb mr-1 text-yellow-500"></i>
+                        스토리에서 중요한 물건들을 미리 생성하면 삽화에서 일관되게 표현할 수 있어요.
                     </p>
                     ${createModelSelect('keyobject', imageSettings.keyObjectModel || 'gemini-3-pro-image-preview', 'updateKeyObjectModel(this.value)')}
                 </div>
