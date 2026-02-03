@@ -1306,11 +1306,13 @@ async function updateBookTitleInList(id, newTitle) {
 // 드래그 앤 드롭 관련 변수
 let draggedElement = null;
 let draggedIndex = null;
+let isDragging = false; // 드래그 중 플래그
 
 // 드래그 시작
 function handleDragStart(e) {
     draggedElement = e.currentTarget;
     draggedIndex = parseInt(e.currentTarget.dataset.bookIndex);
+    isDragging = true; // 드래그 시작
     e.currentTarget.style.opacity = '0.5';
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', e.currentTarget.innerHTML);
@@ -1374,6 +1376,7 @@ function handleDrop(e) {
 // 드래그 종료
 function handleDragEnd(e) {
     e.currentTarget.style.opacity = '1';
+    isDragging = false; // 드래그 종료
     
     // 모든 요소의 하이라이트 제거
     document.querySelectorAll('.book-item').forEach(item => {
@@ -7766,35 +7769,38 @@ function applyBookFilters() {
         bookCountSpan.textContent = filteredBooks.length;
     }
     
-    // 정렬
-    if (currentSortOption === 'title') {
-        // 가나다순 (제목)
-        filteredBooks.sort((a, b) => {
-            const titleA = (a.title || '').toLowerCase();
-            const titleB = (b.title || '').toLowerCase();
-            const result = titleA.localeCompare(titleB, 'ko');
-            return sortAscending ? result : -result;
-        });
-    } else if (currentSortOption === 'completion') {
-        // 완성도순
-        filteredBooks.sort((a, b) => {
-            const rateA = calculateCompletionRate(a);
-            const rateB = calculateCompletionRate(b);
-            const result = rateB - rateA; // 기본: 높은 순
-            return sortAscending ? result : -result;
-        });
-    } else if (currentSortOption === 'latest') {
-        // 최신순 (생성일)
-        filteredBooks.sort((a, b) => {
-            const timeA = a.id ? parseInt(a.id) : 0;
-            const timeB = b.id ? parseInt(b.id) : 0;
-            const result = timeB - timeA; // 기본: 최신 순
-            return sortAscending ? result : -result;
-        });
-    }
-    
-    console.log(`📊 정렬 적용: ${currentSortOption} (${sortAscending ? '오름차순' : '내림차순'}, ${filteredBooks.length}개)`);
-    
+    // 정렬 (드래그 중이 아닐 때만)
+    if (!isDragging) {
+        if (currentSortOption === 'title') {
+            // 가나다순 (제목)
+            filteredBooks.sort((a, b) => {
+                const titleA = (a.title || '').toLowerCase();
+                const titleB = (b.title || '').toLowerCase();
+                const result = titleA.localeCompare(titleB, 'ko');
+                return sortAscending ? result : -result;
+            });
+        } else if (currentSortOption === 'completion') {
+            // 완성도순
+            filteredBooks.sort((a, b) => {
+                const rateA = calculateCompletionRate(a);
+                const rateB = calculateCompletionRate(b);
+                const result = rateB - rateA; // 기본: 높은 순
+                return sortAscending ? result : -result;
+            });
+        } else if (currentSortOption === 'latest') {
+            // 최신순 (생성일)
+            filteredBooks.sort((a, b) => {
+                const timeA = a.id ? parseInt(a.id) : 0;
+                const timeB = b.id ? parseInt(b.id) : 0;
+                const result = timeB - timeA; // 기본: 최신 순
+                return sortAscending ? result : -result;
+            });
+        }
+        
+        console.log(`📊 정렬 적용: ${currentSortOption} (${sortAscending ? '오름차순' : '내림차순'}, ${filteredBooks.length}개)`);
+    } else {
+        console.log(`⏸️ 정렬 건너뜀 (드래그 중)`);
+    }    
     // 빈 결과 처리
     if (filteredBooks.length === 0) {
         const message = currentSearchText !== '' || currentCategoryFilter !== '' 
