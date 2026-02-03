@@ -6050,6 +6050,16 @@ function selectBackgroundMusic(musicId) {
     // window.removeBackgroundMusic = removeBackgroundMusic;  // ❌ 함수 정의 없음
     window.loadBackgroundMusicList = loadBackgroundMusicList;
     
+    // 모델 선택 관련 함수 전역 노출
+    window.createModelSelect = createModelSelect;
+    window.updateCharacterModel = updateCharacterModel;
+    window.updateKeyObjectModel = updateKeyObjectModel;
+    window.updateIllustrationModel = updateIllustrationModel;
+    window.updateVocabularyModel = updateVocabularyModel;
+    window.updateCoverModel = updateCoverModel;
+    window.createTTSModelSelect = createTTSModelSelect;
+    window.updateTTSModelDescription = updateTTSModelDescription;
+    
     // 드래그 앤 드롭 핸들러 전역 노출
     window.handleDragStart = handleDragStart;
     window.handleDragOver = handleDragOver;
