@@ -3262,6 +3262,56 @@ function closeIllustrationUploadModal() {
     currentUploadType = 'illustration';
 }
 
+// 캐릭터 업로드 모달 닫기
+function closeCharacterUploadModal() {
+    const modal = document.getElementById('illustrationUploadModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+    
+    // 입력 초기화
+    const fileInput = document.getElementById('illustrationFileInput');
+    const urlInput = document.getElementById('illustrationUrlInput');
+    if (fileInput) fileInput.value = '';
+    if (urlInput) urlInput.value = '';
+    currentUploadPageIndex = null;
+    currentUploadCharIndex = null;
+    currentUploadType = 'character';
+}
+
+// 캐릭터 업로드 탭 전환
+function switchCharacterUploadTab(tab) {
+    const fileTab = document.querySelector('[onclick*="switchCharacterUploadTab(\'file\')"]');
+    const urlTab = document.querySelector('[onclick*="switchCharacterUploadTab(\'url\')"]');
+    const fileArea = document.getElementById('illustrationFileUploadArea');
+    const urlArea = document.getElementById('illustrationUrlUploadArea');
+    
+    if (tab === 'file') {
+        if (fileTab) {
+            fileTab.classList.add('bg-purple-600', 'text-white');
+            fileTab.classList.remove('bg-gray-200', 'text-gray-700');
+        }
+        if (urlTab) {
+            urlTab.classList.remove('bg-purple-600', 'text-white');
+            urlTab.classList.add('bg-gray-200', 'text-gray-700');
+        }
+        if (fileArea) fileArea.classList.remove('hidden');
+        if (urlArea) urlArea.classList.add('hidden');
+    } else {
+        if (urlTab) {
+            urlTab.classList.add('bg-purple-600', 'text-white');
+            urlTab.classList.remove('bg-gray-200', 'text-gray-700');
+        }
+        if (fileTab) {
+            fileTab.classList.remove('bg-purple-600', 'text-white');
+            fileTab.classList.add('bg-gray-200', 'text-gray-700');
+        }
+        if (urlArea) urlArea.classList.remove('hidden');
+        if (fileArea) fileArea.classList.add('hidden');
+    }
+}
+
 // TTS 업로드 모달 열기
 let currentTTSUploadPageIndex = null;
 let currentTTSUploadTab = 'file';
@@ -8509,12 +8559,14 @@ function selectBackgroundMusic(musicId) {
     window.closeCoverUploadModal = closeCoverUploadModal;
     window.closeReviewModal = closeReviewModal;
     window.closeTTSUploadModal = closeTTSUploadModal;
+    window.closeCharacterUploadModal = closeCharacterUploadModal;
     window.completeReviewFromModal = completeReviewFromModal;
     
     // 업로드 관련 함수 전역 노출
     window.switchCoverUploadTab = switchCoverUploadTab;
     window.switchTTSUploadTab = switchTTSUploadTab;
     window.switchUploadTab = switchUploadTab;
+    window.switchCharacterUploadTab = switchCharacterUploadTab;
     window.uploadCover = uploadCover;
     window.uploadTTSAudio = uploadTTSAudio;
     window.uploadCharacter = uploadCharacter;
