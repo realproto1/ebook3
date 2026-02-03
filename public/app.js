@@ -791,6 +791,7 @@ function renderBookList() {
 function selectStorybook(id) {
     const book = storybookManager.selectStorybook(id, (book) => {
         currentStorybook = book;
+        window.currentStorybook = book; // 전역 참조 업데이트
         displayStorybook(book);
         renderBookList();
         document.getElementById('createForm').style.display = 'none';
@@ -800,6 +801,7 @@ function selectStorybook(id) {
     
     if (book) {
         currentStorybook = book;
+        window.currentStorybook = book; // 전역 참조 업데이트
         storybookManager.currentStorybook = book; // 동기화
     }
 }
@@ -6348,6 +6350,11 @@ function openBatchTTSUpload() {
     // ============================================
     // 전역 함수 노출 (HTML onclick에서 사용)
     // ============================================
+    
+    // 핵심 변수 및 함수 (UploadService에서 사용)
+    window.currentStorybook = currentStorybook;
+    window.displayStorybook = displayStorybook;
+    
     window.toggleSection = toggleSection;
     window.togglePageSection = togglePageSection;
     window.resetCoverPrompt = resetCoverPrompt;
