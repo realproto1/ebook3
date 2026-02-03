@@ -1904,28 +1904,7 @@ function cancelBatchUpload() {
 }
 
 async function uploadCharacter() {
-    // uploadCharacter는 이미 다른 곳에서 다르게 구현되어 있으므로 제거하지 않음
-    if (!currentStorybook) {
-        alert('동화책을 먼저 선택해주세요.');
-        return;
-    }
-    
-    const charIndex = uploadService.currentUploadCharIndex;
-    if (charIndex === null || charIndex === undefined) {
-        alert('캐릭터를 선택해주세요.');
-        return;
-    }
-    currentUploadPageIndex = null;
-    currentUploadCharIndex = charIndex;
-    currentUploadType = 'character';
-    const modal = document.getElementById('illustrationUploadModal');
-    const title = modal.querySelector('h2');
-    title.innerHTML = '<i class="fas fa-upload mr-3 text-purple-600"></i>캐릭터 레퍼런스 업로드';
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    
-    // 기본 탭으로 설정
-    switchUploadTab('file');
+    await uploadService.uploadIllustration(currentStorybook, saveCurrentStorybook, displayStorybook);
 }
 
 
@@ -4210,89 +4189,6 @@ ${noTextPrompt}`;
 let currentCharacterUploadIndex = null;
 let currentCharacterUploadTab = 'file';
 
-
-async function uploadCharacter() {
-    if (!currentStorybook || currentCharacterUploadIndex === null) return;
-    
-    const uploadBtn = document.getElementById('characterUploadBtn');
-    
-    try {
-        let imageUrl = '';
-        
-        if (currentCharacterUploadTab === 'file') {
-            // 파일 업로드
-            const fileInput = document.getElementById('characterFileInput');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                alert('파일을 선택해주세요.');
-                return;
-            }
-            
-            uploadBtn.disabled = true;
-            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>업로드 중...';
-            
-            const formData = new FormData();
-            formData.append('image', file);
-            formData.append('storybookId', currentStorybook.id);
-            formData.append('storybookTitle', currentStorybook.title);
-            formData.append('type', 'character');
-            formData.append('characterIndex', currentCharacterUploadIndex);
-            formData.append('characterName', currentStorybook.characters[currentCharacterUploadIndex]?.name || '');
-            
-            const response = await axios.post('/api/upload-image', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-            
-            if (response.data.success) {
-                imageUrl = response.data.imageUrl;
-            } else {
-                throw new Error(response.data.error || '이미지 업로드 실패');
-            }
-        } else {
-            // URL 입력
-            const urlInput = document.getElementById('characterUrlInput');
-            const url = urlInput.value.trim();
-            
-            if (!url) {
-                alert('URL을 입력해주세요.');
-                return;
-            }
-            
-            // URL 유효성 검사
-            try {
-                new URL(url);
-            } catch (e) {
-                alert('올바른 URL을 입력해주세요.');
-                return;
-            }
-            
-            uploadBtn.disabled = true;
-            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>업로드 중...';
-            
-            imageUrl = url;
-        }
-        
-        // 캐릭터 레퍼런스 이미지 저장
-        currentStorybook.characters[currentCharacterUploadIndex].referenceImage = imageUrl;
-        await saveCurrentStorybook();
-        
-        // UI 업데이트
-        displayStorybook(currentStorybook);
-        
-        closeCharacterUploadModal();
-        
-        showNotification('✅ 이미지가 업로드되었습니다.', 'success');
-    } catch (error) {
-        console.error('Character upload error:', error);
-        alert('이미지 업로드 중 오류가 발생했습니다: ' + (error.message || '알 수 없는 오류'));
-    } finally {
-        uploadBtn.disabled = false;
-        uploadBtn.innerHTML = '<i class="fas fa-upload mr-2"></i>업로드';
-    }
-}
 
 // 기존 uploadCharacterImage 함수 (사용하지 않음)
 async function uploadCharacterImage_old(charIndex, inputElement) {
