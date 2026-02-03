@@ -644,6 +644,15 @@ class DisplayService {
                                 >
                                     <i class="fas fa-upload mr-1"></i>업로드
                                 </button>
+                                ${displayTTSAudio ? `
+                                <button 
+                                    onclick="downloadPageTTS(${idx})"
+                                    class="bg-orange-600 text-white px-3 py-2 rounded-lg hover:bg-orange-700 transition text-sm"
+                                    title="TTS 다운로드"
+                                >
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                ` : ''}
                             </div>
                             
                             ${ttsSection}
@@ -670,6 +679,15 @@ class DisplayService {
                                 >
                                     <i class="fas fa-upload mr-1"></i>업로드
                                 </button>
+                                ${page.illustrationImage ? `
+                                <button 
+                                    onclick="downloadIllustration(${idx})"
+                                    class="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition text-sm"
+                                    title="삽화 다운로드"
+                                >
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                ` : ''}
                             </div>
                             
                             <div class="bg-white rounded-lg overflow-hidden border-2 border-purple-200 min-h-[200px]">

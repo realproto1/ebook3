@@ -6332,13 +6332,13 @@ function deletePage(pageIndex) {
 // 삽화 업로드
 function uploadIllustration(pageIndex) {
     if (!currentStorybook) return;
-    uploadService.openPageIllustrationUploadModal(pageIndex);
+    uploadService.openIllustrationUploadModal(pageIndex);
 }
 
 // 페이지 TTS 업로드
 function uploadPageTTS(pageIndex) {
     if (!currentStorybook) return;
-    uploadService.openPageTTSUploadModal(pageIndex);
+    uploadService.openTTSUploadModal(pageIndex);
 }
 
 // 페이지 삽화 프롬프트 업데이트
@@ -6358,6 +6358,53 @@ function openBatchIllustrationUpload() {
 function openBatchTTSUpload() {
     if (!currentStorybook) return;
     uploadService.openBatchTTSUploadModal(currentStorybook, window.currentLanguage);
+}
+
+// 페이지 삽화 다운로드
+function downloadIllustration(pageIndex) {
+    if (!currentStorybook || !currentStorybook.pages[pageIndex]) return;
+    const page = currentStorybook.pages[pageIndex];
+    if (!page.illustrationImage) {
+        alert('다운로드할 삽화가 없습니다.');
+        return;
+    }
+    
+    const link = document.createElement('a');
+    link.href = page.illustrationImage;
+    link.download = `${currentStorybook.title}_page${page.pageNumber || pageIndex + 1}_illustration.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showNotification('success', '삽화 다운로드', '삽화가 다운로드되었습니다.');
+}
+
+// 페이지 TTS 다운로드
+function downloadPageTTS(pageIndex) {
+    if (!currentStorybook || !currentStorybook.pages[pageIndex]) return;
+    const page = currentStorybook.pages[pageIndex];
+    const currentLanguage = window.currentLanguage || 'ko';
+    
+    let audioUrl = null;
+    if (currentLanguage === 'ko') {
+        audioUrl = page.ttsAudio?.url || page.audioUrl || page.tts_audio;
+    } else {
+        audioUrl = page.ttsAudio?.[currentLanguage]?.url || null;
+    }
+    
+    if (!audioUrl) {
+        alert('다운로드할 TTS 오디오가 없습니다.');
+        return;
+    }
+    
+    const link = document.createElement('a');
+    link.href = audioUrl;
+    link.download = `${currentStorybook.title}_page${page.pageNumber || pageIndex + 1}_${currentLanguage}_tts.mp3`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showNotification('success', 'TTS 다운로드', 'TTS 오디오가 다운로드되었습니다.');
 }
 
     // ============================================
@@ -6450,6 +6497,8 @@ function openBatchTTSUpload() {
     window.deletePage = deletePage;
     window.uploadIllustration = uploadIllustration;
     window.uploadPageTTS = uploadPageTTS;
+    window.downloadIllustration = downloadIllustration;
+    window.downloadPageTTS = downloadPageTTS;
     window.updatePageIllustrationPrompt = updatePageIllustrationPrompt;
     window.openBatchIllustrationUpload = openBatchIllustrationUpload;
     window.openBatchTTSUpload = openBatchTTSUpload;
