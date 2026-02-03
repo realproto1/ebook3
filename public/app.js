@@ -1044,6 +1044,7 @@ function handleDragEnd(e) {
     
     draggedElement = null;
     draggedIndex = null;
+    draggedBookId = null; // 드래그 중인 동화책 ID 초기화
 }
 
 // 동화책 제목 업데이트 (메인 페이지)
