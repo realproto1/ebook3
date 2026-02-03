@@ -8497,8 +8497,32 @@ function selectBackgroundMusic(musicId) {
     window.handleDragEnd = handleDragEnd;
     window.handleDrop = handleDrop;
     
-    // 기타 UI 핸들러 전역 노출
+    // UI 핸들러 전역 노출
     window.handleArtStyleChange = handleArtStyleChange;
+    window.applySortOption = applySortOption;
+    window.toggleSortOrder = toggleSortOrder;
+    window.filterByCategory = filterByCategory;
+    window.filterByVisibility = filterByVisibility;
+    window.filterBooks = filterBooks;
+    
+    // 모달 관련 함수 전역 노출
+    window.closeCoverUploadModal = closeCoverUploadModal;
+    window.closeReviewModal = closeReviewModal;
+    window.closeTTSUploadModal = closeTTSUploadModal;
+    window.completeReviewFromModal = completeReviewFromModal;
+    
+    // 업로드 관련 함수 전역 노출
+    window.switchCoverUploadTab = switchCoverUploadTab;
+    window.switchTTSUploadTab = switchTTSUploadTab;
+    window.switchUploadTab = switchUploadTab;
+    window.uploadCover = uploadCover;
+    window.uploadTTSAudio = uploadTTSAudio;
+    window.uploadCharacter = uploadCharacter;
+    window.uploadBackgroundMusic = uploadBackgroundMusic;
+    
+    // 기타 함수 전역 노출
+    window.updateStorybookCategory = updateStorybookCategory;
+    window.updateTTSModelDescription = updateTTSModelDescription;
     
     })(); // IIFE 종료
 } else {
