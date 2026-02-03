@@ -4,9 +4,16 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { readFileSync } from 'fs';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import multer from 'multer';
+import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import axios from 'axios';
+
+// 새로운 모듈 import
+import { config, validateApiKeys, logConfig } from './server/config/env.js';
+import { r2Client, logR2Config } from './server/config/r2.js';
+import { requireAPIKey } from './server/middleware/auth.js';
+import { upload, audioUpload } from './server/middleware/upload.js';
+import { initializeGemini } from './server/services/gemini.js';
+import * as R2Storage from './server/services/r2Storage.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,296 +29,40 @@ const SYSTEM_INSTRUCTION_IMAGE = readFileSync(
 );
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = config.port;
 
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API 키 (환경 변수 필수)
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+// 환경 변수 검증 및 로깅
+validateApiKeys();
+logConfig();
+logR2Config();
 
-// Cloudflare R2 설정
-const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || 'ad0cc40df8e41b561442058f198278ea';
-const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || '764805a6659844bc5b989f14e1d7408c';
-const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || 'fa1a1d55c9278d758d2f3a4da79cc28584bf0521792d3d2cb249958cb1eeada5';
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || 'storybook-images';
-// 강제로 올바른 Public URL 사용
-const R2_PUBLIC_URL = 'https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev';
+// Gemini AI 초기화
+initializeGemini();
 
-// R2 클라이언트 초기화
-const r2Client = new S3Client({
-  region: 'auto',
-  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: R2_ACCESS_KEY_ID,
-    secretAccessKey: R2_SECRET_ACCESS_KEY,
-  },
-});
+// 하위 호환성을 위한 레거시 변수들 (기존 코드에서 사용 중)
+const GEMINI_API_KEY = config.geminiApiKey;
+const R2_ACCOUNT_ID = config.r2.accountId;
+const R2_ACCESS_KEY_ID = config.r2.accessKeyId;
+const R2_SECRET_ACCESS_KEY = config.r2.secretAccessKey;
+const R2_BUCKET_NAME = config.r2.bucketName;
+const R2_PUBLIC_URL = config.r2.publicUrl;
 
-console.log('✅ Cloudflare R2 initialized:', {
-  bucket: R2_BUCKET_NAME,
-  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  publicUrl: R2_PUBLIC_URL
-});
+// ===== Cloudflare R2 헬퍼 함수 (R2Storage 서비스로 이동) =====
+// R2Storage.uploadImageToR2, uploadBase64ToR2, uploadBufferToR2, etc.
+// 이제 R2Storage 모듈에서 제공됩니다.
 
-// API 키 체크 (경고만 표시, 서버는 계속 실행)
-if (!GEMINI_API_KEY) {
-  console.warn('⚠️ WARNING: GEMINI_API_KEY environment variable is not set!');
-  console.warn('Please set GEMINI_API_KEY in Vercel Environment Variables.');
-  console.warn('Visit: https://makersuite.google.com/app/apikey to get a new API key');
-  console.warn('Server will start but API calls will fail until key is set.');
-}
-
-// API 키 검증 미들웨어
-function requireAPIKey(req, res, next) {
-  if (!GEMINI_API_KEY) {
-    return res.status(403).json({ 
-      success: false,
-      error: '⚠️ GEMINI_API_KEY가 설정되지 않았습니다.\n\n' +
-             'Vercel Dashboard → Settings → Environment Variables에서\n' +
-             'GEMINI_API_KEY를 추가하고 재배포해주세요.\n\n' +
-             'API 키 발급: https://makersuite.google.com/app/apikey'
-    });
-  }
-  next();
-}
-
-// ===== Cloudflare R2 헬퍼 함수 =====
-
-/**
- * 이미지 URL을 Cloudflare R2에 업로드
- * @param {string} imageUrl - Gemini에서 생성된 이미지 URL
- * @param {string} filename - 저장할 파일명 (예: 'character-123.png')
- * @returns {string} R2 공개 URL
- */
-async function uploadImageToR2(imageUrl, filename) {
-  try {
-    console.log(`📤 Uploading to R2: ${filename}`);
-    
-    // 이미지 다운로드
-    const response = await fetch(imageUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch image: ${response.statusText}`);
-    }
-    
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    
-    // R2에 업로드
-    const command = new PutObjectCommand({
-      Bucket: R2_BUCKET_NAME,
-      Key: filename,
-      Body: buffer,
-      ContentType: 'image/png',
-    });
-    
-    await r2Client.send(command);
-    
-    const publicUrl = `${R2_PUBLIC_URL}/${filename}`;
-    console.log(`✅ Uploaded to R2: ${publicUrl}`);
-    
-    return publicUrl;
-  } catch (error) {
-    console.error('❌ R2 upload failed:', error);
-    // R2 업로드 실패 시 원본 URL 반환 (fallback)
-    return imageUrl;
-  }
-}
-
-/**
- * Base64 이미지를 Cloudflare R2에 업로드
- * @param {string} base64Data - Base64 인코딩된 이미지 데이터
- * @param {string} filename - 저장할 파일명
- * @returns {string} R2 공개 URL
- */
-async function uploadBase64ToR2(base64Data, filename) {
-  try {
-    console.log(`📤 Uploading Base64 to R2: ${filename}`);
-    
-    // Base64 디코딩
-    const buffer = Buffer.from(base64Data, 'base64');
-    
-    // R2에 업로드
-    const command = new PutObjectCommand({
-      Bucket: R2_BUCKET_NAME,
-      Key: filename,
-      Body: buffer,
-      ContentType: 'image/png',
-    });
-    
-    await r2Client.send(command);
-    
-    const publicUrl = `${R2_PUBLIC_URL}/${filename}`;
-    console.log(`✅ Uploaded Base64 to R2: ${publicUrl}`);
-    
-    return publicUrl;
-  } catch (error) {
-    console.error('❌ R2 Base64 upload failed:', error);
-    throw error;
-  }
-}
-
-/**
- * 로컬 파일 경로에서 Cloudflare R2에 업로드
- * @param {string} filePath - 로컬 파일 경로
- * @param {string} filename - 저장할 파일명
- * @returns {string} R2 공개 URL
- */
-async function uploadImageToR2FromPath(filePath, filename) {
-  try {
-    console.log(`📤 Uploading from path to R2: ${filename}`);
-    
-    // 파일 읽기
-    const buffer = await fs.promises.readFile(filePath);
-    
-    // R2에 업로드
-    const command = new PutObjectCommand({
-      Bucket: R2_BUCKET_NAME,
-      Key: filename,
-      Body: buffer,
-      ContentType: 'image/png',
-    });
-    
-    await r2Client.send(command);
-    
-    const publicUrl = `${R2_PUBLIC_URL}/${filename}`;
-    console.log(`✅ Uploaded from path to R2: ${publicUrl}`);
-    
-    return publicUrl;
-  } catch (error) {
-    console.error('❌ R2 upload from path failed:', error);
-    throw error;
-  }
-}
-
-// Multer 설정 (메모리 스토리지 사용)
-const storage = multer.memoryStorage();
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB 제한
-  },
-  fileFilter: (req, file, cb) => {
-    // 이미지 파일만 허용
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('이미지 파일만 업로드 가능합니다.'));
-    }
-  }
-});
-
-// 오디오 업로드용 multer 설정
-const audioUpload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB 제한 (오디오는 더 큼)
-  },
-  fileFilter: (req, file, cb) => {
-    // 오디오 파일만 허용
-    if (file.mimetype.startsWith('audio/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('오디오 파일만 업로드 가능합니다.'));
-    }
-  }
-});
-
-/**
- * Buffer를 Cloudflare R2에 업로드
- * @param {Buffer} buffer - 이미지 버퍼
- * @param {string} filename - 저장할 파일명
- * @param {string} contentType - 파일 MIME 타입
- * @returns {string} R2 공개 URL
- */
-async function uploadBufferToR2(buffer, filename, contentType) {
-  try {
-    console.log(`📤 Uploading Buffer to R2: ${filename}`);
-    
-    // R2에 업로드
-    const command = new PutObjectCommand({
-      Bucket: R2_BUCKET_NAME,
-      Key: filename,
-      Body: buffer,
-      ContentType: contentType,
-    });
-    
-    await r2Client.send(command);
-    
-    const publicUrl = `${R2_PUBLIC_URL}/${filename}`;
-    console.log(`✅ Uploaded Buffer to R2: ${publicUrl}`);
-    
-    return publicUrl;
-  } catch (error) {
-    console.error('❌ R2 Buffer upload failed:', error);
-    throw error;
-  }
-}
-
-/**
- * 오래된 히스토리 이미지를 R2에서 삭제
- * @param {string} imageUrl - 삭제할 이미지 URL
- */
-async function cleanupOldHistoryImage(imageUrl) {
-  if (!imageUrl || !imageUrl.includes(R2_PUBLIC_URL)) {
-    console.log('⏭️ Skip cleanup: invalid URL or not in R2');
-    return;
-  }
-  
-  try {
-    // URL에서 Key 추출
-    const key = imageUrl.replace(`${R2_PUBLIC_URL}/`, '');
-    
-    const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
-    
-    const command = new DeleteObjectCommand({
-      Bucket: R2_BUCKET_NAME,
-      Key: key
-    });
-    
-    await r2Client.send(command);
-    console.log(`🗑️ Cleaned up old history image: ${key}`);
-  } catch (error) {
-    // 이미 삭제되었거나 없는 경우 무시
-    console.warn(`⚠️ Failed to cleanup history image (may already be deleted):`, error.message);
-  }
-}
-
-/**
- * JSON 데이터를 Cloudflare R2에 업로드
- * @param {Object} jsonData - 저장할 JSON 객체
- * @param {string} filename - 저장할 파일명
- * @returns {string} R2 공개 URL
- */
-async function uploadJSONToR2(jsonData, filename) {
-  try {
-    console.log(`📤 Uploading JSON to R2: ${filename}`);
-    
-    // JSON을 문자열로 변환
-    const jsonString = JSON.stringify(jsonData, null, 2);
-    const buffer = Buffer.from(jsonString, 'utf-8');
-    
-    // R2에 업로드
-    const command = new PutObjectCommand({
-      Bucket: R2_BUCKET_NAME,
-      Key: filename,
-      Body: buffer,
-      ContentType: 'application/json',
-    });
-    
-    await r2Client.send(command);
-    
-    const publicUrl = `${R2_PUBLIC_URL}/${filename}`;
-    console.log(`✅ Uploaded JSON to R2: ${publicUrl}`);
-    
-    return publicUrl;
-  } catch (error) {
-    console.error('❌ R2 JSON upload failed:', error);
-    throw error;
-  }
-}
+// 하위 호환성을 위한 래퍼 함수들
+const uploadImageToR2 = R2Storage.uploadImageToR2;
+const uploadBase64ToR2 = R2Storage.uploadBase64ToR2;
+const uploadBufferToR2 = R2Storage.uploadBufferToR2;
+const uploadJSONToR2 = R2Storage.uploadJSONToR2;
+const getJSONFromR2 = R2Storage.getJSONFromR2;
+const cleanupOldHistoryImage = R2Storage.deleteImageFromR2;
 
 
 // Gemini 이미지 생성 함수 (Nano Banana Pro) - 멀티모달 지원 + 자동 재시도
