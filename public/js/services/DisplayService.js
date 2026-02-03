@@ -162,14 +162,23 @@ class DisplayService {
                             onclick="generateCharacterReference(${idx})"
                             class="flex-1 btn-generate px-3 py-2 rounded-lg transition text-sm font-semibold"
                         >
-                            <i class="fas fa-magic mr-2"></i>${char.referenceImage ? '재생성' : '생성'}
+                            <i class="fas fa-magic mr-1"></i>${char.referenceImage ? '재생성' : '생성'}
                         </button>
                         <button 
                             onclick="openCharacterUploadModal(${idx})"
                             class="flex-1 btn-upload px-3 py-2 rounded-lg transition text-sm font-semibold"
                         >
-                            <i class="fas fa-upload mr-2"></i>업로드
+                            <i class="fas fa-upload mr-1"></i>업로드
                         </button>
+                        ${char.referenceImage ? `
+                        <button 
+                            onclick="downloadImage('${char.referenceImage}', '${char.name}_레퍼런스.png')"
+                            class="btn-download px-3 py-2 rounded-lg transition text-sm font-semibold"
+                            title="다운로드"
+                        >
+                            <i class="fas fa-download"></i>
+                        </button>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -258,14 +267,23 @@ class DisplayService {
                                     onclick="generateCoverImage()"
                                     class="flex-1 btn-generate px-6 py-3 rounded-lg transition font-semibold shadow-lg"
                                 >
-                                    <i class="fas fa-magic mr-2"></i>${storybook.coverImage ? '재생성' : '생성'}
+                                    <i class="fas fa-magic mr-1"></i>${storybook.coverImage ? '재생성' : '생성'}
                                 </button>
                                 <button 
                                     onclick="openCoverUploadModal()"
                                     class="flex-1 btn-upload px-6 py-3 rounded-lg transition font-semibold shadow-lg"
                                 >
-                                    <i class="fas fa-upload mr-2"></i>업로드
+                                    <i class="fas fa-upload mr-1"></i>업로드
                                 </button>
+                                ${storybook.coverImage ? `
+                                <button 
+                                    onclick="downloadImage('${storybook.coverImage}', '${storybook.title}_표지.png')"
+                                    class="btn-download px-6 py-3 rounded-lg transition font-semibold shadow-lg"
+                                    title="표지 다운로드"
+                                >
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                ` : ''}
                             </div>
                         </div>
                         <div>
@@ -843,7 +861,7 @@ class DisplayService {
                         <i class="fas fa-download mr-1"></i>모든 삽화 다운로드
                     </button>
                     <button id="batch-illust-upload-btn" onclick="openBatchIllustrationUpload()" class="btn-upload px-4 py-2 rounded-lg transition text-sm font-semibold shadow-lg">
-                        <i class="fas fa-upload mr-1"></i>일괄 업로드
+                        <i class="fas fa-upload mr-1"></i>일괄 삽화 업로드
                     </button>
                 </div>
             </div>
