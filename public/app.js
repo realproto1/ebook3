@@ -6067,6 +6067,9 @@ function selectBackgroundMusic(musicId) {
     window.createTTSModelSelect = createTTSModelSelect;
     window.updateTTSModelDescription = updateTTSModelDescription;
     
+    // 표지 관련 함수 전역 노출
+    window.buildCoverPrompt = buildCoverPrompt;
+    
     // 드래그 앤 드롭 핸들러 전역 노출
     window.handleDragStart = handleDragStart;
     window.handleDragOver = handleDragOver;
