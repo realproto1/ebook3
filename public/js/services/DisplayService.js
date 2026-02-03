@@ -337,48 +337,239 @@ class DisplayService {
      * Key Object 섹션 렌더링 (임시 플레이스홀더)
      */
     renderKeyObjectSection(storybook) {
+        const createModelSelect = window.createModelSelect;
+        const imageSettings = this.imageSettings;
+        
         return `
-            <div class="bg-white rounded-3xl shadow-2xl p-10 mb-8">
-                <h3 class="text-3xl font-bold text-gray-800 mb-4">
-                    <i class="fas fa-cube mr-2 text-orange-500"></i>
-                    핵심 사물 (Key Objects)
-                </h3>
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-                    <i class="fas fa-construction text-yellow-600 text-4xl mb-3"></i>
-                    <p class="text-lg text-gray-700 font-semibold">⚠️ 이 섹션은 아직 구현 중입니다</p>
-                    <p class="text-sm text-gray-600 mt-2">DisplayService 완성 후 사용 가능합니다.</p>
+        <!-- Key Objects 섹션 -->
+        <div class="bg-white rounded-3xl shadow-2xl p-4 md:p-10 mb-8">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0 mb-4 md:mb-6">
+                <div class="flex-1">
+                    <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2 cursor-pointer flex items-center" onclick="toggleSection('keyobject-section')">
+                        <i id="keyobject-section-icon" class="fas fa-chevron-right mr-2 text-sm transition-transform"></i>
+                        <i class="fas fa-cube mr-2 text-orange-500"></i>
+                        핵심 사물 (Key Objects)
+                    </h3>
+                    <p class="text-xs md:text-base text-gray-600">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <span class="hidden sm:inline">스토리에서 중요한 물건들을 미리 생성하면 삽화에서 일관되게 표현할 수 있어요.</span>
+                        <span class="sm:hidden">핵심 사물로 일관성 유지</span>
+                    </p>
+                    ${createModelSelect('keyobject', imageSettings.keyObjectModel || 'gemini-3-pro-image-preview', 'updateKeyObjectModel(this.value)')}
+                </div>
+                <div class="flex gap-2 md:gap-3">
+                    <button 
+                        onclick="generateAllKeyObjectImages()"
+                        class="bg-orange-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-orange-700 transition whitespace-nowrap text-sm md:text-base"
+                    >
+                        <i class="fas fa-images mr-1 md:mr-2"></i><span class="hidden sm:inline">모든 이미지 생성</span><span class="sm:hidden">전체 생성</span>
+                    </button>
+                    <button 
+                        onclick="downloadAllKeyObjectImages()"
+                        class="bg-green-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-green-700 transition whitespace-nowrap text-sm md:text-base"
+                    >
+                        <i class="fas fa-download mr-1 md:mr-2"></i><span class="hidden sm:inline">모두 다운로드</span><span class="sm:hidden">다운</span>
+                    </button>
+                    <button 
+                        onclick="bulkUploadKeyObjectImages()"
+                        class="bg-purple-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-purple-700 transition whitespace-nowrap text-sm md:text-base"
+                    >
+                        <i class="fas fa-upload mr-1 md:mr-2"></i><span class="hidden sm:inline">일괄 업로드</span><span class="sm:hidden">업로드</span>
+                    </button>
+                    <button 
+                        onclick="addNewKeyObject()"
+                        class="bg-blue-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-blue-700 transition whitespace-nowrap text-sm md:text-base"
+                    >
+                        <i class="fas fa-plus mr-1 md:mr-2"></i><span class="hidden sm:inline">사물 추가</span><span class="sm:hidden">추가</span>
+                    </button>
                 </div>
             </div>
-        `;
-    }
-    
-    /**
-     * 페이지 섹션 렌더링 (임시 플레이스홀더)
-     */
-    renderPageSection(storybook) {
-        return `
-            <div class="bg-white rounded-3xl shadow-2xl p-10 mb-8">
-                <h3 class="text-3xl font-bold text-gray-800 mb-4">
-                    <i class="fas fa-book mr-2 text-blue-500"></i>
-                    페이지별 편집
-                </h3>
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-                    <i class="fas fa-construction text-yellow-600 text-4xl mb-3"></i>
-                    <p class="text-lg text-gray-700 font-semibold">⚠️ 이 섹션은 아직 구현 중입니다</p>
-                    <p class="text-sm text-gray-600 mt-2">DisplayService 완성 후 사용 가능합니다.</p>
-                    <div class="mt-4 text-left bg-white p-4 rounded">
-                        <p class="text-sm font-semibold mb-2">페이지 목록:</p>
-                        ${storybook.pages.map((page, idx) => `
-                            <div class="text-xs text-gray-600 mb-1">
-                                <i class="fas fa-file-alt mr-2"></i>페이지 ${idx + 1}: ${page.text?.substring(0, 50) || '(내용 없음)'}...
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-}
 
-// 전역 인스턴스 생성
-window.displayService = new DisplayService();
+            <div id="keyobject-section-content" class="hidden">
+            ${storybook.key_objects && storybook.key_objects.length > 0 ? `
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                ${storybook.key_objects.map((obj, idx) => {
+                    const objImg = storybook.keyObjectImages && storybook.keyObjectImages[idx];
+                    const sizeIcon = obj.size === 'small' ? 'fa-hand-holding' : obj.size === 'large' ? 'fa-building' : 'fa-box';
+                    const sizeColor = obj.size === 'small' ? 'text-blue-600' : obj.size === 'large' ? 'text-red-600' : 'text-yellow-600';
+                    return `
+                    <div class="bg-gradient-to-br from-orange-50 to-yellow-50 p-4 rounded-xl border-2 border-orange-200">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <input 
+                                        type="text" 
+                                        id="keyobj-name-${idx}" 
+                                        value="${obj.name}"
+                                        onblur="updateKeyObjectField(${idx}, 'name', this.value)"
+                                        class="font-bold text-gray-700 bg-transparent border-b border-orange-300 focus:border-orange-500 focus:outline-none w-full"
+                                        placeholder="영어 이름"
+                                    />
+                                    <i class="${sizeIcon} ${sizeColor}" title="${obj.size}"></i>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    id="keyobj-korean-${idx}" 
+                                    value="${obj.korean}"
+                                    onblur="updateKeyObjectField(${idx}, 'korean', this.value)"
+                                    class="text-sm text-gray-600 bg-transparent border-b border-orange-200 focus:border-orange-400 focus:outline-none w-full mb-2"
+                                    placeholder="한글 이름"
+                                />
+                                <div class="flex items-center gap-2 mb-2">
+                                    <select 
+                                        id="keyobj-size-${idx}"
+                                        onchange="updateKeyObjectField(${idx}, 'size', this.value)"
+                                        class="flex-1 text-xs bg-white border border-orange-200 rounded px-2 py-1"
+                                    >
+                                        <option value="small" ${obj.size === 'small' ? 'selected' : ''}>Small</option>
+                                        <option value="medium" ${obj.size === 'medium' ? 'selected' : ''}>Medium</option>
+                                        <option value="large" ${obj.size === 'large' ? 'selected' : ''}>Large</option>
+                                    </select>
+                                    <div class="flex items-center gap-1">
+                                        <input 
+                                            type="number" 
+                                            id="keyobj-size-cm-${idx}" 
+                                            value="${obj.sizeCm || (obj.size === 'small' ? 10 : obj.size === 'large' ? 200 : 100)}"
+                                            onblur="updateKeyObjectField(${idx}, 'sizeCm', parseInt(this.value))"
+                                            class="w-12 text-xs bg-white border border-orange-200 rounded px-1 py-1 text-center"
+                                            min="1"
+                                            max="1000"
+                                        />
+                                        <span class="text-xs text-gray-600">cm</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button 
+                                onclick="deleteKeyObject(${idx})"
+                                class="text-orange-600 hover:text-orange-800 ml-2"
+                                title="삭제"
+                            >
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                        <div class="bg-white rounded-lg overflow-hidden mb-2 min-h-[120px]">
+                            ${objImg ? `
+                                <img src="${objImg}" alt="${obj.name}" class="w-full h-32 object-contain bg-gray-50" />
+                            ` : `
+                                <div class="flex items-center justify-center h-32 bg-gray-50">
+                                    <i class="fas fa-image text-3xl text-gray-300"></i>
+                                </div>
+                            `}
+                        </div>
+                        <textarea 
+                            id="keyobj-desc-${idx}"
+                            onblur="updateKeyObjectField(${idx}, 'description', this.value)"
+                            class="w-full text-xs bg-white border border-orange-200 rounded p-2 mb-2 resize-none"
+                            rows="2"
+                            placeholder="설명..."
+                        >${obj.description || ''}</textarea>
+                        <div class="flex gap-2">
+                            <button 
+                                onclick="generateSingleKeyObjectImage(${idx})"
+                                class="flex-1 bg-orange-500 text-white text-xs py-1.5 px-2 rounded hover:bg-orange-600 transition"
+                            >
+                                <i class="fas fa-magic mr-1"></i>${objImg ? '재생성' : '생성'}
+                            </button>
+                            <button 
+                                onclick="downloadImage('${objImg}', '${obj.name}_keyobject.png')"
+                                class="bg-green-500 text-white text-xs py-1.5 px-2 rounded hover:bg-green-600 transition ${!objImg ? 'opacity-50 cursor-not-allowed' : ''}"
+                                ${!objImg ? 'disabled' : ''}
+                            >
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    `;
+                }).join('')}
+            </div>
+            ` : `
+                <div class="text-center py-10 text-gray-500">
+                    <i class="fas fa-cube text-5xl mb-4 opacity-50"></i>
+                    <p class="text-lg">아직 핵심 사물이 없습니다.</p>
+                    <p class="text-sm mt-2">"사물 추가" 버튼을 눌러 핵심 사물을 추가하세요.</p>
+                </div>
+            `}
+            </div>
+        </div>
+        `;
+    }
+    renderPageSection(storybook) {
+        const createModelSelect = window.createModelSelect;
+        const imageSettings = this.imageSettings;
+        
+        return `
+        <!-- 페이지 섹션 (간소화) -->
+        <div class="bg-white rounded-3xl shadow-2xl p-10 mb-8">
+            <h3 class="text-3xl font-bold text-gray-800 cursor-pointer flex items-center mb-6" onclick="toggleSection('pages-section')">
+                <i id="pages-section-icon" class="fas fa-chevron-down mr-2 text-sm transition-transform"></i>
+                <i class="fas fa-book mr-2 text-purple-500"></i>
+                스토리 페이지 (${storybook.pages.length}페이지)
+            </h3>
+            
+            <div class="mb-6">
+                <div class="flex items-center gap-4">
+                    <label class="text-sm text-gray-600">이미지 모델:</label>
+                    ${createModelSelect('illustration', imageSettings.illustrationModel || 'gemini-3-pro-image-preview', 'updateIllustrationModel(this.value)')}
+                </div>
+            </div>
+            
+            <div id="pages-section-content">
+                <div class="space-y-6">
+                    ${storybook.pages.map((page, idx) => `
+                        <div class="border-2 border-purple-200 rounded-xl p-6 bg-gradient-to-br from-purple-50 to-pink-50">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-xl font-bold text-purple-800">
+                                    <i class="fas fa-file-alt mr-2"></i>페이지 ${idx + 1}
+                                </h4>
+                                <div class="flex gap-2">
+                                    <button 
+                                        onclick="generateIllustration(${idx})"
+                                        class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm"
+                                    >
+                                        <i class="fas fa-magic mr-1"></i>${page.illustrationImage ? '재생성' : '삽화 생성'}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">텍스트:</label>
+                                    <textarea 
+                                        id="page-text-${idx}"
+                                        onblur="updatePageText(${idx}, this.value)"
+                                        class="w-full p-3 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        rows="4"
+                                    >${page.text || ''}</textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">삽화:</label>
+                                    <div class="bg-white rounded-lg overflow-hidden border-2 border-purple-200 min-h-[150px]">
+                                        ${page.illustrationImage ? `
+                                            <img src="${page.illustrationImage}" alt="페이지 ${idx + 1}" class="w-full h-full object-cover" />
+                                        ` : `
+                                            <div class="flex items-center justify-center h-[150px] text-gray-400">
+                                                <div class="text-center">
+                                                    <i class="fas fa-image text-4xl mb-2"></i>
+                                                    <p class="text-sm">삽화 생성 대기중</p>
+                                                </div>
+                                            </div>
+                                        `}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="mt-6 flex justify-center">
+                    <button 
+                        onclick="addNewPage()"
+                        class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition font-semibold"
+                    >
+                        <i class="fas fa-plus mr-2"></i>페이지 추가
+                    </button>
+                </div>
+            </div>
+        </div>
+        `;
+    }
