@@ -795,26 +795,26 @@ class DisplayService {
                     </div>
                     
                     <div class="flex gap-2 mt-4 pb-4">
-                        <button onclick="translateAllPages()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-semibold flex items-center gap-2">
+                        <button id="translate-all-btn" onclick="translateAllPages()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-semibold flex items-center gap-2">
                             <i class="fas fa-language"></i>전체 번역
                         </button>
-                        <button onclick="generateAllTTS()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold flex items-center gap-2">
+                        <button id="generate-all-tts-btn" onclick="generateAllTTS()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold flex items-center gap-2">
                             <i class="fas fa-volume-up"></i>전체 TTS 생성
                         </button>
-                        <button onclick="downloadAllText()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-semibold flex items-center gap-2">
+                        <button id="download-all-text-btn" onclick="downloadAllText()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-semibold flex items-center gap-2">
                             <i class="fas fa-download"></i>전체 텍스트 다운로드
                         </button>
                     </div>
                 </div>
                 
                 <div class="flex gap-2 flex-wrap">
-                    <button onclick="generateAllIllustrationsSequential()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-semibold">
+                    <button id="generate-all-illust-btn" onclick="generateAllIllustrationsSequential()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-semibold">
                         <i class="fas fa-image mr-1"></i>모든 삽화 생성
                     </button>
-                    <button onclick="downloadAllIllustrations()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold">
+                    <button id="download-all-illust-btn" onclick="downloadAllIllustrations()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold">
                         <i class="fas fa-download mr-1"></i>모든 삽화 다운로드
                     </button>
-                    <button onclick="openBatchIllustrationUpload()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-semibold">
+                    <button id="batch-illust-upload-btn" onclick="openBatchIllustrationUpload()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-semibold">
                         <i class="fas fa-upload mr-1"></i>일괄 업로드
                     </button>
                 </div>

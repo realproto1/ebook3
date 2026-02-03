@@ -188,6 +188,65 @@ function updateProgressBar(percentage, message = '') {
 }
 
 // ============================================
+// 버튼 로딩 상태 관리 유틸리티
+// ============================================
+
+/**
+ * 버튼을 로딩 상태로 변경
+ * @param {HTMLElement|string} button - 버튼 요소 또는 ID
+ * @param {string} loadingText - 로딩 중 표시할 텍스트
+ */
+function setButtonLoading(button, loadingText = '처리 중...') {
+    const btn = typeof button === 'string' ? document.getElementById(button) : button;
+    if (!btn) return;
+    
+    // 원래 내용 저장
+    if (!btn.dataset.originalContent) {
+        btn.dataset.originalContent = btn.innerHTML;
+    }
+    
+    btn.disabled = true;
+    btn.classList.add('opacity-75', 'cursor-not-allowed');
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>${loadingText}`;
+}
+
+/**
+ * 버튼 로딩 상태 해제
+ * @param {HTMLElement|string} button - 버튼 요소 또는 ID
+ */
+function resetButtonLoading(button) {
+    const btn = typeof button === 'string' ? document.getElementById(button) : button;
+    if (!btn) return;
+    
+    btn.disabled = false;
+    btn.classList.remove('opacity-75', 'cursor-not-allowed');
+    
+    if (btn.dataset.originalContent) {
+        btn.innerHTML = btn.dataset.originalContent;
+        delete btn.dataset.originalContent;
+    }
+}
+
+/**
+ * 여러 버튼을 로딩 상태로 변경
+ * @param {string} selector - CSS 선택자
+ * @param {string} loadingText - 로딩 중 표시할 텍스트
+ */
+function setButtonsLoading(selector, loadingText = '처리 중...') {
+    const buttons = document.querySelectorAll(selector);
+    buttons.forEach(btn => setButtonLoading(btn, loadingText));
+}
+
+/**
+ * 여러 버튼 로딩 상태 해제
+ * @param {string} selector - CSS 선택자
+ */
+function resetButtonsLoading(selector) {
+    const buttons = document.querySelectorAll(selector);
+    buttons.forEach(btn => resetButtonLoading(btn));
+}
+
+// ============================================
 // API 키 및 모델 설정
 // ============================================
 // API 키 가져오기 함수
@@ -5314,12 +5373,8 @@ async function translateAllPages() {
         return;
     }
     
-    // 버튼 비활성화
-    const translateAllBtn = document.getElementById('translate-all-btn');
-    if (translateAllBtn) {
-        translateAllBtn.disabled = true;
-        translateAllBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-xl"></i><span>번역 중...</span>';
-    }
+    // 버튼 로딩 상태로 변경
+    setButtonLoading('translate-all-btn', '번역 중...');
     
     let successCount = 0;
     let failCount = 0;
@@ -5349,10 +5404,8 @@ async function translateAllPages() {
         
         console.log(`🌐 페이지 ${page.pageNumber}/${totalPages} 번역 중...`);
         
-        // 버튼 업데이트
-        if (translateAllBtn) {
-            translateAllBtn.innerHTML = `<i class="fas fa-spinner fa-spin text-xl"></i><span>번역 중... (${i + 1}/${totalPages})</span>`;
-        }
+        // 진행 상황 표시
+        setButtonLoading('translate-all-btn', `번역 중... (${i + 1}/${totalPages})`);
         
         try {
             const sourceText = page.text;
@@ -5477,10 +5530,7 @@ async function translateAllPages() {
                             // 최종 저장 후 종료
                             console.log('💾 중단 전 저장 중...');
                             await saveToR2(currentStorybook);
-                            if (translateAllBtn) {
-                                translateAllBtn.disabled = false;
-                                translateAllBtn.innerHTML = '<i class="fas fa-language text-xl"></i><span>모두 번역하기</span>';
-                            }
+                            resetButtonLoading('translate-all-btn');
                             return;
                         }
                     }
@@ -5501,10 +5551,8 @@ async function translateAllPages() {
     displayStorybook(currentStorybook);
     
     // 버튼 복원
-    if (translateAllBtn) {
-        translateAllBtn.disabled = false;
-        translateAllBtn.innerHTML = '<i class="fas fa-language text-xl"></i><span>모두 번역하기</span>';
-    }
+    // 버튼 복원
+    resetButtonLoading('translate-all-btn');
     
     // 완료 알림
     if (successCount > 0) {
@@ -6141,6 +6189,12 @@ function openBatchIllustrationUpload() {
     
     // UI 핸들러 전역 노출
     window.handleArtStyleChange = handleArtStyleChange;
+    
+    // 버튼 로딩 유틸리티 전역 노출
+    window.setButtonLoading = setButtonLoading;
+    window.resetButtonLoading = resetButtonLoading;
+    window.setButtonsLoading = setButtonsLoading;
+    window.resetButtonsLoading = resetButtonsLoading;
     window.applySortOption = applySortOption;
     window.toggleSortOrder = toggleSortOrder;
     window.filterByCategory = filterByCategory;
