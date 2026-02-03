@@ -82,7 +82,6 @@ let currentLanguage = 'ko'; // 현재 표시 중인 언어 (기본: 한국어)
 let backgroundMusicList = []; // 배경음악 목록
 // imageSettings는 이제 settingsService.settings로 대체됨
 let imageSettings = settingsService.getSettings();
-};
 
 // ============================================
 // 공통 헬퍼 함수
