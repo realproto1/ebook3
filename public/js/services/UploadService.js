@@ -588,12 +588,29 @@ class UploadService {
             // 서버에 저장 및 UI 업데이트
             if (successCount > 0) {
                 try {
-                    await axios.post('/api/storybooks', storybook);
+                    const response = await axios.post('/api/storybooks', storybook);
                     console.log('✅ 일괄 업로드 후 저장 완료');
+                    
+                    // currentStorybook 참조 업데이트 (중요!)
+                    if (window.currentStorybook && window.currentStorybook.id === storybook.id) {
+                        // 페이지 배열 업데이트
+                        storybook.pages.forEach((page, idx) => {
+                            if (window.currentStorybook.pages[idx]) {
+                                window.currentStorybook.pages[idx] = page;
+                            }
+                        });
+                    }
                     
                     // UI 업데이트
                     if (window.displayStorybook && window.currentStorybook) {
+                        console.log('🔄 UI 업데이트 시작...');
                         window.displayStorybook(window.currentStorybook);
+                        console.log('✅ UI 업데이트 완료');
+                    } else {
+                        console.warn('⚠️ displayStorybook 또는 currentStorybook이 없습니다', {
+                            hasDisplay: !!window.displayStorybook,
+                            hasCurrent: !!window.currentStorybook
+                        });
                     }
                 } catch (error) {
                     console.error('❌ 저장 실패:', error);
