@@ -998,14 +998,27 @@ ${referenceContent}
     
     // educational_content.vocabulary를 key_objects로 변환 (UI 호환성)
     if (storybook.educational_content && storybook.educational_content.vocabulary) {
-      storybook.key_objects = storybook.educational_content.vocabulary.map(vocab => ({
-        name: vocab.word,
-        korean: vocab.korean,
-        definition: vocab.definition,
-        example: vocab.example,
-        size: 'medium',
-        sizeCm: 50
-      }));
+      // sizeCm 값을 랜덤하게 설정 (20cm ~ 200cm)
+      const getSizeCategory = (sizeCm) => {
+        if (sizeCm < 50) return 'small';
+        if (sizeCm < 100) return 'medium';
+        return 'large';
+      };
+      
+      storybook.key_objects = storybook.educational_content.vocabulary.map(vocab => {
+        // 랜덤 sizeCm 생성 (20 ~ 200)
+        const sizeCm = Math.floor(Math.random() * 180) + 20; // 20 ~ 200
+        
+        return {
+          name: vocab.word,
+          korean: vocab.korean,
+          description: vocab.definition, // description 필드 추가 (definition과 동일)
+          definition: vocab.definition,
+          example: vocab.example,
+          size: getSizeCategory(sizeCm), // sizeCm에 따라 자동 결정
+          sizeCm: sizeCm // 랜덤 크기
+        };
+      });
       console.log(`✅ Vocabulary → Key Objects 변환 완료: ${storybook.key_objects.length}개`);
     }
     
