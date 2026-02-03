@@ -5988,6 +5988,45 @@ function selectBackgroundMusic(musicId) {
     saveCurrentStorybook();
 }
 
+// ============================================
+// 페이지 관련 함수
+// ============================================
+
+// 페이지 삭제
+function deletePage(pageIndex) {
+    if (!currentStorybook) return;
+    if (!confirm(`페이지 ${pageIndex + 1}을(를) 삭제하시겠습니까?`)) return;
+    
+    currentStorybook.pages.splice(pageIndex, 1);
+    saveCurrentStorybook();
+    displayStorybook(currentStorybook);
+}
+
+// 삽화 업로드
+function uploadIllustration(pageIndex) {
+    if (!currentStorybook) return;
+    uploadService.openPageIllustrationUploadModal(pageIndex);
+}
+
+// 페이지 TTS 업로드
+function uploadPageTTS(pageIndex) {
+    if (!currentStorybook) return;
+    uploadService.openPageTTSUploadModal(pageIndex);
+}
+
+// 페이지 삽화 프롬프트 업데이트
+function updatePageIllustrationPrompt(pageIndex, prompt) {
+    if (!currentStorybook) return;
+    currentStorybook.pages[pageIndex].illustrationPrompt = prompt;
+    saveCurrentStorybook();
+}
+
+// 일괄 삽화 업로드 모달 열기
+function openBatchIllustrationUpload() {
+    if (!currentStorybook) return;
+    uploadService.openBatchIllustrationUploadModal();
+}
+
     // ============================================
     // 전역 함수 노출 (HTML onclick에서 사용)
     // ============================================
@@ -6065,7 +6104,11 @@ function selectBackgroundMusic(musicId) {
     // window.addCharacter = addCharacter;  // ❌ 함수 정의 없음
     window.deleteCharacter = deleteCharacter;
     // window.addPage = addPage;  // ❌ 함수 정의 없음
-    // window.deletePage = deletePage;  // ❌ 함수 정의 없음
+    window.deletePage = deletePage;
+    window.uploadIllustration = uploadIllustration;
+    window.uploadPageTTS = uploadPageTTS;
+    window.updatePageIllustrationPrompt = updatePageIllustrationPrompt;
+    window.openBatchIllustrationUpload = openBatchIllustrationUpload;
     // window.goBack = goBack;  // ❌ 함수 정의 없음
     // window.toggleLanguage = toggleLanguage;  // ❌ 함수 정의 없음
     window.openBackgroundMusicModal = openBackgroundMusicModal;
