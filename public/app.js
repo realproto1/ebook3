@@ -8625,6 +8625,14 @@ function selectBackgroundMusic(musicId) {
     // window.removeBackgroundMusic = removeBackgroundMusic;  // ❌ 함수 정의 없음
     window.loadBackgroundMusicList = loadBackgroundMusicList;
     
+    // 드래그 앤 드롭 핸들러 전역 노출
+    window.handleDragStart = handleDragStart;
+    window.handleDragOver = handleDragOver;
+    window.handleDragEnter = handleDragEnter;
+    window.handleDragLeave = handleDragLeave;
+    window.handleDragEnd = handleDragEnd;
+    window.handleDrop = handleDrop;
+    
     })(); // IIFE 종료
 } else {
     console.warn('⚠️ app.js: 모듈 로드 대기 중... 전역 변수로 fallback');
