@@ -353,48 +353,49 @@ class DisplayService {
         return `
         <!-- Key Objects 섹션 -->
         <div class="bg-white rounded-3xl shadow-2xl p-4 md:p-10 mb-8">
-            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0 mb-4 md:mb-6">
-                <div class="flex-1">
-                    <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2 cursor-pointer flex items-center" onclick="toggleSection('keyobject-section')">
-                        <i id="keyobject-section-icon" class="fas fa-chevron-right mr-2 text-sm transition-transform"></i>
-                        <i class="fas fa-cube mr-2 text-orange-500"></i>
-                        핵심 사물 (Key Objects)
-                        <i class="fas fa-info-circle ml-2 text-gray-400 text-sm cursor-pointer hover:text-orange-500" 
-                           onclick="event.stopPropagation(); const el = document.getElementById('keyobject-info'); el.style.display = el.style.display === 'none' ? 'block' : 'none';"
-                           title="도움말"></i>
-                    </h3>
-                    <p id="keyobject-info" class="text-xs md:text-sm text-gray-600 mb-2" style="display: none;">
-                        <i class="fas fa-lightbulb mr-1 text-yellow-500"></i>
-                        스토리에서 중요한 물건들을 미리 생성하면 삽화에서 일관되게 표현할 수 있어요.
-                    </p>
-                    ${createModelSelect('keyobject', imageSettings.keyObjectModel || 'gemini-3-pro-image-preview', 'updateKeyObjectModel(this.value)')}
-                </div>
-                <div class="flex gap-2 md:gap-3">
-                    <button 
-                        onclick="generateAllKeyObjectImages()"
-                        class="bg-orange-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-orange-700 transition whitespace-nowrap text-sm md:text-base"
-                    >
-                        <i class="fas fa-images mr-1 md:mr-2"></i><span class="hidden sm:inline">모든 이미지 생성</span><span class="sm:hidden">전체 생성</span>
-                    </button>
-                    <button 
-                        onclick="downloadAllKeyObjectImages()"
-                        class="bg-green-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-green-700 transition whitespace-nowrap text-sm md:text-base"
-                    >
-                        <i class="fas fa-download mr-1 md:mr-2"></i><span class="hidden sm:inline">모두 다운로드</span><span class="sm:hidden">다운</span>
-                    </button>
-                    <button 
-                        onclick="bulkUploadKeyObjectImages()"
-                        class="bg-purple-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-purple-700 transition whitespace-nowrap text-sm md:text-base"
-                    >
-                        <i class="fas fa-upload mr-1 md:mr-2"></i><span class="hidden sm:inline">일괄 업로드</span><span class="sm:hidden">업로드</span>
-                    </button>
-                    <button 
-                        onclick="addNewKeyObject()"
-                        class="bg-blue-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-blue-700 transition whitespace-nowrap text-sm md:text-base"
-                    >
-                        <i class="fas fa-plus mr-1 md:mr-2"></i><span class="hidden sm:inline">사물 추가</span><span class="sm:hidden">추가</span>
-                    </button>
-                </div>
+            <!-- 제목과 모델 선택 -->
+            <div class="mb-4 md:mb-6">
+                <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2 cursor-pointer flex items-center" onclick="toggleSection('keyobject-section')">
+                    <i id="keyobject-section-icon" class="fas fa-chevron-right mr-2 text-sm transition-transform"></i>
+                    <i class="fas fa-cube mr-2 text-orange-500"></i>
+                    핵심 사물 (Key Objects)
+                    <i class="fas fa-info-circle ml-2 text-gray-400 text-sm cursor-pointer hover:text-orange-500" 
+                       onclick="event.stopPropagation(); const el = document.getElementById('keyobject-info'); el.style.display = el.style.display === 'none' ? 'block' : 'none';"
+                       title="도움말"></i>
+                </h3>
+                <p id="keyobject-info" class="text-xs md:text-sm text-gray-600 mb-2" style="display: none;">
+                    <i class="fas fa-lightbulb mr-1 text-yellow-500"></i>
+                    스토리에서 중요한 물건들을 미리 생성하면 삽화에서 일관되게 표현할 수 있어요.
+                </p>
+                ${createModelSelect('keyobject', imageSettings.keyObjectModel || 'gemini-3-pro-image-preview', 'updateKeyObjectModel(this.value)')}
+            </div>
+            
+            <!-- 버튼 그룹 -->
+            <div class="flex flex-wrap gap-2 md:gap-3 mb-4 md:mb-6">
+                <button 
+                    onclick="generateAllKeyObjectImages()"
+                    class="bg-orange-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-orange-700 transition whitespace-nowrap text-sm md:text-base"
+                >
+                    <i class="fas fa-images mr-1 md:mr-2"></i><span class="hidden sm:inline">모든 이미지 생성</span><span class="sm:hidden">전체 생성</span>
+                </button>
+                <button 
+                    onclick="downloadAllKeyObjectImages()"
+                    class="bg-green-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-green-700 transition whitespace-nowrap text-sm md:text-base"
+                >
+                    <i class="fas fa-download mr-1 md:mr-2"></i><span class="hidden sm:inline">모두 다운로드</span><span class="sm:hidden">다운</span>
+                </button>
+                <button 
+                    onclick="bulkUploadKeyObjectImages()"
+                    class="bg-purple-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-purple-700 transition whitespace-nowrap text-sm md:text-base"
+                >
+                    <i class="fas fa-upload mr-1 md:mr-2"></i><span class="hidden sm:inline">일괄 업로드</span><span class="sm:hidden">업로드</span>
+                </button>
+                <button 
+                    onclick="addNewKeyObject()"
+                    class="bg-blue-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-blue-700 transition whitespace-nowrap text-sm md:text-base"
+                >
+                    <i class="fas fa-plus mr-1 md:mr-2"></i><span class="hidden sm:inline">사물 추가</span><span class="sm:hidden">추가</span>
+                </button>
             </div>
 
             <div id="keyobject-section-content" class="hidden">
