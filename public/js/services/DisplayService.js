@@ -815,6 +815,9 @@ class DisplayService {
                         <button id="generate-all-tts-btn" onclick="generateAllTTS()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold flex items-center gap-2">
                             <i class="fas fa-volume-up"></i>전체 TTS 생성
                         </button>
+                        <button id="batch-tts-upload-btn" onclick="openBatchTTSUpload()" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition text-sm font-semibold flex items-center gap-2">
+                            <i class="fas fa-upload"></i>전체 TTS 업로드
+                        </button>
                         <button id="download-all-text-btn" onclick="downloadAllText()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-semibold flex items-center gap-2">
                             <i class="fas fa-download"></i>전체 텍스트 다운로드
                         </button>

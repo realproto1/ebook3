@@ -6116,6 +6116,12 @@ function openBatchIllustrationUpload() {
     uploadService.openBatchUploadModal(currentStorybook);
 }
 
+// 일괄 TTS 업로드 모달 열기
+function openBatchTTSUpload() {
+    if (!currentStorybook) return;
+    uploadService.openBatchTTSUploadModal(currentStorybook, window.currentLanguage);
+}
+
     // ============================================
     // 전역 함수 노출 (HTML onclick에서 사용)
     // ============================================
@@ -6200,6 +6206,7 @@ function openBatchIllustrationUpload() {
     window.uploadPageTTS = uploadPageTTS;
     window.updatePageIllustrationPrompt = updatePageIllustrationPrompt;
     window.openBatchIllustrationUpload = openBatchIllustrationUpload;
+    window.openBatchTTSUpload = openBatchTTSUpload;
     window.togglePageCharacterRef = togglePageCharacterRef;
     // window.goBack = goBack;  // ❌ 함수 정의 없음
     // window.toggleLanguage = toggleLanguage;  // ❌ 함수 정의 없음
