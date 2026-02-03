@@ -510,13 +510,15 @@ class DisplayService {
                 // 한국어: ttsAudio.url 또는 하위 호환용 audioUrl
                 displayTTSAudio = page.ttsAudio?.url || page.audioUrl || page.tts_audio || null;
             } else {
-                // 다른 언어
-                if (storybook.translations && 
-                    storybook.translations[currentLanguage] && 
-                    storybook.translations[currentLanguage][idx]) {
-                    const translation = storybook.translations[currentLanguage][idx];
-                    displayText = translation.text || translation || '';
-                    displayTTSAudio = page.ttsAudio?.[currentLanguage]?.url || translation.tts_audio || null;
+                // 다른 언어: pageNumber로 찾기 (배열 인덱스가 아님!)
+                if (storybook.translations && storybook.translations[currentLanguage]) {
+                    const translatedPage = storybook.translations[currentLanguage].find(
+                        p => p.pageNumber === page.pageNumber
+                    );
+                    if (translatedPage) {
+                        displayText = translatedPage.text || '';
+                        displayTTSAudio = translatedPage.tts_audio || null;
+                    }
                 }
             }
             
