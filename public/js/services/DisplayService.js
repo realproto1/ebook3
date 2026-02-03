@@ -307,7 +307,59 @@ class DisplayService {
         // 표지 섹션
         html += this.renderCoverSection(storybook);
         
+        // Key Object 섹션 (임시)
+        html += this.renderKeyObjectSection(storybook);
+        
+        // 페이지 섹션 (임시)
+        html += this.renderPageSection(storybook);
+        
         return html;
+    }
+    
+    /**
+     * Key Object 섹션 렌더링 (임시 플레이스홀더)
+     */
+    renderKeyObjectSection(storybook) {
+        return `
+            <div class="bg-white rounded-3xl shadow-2xl p-10 mb-8">
+                <h3 class="text-3xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-cube mr-2 text-orange-500"></i>
+                    핵심 사물 (Key Objects)
+                </h3>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                    <i class="fas fa-construction text-yellow-600 text-4xl mb-3"></i>
+                    <p class="text-lg text-gray-700 font-semibold">⚠️ 이 섹션은 아직 구현 중입니다</p>
+                    <p class="text-sm text-gray-600 mt-2">DisplayService 완성 후 사용 가능합니다.</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    /**
+     * 페이지 섹션 렌더링 (임시 플레이스홀더)
+     */
+    renderPageSection(storybook) {
+        return `
+            <div class="bg-white rounded-3xl shadow-2xl p-10 mb-8">
+                <h3 class="text-3xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-book mr-2 text-blue-500"></i>
+                    페이지별 편집
+                </h3>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                    <i class="fas fa-construction text-yellow-600 text-4xl mb-3"></i>
+                    <p class="text-lg text-gray-700 font-semibold">⚠️ 이 섹션은 아직 구현 중입니다</p>
+                    <p class="text-sm text-gray-600 mt-2">DisplayService 완성 후 사용 가능합니다.</p>
+                    <div class="mt-4 text-left bg-white p-4 rounded">
+                        <p class="text-sm font-semibold mb-2">페이지 목록:</p>
+                        ${storybook.pages.map((page, idx) => `
+                            <div class="text-xs text-gray-600 mb-1">
+                                <i class="fas fa-file-alt mr-2"></i>페이지 ${idx + 1}: ${page.text?.substring(0, 50) || '(내용 없음)'}...
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
     }
 }
 
