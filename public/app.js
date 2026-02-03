@@ -6113,7 +6113,7 @@ function updatePageIllustrationPrompt(pageIndex, prompt) {
 // 일괄 삽화 업로드 모달 열기
 function openBatchIllustrationUpload() {
     if (!currentStorybook) return;
-    uploadService.openBatchIllustrationUploadModal();
+    uploadService.openBatchUploadModal(currentStorybook);
 }
 
     // ============================================
