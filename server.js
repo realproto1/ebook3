@@ -3371,18 +3371,15 @@ app.delete('/api/storybooks/:id', async (req, res) => {
       console.log(`✅ Image deletion complete: ${deletedCount} deleted, ${failedCount} failed`);
     }
     
-    // 3️⃣ JSON 파일 삭제
-    try {
-      const deleteCommand = new DeleteObjectCommand({
-        Bucket: R2_BUCKET_NAME,
-        Key: filename
-      });
-      
-      await r2Client.send(deleteCommand);
-      console.log(`✅ Deleted JSON from R2: ${filename}`);
-    } catch (error) {
-      console.warn(`⚠️ Failed to delete JSON file:`, error.message);
-    }
+    // 3️⃣ JSON 파일 삭제 (필수 - 실패 시 전체 삭제 실패)
+    console.log(`🗑️ Deleting JSON file: ${filename}`);
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: filename
+    });
+    
+    await r2Client.send(deleteCommand);
+    console.log(`✅ Deleted JSON from R2: ${filename}`);
     
     // 4️⃣ 인덱스에서도 제거
     await removeFromStorybooksIndex(id);
