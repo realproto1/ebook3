@@ -1,116 +1,133 @@
-# 동화책 자동 생성기 v13.0 - 클라이언트 직접 이미지 생성
+# 탱고북 저작도구 (Tangobook Author Tool)
 
-AI 기반 유아 교육용 동화책 자동 생성 플랫폼 (클라이언트 측 이미지 생성으로 Vercel 제한 우회)
+AI 기반 유아 교육용 동화책 자동 생성 플랫폼
 
 ## 📖 프로젝트 개요
 
-**동화책 자동 생성기**는 Gemini 2.5 Flash AI를 활용하여 맞춤형 동화책을 자동으로 생성하는 웹 애플리케이션입니다. 캐릭터 일관성을 유지하면서 고품질의 삽화와 교육적 콘텐츠를 제공합니다.
-
-## 🎯 v13.0 주요 변경사항
-
-### 클라이언트 측 이미지 생성 (NEW!)
-- **브라우저에서 직접 Gemini API 호출**: 서버를 거치지 않고 직접 이미지 생성
-- **Vercel 서버리스 제한 우회**: 4.5MB payload 제한 해결
-- **서버 부하 감소**: 이미지 생성 트래픽이 서버를 거치지 않음
-- **빠른 응답 속도**: 중간 서버 없이 직접 API 통신
-- **자동 재시도 로직**: 500 에러 발생 시 최대 3회 자동 재시도 (지수 백오프)
-- **Blob URL 저장**: 생성된 이미지를 Blob URL로 로컬에 저장
-
-### 아키텍처 변경
-```
-기존: 브라우저 → Express 서버 → Gemini API → Express 서버 → 브라우저
-변경: 브라우저 → Gemini API → 브라우저 (이미지만)
-      브라우저 → Express 서버 → Gemini API → Express 서버 → 브라우저 (텍스트는 유지)
-```
+**탱고북 저작도구**는 Gemini AI를 활용하여 맞춤형 동화책을 자동으로 생성하는 웹 애플리케이션입니다. 캐릭터 일관성을 유지하면서 고품질의 삽화, TTS, 퀴즈, 배경음악까지 제공하는 올인원 동화책 제작 도구입니다.
 
 ## 🌟 주요 기능
 
 ### 1. AI 동화책 생성
 - **자동 스토리 생성**: Gemini 2.5 Flash 기반 창의적인 동화 스토리
 - **연령별 맞춤 콘텐츠**: 4-5세, 5-7세, 7-8세 연령대별 최적화
-- **참고 내용 입력**: 내용을 입력하면 이를 참조하여 스토리 생성
-- **10-12페이지 분량**: 적절한 분량의 완성도 높은 동화책
-- **7가지 그림체 프리셋**: 현대 일러스트, 수채화, 카툰, 전통 동화책, 애니메이션, 유화, 연필 스케치
-- **커스텀 그림체**: 직접 입력으로 원하는 스타일 지정 (예: Pixar style 3D animation)
+- **참고 내용 입력**: 기존 스토리를 참조하여 새로운 동화책 생성
+- **다양한 그림체**: 디즈니, 픽사, 수채화, 카툰, 전통 동화책, 유화 등
+- **커스텀 그림체**: 직접 입력으로 원하는 스타일 지정
 
-### 2. 캐릭터 레퍼런스 시스템 ⚡ CLIENT-SIDE
-- **클라이언트 직접 생성**: 브라우저에서 Gemini API 직접 호출
-- **멀티모달 이미지 참조**: Gemini 2.5 Flash Image로 일관된 캐릭터 생성
-- **캐릭터 관리**: 이름 편집, 추가, 삭제 기능
+### 2. 캐릭터 레퍼런스 시스템
+- **멀티모달 이미지 참조**: Gemini Image로 일관된 캐릭터 생성
+- **캐릭터 관리**: 이름 편집, 키 설정, 추가, 삭제 기능
 - **프롬프트 커스터마이징**: 각 캐릭터별 프롬프트 수정 가능
-- **다중 뷰 레퍼런스**: 정면, 측면, 3/4 뷰 + 3가지 표정
-- **자동 재시도**: 실패 시 최대 3회 자동 재시도
+- **히스토리 관리**: 이전 생성 이미지 보관 및 선택
+- **일괄 생성**: 모든 캐릭터 레퍼런스 한 번에 생성
 
-### 3. 페이지 삽화 생성 ⚡ CLIENT-SIDE
-- **클라이언트 직접 생성**: 브라우저에서 Gemini API 직접 호출
-- **수정사항 입력**: 각 페이지마다 수정사항 입력하여 이미지 수정
-- **캐릭터 일관성 보장**: 레퍼런스 이미지를 직접 참조하여 100% 일관성 유지
+### 3. 표지 이미지 생성
+- **커스텀 프롬프트**: 표지 설명 자유롭게 작성
+- **캐릭터 참조**: 선택한 캐릭터를 참조하여 표지 생성
+- **비율 선택**: 4:3, 3:4, 16:9, 9:16, 1:1 지원
+- **히스토리 관리**: 이전 표지 버전 보관 및 복원
+- **업로드 기능**: 직접 제작한 표지 업로드 가능
+
+### 4. Key Objects (핵심 사물) 시스템
+- **스토리 일관성**: 중요한 물건들을 미리 생성하여 일관성 유지
+- **크기 관리**: Small/Medium/Large 및 cm 단위 크기 설정
+- **설명 편집**: 각 사물의 이름, 한글명, 설명, 예문 수정 가능
+- **일괄 생성**: 모든 Key Object 이미지 한 번에 생성
+- **일괄 업로드**: 준비된 이미지들을 순서대로 일괄 업로드
+
+### 5. 페이지 삽화 생성
 - **구조화된 장면 설명**: 캐릭터&행동, 배경, 분위기로 세분화
-- **텍스트 편집 가능**: 모든 페이지 텍스트 실시간 수정
-- **배치 생성**: 모든 페이지 삽화를 한 번에 생성
-- **자동 재시도**: 실패 시 최대 3회 자동 재시도
+- **텍스트 편집**: 모든 페이지 텍스트 실시간 수정 (다국어 지원)
+- **수정사항 입력**: 각 페이지마다 수정 요청사항 입력
+- **캐릭터 일관성**: 레퍼런스와 Key Object를 참조하여 100% 일관성 유지
+- **일괄 생성**: 병렬/순차 생성 모드 선택 가능
+- **히스토리 관리**: 이전 버전 이미지 보관 및 선택
+- **일괄 업로드**: 페이지별 이미지 일괄 업로드
 
-### 4. 이미지 생성 설정
-- **이미지 비율**: 1:1, 4:3, 16:9, 3:4, 9:16 선택
-- **텍스트 제거 강조**: CRITICAL NO TEXT 옵션
-- **캐릭터 일관성 강조**: PIXEL-PERFECT 정확도 옵션
-- **추가 프롬프트**: 자유로운 스타일 커스터마이징
-- **이미지 품질**: 표준/고품질 선택
+### 6. TTS (Text-to-Speech)
+- **다중 TTS 엔진**: Gemini TTS, Minimax TTS, ElevenLabs TTS 지원
+- **음성 선택**: 다양한 음성 캐릭터 선택 가능
+- **음성 설정**: 톤, 속도, 스타일 커스터마이징
+- **다국어 지원**: 한국어, 영어, 일본어, 중국어 등
+- **일괄 생성**: 모든 페이지 TTS 한 번에 생성
+- **업로드 기능**: 직접 녹음한 오디오 업로드
+- **일괄 업로드**: 페이지별 오디오 일괄 업로드
 
-### 5. 교육 콘텐츠 (영어 단어 학습)
-- **단어 이름 수정**: 각 단어를 클릭하여 편집 가능
-- **개별 이미지 생성**: 각 단어마다 개별 생성/재생성
-- **배치 생성**: 모든 단어 이미지 한 번에 생성
-- **개별 다운로드**: 각 단어 이미지 개별 저장
-- **배치 다운로드**: 모든 단어 이미지 한 번에 다운로드
-- **8개 영어 단어**: 시각화 학습 지원
+### 7. 배경음악
+- **사전 제작 음악**: 다양한 분위기의 배경음악 라이브러리
+- **음악 미리듣기**: 선택 전 미리듣기 기능
+- **음악 선택**: 동화책에 어울리는 배경음악 선택
+- **업로드 기능**: 직접 제작한 배경음악 업로드
 
-### 6. 다운로드 기능
-- **전체 텍스트 다운로드**: .txt 형식으로 모든 페이지 저장
-- **전체 삽화 다운로드**: 모든 페이지 이미지 일괄 다운로드
-- **개별 다운로드**: 캐릭터/삽화/단어 이미지 개별 저장
+### 8. 퀴즈 생성
+- **자동 퀴즈 생성**: Key Objects 기반 자동 퀴즈 생성
+- **다양한 문제**: 순서 맞추기, 낱말 찾기, 어휘 학습 등
+- **난이도 선택**: 쉬움/보통/어려움
+- **정답 확인**: 퀴즈 정답 미리보기
+
+### 9. 다국어 번역
+- **자동 번역**: Gemini 번역 API로 고품질 번역
+- **지원 언어**: 영어, 일본어, 중국어, 스페인어, 프랑스어, 독일어
+- **언어 추가/삭제**: 필요한 언어만 선택하여 관리
+- **일괄 번역**: 모든 페이지 한 번에 번역
+- **TTS 지원**: 번역된 텍스트도 TTS 생성 가능
+
+### 10. 다운로드 기능
+- **전체 텍스트**: 모든 페이지 텍스트를 .txt 파일로 저장
+- **전체 오디오**: 모든 TTS 오디오 일괄 다운로드
+- **전체 삽화**: 모든 페이지 이미지 일괄 다운로드
+- **개별 다운로드**: 각 이미지/오디오 개별 저장
+- **캐릭터 레퍼런스**: 모든 캐릭터 레퍼런스 일괄 다운로드
+- **Key Object 이미지**: 모든 Key Object 이미지 일괄 다운로드
 
 ## 🛠️ 기술 스택
 
 ### Backend
-- **Node.js** + **Express**: RESTful API 서버 (스토리 생성만)
-- **Gemini 2.5 Flash**: 스토리 생성 AI
+- **Node.js** + **Express**: RESTful API 서버
+- **Cloudflare R2**: 이미지/오디오 파일 스토리지
+- **Gemini AI**: 스토리, 이미지, TTS 생성
 
-### Frontend ⚡ NEW!
+### Frontend
 - **HTML5** + **TailwindCSS**: 반응형 UI
-- **Vanilla JavaScript**: 동적 인터랙션
-- **Gemini Client (`gemini-client.js`)**: 클라이언트 측 이미지 생성
+- **Modular JavaScript**: 28개 모듈로 구성된 클린 아키텍처
 - **Axios**: HTTP 클라이언트
-- **LocalStorage**: 클라이언트 데이터 영속성 (이미지는 Blob URL로 저장)
+- **R2 Storage**: 데이터 영속성 (60권 이상 동화책 관리)
 
 ### AI Models
-- **Gemini 2.5 Flash**: 텍스트/스토리 생성 (서버 측)
-- **Gemini 2.5 Flash Image**: 이미지 생성 (클라이언트 측)
+- **Gemini 2.5 Flash**: 텍스트/스토리 생성
+- **Gemini 3 Pro Image**: 이미지 생성 (Nano Banana Pro)
+- **Gemini 2.5 Flash TTS**: 음성 합성
+- **Minimax TTS**: 고품질 다국어 TTS
+- **ElevenLabs TTS**: 프리미엄 TTS
 
-### DevOps
-- **PM2**: 프로세스 관리
-- **Git**: 버전 관리
-- **Vercel**: 프로덕션 배포
+### Architecture (리팩토링 완료)
+- **28개 모듈**: 단일 파일 9,365줄 → 28개 모듈 14,690줄
+- **코드 감소**: 30.7% (2,880줄 감소)
+- **Services (11개)**: ImageService, TTSService, TranslationService, QuizService, MusicService, DownloadService, SettingsService, ValidationService, CoverService, UploadService, DisplayService
+- **Managers (3개)**: CharacterManager, PageManager, StorybookManager
+- **Utils (4개)**: UIHelper, audio, dom, storage
+- **Games (4개)**: MemoryMatch, StoryQuiz, StorySequence, WordWriting
 
 ## 📦 설치 및 실행
 
 ### 요구사항
 - Node.js 18 이상
-- npm 또는 yarn
+- npm
 - **Gemini API 키** (필수)
+- **Cloudflare R2 계정** (스토리지)
 
 ### API 키 발급
 
-1. **Gemini API 키 발급**: https://makersuite.google.com/app/apikey
-2. "Create API Key" 클릭
-3. 생성된 API 키 복사
+1. **Gemini API 키**: https://makersuite.google.com/app/apikey
+2. **Cloudflare R2**: Cloudflare 대시보드에서 R2 활성화
 
 ### 설치
 
 ```bash
 # 저장소 클론
-git clone https://github.com/realproto1/ebook2.git
-cd ebook2
+git clone https://github.com/realproto1/ebook3.git
+cd ebook3
 
 # 의존성 설치
 npm install
@@ -120,26 +137,23 @@ cp .env.example .env
 
 # .env 파일 편집하여 API 키 입력
 # GEMINI_API_KEY=your_actual_api_key_here
+# R2_ACCOUNT_ID=your_r2_account_id
+# R2_ACCESS_KEY_ID=your_r2_access_key
+# R2_SECRET_ACCESS_KEY=your_r2_secret_key
+# R2_BUCKET_NAME=your_bucket_name
 ```
 
 ### 개발 서버 실행
 
 ```bash
-# 방법 1: 직접 실행
-npm start
-
-# 방법 2: PM2 사용 (권장)
+# PM2 사용 (권장)
 pm2 start ecosystem.config.cjs
+
+# 직접 실행
+npm start
 ```
 
 서버는 `http://localhost:3000`에서 실행됩니다.
-
-### ⚠️ 중요 보안 주의사항
-
-- **절대 API 키를 Git에 커밋하지 마세요**
-- `.env` 파일은 `.gitignore`에 포함되어 있습니다
-- API 키가 유출되면 즉시 새 키를 발급받으세요
-- 프로덕션 환경에서는 환경 변수로 API 키를 설정하세요
 
 ## 🎯 사용 방법
 
@@ -147,39 +161,50 @@ pm2 start ecosystem.config.cjs
 1. "새 동화책 만들기" 클릭
 2. 제목, 타겟 연령, 그림체 선택
 3. "동화책 생성하기" 버튼 클릭
-4. AI가 스토리, 캐릭터, 페이지를 자동 생성 (약 30초)
+4. AI가 스토리, 캐릭터, 페이지, Key Objects를 자동 생성
 
-### 2. 이미지 설정 조정 (선택사항)
-1. 오른쪽 상단 "설정" 버튼 클릭
-2. 이미지 비율, 텍스트 제거, 캐릭터 일관성 등 조정
-3. "저장" 클릭 (LocalStorage에 자동 저장)
+### 2. 캐릭터 레퍼런스 생성
+1. 각 캐릭터의 키(height) 설정 (선택사항)
+2. "모든 레퍼런스 생성" 클릭
+3. 생성된 이미지 확인 및 다운로드
 
-### 3. 캐릭터 레퍼런스 생성
-1. 각 캐릭터의 프롬프트 확인 및 수정 (선택사항)
-2. "모든 레퍼런스 생성" 클릭 (또는 개별 생성)
-3. 생성된 레퍼런스 이미지 확인 및 다운로드
+### 3. 표지 생성
+1. 참조할 캐릭터 선택
+2. 표지 프롬프트 작성 또는 수정
+3. 비율 선택 (권장: 3:4 세로)
+4. "표지 생성" 클릭
 
-### 4. 페이지 삽화 생성
+### 4. Key Objects 생성
+1. 각 사물의 크기(cm) 확인 및 수정
+2. "모든 이미지 생성" 클릭
+3. 생성된 이미지 확인
+
+### 5. 페이지 삽화 생성
 1. 각 페이지의 텍스트 및 장면 설명 확인/수정
-2. "모든 삽화 생성" 클릭 (또는 개별 생성)
-3. 생성된 삽화 확인 및 다운로드
+2. "모든 삽화 생성 (병렬)" 클릭 (빠름) 또는 "순차 생성" (안정적)
+3. 생성된 삽화 확인 및 히스토리에서 선택
 
-### 5. 다운로드
-- **전체 텍스트**: 모든 페이지 텍스트를 .txt 파일로 저장
-- **전체 삽화**: 모든 페이지 이미지를 PNG로 일괄 다운로드
-- **개별 이미지**: 각 캐릭터/삽화/단어 이미지 개별 다운로드
+### 6. TTS 생성
+1. TTS 엔진 및 음성 선택
+2. 음성 설정 조정 (선택사항)
+3. "모든 TTS 생성" 클릭
+4. 각 페이지에서 오디오 재생 테스트
 
-## 🎨 주요 개선사항 (v12.0)
+### 7. 번역 (선택사항)
+1. "언어 추가" 클릭
+2. 원하는 언어 선택
+3. "모든 페이지 번역" 클릭
+4. 번역된 텍스트 확인 및 수정
 
-| 항목 | 이전 버전 | v12.0 |
-|------|----------|-------|
-| 캐릭터 일관성 | 텍스트 설명 기반 (70% 일관성) | 멀티모달 이미지 참조 (100% 일관성) |
-| 장면 설명 | 단순 영어 설명 | 구조화된 한글 설명 (캐릭터/배경/분위기) |
-| 텍스트 편집 | 불가능 | 모든 페이지 텍스트 수정 가능 |
-| 캐릭터 관리 | 고정 | 이름 편집, 추가, 삭제 가능 |
-| 이미지 설정 | 고정 | 5가지 비율, 텍스트/일관성 강조, 커스텀 프롬프트 |
-| 배치 생성 | 없음 | 모든 레퍼런스/삽화 한 번에 생성 |
-| 다운로드 | 없음 | 개별 및 전체 다운로드 지원 |
+### 8. 퀴즈 생성 (선택사항)
+1. 난이도 선택
+2. "퀴즈 생성" 클릭
+3. 생성된 퀴즈 미리보기
+
+### 9. 다운로드
+- **전체 텍스트**: 모든 페이지 텍스트 저장
+- **전체 오디오**: 모든 TTS 다운로드
+- **전체 삽화**: 모든 이미지 다운로드
 
 ## 📊 프로젝트 구조
 
@@ -189,227 +214,117 @@ webapp/
 ├── package.json           # 프로젝트 메타데이터
 ├── ecosystem.config.cjs   # PM2 설정
 ├── .gitignore            # Git 제외 파일
-├── README.md             # 프로젝트 문서 (이 파일)
+├── README.md             # 프로젝트 문서
 └── public/
-    ├── index.html        # 프론트엔드 HTML
-    └── app.js            # 프론트엔드 JavaScript
+    ├── author.html       # 메인 HTML
+    ├── app.js            # 메인 JavaScript (6,485줄)
+    └── js/
+        ├── config/       # 설정 파일
+        │   └── models.js
+        ├── controllers/  # 컨트롤러
+        │   └── EditorController.js
+        ├── core/         # 핵심 기능
+        │   └── api.js
+        ├── games/        # 게임 모듈 (4개)
+        ├── managers/     # 매니저 (3개)
+        │   ├── CharacterManager.js
+        │   ├── PageManager.js
+        │   └── StorybookManager.js
+        ├── models/       # 데이터 모델
+        │   └── Storybook.js
+        ├── services/     # 서비스 (11개)
+        │   ├── CoverService.js
+        │   ├── DisplayService.js
+        │   ├── DownloadService.js
+        │   ├── ImageService.js
+        │   ├── MusicService.js
+        │   ├── QuizService.js
+        │   ├── SettingsService.js
+        │   ├── StoryService.js
+        │   ├── TranslationService.js
+        │   ├── TTSService.js
+        │   ├── UploadService.js
+        │   └── ValidationService.js
+        └── utils/        # 유틸리티 (4개)
+            ├── UIHelper.js
+            ├── audio.js
+            ├── dom.js
+            └── storage.js
 ```
 
-## 🔧 API 엔드포인트
+## 🔧 주요 API 엔드포인트
 
-### POST /api/generate-storybook
-동화책 스토리 생성
-```json
-{
-  "title": "용감한 토끼의 모험",
-  "targetAge": "5-7",
-  "artStyle": "Modern Illustration"
-}
-```
+### 스토리 생성
+- `POST /api/generate-storybook` - 동화책 스토리 자동 생성
 
-### POST /api/generate-character-image
-캐릭터 레퍼런스 이미지 생성
-```json
-{
-  "character": {
-    "name": "토끼",
-    "description": "A brave white rabbit..."
-  },
-  "artStyle": "Modern Illustration",
-  "settings": { "aspectRatio": "16:9", "enforceNoText": true }
-}
-```
+### 이미지 생성
+- `POST /api/generate-character-image` - 캐릭터 레퍼런스 생성
+- `POST /api/generate-cover` - 표지 이미지 생성
+- `POST /api/generate-key-object` - Key Object 이미지 생성
+- `POST /api/generate-illustration` - 페이지 삽화 생성
 
-### POST /api/generate-illustration
-페이지 삽화 생성
-```json
-{
-  "page": {
-    "scene_description": "A rabbit in the forest",
-    "scene_structure": {
-      "characters": "토끼가 당근을 발견함",
-      "background": "초록 숲속",
-      "atmosphere": "밝고 즐거운"
-    }
-  },
-  "artStyle": "Modern Illustration",
-  "characterReferences": [...],
-  "settings": { ... }
-}
-```
+### TTS 생성
+- `POST /api/generate-tts` - TTS 오디오 생성
+- `POST /api/generate-all-tts` - 모든 페이지 TTS 일괄 생성
 
-### POST /api/generate-vocabulary-images
-단어 학습 이미지 생성
-```json
-{
-  "vocabulary": ["apple", "tree", "friend", ...],
-  "artStyle": "Modern Illustration",
-  "settings": { ... }
-}
-```
+### 번역
+- `POST /api/translate-page` - 단일 페이지 번역
+- `POST /api/translate-all-pages` - 모든 페이지 일괄 번역
 
-## 🌐 데모
+### 퀴즈
+- `POST /api/generate-quiz` - Key Objects 기반 퀴즈 생성
 
-- **Vercel 프로덕션**: https://ebook2.vercel.app (배포 예정)
-- **GitHub**: https://github.com/realproto1/ebook2
+### 스토리지 (R2)
+- `GET /api/storybooks` - 모든 동화책 목록 조회
+- `POST /api/storybooks` - 동화책 저장
+- `DELETE /api/storybooks/:id` - 동화책 삭제
+- `POST /api/upload-image` - 이미지 업로드
+- `POST /api/upload-tts` - TTS 오디오 업로드
+- `POST /api/upload-background-music` - 배경음악 업로드
+
+## 🌐 배포
+
+### Production
+- **URL**: (배포 예정)
+- **GitHub**: https://github.com/realproto1/ebook3
 
 ## ⚠️ 중요 안내
 
-### LocalStorage 용량 제한
-- 브라우저 LocalStorage는 5-10MB 제한이 있습니다
-- **이미지는 저장되지 않습니다** (메타데이터만 저장)
-- 각 세션에서 이미지를 다시 생성해야 합니다
-- 또는 "다운로드" 기능으로 이미지를 로컬에 저장하세요
+### R2 스토리지
+- 현재 **60권 이상의 동화책**이 R2에 저장되어 있습니다
+- 평균 로드 시간: 1.2초 (20ms/권)
+- 이미지, 오디오 파일 모두 R2에 저장
+- 데이터 백업 권장
 
-### LocalStorage 초과 시 해결 방법
-브라우저 개발자 도구(F12)에서:
-```javascript
-localStorage.clear()
-location.reload()
-```
+### API 키 보안
+- **절대 API 키를 Git에 커밋하지 마세요**
+- `.env` 파일은 `.gitignore`에 포함되어 있습니다
+- API 키가 유출되면 즉시 새 키를 발급받으세요
+- 프로덕션 환경에서는 환경 변수로 API 키를 설정하세요
 
-## 🚀 배포
+## 🚀 최근 업데이트 (리팩토링)
 
-### Vercel 배포 (권장)
+### 코드 구조 개선
+- **Before**: 단일 파일 9,365줄
+- **After**: 28개 모듈 14,690줄 (app.js 6,485줄)
+- **감소**: 2,880줄 (30.7%)
 
-#### 1. Vercel에 프로젝트 임포트
-1. https://vercel.com 접속
-2. GitHub 계정으로 로그인
-3. "Import Project" → `ebook2` 저장소 선택
-4. "Deploy" 클릭
+### 수정된 버그 (10개)
+1. 중복 변수 선언 제거
+2. 잔재 코드 제거 (145줄)
+3. Key Object description undefined 오류
+4. Key Object API 형식 호환성
+5. MusicService axios 직접 사용
+6. 드래그 앤 드롭 핸들러 전역 노출
+7. 드래그 앤 드롭 순서 변경 정상화
+8. 문법 오류 수정
+9. handleArtStyleChange 전역 노출
+10. 21개 HTML 함수 전역 노출
 
-#### 2. 환경 변수 설정 (중요!)
-배포 전 또는 후에 환경 변수를 설정해야 합니다:
-
-**Vercel Dashboard에서:**
-1. 프로젝트 선택 → "Settings" → "Environment Variables"
-2. 다음 변수 추가:
-   - **Name**: `GEMINI_API_KEY`
-   - **Value**: `YOUR_GEMINI_API_KEY_HERE` (https://makersuite.google.com/app/apikey에서 발급)
-   - **Environment**: Production, Preview, Development 모두 선택
-3. "Save" 클릭
-4. 프로젝트 재배포 (Deployments → ... → Redeploy)
-
-**⚠️ 중요**: 
-- 절대 실제 API 키를 코드나 README에 포함하지 마세요
-- API 키는 Vercel 환경 변수로만 설정하세요
-- 유출된 키는 즉시 재발급 받으세요
-
-#### 3. 배포 완료
-- URL: `https://your-project.vercel.app`
-- 자동 HTTPS 적용
-- GitHub push 시 자동 재배포
-
-### PM2로 로컬 배포
-```bash
-# PM2 설치 (전역)
-npm install -g pm2
-
-# 앱 시작
-pm2 start ecosystem.config.cjs
-
-# 상태 확인
-pm2 list
-
-# 로그 확인
-pm2 logs storybook-generator --nostream
-
-# 재시작
-pm2 restart storybook-generator
-```
-
-## 🔍 에러 모니터링 및 디버깅
-
-### 실시간 에러 모니터링
-동화책 생성 중 에러를 실시간으로 확인:
-```bash
-cd /home/user/webapp
-./monitor-errors.sh
-```
-
-**기능**:
-- ❌ 에러 메시지 빨간색 강조
-- ⚠️ 경고 메시지 노란색 강조  
-- ✅ 성공 메시지 초록색 강조
-- 🤖 Gemini API 관련 메시지 표시
-- 🔥 503 Overload 강조
-- ⏱️ Timeout 강조
-
-종료: `Ctrl + C`
-
-### 에러 로그 분석
-최근 에러를 통계적으로 분석:
-```bash
-cd /home/user/webapp
-
-# 기본: 최근 100줄 분석
-./analyze-errors.sh
-
-# 최근 200줄 분석
-./analyze-errors.sh 200
-
-# 최근 500줄 분석
-./analyze-errors.sh 500
-```
-
-**분석 항목**:
-1. 📈 에러 통계 (총 에러, 경고, 타임아웃, 오버로드)
-2. 🔍 주요 에러 타입 (axios, parts, OTHER, 503, 524 등)
-3. 📋 최근 에러 메시지 (최대 10개)
-4. 🌐 API 호출 통계 (동화책/이미지/TTS 생성)
-5. 🤖 Gemini API 응답 통계 (STOP, OTHER, SAFETY)
-6. 🔄 재시도 통계
-7. ✅ 최근 성공 메시지
-8. 💡 권장 조치사항
-
-### 주요 에러 패턴 및 해결책
-
-#### 1. axios is not defined
-```
-ReferenceError: axios is not defined
-```
-**해결**: server.js에 `import axios from 'axios';` 추가 필요
-
-#### 2. parts is not an array
-```
-Invalid response structure: parts is not an array
-```
-**해결**: 최신 코드로 업데이트 (finishReason: OTHER 처리 로직 포함)
-
-#### 3. 503 Model Overloaded
-```
-The model is overloaded. Please try again later.
-```
-**해결**: 자동 재시도 작동 중 (3초, 6초, 9초 간격)
-
-#### 4. 524 Timeout
-```
-Request failed with status code 524
-```
-**해결**: 
-- 더 빠른 모델 사용 (`gemini-2.5-flash`)
-- 프롬프트 축소
-- 비동기 처리
-
-### 유용한 디버깅 명령어
-```bash
-# PM2 로그 최근 100줄 (non-blocking)
-pm2 logs --nostream --lines 100
-
-# 에러 로그만 확인
-pm2 logs --nostream --lines 100 --err
-
-# 특정 키워드 검색
-pm2 logs --nostream --lines 200 | grep -i "error\|timeout\|503"
-
-# 서버 재시작
-pm2 restart all
-
-# 포트 3000 정리
-fuser -k 3000/tcp 2>/dev/null || true
-```
-
-자세한 내용은 [ERROR_MONITORING.md](./ERROR_MONITORING.md) 참조
+### 성능 개선
+- **모듈화율**: 56%
+- **유지보수성**: 극대 향상
+- **코드 가독성**: 대폭 개선
 
 ## 📝 라이선스
 
@@ -418,7 +333,7 @@ MIT License
 ## 👨‍💻 개발자
 
 - **프로젝트 관리**: realproto1
-- **AI 엔진**: Google Gemini 2.5 Flash + Gemini 2.5 Flash Image
+- **AI 엔진**: Google Gemini 2.5 Flash + Gemini 3 Pro Image
 
 ## 🤝 기여
 
@@ -426,13 +341,10 @@ MIT License
 
 ## 📞 문의
 
-- GitHub Issues: https://github.com/realproto1/ebook2/issues
+- GitHub Issues: https://github.com/realproto1/ebook3/issues
 
 ---
 
-**마지막 업데이트**: 2025-01-15  
-**버전**: 12.0.0  
-**상태**: ✅ Active
-# Trigger Railway redeploy
-# Force redeploy Tue Jan 20 09:10:02 UTC 2026
-# Force redeploy Tue Jan 20 10:54:36 UTC 2026
+**마지막 업데이트**: 2026-02-03  
+**버전**: 14.0.0  
+**상태**: ✅ Active Development
