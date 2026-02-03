@@ -573,3 +573,7 @@ class DisplayService {
         </div>
         `;
     }
+}
+
+// 전역 인스턴스 생성
+window.displayService = new DisplayService();
