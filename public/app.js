@@ -5010,7 +5010,12 @@ function renderReviewLanguageContents() {
                                 <label class="block text-xs font-semibold text-blue-700 mb-1">
                                     <i class="fas fa-palette mr-1"></i>장면 설명
                                 </label>
-                                <div class="text-xs text-blue-900 leading-relaxed whitespace-pre-wrap">${illustrationPrompt}</div>
+                                <textarea
+                                    id="review-page-prompt-${lang}-${pageIdx}"
+                                    class="w-full p-2 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition resize-y text-xs bg-white"
+                                    rows="2"
+                                    onchange="updateReviewPagePrompt('${lang}', ${pageIdx}, this.value)"
+                                >${illustrationPrompt}</textarea>
                             </div>
                             ` : ''}
                             
@@ -5072,6 +5077,18 @@ function updateReviewPageText(lang, pageIdx, newText) {
     reviewStorybookData.translations[lang][pageIdx].text = newText.trim();
     
     console.log(`✅ Review 페이지 ${pageIdx + 1} (${lang}) 텍스트 업데이트됨`);
+}
+
+// Review 페이지 장면 설명 업데이트
+function updateReviewPagePrompt(lang, pageIdx, newPrompt) {
+    // 한국어 페이지만 장면 설명 수정 가능
+    if (lang !== 'ko') return;
+    
+    // 실제 pages 데이터 업데이트
+    if (reviewStorybookData.pages && reviewStorybookData.pages[pageIdx]) {
+        reviewStorybookData.pages[pageIdx].illustrationPrompt = newPrompt.trim();
+        console.log(`✅ Review 페이지 ${pageIdx + 1} 장면 설명 업데이트됨`);
+    }
 }
 
 // Review 페이지 삭제
@@ -6118,6 +6135,8 @@ function openBatchIllustrationUpload() {
     window.duplicateStorybookById = duplicateStorybookById;
     window.addReviewNewPage = addReviewNewPage;
     window.deleteReviewPage = deleteReviewPage;
+    window.updateReviewPageText = updateReviewPageText;
+    window.updateReviewPagePrompt = updateReviewPagePrompt;
     window.switchLanguage = switchLanguage;
     window.switchReviewLanguage = switchReviewLanguage;
     window.translateAllPages = translateAllPages;
