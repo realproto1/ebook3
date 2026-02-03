@@ -293,6 +293,18 @@ class DisplayService {
             historyCount: (storybook.coverImageHistory || []).length
         });
         
+        console.log('🔍 UIHelper 상태:', {
+            exists: !!UIHelper,
+            type: typeof UIHelper,
+            hasRenderStorybookHeader: !!(UIHelper && UIHelper.renderStorybookHeader),
+            hasRenderMusicSection: !!(UIHelper && UIHelper.renderMusicSection)
+        });
+        
+        if (!UIHelper) {
+            console.error('❌ UIHelper를 찾을 수 없습니다!');
+            return '<div class="p-10 text-center text-red-600"><h2>오류: UIHelper를 로드할 수 없습니다</h2></div>';
+        }
+        
         let html = '';
         
         // 헤더
@@ -312,6 +324,11 @@ class DisplayService {
         
         // 페이지 섹션 (임시)
         html += this.renderPageSection(storybook);
+        
+        console.log('✅ HTML 생성 완료:', {
+            htmlLength: html.length,
+            htmlPreview: html.substring(0, 200) + '...'
+        });
         
         return html;
     }

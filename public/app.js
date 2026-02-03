@@ -1387,10 +1387,27 @@ function displayStorybook(storybook) {
     // HTML 렌더링
     const html = displayService.renderStorybook(storybook);
     
+    console.log('📝 HTML 렌더링 결과:', {
+        htmlLength: html.length,
+        htmlType: typeof html,
+        hasContent: html.length > 0
+    });
+    
     // DOM에 삽입
     const resultDiv = document.getElementById('storybookResult');
+    console.log('🎯 DOM 타겟:', {
+        found: !!resultDiv,
+        id: resultDiv?.id,
+        currentContent: resultDiv?.innerHTML.substring(0, 100)
+    });
+    
     if (resultDiv) {
+        // hidden 클래스 제거하여 표시
+        resultDiv.classList.remove('hidden');
         resultDiv.innerHTML = html;
+        console.log('✅ DOM에 HTML 삽입 완료');
+    } else {
+        console.error('❌ storybookResult 요소를 찾을 수 없습니다!');
     }
     
     // 표지 이미지 업데이트 (히스토리 포함)
