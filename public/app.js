@@ -72,6 +72,13 @@ if (window.api) {
         // SettingsService 초기화
         const settingsService = new window.SettingsService();
         settingsService.init();
+        
+        // ValidationService 초기화
+        const validationService = new window.ValidationService();
+        validationService.init();
+        
+        // CoverService 초기화
+        const coverService = window.coverService;
 
 // ============================================
 // 전역 변수
@@ -413,44 +420,11 @@ async function generatePageTTS(pageIndex) {
     }
 }
 
-// 표지 모델 변경
-function updateCoverModel(value) {
-    imageSettings.coverModel = value;
-    saveImageSettings();
-    console.log('✅ 표지 모델 변경:', value);
-}
-
-// 표지 프롬프트 생성
+// 표지 관련 함수들 (CoverService 래퍼)
 function buildCoverPrompt(storybook) {
-    const title = storybook.title || '동화책';
-    const theme = storybook.theme || '';
-    const artStyle = storybook.artStyle || 'Disney animation style';
-    const characters = storybook.characters.map(c => c.name).join(', ');
-    
-    return `Create a beautiful, professional book cover illustration for a children's storybook.
-
-**Book Title:** ${title}
-**Theme:** ${theme}
-**Art Style:** ${artStyle}
-
-**Main Characters:** ${characters}
-
-**Cover Requirements:**
-- Eye-catching, vibrant illustration that captures the story's essence
-- Show the main characters in an engaging scene
-- Magical, inviting atmosphere suitable for children ages 4-8
-- Professional book cover quality
-- Composition suitable for a vertical book cover layout
-
-**DO NOT include:**
-- Any text, title, or letters on the cover
-- Book spine or binding elements
-- Just pure illustration
-
-Create a captivating cover illustration that makes children want to read this story!`;
+    return coverService.buildCoverPrompt(storybook);
 }
 
-// 표지 프롬프트 초기화
 function resetCoverPrompt() {
     if (!currentStorybook) return;
     const promptTextarea = document.getElementById('cover-prompt');
@@ -461,397 +435,37 @@ function resetCoverPrompt() {
     }
 }
 
-// 표지 캐릭터 참조 토글
 function toggleCoverCharacterRef(charIndex, checked) {
     if (!currentStorybook) return;
-    
-    if (!currentStorybook.coverCharacterRefs) {
-        currentStorybook.coverCharacterRefs = [];
-    }
-    
-    if (checked) {
-        if (!currentStorybook.coverCharacterRefs.includes(charIndex)) {
-            currentStorybook.coverCharacterRefs.push(charIndex);
-        }
-    } else {
-        currentStorybook.coverCharacterRefs = currentStorybook.coverCharacterRefs.filter(i => i !== charIndex);
-    }
-    
-    saveCurrentStorybook();
-    console.log('✅ 표지 캐릭터 참조 업데이트:', currentStorybook.coverCharacterRefs);
+    coverService.toggleCoverCharacterRef(currentStorybook, charIndex, checked, saveCurrentStorybook);
 }
 
-// 표지 업로드 모달
-let currentCoverUploadTab = 'file';
-
 function openCoverUploadModal() {
-    currentCoverUploadTab = 'file';
-    document.getElementById('coverUploadModal').classList.remove('hidden');
-    switchCoverUploadTab('file');
+    coverService.openCoverUploadModal();
 }
 
 function closeCoverUploadModal() {
-    document.getElementById('coverUploadModal').classList.add('hidden');
-    document.getElementById('coverFileInput').value = '';
-    document.getElementById('coverUrlInput').value = '';
+    coverService.closeCoverUploadModal();
 }
 
 function switchCoverUploadTab(tab) {
-    currentCoverUploadTab = tab;
-    
-    // 탭 버튼 스타일
-    const fileTab = document.getElementById('coverFileTab');
-    const urlTab = document.getElementById('coverUrlTab');
-    
-    if (tab === 'file') {
-        fileTab.classList.add('border-indigo-600', 'text-indigo-600');
-        fileTab.classList.remove('border-transparent', 'text-gray-500');
-        urlTab.classList.remove('border-indigo-600', 'text-indigo-600');
-        urlTab.classList.add('border-transparent', 'text-gray-500');
-        
-        document.getElementById('coverFileUploadArea').classList.remove('hidden');
-        document.getElementById('coverUrlUploadArea').classList.add('hidden');
-    } else {
-        urlTab.classList.add('border-indigo-600', 'text-indigo-600');
-        urlTab.classList.remove('border-transparent', 'text-gray-500');
-        fileTab.classList.remove('border-indigo-600', 'text-indigo-600');
-        fileTab.classList.add('border-transparent', 'text-gray-500');
-        
-        document.getElementById('coverUrlUploadArea').classList.remove('hidden');
-        document.getElementById('coverFileUploadArea').classList.add('hidden');
-    }
+    coverService.switchCoverUploadTab(tab);
 }
 
 async function uploadCover() {
-    if (!currentStorybook) return;
-    
-    const uploadBtn = document.getElementById('coverUploadBtn');
-    
-    try {
-        let imageUrl = '';
-        
-        if (currentCoverUploadTab === 'file') {
-            // 파일 업로드
-            const fileInput = document.getElementById('coverFileInput');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                alert('파일을 선택해주세요.');
-                return;
-            }
-            
-            uploadBtn.disabled = true;
-            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>업로드 중...';
-            
-            const formData = new FormData();
-            formData.append('image', file);
-            formData.append('storybookId', currentStorybook.id);
-            formData.append('storybookTitle', currentStorybook.title);
-            formData.append('type', 'cover');
-            
-            const response = await axios.post('/api/upload-image', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-            
-            if (response.data.success) {
-                imageUrl = response.data.imageUrl;
-            } else {
-                throw new Error(response.data.error || '이미지 업로드 실패');
-            }
-        } else {
-            // URL 입력
-            const urlInput = document.getElementById('coverUrlInput');
-            const url = urlInput.value.trim();
-            
-            if (!url) {
-                alert('URL을 입력해주세요.');
-                return;
-            }
-            
-            // URL 유효성 검사
-            try {
-                new URL(url);
-            } catch (e) {
-                alert('올바른 URL을 입력해주세요.');
-                return;
-            }
-            
-            uploadBtn.disabled = true;
-            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>업로드 중...';
-            
-            imageUrl = url;
-        }
-        
-        // 표지 이미지 저장
-        currentStorybook.coverImage = imageUrl;
-        await saveCurrentStorybook();
-        
-        // UI 업데이트
-        displayStorybook(currentStorybook);
-        
-        closeCoverUploadModal();
-        
-        showNotification('✅ 표지 이미지가 업로드되었습니다.', 'success');
-    } catch (error) {
-        console.error('Cover upload error:', error);
-        alert('이미지 업로드 중 오류가 발생했습니다: ' + (error.message || '알 수 없는 오류'));
-    } finally {
-        uploadBtn.disabled = false;
-        uploadBtn.innerHTML = '<i class="fas fa-upload mr-2"></i>업로드';
-    }
+    await coverService.uploadCover(currentStorybook, saveCurrentStorybook, displayStorybook);
 }
 
-// 표지 이미지 생성
 async function generateCoverImage() {
-    if (!currentStorybook) {
-        alert('동화책을 먼저 선택해주세요.');
-        return;
-    }
-    
-    const promptTextarea = document.getElementById('cover-prompt');
-    const customPrompt = promptTextarea ? promptTextarea.value.trim() : '';
-    
-    if (!customPrompt) {
-        alert('표지 프롬프트를 입력해주세요.');
-        return;
-    }
-    
-    // 선택된 비율 가져오기 (기본값: 4:3)
-    const aspectRatioSelect = document.getElementById('cover-aspect-ratio');
-    const aspectRatio = aspectRatioSelect ? aspectRatioSelect.value : '4:3';
-    
-    // 선택된 비율 저장
-    currentStorybook.coverAspectRatio = aspectRatio;
-    
-    console.log(`📐 표지 비율: ${aspectRatio}`);
-    
-    const coverDisplay = document.getElementById('cover-image-display');
-    coverDisplay.innerHTML = '<div class="flex flex-col items-center justify-center h-full p-6"><div class="animate-spin rounded-full h-16 w-16 border-b-4 border-white mb-3"></div><p class="text-white text-sm font-semibold">AI가 표지를 생성하는 중...</p><p class="text-white text-xs opacity-75 mt-1">실패 시 자동으로 재시도합니다</p></div>';
-    
-    try {
-        // 참조할 캐릭터 레퍼런스 수집
-        const characterReferences = [];
-        if (currentStorybook.coverCharacterRefs && currentStorybook.coverCharacterRefs.length > 0) {
-            currentStorybook.coverCharacterRefs.forEach(charIdx => {
-                const char = currentStorybook.characters[charIdx];
-                if (char && char.referenceImage) {
-                    characterReferences.push(char.referenceImage);
-                }
-            });
-        }
-        
-        console.log(`📚 표지 생성 시작 - 참조 캐릭터: ${characterReferences.length}개`);
-        
-        // 재생성인 경우 기존 표지 이미지도 참조로 추가
-        if (currentStorybook.coverImage) {
-            console.log('🔄 재생성 모드: 기존 표지를 레퍼런스로 추가');
-            characterReferences.push(currentStorybook.coverImage);
-        }
-        
-        // 🔥 서버 API 호출 (R2 업로드 포함)
-        const response = await axios.post('/api/generate-cover', {
-            title: currentStorybook.title,
-            artStyle: currentStorybook.artStyle || '디즈니 스타일',
-            characterReferences: characterReferences,
-            settings: {
-                aspectRatio: aspectRatio,  // 사용자가 선택한 비율 사용
-                enforceNoText: true,
-                coverModel: imageSettings.coverModel || 'gemini-3-pro-image-preview'  // 표지 모델 전달
-            },
-            customPrompt: customPrompt,
-            storybookId: currentStorybook.id
-        });
-        
-        if (response.data.success && response.data.imageUrl) {
-            const imageUrl = response.data.imageUrl; // R2 URL
-            
-            // 히스토리에 추가 (최대 10개 유지)
-            if (!currentStorybook.coverImageHistory) {
-                currentStorybook.coverImageHistory = [];
-            }
-            
-            console.log('🖼️ 표지 생성 전 상태:', {
-                currentCover: currentStorybook.coverImage ? '있음' : '없음',
-                historyCount: currentStorybook.coverImageHistory.length
-            });
-            
-            // 현재 표지가 있고, 새 이미지와 다르면 히스토리에 추가
-            if (currentStorybook.coverImage && currentStorybook.coverImage !== imageUrl) {
-                // 히스토리에 이미 같은 URL이 있는지 확인 (중복 방지)
-                if (!currentStorybook.coverImageHistory.includes(currentStorybook.coverImage)) {
-                    currentStorybook.coverImageHistory.unshift(currentStorybook.coverImage);
-                    console.log('✅ 이전 표지를 히스토리에 추가');
-                } else {
-                    console.log('⚠️ 이전 표지가 이미 히스토리에 있음 (중복 방지)');
-                }
-                
-                // 10개 초과 시 가장 오래된 이미지 삭제 요청
-                if (currentStorybook.coverImageHistory.length > 10) {
-                    const oldestImageUrl = currentStorybook.coverImageHistory[10];
-                    
-                    // 서버에 삭제 요청 (비동기, 실패해도 계속 진행)
-                    if (oldestImageUrl && oldestImageUrl.includes('r2.dev')) {
-                        axios.delete('/api/cleanup-image', {
-                            data: { imageUrl: oldestImageUrl }
-                        }).catch(err => {
-                            console.warn('⚠️ 히스토리 이미지 삭제 실패:', err.message);
-                        });
-                    }
-                    
-                    // 배열에서 제거
-                    currentStorybook.coverImageHistory = currentStorybook.coverImageHistory.slice(0, 10);
-                    console.log('🗑️ 오래된 히스토리 이미지 정리 완료');
-                }
-            }
-            
-            currentStorybook.coverImage = imageUrl;
-            currentStorybook.coverPrompt = customPrompt;
-            
-            console.log('🖼️ 표지 생성 후 상태:', {
-                currentCover: currentStorybook.coverImage,
-                historyCount: currentStorybook.coverImageHistory.length,
-                historyUrls: currentStorybook.coverImageHistory.slice(0, 3)
-            });
-            
-            saveCurrentStorybook();
-            
-            // UI 업데이트 (표지 이미지만 업데이트하여 섹션 열림 상태 유지)
-            updateCoverImageDisplay();
-            
-            showNotification('success', '표지 생성 완료!', '동화책 표지가 생성되었습니다.');
-            console.log(`✅ 표지 이미지 생성 완료 (R2 업로드 포함)`);
-        } else {
-            throw new Error(response.data.error || '이미지 URL을 받지 못했습니다.');
-        }
-    } catch (error) {
-        console.error('표지 생성 오류:', error);
-        
-        let errorMsg = error.message || '알 수 없는 오류';
-        
-        // 서버에서 온 상세 에러 메시지 추출
-        if (error.response && error.response.data && error.response.data.error) {
-            errorMsg = error.response.data.error;
-        }
-        
-        // API 키 관련 에러 처리
-        if (errorMsg.includes('API key') || errorMsg.includes('403') || errorMsg.includes('PERMISSION_DENIED')) {
-            errorMsg = 'API 키 오류: Gemini API 키가 만료되었거나 유효하지 않습니다. 새로운 API 키가 필요합니다.';
-        }
-        
-        coverDisplay.innerHTML = `
-            <div class="text-center p-6">
-                <i class="fas fa-exclamation-triangle text-6xl text-white opacity-50 mb-4"></i>
-                <p class="text-white text-sm font-bold mb-2">⚠️ 생성 실패</p>
-                <p class="text-white text-xs opacity-75 mb-1">${errorMsg}</p>
-                ${errorMsg.includes('API 키') ? `
-                    <p class="text-white text-xs opacity-90 mt-3 bg-white bg-opacity-10 p-3 rounded">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        새 API 키 발급: <a href="https://makersuite.google.com/app/apikey" target="_blank" class="underline">Google AI Studio</a>
-                    </p>
-                ` : ''}
-                <button 
-                    onclick="generateCoverImage()"
-                    class="mt-4 bg-white text-indigo-600 px-4 py-2 rounded-lg font-semibold hover:bg-opacity-90 transition"
-                >
-                    <i class="fas fa-redo mr-2"></i>재시도
-                </button>
-            </div>
-        `;
-        
-        // 알림도 표시
-        showNotification('❌ ' + errorMsg, 'error');
-    }
+    await coverService.generateCoverImage(currentStorybook, imageSettings, saveCurrentStorybook, updateCoverImageDisplay);
 }
 
-// 히스토리에서 표지 이미지 선택
 function selectCoverImageFromHistory(historyIndex) {
-    const selectedImage = currentStorybook.coverImageHistory[historyIndex];
-    
-    console.log('🔄 히스토리에서 선택:', {
-        선택된_인덱스: historyIndex,
-        선택된_이미지: selectedImage,
-        현재_표지: currentStorybook.coverImage,
-        히스토리_개수: currentStorybook.coverImageHistory.length
-    });
-    
-    // 현재 표지와 선택한 이미지가 같으면 아무것도 안 함 (중복 방지)
-    if (currentStorybook.coverImage === selectedImage) {
-        console.log('⚠️ 이미 같은 이미지입니다. 교환하지 않음.');
-        return;
-    }
-    
-    // 현재 표지를 히스토리에 추가
-    currentStorybook.coverImageHistory.splice(historyIndex, 1); // 선택된 항목 제거
-    currentStorybook.coverImageHistory.unshift(currentStorybook.coverImage); // 현재 표지를 맨 앞에 추가
-    
-    // 선택한 이미지를 현재 표지로 설정
-    currentStorybook.coverImage = selectedImage;
-    
-    console.log('✅ 표지 교환 완료:', {
-        새_표지: currentStorybook.coverImage,
-        히스토리_개수: currentStorybook.coverImageHistory.length
-    });
-    
-    saveCurrentStorybook();
-    
-    // 표지 이미지 부분만 업데이트 (전체 페이지 재렌더링 안 함)
-    updateCoverImageDisplay();
-    
-    showNotification('success', '표지 변경 완료', '이전 버전이 현재 표지로 설정되었습니다.');
+    coverService.selectCoverImageFromHistory(currentStorybook, historyIndex, saveCurrentStorybook, updateCoverImageDisplay);
 }
 
-// 표지 이미지 디스플레이만 업데이트 (섹션 열림 상태 유지)
 function updateCoverImageDisplay() {
-    const coverDisplay = document.getElementById('cover-image-display');
-    if (!coverDisplay || !currentStorybook) {
-        console.warn('⚠️ updateCoverImageDisplay: coverDisplay 또는 currentStorybook이 없음', {
-            coverDisplay: !!coverDisplay,
-            currentStorybook: !!currentStorybook
-        });
-        return;
-    }
-    
-    console.log('🔄 updateCoverImageDisplay 호출:', {
-        coverImage: currentStorybook.coverImage,
-        historyCount: (currentStorybook.coverImageHistory || []).length
-    });
-    
-    const history = currentStorybook.coverImageHistory || [];
-    
-    if (currentStorybook.coverImage) {
-        coverDisplay.innerHTML = `
-            <div class="flex gap-2 h-full">
-                <!-- 메인 이미지 -->
-                <div class="flex-1 relative group">
-                    <img src="${currentStorybook.coverImage}" alt="표지" class="w-full h-full object-cover rounded-lg"/>
-                    <button 
-                        onclick="downloadImage('${currentStorybook.coverImage}', '${currentStorybook.title}_표지.png')"
-                        class="absolute top-3 right-3 bg-white bg-opacity-90 text-indigo-600 w-12 h-12 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
-                        title="다운로드"
-                    >
-                        <i class="fas fa-download text-lg"></i>
-                    </button>
-                </div>
-                ${history.length > 0 ? `
-                    <!-- 히스토리 -->
-                    <div class="w-24 overflow-y-auto space-y-2 p-1" style="scrollbar-width: thin; scrollbar-color: rgba(99, 102, 241, 0.5) rgba(99, 102, 241, 0.1);">
-                        ${history.map((url, histIdx) => `
-                            <div class="relative group cursor-pointer border-2 border-transparent hover:border-indigo-400 rounded transition" onclick="selectCoverImageFromHistory(${histIdx})" title="이전 버전 ${histIdx + 1}">
-                                <img src="${url}" alt="이전 ${histIdx + 1}" class="w-full h-20 object-cover rounded"/>
-                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition rounded flex items-center justify-center">
-                                    <i class="fas fa-check text-white opacity-0 group-hover:opacity-100 transition"></i>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                ` : ''}
-            </div>
-        `;
-    } else {
-        coverDisplay.innerHTML = '<div class="flex items-center justify-center h-full"><div class="text-center p-6"><i class="fas fa-book-open text-6xl text-white opacity-50 mb-4"></i><p class="text-white text-sm">표지 이미지 생성 대기중</p></div></div>';
-    }
+    coverService.updateCoverImageDisplay(currentStorybook);
 }
 
 // 페이지 로드 시 초기화
@@ -7806,94 +7420,28 @@ function applyBookFilters() {
 }
 
 // 동화책 완성도 계산 (간단 버전)
+// 완성도 계산 (ValidationService 사용)
 function calculateCompletionRate(book) {
-    if (!book || !book.pages) return 0;
-    
-    // 사용 가능한 언어 목록
-    const availableLanguages = ['ko'];
-    if (book.translations && typeof book.translations === 'object') {
-        availableLanguages.push(...Object.keys(book.translations));
-    }
-    
-    // 각 항목 카운트
-    const characterTotal = book.characters?.length || 0;
-    const characterWithImage = book.characters?.filter(c => c.referenceImage).length || 0;
-    
-    const keyObjectTotal = book.key_objects?.length || 0;
-    const keyObjectWithImage = book.keyObjectImages?.filter(img => img?.imageUrl).length || 0;
-    
-    const pageTotal = book.pages.length;
-    const illustrationCount = book.pages.filter(p => p.illustrationImage).length;
-    
-    // 언어별 텍스트/TTS 카운트
-    let textCount = 0;
-    let ttsCount = 0;
-    
-    availableLanguages.forEach(lang => {
-        book.pages.forEach((page, idx) => {
-            // 텍스트 체크
-            if (lang === 'ko') {
-                if (page.text && page.text.trim()) textCount++;
-            } else {
-                const translatedText = book.translations?.[lang]?.[idx];
-                if (translatedText && typeof translatedText === 'string' && translatedText.trim()) {
-                    textCount++;
-                }
-            }
-            
-            // TTS 체크
-            if (lang === 'ko') {
-                if (page.audioUrl) ttsCount++;
-            } else {
-                if (page.translatedAudioUrls?.[lang]) ttsCount++;
-            }
-        });
-    });
-    
-    // 총 항목 및 완료 항목
-    const totalItems = 
-        characterTotal + 
-        keyObjectTotal + 
-        pageTotal + // 삽화
-        (availableLanguages.length * pageTotal) + // 텍스트
-        (availableLanguages.length * pageTotal) + // TTS
-        1; // 표지
-    
-    const completedItems = 
-        characterWithImage + 
-        keyObjectWithImage + 
-        illustrationCount + 
-        textCount + 
-        ttsCount + 
-        (book.coverImage ? 1 : 0);
-    
-    return totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+    return validationService.calculateCompletionRate(book);
 }
 
-// 완성도에 따른 버튼 색상 반환
+// 완성도 버튼 색상 (ValidationService 사용)
 function getCompletionButtonColor(book) {
-    const rate = calculateCompletionRate(book);
-    
-    if (rate >= 90) {
-        // 90% 이상: 진한 파란색
-        return 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800';
-    } else if (rate >= 70) {
-        // 70-89%: 파란색
-        return 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600';
-    } else if (rate >= 50) {
-        // 50-69%: 초록색
-        return 'bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600';
-    } else if (rate >= 30) {
-        // 30-49%: 주황색
-        return 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600';
-    } else {
-        // 0-29%: 빨간색
-        return 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600';
-    }
+    return validationService.getCompletionButtonColor(book);
 }
 
-// 동화책 완성도 확인 팝업
+// 동화책 상태 확인 (ValidationService 사용)
 function checkStorybookStatus(bookId) {
+    validationService.checkStorybookStatus(bookId, storybooks);
+}
+
+// 상태 팝업 닫기
+function closeStatusPopup() {
+    const popup = document.getElementById('statusPopup');
+    if (popup) {
+        popup.remove();
+    }
+}
     const book = storybooks.find(b => b.id === bookId);
     if (!book) {
         alert('동화책을 찾을 수 없습니다.');
@@ -8577,6 +8125,7 @@ function selectBackgroundMusic(musicId) {
     // 기타 함수 전역 노출
     window.updateStorybookCategory = updateStorybookCategory;
     window.updateTTSModelDescription = updateTTSModelDescription;
+    window.checkStorybookStatus = checkStorybookStatus;
     
     })(); // IIFE 종료
 } else {
