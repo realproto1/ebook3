@@ -270,6 +270,13 @@ function updateVocabularyModel(value) {
     console.log('✅ 8단어 학습 모델 변경:', value);
 }
 
+// 표지 이미지 모델 변경
+function updateCoverModel(value) {
+    imageSettings.coverModel = value;
+    saveImageSettings();
+    console.log('✅ 표지 이미지 모델 변경:', value);
+}
+
 // TTS 모델 선택 HTML 생성 (설명 포함)
 function createTTSModelSelect(currentModel, pageIndex) {
     const modelOptions = TTS_MODELS.map(model => 
