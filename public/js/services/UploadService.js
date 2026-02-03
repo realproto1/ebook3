@@ -588,7 +588,7 @@ class UploadService {
             // 서버에 저장 및 UI 업데이트
             if (successCount > 0) {
                 try {
-                    await axios.put(`/api/storybooks/${storybook.id}`, storybook);
+                    await axios.post('/api/storybooks', storybook);
                     console.log('✅ 일괄 업로드 후 저장 완료');
                     
                     // UI 업데이트
