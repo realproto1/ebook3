@@ -598,7 +598,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 삽화 업로드 모달 이벤트
     const uploadIllustrationBtn = document.getElementById('uploadIllustrationBtn');
     if (uploadIllustrationBtn) {
-        uploadIllustrationBtn.addEventListener('click', uploadIllustration);
+        uploadIllustrationBtn.addEventListener('click', executeIllustrationUpload);
     }
     
     const closeIllustrationUploadModalBtn = document.getElementById('closeIllustrationUploadModalBtn');
@@ -1891,10 +1891,6 @@ function switchUploadTab(tab) {
     uploadService.switchUploadTab(tab);
 }
 
-async function uploadIllustration() {
-    await uploadService.uploadIllustration(currentStorybook, saveCurrentStorybook, displayStorybook);
-}
-
 function openBatchUploadModal() {
     uploadService.openBatchUploadModal(currentStorybook);
 }
@@ -1903,6 +1899,7 @@ function cancelBatchUpload() {
     uploadService.cancelBatchUpload();
 }
 
+// 캐릭터 업로드 실행 (모달 내부에서 호출)
 async function uploadCharacter() {
     await uploadService.uploadIllustration(currentStorybook, saveCurrentStorybook, displayStorybook);
 }
@@ -6226,9 +6223,15 @@ function deletePage(pageIndex) {
 }
 
 // 삽화 업로드
+// 삽화 업로드 모달 열기
 function uploadIllustration(pageIndex) {
     if (!currentStorybook) return;
     uploadService.openIllustrationUploadModal(pageIndex);
+}
+
+// 삽화 업로드 실행 (모달 내부에서 호출)
+async function executeIllustrationUpload() {
+    await uploadService.uploadIllustration(currentStorybook, saveCurrentStorybook, displayStorybook);
 }
 
 // 페이지 TTS 업로드
@@ -6392,6 +6395,7 @@ function downloadPageTTS(pageIndex) {
     // window.addPage = addPage;  // ❌ 함수 정의 없음
     window.deletePage = deletePage;
     window.uploadIllustration = uploadIllustration;
+    window.executeIllustrationUpload = executeIllustrationUpload;
     window.uploadPageTTS = uploadPageTTS;
     window.downloadIllustration = downloadIllustration;
     window.downloadPageTTS = downloadPageTTS;
