@@ -5384,7 +5384,7 @@ async function translateAllPages() {
         hasTranslations: !!currentStorybook.translations,
         hasCurrentLang: !!currentStorybook.translations?.[window.currentLanguage],
         translationCount: currentStorybook.translations?.[window.currentLanguage]?.length || 0,
-        window.currentLanguage: window.currentLanguage
+        currentLanguage: window.currentLanguage
     });
     
     for (let i = 0; i < currentStorybook.pages.length; i++) {
