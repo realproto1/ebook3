@@ -663,6 +663,48 @@ class DisplayService {
                                 placeholder="삽화 프롬프트를 입력하세요..."
                             >${page.illustrationPrompt || ''}</textarea>
                         </div>
+                        
+                        <!-- 캐릭터 레퍼런스 선택 -->
+                        ${storybook.characters && storybook.characters.length > 0 ? `
+                        <div class="mt-3">
+                            <button 
+                                onclick="togglePageSection('ref-chars-${idx}')"
+                                class="w-full flex items-center justify-between text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 p-2 rounded-lg transition"
+                            >
+                                <span><i class="fas fa-users mr-1"></i>캐릭터 레퍼런스 (선택)</span>
+                                <i id="ref-chars-${idx}-icon" class="fas fa-chevron-down text-xs transition-transform"></i>
+                            </button>
+                            <div id="ref-chars-${idx}-content" class="hidden mt-2 bg-purple-50 border-2 border-purple-200 rounded-lg p-3">
+                                <p class="text-[10px] text-gray-600 mb-2"><i class="fas fa-info-circle mr-1"></i>삽화 생성 시 참조할 캐릭터를 선택하세요</p>
+                                <div class="grid grid-cols-2 gap-2">
+                                    ${storybook.characters.map((char, charIdx) => {
+                                        if (!char.referenceImage) return '';
+                                        return `
+                                        <label class="relative cursor-pointer group">
+                                            <input 
+                                                type="checkbox" 
+                                                id="page-char-ref-${idx}-${charIdx}"
+                                                onchange="togglePageCharacterRef(${idx}, ${charIdx}, this.checked)"
+                                                class="absolute top-2 left-2 w-4 h-4 z-10"
+                                                ${page.characterRefs && page.characterRefs.includes(charIdx) ? 'checked' : ''}
+                                            />
+                                            <div class="border-2 rounded-lg overflow-hidden transition ${page.characterRefs && page.characterRefs.includes(charIdx) ? 'border-purple-500 ring-2 ring-purple-300' : 'border-gray-300 group-hover:border-purple-400'}">
+                                                <img 
+                                                    src="${char.referenceImage}" 
+                                                    alt="${char.name}"
+                                                    class="w-full h-20 object-cover"
+                                                />
+                                                <div class="bg-white px-2 py-1 text-center">
+                                                    <p class="text-[10px] font-semibold text-gray-700 truncate">${char.name}</p>
+                                                </div>
+                                            </div>
+                                        </label>
+                                        `;
+                                    }).join('') || '<p class="text-gray-400 text-[10px] col-span-2 text-center py-2">레퍼런스 이미지가 있는 캐릭터가 없습니다</p>'}
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
             </div>

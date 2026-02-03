@@ -6109,6 +6109,7 @@ function openBatchIllustrationUpload() {
     window.uploadPageTTS = uploadPageTTS;
     window.updatePageIllustrationPrompt = updatePageIllustrationPrompt;
     window.openBatchIllustrationUpload = openBatchIllustrationUpload;
+    window.togglePageCharacterRef = togglePageCharacterRef;
     // window.goBack = goBack;  // ❌ 함수 정의 없음
     // window.toggleLanguage = toggleLanguage;  // ❌ 함수 정의 없음
     window.openBackgroundMusicModal = openBackgroundMusicModal;
