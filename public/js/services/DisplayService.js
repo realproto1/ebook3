@@ -503,15 +503,20 @@ class DisplayService {
         const renderPageCard = (page, idx) => {
             // 현재 언어의 텍스트 가져오기
             let displayText = page.text || '';
-            let displayTTSAudio = page.tts_audio || null;
+            let displayTTSAudio = null;
             
-            if (currentLanguage !== 'ko') {
+            // TTS 오디오 가져오기
+            if (currentLanguage === 'ko') {
+                // 한국어: ttsAudio.url 또는 하위 호환용 audioUrl
+                displayTTSAudio = page.ttsAudio?.url || page.audioUrl || page.tts_audio || null;
+            } else {
+                // 다른 언어
                 if (storybook.translations && 
                     storybook.translations[currentLanguage] && 
                     storybook.translations[currentLanguage][idx]) {
                     const translation = storybook.translations[currentLanguage][idx];
                     displayText = translation.text || translation || '';
-                    displayTTSAudio = translation.tts_audio || null;
+                    displayTTSAudio = page.ttsAudio?.[currentLanguage]?.url || translation.tts_audio || null;
                 }
             }
             
