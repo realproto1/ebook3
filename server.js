@@ -1029,6 +1029,16 @@ ${referenceContent}
     storybook.createdAt = new Date().toISOString();
     storybook.category = ''; // 카테고리 초기화 (빈 문자열)
     
+    // 🎨 scene_description을 illustrationPrompt에 복사 (UI 호환성)
+    if (storybook.pages && Array.isArray(storybook.pages)) {
+      storybook.pages.forEach(page => {
+        if (page.scene_description && !page.illustrationPrompt) {
+          page.illustrationPrompt = page.scene_description;
+        }
+      });
+      console.log(`✅ Scene descriptions → illustration prompts 복사 완료`);
+    }
+    
     // 다국어 번역 처리
     if (languages.length > 1 || (languages.length === 1 && languages[0] !== 'ko')) {
       console.log(`🌍 다국어 번역 시작: ${languages.join(', ')}`);
@@ -2840,6 +2850,11 @@ app.get('/api/storybooks/:id', async (req, res) => {
       // TTS base64 데이터 제거 (응답 크기 최적화)
       if (storybook.pages && Array.isArray(storybook.pages)) {
         storybook.pages.forEach(page => {
+          // 🎨 scene_description을 illustrationPrompt에 복사 (기존 동화책 호환성)
+          if (page.scene_description && !page.illustrationPrompt) {
+            page.illustrationPrompt = page.scene_description;
+          }
+          
           if (page.ttsAudio) {
             // base64 인라인 데이터 체크 및 제거
             if (typeof page.ttsAudio.url === 'string' && page.ttsAudio.url.startsWith('data:audio/')) {
