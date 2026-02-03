@@ -113,7 +113,13 @@ class DisplayService {
                             <i class="fas fa-trash text-sm md:text-base"></i>
                         </button>
                     </div>
-                    <p class="text-white text-xs md:text-sm mb-3 md:mb-4 opacity-90">${char.description.substring(0, 80)}...</p>
+                    <textarea 
+                        id="char-desc-${idx}"
+                        onchange="updateCharacterDescription(${idx}, this.value)"
+                        class="w-full text-white text-xs md:text-sm mb-3 md:mb-4 opacity-90 bg-white bg-opacity-10 border border-white border-opacity-30 rounded p-2 focus:outline-none focus:border-opacity-60"
+                        rows="2"
+                        placeholder="캐릭터 설명을 입력하세요..."
+                    >${char.description}</textarea>
                     <div id="char-ref-${idx}" class="mb-3 md:mb-4 min-h-[150px] md:min-h-[200px] bg-white bg-opacity-20 rounded-lg overflow-hidden">
                         ${char.referenceImage ? `
                             <div class="flex gap-2 h-[150px] md:h-[200px]">

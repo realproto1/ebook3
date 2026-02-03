@@ -1653,6 +1653,14 @@ function updateCharacterHeight(charIndex, height) {
     }
 }
 
+function updateCharacterDescription(charIndex, description) {
+    if (description.trim()) {
+        currentStorybook.characters[charIndex].description = description.trim();
+        saveCurrentStorybook();
+        console.log(`✅ Character description updated: ${currentStorybook.characters[charIndex].name}`);
+    }
+}
+
 function deleteCharacter(charIndex) {
     try {
         const deleted = characterManager.deleteCharacter(currentStorybook, charIndex);
@@ -6434,6 +6442,9 @@ function openBatchTTSUpload() {
     // window.updateStoryTitle = updateStoryTitle;  // ❌ 함수 정의 없음
     // window.updateCoverPrompt = updateCoverPrompt;  // ❌ 함수 정의 없음
     // window.addCharacter = addCharacter;  // ❌ 함수 정의 없음
+    window.updateCharacterName = updateCharacterName;
+    window.updateCharacterHeight = updateCharacterHeight;
+    window.updateCharacterDescription = updateCharacterDescription;
     window.deleteCharacter = deleteCharacter;
     // window.addPage = addPage;  // ❌ 함수 정의 없음
     window.deletePage = deletePage;
