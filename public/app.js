@@ -68,6 +68,10 @@ if (window.api) {
         // DownloadService 초기화
         const downloadService = new window.DownloadService();
         downloadService.init({ api });
+        
+        // SettingsService 초기화
+        const settingsService = new window.SettingsService();
+        settingsService.init();
 
 // ============================================
 // 전역 변수
@@ -76,21 +80,8 @@ let storybooks = [];
 let currentStorybook = null;
 let currentLanguage = 'ko'; // 현재 표시 중인 언어 (기본: 한국어)
 let backgroundMusicList = []; // 배경음악 목록
-let imageSettings = {
-    aspectRatio: '16:9',
-    enforceNoText: true,
-    enforceCharacterConsistency: true,
-    additionalPrompt: '',
-    imageQuality: 'high',
-    imageModel: 'gemini-3-pro-image-preview',  // 기본값: Nano Banana Pro (Gemini 3 Pro Image Preview)
-    characterModel: 'gemini-3-pro-image-preview',  // 캐릭터 레퍼런스 모델
-    keyObjectModel: 'gemini-3-pro-image-preview',  // Key Object 모델
-    illustrationModel: 'gemini-3-pro-image-preview',  // 페이지 삽화 모델
-    vocabularyModel: 'gemini-3-pro-image-preview',  // 8단어 학습 모델
-    coverModel: 'gemini-3-pro-image-preview',  // 표지 모델
-    geminiTTSModel: 'gemini-2.5-flash-preview-tts',  // Gemini TTS 생성 모델 (기본값)
-    ttsModel: 'Aoede',  // TTS Voice (Gemini TTS Voice) - 여성 목소리
-    ttsVoiceConfig: '여성 목소리, 부드럽고 따뜻한 톤, 동화 낭독 스타일, 적당한 속도로 또박또박, 어린이가 이해하기 쉽게'  // TTS 음성 설정
+// imageSettings는 이제 settingsService.settings로 대체됨
+let imageSettings = settingsService.getSettings();
 };
 
 // ============================================
@@ -1025,164 +1016,32 @@ function togglePageSection(sectionId) {
 }
 
 // 이미지 설정 관련 함수
+// 설정 관련 함수들은 SettingsService로 이동됨
 function loadImageSettings() {
-    const saved = localStorage.getItem('imageSettings');
-    if (saved) {
-        imageSettings = JSON.parse(saved);
-        
-        // 유효하지 않은 모델 설정 자동 수정
-        const validModels = IMAGE_MODELS.map(m => m.value);
-        const invalidModels = ['gemini-2.5-flash-image', 'gemini-2.0-flash-exp', 'gemini-2.5-flash', 'gemini-2.5-pro'];
-        
-        // 각 모델 설정 검증 및 수정
-        ['coverModel', 'characterModel', 'keyObjectModel', 'illustrationModel', 'vocabularyModel'].forEach(key => {
-            if (imageSettings[key] && (invalidModels.includes(imageSettings[key]) || !validModels.includes(imageSettings[key]))) {
-                console.warn(`⚠️ 유효하지 않은 ${key} 감지: ${imageSettings[key]} → gemini-3-pro-image-preview로 자동 수정`);
-                imageSettings[key] = 'gemini-3-pro-image-preview';
-            }
-        });
-        
-        // 수정된 설정 저장
-        saveImageSettings();
-    }
+    settingsService.loadSettings();
+    imageSettings = settingsService.getSettings();
 }
 
 function saveImageSettings() {
-    localStorage.setItem('imageSettings', JSON.stringify(imageSettings));
+    settingsService.saveSettings();
 }
 
 function openSettings() {
-    document.getElementById('imageAspectRatio').value = imageSettings.aspectRatio;
-    document.getElementById('enforceNoText').checked = imageSettings.enforceNoText;
-    document.getElementById('enforceCharacterConsistency').checked = imageSettings.enforceCharacterConsistency;
-    document.getElementById('additionalPrompt').value = imageSettings.additionalPrompt;
-    document.getElementById('imageQuality').value = imageSettings.imageQuality;
-    
-    // 각 섹션별 모델 선택값 복원 (요소가 있을 때만)
-    const characterModelSelect = document.getElementById('characterModelSelect');
-    if (characterModelSelect) {
-        characterModelSelect.value = imageSettings.characterModel || 'gemini-3-pro-image-preview';
-    }
-    
-    const keyObjectModelSelect = document.getElementById('keyObjectModelSelect');
-    if (keyObjectModelSelect) {
-        keyObjectModelSelect.value = imageSettings.keyObjectModel || 'gemini-3-pro-image-preview';
-    }
-    
-    const illustrationModelSelect = document.getElementById('illustrationModelSelect');
-    if (illustrationModelSelect) {
-        illustrationModelSelect.value = imageSettings.illustrationModel || 'gemini-3-pro-image-preview';
-    }
-    
-    const vocabularyModelSelect = document.getElementById('vocabularyModelSelect');
-    if (vocabularyModelSelect) {
-        vocabularyModelSelect.value = imageSettings.vocabularyModel || 'gemini-3-pro-image-preview';
-    }
-    
-    // TTS 모델 선택값 복원
-    const ttsModelSelect = document.getElementById('ttsModelSelect');
-    if (ttsModelSelect) {
-        ttsModelSelect.value = imageSettings.ttsModel || 'Puck';
-        updateTTSModelDescription(ttsModelSelect.value);
-    }
-    
-    // API 키 로드 (localStorage에서)
-    const savedApiKey = localStorage.getItem('gemini_api_key') || '';
-    const geminiApiKeyInput = document.getElementById('geminiApiKey');
-    if (geminiApiKeyInput) {
-        geminiApiKeyInput.value = savedApiKey;
-    }
-    
-    document.getElementById('settingsModal').classList.remove('hidden');
+    settingsService.openSettingsModal();
 }
 
 function closeSettings(event) {
-    if (!event || event.target.id === 'settingsModal') {
-        document.getElementById('settingsModal').classList.add('hidden');
-    }
+    settingsService.closeSettingsModal(event);
 }
 
 function saveSettings() {
-    // 기본 이미지 설정 저장 (null 체크)
-    const aspectRatioEl = document.getElementById('imageAspectRatio');
-    const enforceNoTextEl = document.getElementById('enforceNoText');
-    const enforceCharacterEl = document.getElementById('enforceCharacterConsistency');
-    const additionalPromptEl = document.getElementById('additionalPrompt');
-    const imageQualityEl = document.getElementById('imageQuality');
-    
-    if (aspectRatioEl) imageSettings.aspectRatio = aspectRatioEl.value;
-    if (enforceNoTextEl) imageSettings.enforceNoText = enforceNoTextEl.checked;
-    if (enforceCharacterEl) imageSettings.enforceCharacterConsistency = enforceCharacterEl.checked;
-    if (additionalPromptEl) imageSettings.additionalPrompt = additionalPromptEl.value;
-    if (imageQualityEl) imageSettings.imageQuality = imageQualityEl.value;
-    
-    // 각 섹션별 모델 설정 저장 (null 체크)
-    const characterModelEl = document.getElementById('characterModelSelect');
-    const keyObjectModelEl = document.getElementById('keyObjectModelSelect');
-    const illustrationModelEl = document.getElementById('illustrationModelSelect');
-    const vocabularyModelEl = document.getElementById('vocabularyModelSelect');
-    
-    if (characterModelEl) imageSettings.characterModel = characterModelEl.value;
-    if (keyObjectModelEl) imageSettings.keyObjectModel = keyObjectModelEl.value;
-    if (illustrationModelEl) imageSettings.illustrationModel = illustrationModelEl.value;
-    if (vocabularyModelEl) imageSettings.vocabularyModel = vocabularyModelEl.value;
-    
-    // TTS 모델 설정 저장
-    const ttsModelSelect = document.getElementById('ttsModelSelect');
-    if (ttsModelSelect) {
-        imageSettings.ttsModel = ttsModelSelect.value;
-    }
-    
-    console.log('💾 이미지 설정 저장:', imageSettings);
-    
-    // API 키 저장 (localStorage에, null 체크)
-    const geminiApiKeyEl = document.getElementById('geminiApiKey');
-    const apiKey = geminiApiKeyEl ? geminiApiKeyEl.value.trim() : '';
-    if (apiKey) {
-        localStorage.setItem('gemini_api_key', apiKey);
-        // gemini-client.js의 GEMINI_API_KEY 업데이트
-        if (typeof GEMINI_API_KEY !== 'undefined') {
-            GEMINI_API_KEY = apiKey;
-            console.log('✅ 커스텀 Gemini API 키 적용됨');
-        }
-    } else {
-        localStorage.removeItem('gemini_api_key');
-        // 기본 키로 복원 (서버에서 다시 가져오기)
-        if (typeof initGeminiAPIKey === 'function') {
-            initGeminiAPIKey();
-            console.log('✅ 기본 Gemini API 키로 복원');
-        }
-    }
-    
-    saveImageSettings();
-    closeSettings();
-    showNotification('success', '설정 저장 완료', '설정이 성공적으로 저장되었습니다.');
+    settingsService.saveSettingsFromUI();
+    imageSettings = settingsService.getSettings(); // 동기화
 }
 
 function resetSettings() {
-    if (confirm('모든 설정을 기본값으로 복원하시겠습니까?\n\n⚠️ 주의: API 키도 기본값으로 복원됩니다.')) {
-        imageSettings = {
-            aspectRatio: '16:9',
-            enforceNoText: true,
-            enforceCharacterConsistency: true,
-            additionalPrompt: '',
-            imageQuality: 'high',
-            imageModel: 'gemini-3-pro-image-preview'  // Nano Banana Pro
-        };
-        
-        // API 키 초기화
-        localStorage.removeItem('gemini_api_key');
-        document.getElementById('geminiApiKey').value = '';
-        
-        // 기본 키로 복원
-        if (typeof initGeminiAPIKey === 'function') {
-            initGeminiAPIKey();
-        }
-        
-        saveImageSettings();
-        openSettings();
-        showNotification('success', '설정 복원 완료', '모든 설정이 기본값으로 복원되었습니다.');
-    }
+    settingsService.resetSettings();
+    imageSettings = settingsService.getSettings(); // 동기화
 }
 
 // 스토리북 관리
