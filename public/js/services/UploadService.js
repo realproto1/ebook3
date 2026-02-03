@@ -513,7 +513,7 @@ class UploadService {
         this.batchUploadCancelled = false;
         this.batchUploadInProgress = true;
         
-        const btn = document.getElementById('batch-upload-btn');
+        const btn = document.getElementById('batch-illust-upload-btn');
         const originalHTML = btn?.innerHTML;
         
         let successCount = 0;
@@ -582,6 +582,24 @@ class UploadService {
                     window.showNotification('success', '일괄 업로드 완료', `${successCount}개 이미지가 업로드되었습니다.`);
                 } else {
                     window.showNotification('warning', '일괄 업로드 완료', `성공: ${successCount}개, 실패: ${failCount}개`);
+                }
+            }
+            
+            // 서버에 저장 및 UI 업데이트
+            if (successCount > 0) {
+                try {
+                    await axios.put(`/api/storybooks/${storybook.id}`, storybook);
+                    console.log('✅ 일괄 업로드 후 저장 완료');
+                    
+                    // UI 업데이트
+                    if (window.displayStorybook && window.currentStorybook) {
+                        window.displayStorybook(window.currentStorybook);
+                    }
+                } catch (error) {
+                    console.error('❌ 저장 실패:', error);
+                    if (window.showNotification) {
+                        window.showNotification('error', '저장 실패', '이미지는 업로드되었지만 저장에 실패했습니다.');
+                    }
                 }
             }
             
