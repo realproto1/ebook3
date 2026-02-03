@@ -79,6 +79,9 @@ if (window.api) {
         
         // CoverService 초기화
         const coverService = window.coverService;
+        
+        // UploadService 초기화
+        const uploadService = window.uploadService;
 
 // ============================================
 // 전역 변수
@@ -2807,33 +2810,78 @@ function updateVocabularyPrompt(value) {
     console.log('✅ 학습 단어 프롬프트 업데이트:', value);
 }
 
-// 삽화 업로드 모달 관련 변수
-let currentUploadPageIndex = null;
-let currentUploadCharIndex = null;
-let currentUploadType = 'illustration'; // 'illustration', 'character', 'cover'
-let currentUploadTab = 'file';
+// ============================================
+// 업로드 관련 함수들 (UploadService 래퍼)
+// ============================================
 
-// 일괄 업로드 관련 변수
-let batchUploadCancelled = false;
-let batchUploadInProgress = false;
-
-// 삽화 업로드 모달 열기
 function openIllustrationUploadModal(pageIndex) {
-    currentUploadPageIndex = pageIndex;
-    currentUploadCharIndex = null;
-    currentUploadType = 'illustration';
-    const modal = document.getElementById('illustrationUploadModal');
-    const title = modal.querySelector('h2');
-    title.innerHTML = '<i class="fas fa-upload mr-3 text-blue-600"></i>삽화 이미지 업로드';
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    
-    // 기본 탭으로 설정
-    switchUploadTab('file');
+    uploadService.openIllustrationUploadModal(pageIndex);
 }
 
-// 캐릭터 레퍼런스 업로드 모달 열기
+function closeIllustrationUploadModal() {
+    uploadService.closeIllustrationUploadModal();
+}
+
 function openCharacterUploadModal(charIndex) {
+    uploadService.openCharacterUploadModal(charIndex);
+}
+
+function closeCharacterUploadModal() {
+    uploadService.closeCharacterUploadModal();
+}
+
+function switchCharacterUploadTab(tab) {
+    uploadService.switchCharacterUploadTab(tab);
+}
+
+function openCoverImageUploadModal() {
+    uploadService.openCoverImageUploadModal();
+}
+
+function openTTSUploadModal(pageIndex) {
+    uploadService.openTTSUploadModal(pageIndex);
+}
+
+function closeTTSUploadModal() {
+    uploadService.closeTTSUploadModal();
+}
+
+function switchTTSUploadTab(tab) {
+    uploadService.switchTTSUploadTab(tab);
+}
+
+async function uploadTTSAudio() {
+    await uploadService.uploadTTSAudio(currentStorybook, currentLanguage, saveCurrentStorybook, displayStorybook);
+}
+
+function switchUploadTab(tab) {
+    uploadService.switchUploadTab(tab);
+}
+
+async function uploadIllustration() {
+    await uploadService.uploadIllustration(currentStorybook, saveCurrentStorybook, displayStorybook);
+}
+
+function openBatchUploadModal() {
+    uploadService.openBatchUploadModal(currentStorybook);
+}
+
+function cancelBatchUpload() {
+    uploadService.cancelBatchUpload();
+}
+
+async function uploadCharacter() {
+    // uploadCharacter는 이미 다른 곳에서 다르게 구현되어 있으므로 제거하지 않음
+    if (!currentStorybook) {
+        alert('동화책을 먼저 선택해주세요.');
+        return;
+    }
+    
+    const charIndex = uploadService.currentUploadCharIndex;
+    if (charIndex === null || charIndex === undefined) {
+        alert('캐릭터를 선택해주세요.');
+        return;
+    }
     currentUploadPageIndex = null;
     currentUploadCharIndex = charIndex;
     currentUploadType = 'character';
@@ -2847,526 +2895,6 @@ function openCharacterUploadModal(charIndex) {
     switchUploadTab('file');
 }
 
-// 표지 업로드 모달 열기
-function openCoverImageUploadModal() {
-    currentUploadPageIndex = null;
-    currentUploadCharIndex = null;
-    currentUploadType = 'cover';
-    const modal = document.getElementById('illustrationUploadModal');
-    const title = modal.querySelector('h2');
-    title.innerHTML = '<i class="fas fa-upload mr-3 text-indigo-600"></i>표지 이미지 업로드';
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    
-    // 기본 탭으로 설정
-    switchUploadTab('file');
-}
-
-// 삽화 업로드 모달 닫기
-function closeIllustrationUploadModal() {
-    const modal = document.getElementById('illustrationUploadModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-    
-    // 입력 초기화
-    document.getElementById('illustrationFileInput').value = '';
-    document.getElementById('illustrationUrlInput').value = '';
-    currentUploadPageIndex = null;
-    currentUploadCharIndex = null;
-    currentUploadType = 'illustration';
-}
-
-// 캐릭터 업로드 모달 닫기
-function closeCharacterUploadModal() {
-    const modal = document.getElementById('illustrationUploadModal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
-    
-    // 입력 초기화
-    const fileInput = document.getElementById('illustrationFileInput');
-    const urlInput = document.getElementById('illustrationUrlInput');
-    if (fileInput) fileInput.value = '';
-    if (urlInput) urlInput.value = '';
-    currentUploadPageIndex = null;
-    currentUploadCharIndex = null;
-    currentUploadType = 'character';
-}
-
-// 캐릭터 업로드 탭 전환
-function switchCharacterUploadTab(tab) {
-    const fileTab = document.querySelector('[onclick*="switchCharacterUploadTab(\'file\')"]');
-    const urlTab = document.querySelector('[onclick*="switchCharacterUploadTab(\'url\')"]');
-    const fileArea = document.getElementById('illustrationFileUploadArea');
-    const urlArea = document.getElementById('illustrationUrlUploadArea');
-    
-    if (tab === 'file') {
-        if (fileTab) {
-            fileTab.classList.add('bg-purple-600', 'text-white');
-            fileTab.classList.remove('bg-gray-200', 'text-gray-700');
-        }
-        if (urlTab) {
-            urlTab.classList.remove('bg-purple-600', 'text-white');
-            urlTab.classList.add('bg-gray-200', 'text-gray-700');
-        }
-        if (fileArea) fileArea.classList.remove('hidden');
-        if (urlArea) urlArea.classList.add('hidden');
-    } else {
-        if (urlTab) {
-            urlTab.classList.add('bg-purple-600', 'text-white');
-            urlTab.classList.remove('bg-gray-200', 'text-gray-700');
-        }
-        if (fileTab) {
-            fileTab.classList.remove('bg-purple-600', 'text-white');
-            fileTab.classList.add('bg-gray-200', 'text-gray-700');
-        }
-        if (urlArea) urlArea.classList.remove('hidden');
-        if (fileArea) fileArea.classList.add('hidden');
-    }
-}
-
-// TTS 업로드 모달 열기
-let currentTTSUploadPageIndex = null;
-let currentTTSUploadTab = 'file';
-
-function openTTSUploadModal(pageIndex) {
-    currentTTSUploadPageIndex = pageIndex;
-    const modal = document.getElementById('ttsUploadModal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    
-    // 기본 탭으로 설정
-    switchTTSUploadTab('file');
-}
-
-// TTS 업로드 모달 닫기
-function closeTTSUploadModal() {
-    const modal = document.getElementById('ttsUploadModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-    
-    // 입력 초기화
-    document.getElementById('ttsFileInput').value = '';
-    document.getElementById('ttsUrlInput').value = '';
-    currentTTSUploadPageIndex = null;
-}
-
-// TTS 업로드 탭 전환
-function switchTTSUploadTab(tab) {
-    currentTTSUploadTab = tab;
-    
-    const fileTab = document.getElementById('ttsUploadTabFile');
-    const urlTab = document.getElementById('ttsUploadTabUrl');
-    const fileContent = document.getElementById('ttsUploadContentFile');
-    const urlContent = document.getElementById('ttsUploadContentUrl');
-    
-    if (tab === 'file') {
-        fileTab.classList.add('border-blue-600', 'text-blue-600');
-        fileTab.classList.remove('text-gray-600');
-        urlTab.classList.remove('border-blue-600', 'text-blue-600');
-        urlTab.classList.add('text-gray-600');
-        
-        fileContent.classList.remove('hidden');
-        urlContent.classList.add('hidden');
-    } else {
-        urlTab.classList.add('border-blue-600', 'text-blue-600');
-        urlTab.classList.remove('text-gray-600');
-        fileTab.classList.remove('border-blue-600', 'text-blue-600');
-        fileTab.classList.add('text-gray-600');
-        
-        urlContent.classList.remove('hidden');
-        fileContent.classList.add('hidden');
-    }
-}
-
-// TTS 오디오 업로드 실행
-async function uploadTTSAudio() {
-    if (currentTTSUploadPageIndex === null) {
-        alert('페이지가 선택되지 않았습니다.');
-        return;
-    }
-    
-    try {
-        let audioUrl = '';
-        
-        if (currentTTSUploadTab === 'file') {
-            // 파일 업로드
-            const fileInput = document.getElementById('ttsFileInput');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                alert('오디오 파일을 선택하세요.');
-                return;
-            }
-            
-            // 파일 업로드 API 호출
-            const formData = new FormData();
-            formData.append('audio', file);
-            formData.append('storybookId', currentStorybook.id);
-            formData.append('storybookTitle', currentStorybook.title);
-            formData.append('pageNumber', currentStorybook.pages[currentTTSUploadPageIndex].pageNumber);
-            formData.append('language', currentLanguage);
-            
-            showNotification('오디오 업로드 중...', 'info');
-            
-            const response = await fetch('/api/upload-tts', {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (!response.ok) {
-                throw new Error('오디오 업로드 실패');
-            }
-            
-            const result = await response.json();
-            audioUrl = result.audioUrl;
-            
-        } else {
-            // URL 입력
-            const urlInput = document.getElementById('ttsUrlInput');
-            audioUrl = urlInput.value.trim();
-            
-            if (!audioUrl) {
-                alert('오디오 URL을 입력하세요.');
-                return;
-            }
-        }
-        
-        // 페이지에 오디오 URL 저장
-        const page = currentStorybook.pages[currentTTSUploadPageIndex];
-        
-        if (currentLanguage === 'ko') {
-            page.audioUrl = audioUrl;
-        } else {
-            if (!page.translatedAudioUrls) {
-                page.translatedAudioUrls = {};
-            }
-            page.translatedAudioUrls[currentLanguage] = audioUrl;
-        }
-        
-        // R2에 저장
-        console.log(`💾 R2 저장 시작: ${currentStorybook.title}`);
-        const response = await axios.post('/api/storybooks', currentStorybook, {
-            timeout: 300000,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (!response.data.success) {
-            throw new Error('R2 저장 실패');
-        }
-        
-        console.log(`✅ R2 저장 완료: ${currentStorybook.title}`);
-        
-        // UI 업데이트
-        displayStorybook(currentStorybook);
-        
-        // 모달 닫기
-        closeTTSUploadModal();
-        
-        showNotification('✅ TTS 오디오가 업로드되었습니다!', 'success');
-        
-    } catch (error) {
-        console.error('TTS 업로드 오류:', error);
-        showNotification('❌ TTS 업로드 실패: ' + error.message, 'error');
-    }
-}
-
-// 업로드 탭 전환
-function switchUploadTab(tab) {
-    currentUploadTab = tab;
-    
-    const fileTab = document.getElementById('uploadTabFile');
-    const urlTab = document.getElementById('uploadTabUrl');
-    const fileContent = document.getElementById('uploadContentFile');
-    const urlContent = document.getElementById('uploadContentUrl');
-    
-    if (tab === 'file') {
-        fileTab.classList.add('border-blue-600', 'text-blue-600');
-        fileTab.classList.remove('text-gray-600');
-        urlTab.classList.remove('border-blue-600', 'text-blue-600');
-        urlTab.classList.add('text-gray-600');
-        
-        fileContent.classList.remove('hidden');
-        urlContent.classList.add('hidden');
-    } else {
-        urlTab.classList.add('border-blue-600', 'text-blue-600');
-        urlTab.classList.remove('text-gray-600');
-        fileTab.classList.remove('border-blue-600', 'text-blue-600');
-        fileTab.classList.add('text-gray-600');
-        
-        urlContent.classList.remove('hidden');
-        fileContent.classList.add('hidden');
-    }
-}
-
-// 삽화/캐릭터/표지 업로드 실행
-async function uploadIllustration() {
-    const uploadBtn = document.getElementById('uploadIllustrationBtn');
-    const originalText = uploadBtn.innerHTML;
-    
-    try {
-        uploadBtn.disabled = true;
-        uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>업로드 중...';
-        
-        let imageUrl = null;
-        
-        if (currentUploadTab === 'file') {
-            // 파일 업로드
-            const fileInput = document.getElementById('illustrationFileInput');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                alert('파일을 선택해주세요.');
-                return;
-            }
-            
-            // 이미지를 R2에 업로드
-            const formData = new FormData();
-            formData.append('image', file);
-            formData.append('storybookId', currentStorybook.id);
-            formData.append('storybookTitle', currentStorybook.title);
-            formData.append('type', currentUploadType);
-            
-            if (currentUploadType === 'illustration' && currentUploadPageIndex !== null) {
-                formData.append('pageNumber', currentStorybook.pages[currentUploadPageIndex].pageNumber);
-            } else if (currentUploadType === 'character' && currentUploadCharIndex !== null) {
-                formData.append('characterIndex', currentUploadCharIndex);
-                formData.append('characterName', currentStorybook.characters[currentUploadCharIndex].name);
-            } else if (currentUploadType === 'cover') {
-                // 표지는 pageNumber 불필요
-            }
-            
-            const response = await axios.post('/api/upload-image', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-            
-            if (response.data.success) {
-                imageUrl = response.data.imageUrl;
-            } else {
-                throw new Error(response.data.error || '이미지 업로드 실패');
-            }
-        } else {
-            // URL 입력
-            const urlInput = document.getElementById('illustrationUrlInput');
-            const url = urlInput.value.trim();
-            
-            if (!url) {
-                alert('URL을 입력해주세요.');
-                return;
-            }
-            
-            // URL 유효성 검사
-            try {
-                new URL(url);
-            } catch (e) {
-                alert('올바른 URL을 입력해주세요.');
-                return;
-            }
-            
-            imageUrl = url;
-        }
-        
-        // 타입별로 이미지 적용
-        if (currentUploadType === 'illustration' && currentUploadPageIndex !== null) {
-            // 페이지 삽화 - 히스토리 관리
-            const page = currentStorybook.pages[currentUploadPageIndex];
-            
-            // 기존 이미지가 있으면 히스토리에 추가
-            if (page.illustrationImage) {
-                if (!page.illustrationHistory) {
-                    page.illustrationHistory = [];
-                }
-                page.illustrationHistory.unshift(page.illustrationImage);
-                console.log(`📸 이전 이미지를 히스토리에 추가 (총 ${page.illustrationHistory.length}개)`);
-                
-                // 히스토리 10개 제한
-                if (page.illustrationHistory.length > 10) {
-                    page.illustrationHistory.splice(10);
-                }
-            }
-            
-            page.illustrationImage = imageUrl;
-        } else if (currentUploadType === 'character' && currentUploadCharIndex !== null) {
-            // 캐릭터 레퍼런스
-            currentStorybook.characters[currentUploadCharIndex].referenceImage = imageUrl;
-        } else if (currentUploadType === 'cover') {
-            // 표지
-            currentStorybook.coverImage = imageUrl;
-        }
-        
-        saveCurrentStorybook();
-        
-        // UI 업데이트
-        displayStorybook(currentStorybook);
-        
-        // 모달 닫기
-        closeIllustrationUploadModal();
-        
-        const uploadTypeText = currentUploadType === 'illustration' ? '삽화' : 
-                               currentUploadType === 'character' ? '캐릭터 레퍼런스' : '표지';
-        showNotification('success', '업로드 완료', `${uploadTypeText} 이미지가 업로드되었습니다.`);
-        
-    } catch (error) {
-        console.error('업로드 오류:', error);
-        alert('업로드 실패: ' + error.message);
-    } finally {
-        uploadBtn.disabled = false;
-        uploadBtn.innerHTML = originalText;
-    }
-}
-
-// 일괄 업로드 모달 열기
-function openBatchUploadModal() {
-    if (!currentStorybook || !currentStorybook.pages) {
-        alert('동화책이 선택되지 않았습니다.');
-        return;
-    }
-    
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.multiple = true;
-    input.accept = 'image/*';
-    
-    input.onchange = async (e) => {
-        const files = Array.from(e.target.files);
-        if (files.length === 0) return;
-        
-        // 가나다순으로 파일 정렬
-        files.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
-        
-        const totalPages = currentStorybook.pages.length;
-        
-        if (files.length > totalPages) {
-            if (!confirm(`선택한 파일(${files.length}개)이 페이지 수(${totalPages}개)보다 많습니다. 처음 ${totalPages}개만 업로드하시겠습니까?`)) {
-                return;
-            }
-            files.splice(totalPages);
-        }
-        
-        if (!confirm(`${files.length}개의 이미지를 페이지 1부터 순서대로 업로드하시겠습니까?`)) {
-            return;
-        }
-        
-        await batchUploadIllustrations(files);
-    };
-    
-    input.click();
-}
-
-// 일괄 업로드 실행
-async function batchUploadIllustrations(files) {
-    batchUploadCancelled = false;
-    batchUploadInProgress = true;
-    
-    const btn = document.getElementById('batch-upload-btn');
-    const originalHTML = btn.innerHTML;
-    
-    let successCount = 0;
-    let failCount = 0;
-    
-    try {
-        for (let i = 0; i < files.length; i++) {
-            if (batchUploadCancelled) {
-                showNotification('warning', '업로드 취소', `${successCount}개 업로드 완료, ${files.length - i}개 취소됨`);
-                break;
-            }
-            
-            const file = files[i];
-            const pageIndex = i;
-            
-            // 버튼 업데이트 (애니메이션 효과)
-            btn.innerHTML = `
-                <i class="fas fa-spinner fa-spin text-xl"></i>
-                <span class="animate-pulse">${i + 1}/${files.length} 업로드 중...</span>
-                <button onclick="cancelBatchUpload()" class="ml-2 px-2 py-1 bg-red-500 rounded hover:bg-red-600 text-xs">
-                    취소
-                </button>
-            `;
-            
-            try {
-                // 이미지를 R2에 업로드
-                const formData = new FormData();
-                formData.append('image', file);
-                formData.append('storybookId', currentStorybook.id);
-                formData.append('storybookTitle', currentStorybook.title);
-                formData.append('type', 'illustration');
-                formData.append('pageNumber', currentStorybook.pages[pageIndex].pageNumber);
-                
-                const response = await axios.post('/api/upload-image', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-                
-                if (response.data.success) {
-                    const page = currentStorybook.pages[pageIndex];
-                    
-                    // 기존 이미지가 있으면 히스토리에 추가
-                    if (page.illustrationImage) {
-                        if (!page.illustrationHistory) {
-                            page.illustrationHistory = [];
-                        }
-                        page.illustrationHistory.unshift(page.illustrationImage);
-                        
-                        // 히스토리 10개 제한
-                        if (page.illustrationHistory.length > 10) {
-                            page.illustrationHistory.splice(10);
-                        }
-                    }
-                    
-                    page.illustrationImage = response.data.imageUrl;
-                    successCount++;
-                    console.log(`✅ 페이지 ${pageIndex + 1} 업로드 완료:`, file.name);
-                } else {
-                    failCount++;
-                    console.error(`❌ 페이지 ${pageIndex + 1} 업로드 실패:`, file.name);
-                }
-            } catch (error) {
-                failCount++;
-                console.error(`❌ 페이지 ${pageIndex + 1} 업로드 오류:`, error.message);
-            }
-            
-            // 진행률 표시 (0.5초 대기)
-            await new Promise(resolve => setTimeout(resolve, 500));
-        }
-        
-        // 저장 및 UI 업데이트
-        if (successCount > 0) {
-            saveCurrentStorybook();
-            displayStorybook(currentStorybook);
-        }
-        
-        // 결과 알림
-        if (failCount === 0 && !batchUploadCancelled) {
-            showNotification('success', '업로드 완료', `${successCount}개의 삽화가 업로드되었습니다.`);
-        } else if (successCount > 0) {
-            showNotification('warning', '일부 업로드 완료', `성공: ${successCount}개, 실패: ${failCount}개`);
-        } else {
-            showNotification('error', '업로드 실패', '모든 이미지 업로드에 실패했습니다.');
-        }
-        
-    } catch (error) {
-        console.error('일괄 업로드 오류:', error);
-        showNotification('error', '업로드 오류', error.message);
-    } finally {
-        btn.innerHTML = originalHTML;
-        batchUploadInProgress = false;
-        batchUploadCancelled = false;
-    }
-}
-
-// 일괄 업로드 취소
-function cancelBatchUpload() {
-    if (batchUploadInProgress) {
-        batchUploadCancelled = true;
-        console.log('⏹️ 일괄 업로드 취소 요청');
-    }
-}
 
 // 삽화 히스토리에서 선택
 function selectIllustrationFromHistory(pageIndex, historyIndex) {
