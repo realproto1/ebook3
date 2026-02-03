@@ -967,11 +967,15 @@ let draggedBookId = null; // 드래그 중인 동화책 ID
 let draggedType = null; // 'book' 또는 'folder'
 let isDragging = false; // 드래그 중 플래그
 
+// 전역으로 노출 (HTML 인라인 이벤트에서 사용)
+window.draggedBookId = null;
+
 // 드래그 시작
 function handleDragStart(e) {
     draggedElement = e.currentTarget;
     draggedIndex = parseInt(e.currentTarget.dataset.bookIndex);
     draggedBookId = e.currentTarget.dataset.bookId;
+    window.draggedBookId = draggedBookId; // 전역 참조 업데이트
     draggedType = 'book';
     isDragging = true; // 드래그 시작
     e.currentTarget.style.opacity = '0.5';
@@ -1047,6 +1051,7 @@ function handleDragEnd(e) {
     draggedElement = null;
     draggedIndex = null;
     draggedBookId = null; // 드래그 중인 동화책 ID 초기화
+    window.draggedBookId = null; // 전역 참조 초기화
 }
 
 // 동화책 제목 업데이트 (메인 페이지)
