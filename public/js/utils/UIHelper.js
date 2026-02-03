@@ -314,6 +314,41 @@ class UIHelper {
             </div>
         `;
     }
+    
+    /**
+     * 공통 버튼 렌더링
+     */
+    static renderButton(type, onclick, label, icon, options = {}) {
+        const { fullWidth = false, id = '', disabled = false, hideOnMobile = false } = options;
+        const widthClass = fullWidth ? 'flex-1' : '';
+        const mobileClass = hideOnMobile ? 'hidden sm:inline' : '';
+        
+        let btnClass = '';
+        switch(type) {
+            case 'generate':
+                btnClass = 'btn-generate';
+                break;
+            case 'upload':
+                btnClass = 'btn-upload';
+                break;
+            case 'download':
+                btnClass = 'btn-download';
+                break;
+            default:
+                btnClass = 'bg-gray-600 hover:bg-gray-700';
+        }
+        
+        return `
+            <button 
+                ${id ? `id="${id}"` : ''}
+                onclick="${onclick}"
+                class="${widthClass} ${btnClass} px-3 py-2 rounded-lg transition text-sm ${disabled ? 'opacity-50 cursor-not-allowed' : ''}"
+                ${disabled ? 'disabled' : ''}
+            >
+                <i class="${icon} mr-1"></i><span class="${mobileClass}">${label}</span>
+            </button>
+        `;
+    }
 }
 
 // 브라우저 환경에서 전역으로 노출

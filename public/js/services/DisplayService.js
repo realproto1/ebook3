@@ -43,19 +43,19 @@ class DisplayService {
                     <div class="flex gap-2 md:gap-3">
                         <button 
                             onclick="generateAllCharacterReferences()"
-                            class="bg-purple-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-purple-700 transition whitespace-nowrap text-sm md:text-base"
+                            class="btn-generate px-3 md:px-6 py-2 md:py-3 rounded-lg transition whitespace-nowrap text-sm md:text-base font-semibold shadow-lg"
                         >
                             <i class="fas fa-images mr-1 md:mr-2"></i><span class="hidden sm:inline">모든 레퍼런스 생성</span><span class="sm:hidden">전체 생성</span>
                         </button>
                         <button 
                             onclick="downloadAllCharacterReferences()"
-                            class="bg-blue-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-blue-700 transition whitespace-nowrap text-sm md:text-base"
+                            class="btn-download px-3 md:px-6 py-2 md:py-3 rounded-lg transition whitespace-nowrap text-sm md:text-base font-semibold shadow-lg"
                         >
                             <i class="fas fa-download mr-1 md:mr-2"></i><span class="hidden sm:inline">모두 다운로드</span><span class="sm:hidden">다운</span>
                         </button>
                         <button 
                             onclick="addNewCharacter()"
-                            class="bg-green-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-green-700 transition whitespace-nowrap text-sm md:text-base"
+                            class="btn-upload px-3 md:px-6 py-2 md:py-3 rounded-lg transition whitespace-nowrap text-sm md:text-base font-semibold shadow-lg"
                         >
                             <i class="fas fa-plus mr-1 md:mr-2"></i><span class="hidden sm:inline">캐릭터 추가</span><span class="sm:hidden">추가</span>
                         </button>
@@ -160,13 +160,13 @@ class DisplayService {
                     <div class="flex gap-2">
                         <button 
                             onclick="generateCharacterReference(${idx})"
-                            class="flex-1 bg-white bg-opacity-20 text-white px-3 py-2 rounded-lg hover:bg-opacity-30 transition text-sm"
+                            class="flex-1 btn-generate px-3 py-2 rounded-lg transition text-sm font-semibold"
                         >
                             <i class="fas fa-magic mr-2"></i>${char.referenceImage ? '재생성' : '생성'}
                         </button>
                         <button 
                             onclick="openCharacterUploadModal(${idx})"
-                            class="flex-1 bg-white bg-opacity-20 text-white px-3 py-2 rounded-lg hover:bg-opacity-30 transition text-sm"
+                            class="flex-1 btn-upload px-3 py-2 rounded-lg transition text-sm font-semibold"
                         >
                             <i class="fas fa-upload mr-2"></i>업로드
                         </button>
@@ -256,13 +256,13 @@ class DisplayService {
                             <div class="flex gap-2">
                                 <button 
                                     onclick="generateCoverImage()"
-                                    class="flex-1 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition font-semibold"
+                                    class="flex-1 btn-generate px-6 py-3 rounded-lg transition font-semibold shadow-lg"
                                 >
                                     <i class="fas fa-magic mr-2"></i>${storybook.coverImage ? '재생성' : '생성'}
                                 </button>
                                 <button 
                                     onclick="openCoverUploadModal()"
-                                    class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
+                                    class="flex-1 btn-upload px-6 py-3 rounded-lg transition font-semibold shadow-lg"
                                 >
                                     <i class="fas fa-upload mr-2"></i>업로드
                                 </button>
@@ -374,25 +374,25 @@ class DisplayService {
             <div class="flex flex-wrap gap-2 md:gap-3 mb-4 md:mb-6">
                 <button 
                     onclick="generateAllKeyObjectImages()"
-                    class="bg-orange-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-orange-700 transition whitespace-nowrap text-sm md:text-base"
+                    class="btn-generate px-3 md:px-6 py-2 md:py-3 rounded-lg transition whitespace-nowrap text-sm md:text-base font-semibold shadow-lg"
                 >
                     <i class="fas fa-images mr-1 md:mr-2"></i><span class="hidden sm:inline">모든 이미지 생성</span><span class="sm:hidden">전체 생성</span>
                 </button>
                 <button 
                     onclick="downloadAllKeyObjectImages()"
-                    class="bg-green-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-green-700 transition whitespace-nowrap text-sm md:text-base"
+                    class="btn-download px-3 md:px-6 py-2 md:py-3 rounded-lg transition whitespace-nowrap text-sm md:text-base font-semibold shadow-lg"
                 >
                     <i class="fas fa-download mr-1 md:mr-2"></i><span class="hidden sm:inline">모두 다운로드</span><span class="sm:hidden">다운</span>
                 </button>
                 <button 
                     onclick="bulkUploadKeyObjectImages()"
-                    class="bg-purple-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-purple-700 transition whitespace-nowrap text-sm md:text-base"
+                    class="btn-upload px-3 md:px-6 py-2 md:py-3 rounded-lg transition whitespace-nowrap text-sm md:text-base font-semibold shadow-lg"
                 >
                     <i class="fas fa-upload mr-1 md:mr-2"></i><span class="hidden sm:inline">일괄 업로드</span><span class="sm:hidden">업로드</span>
                 </button>
                 <button 
                     onclick="addNewKeyObject()"
-                    class="bg-blue-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-blue-700 transition whitespace-nowrap text-sm md:text-base"
+                    class="btn-upload px-3 md:px-6 py-2 md:py-3 rounded-lg transition whitespace-nowrap text-sm md:text-base font-semibold shadow-lg"
                 >
                     <i class="fas fa-plus mr-1 md:mr-2"></i><span class="hidden sm:inline">사물 추가</span><span class="sm:hidden">추가</span>
                 </button>
@@ -630,29 +630,9 @@ class DisplayService {
                             </div>
                             
                             <div class="flex gap-2 mb-2">
-                                <button 
-                                    id="tts-btn-${idx}"
-                                    onclick="generatePageTTS(${idx})"
-                                    class="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition text-sm"
-                                >
-                                    <i class="fas fa-magic mr-1"></i>${displayTTSAudio ? '재생성' : '생성'}
-                                </button>
-                                <button 
-                                    id="tts-upload-btn-${idx}"
-                                    onclick="uploadPageTTS(${idx})"
-                                    class="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
-                                >
-                                    <i class="fas fa-upload mr-1"></i>업로드
-                                </button>
-                                ${displayTTSAudio ? `
-                                <button 
-                                    onclick="downloadPageTTS(${idx})"
-                                    class="bg-orange-600 text-white px-3 py-2 rounded-lg hover:bg-orange-700 transition text-sm"
-                                    title="TTS 다운로드"
-                                >
-                                    <i class="fas fa-download"></i>
-                                </button>
-                                ` : ''}
+                                ${UIHelper.renderButton('generate', `generatePageTTS(${idx})`, displayTTSAudio ? '재생성' : '생성', 'fas fa-magic', { fullWidth: true, id: `tts-btn-${idx}` })}
+                                ${UIHelper.renderButton('upload', `uploadPageTTS(${idx})`, '업로드', 'fas fa-upload', { fullWidth: true, id: `tts-upload-btn-${idx}` })}
+                                ${displayTTSAudio ? UIHelper.renderButton('download', `downloadPageTTS(${idx})`, '', 'fas fa-download') : ''}
                             </div>
                             
                             ${ttsSection}
@@ -669,20 +649,20 @@ class DisplayService {
                             <div class="flex gap-2 mb-2">
                                 <button 
                                     onclick="generateIllustration(${idx})"
-                                    class="flex-1 bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-700 transition text-sm"
+                                    class="flex-1 btn-generate px-3 py-2 rounded-lg transition text-sm font-semibold"
                                 >
                                     <i class="fas fa-magic mr-1"></i>${page.illustrationImage ? '재생성' : '생성'}
                                 </button>
                                 <button 
                                     onclick="uploadIllustration(${idx})"
-                                    class="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
+                                    class="flex-1 btn-upload px-3 py-2 rounded-lg transition text-sm font-semibold"
                                 >
                                     <i class="fas fa-upload mr-1"></i>업로드
                                 </button>
                                 ${page.illustrationImage ? `
                                 <button 
                                     onclick="downloadIllustration(${idx})"
-                                    class="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition text-sm"
+                                    class="btn-download px-3 py-2 rounded-lg transition text-sm font-semibold"
                                     title="삽화 다운로드"
                                 >
                                     <i class="fas fa-download"></i>
@@ -843,26 +823,26 @@ class DisplayService {
                         <button id="translate-all-btn" onclick="translateAllPages()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-semibold flex items-center gap-2">
                             <i class="fas fa-language"></i>전체 번역
                         </button>
-                        <button id="generate-all-tts-btn" onclick="generateAllTTS()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold flex items-center gap-2">
+                        <button id="generate-all-tts-btn" onclick="generateAllTTS()" class="btn-generate px-4 py-2 rounded-lg transition text-sm font-semibold shadow-lg flex items-center gap-2">
                             <i class="fas fa-volume-up"></i>전체 TTS 생성
                         </button>
-                        <button id="batch-tts-upload-btn" onclick="openBatchTTSUpload()" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition text-sm font-semibold flex items-center gap-2">
+                        <button id="batch-tts-upload-btn" onclick="openBatchTTSUpload()" class="btn-upload px-4 py-2 rounded-lg transition text-sm font-semibold shadow-lg flex items-center gap-2">
                             <i class="fas fa-upload"></i>전체 TTS 업로드
                         </button>
-                        <button id="download-all-text-btn" onclick="downloadAllText()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-semibold flex items-center gap-2">
+                        <button id="download-all-text-btn" onclick="downloadAllText()" class="btn-download px-4 py-2 rounded-lg transition text-sm font-semibold shadow-lg flex items-center gap-2">
                             <i class="fas fa-download"></i>전체 텍스트 다운로드
                         </button>
                     </div>
                 </div>
                 
                 <div class="flex gap-2 flex-wrap">
-                    <button id="generate-all-illust-btn" onclick="generateAllIllustrationsSequential()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-semibold">
+                    <button id="generate-all-illust-btn" onclick="generateAllIllustrationsSequential()" class="btn-generate px-4 py-2 rounded-lg transition text-sm font-semibold shadow-lg">
                         <i class="fas fa-image mr-1"></i>모든 삽화 생성
                     </button>
-                    <button id="download-all-illust-btn" onclick="downloadAllIllustrations()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold">
+                    <button id="download-all-illust-btn" onclick="downloadAllIllustrations()" class="btn-download px-4 py-2 rounded-lg transition text-sm font-semibold shadow-lg">
                         <i class="fas fa-download mr-1"></i>모든 삽화 다운로드
                     </button>
-                    <button id="batch-illust-upload-btn" onclick="openBatchIllustrationUpload()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-semibold">
+                    <button id="batch-illust-upload-btn" onclick="openBatchIllustrationUpload()" class="btn-upload px-4 py-2 rounded-lg transition text-sm font-semibold shadow-lg">
                         <i class="fas fa-upload mr-1"></i>일괄 업로드
                     </button>
                 </div>

@@ -52,6 +52,31 @@
             border-color: #10b981;
         }
         
+        /* 공통 버튼 스타일 */
+        .btn-generate {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+        .btn-generate:hover {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        }
+        
+        .btn-upload {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+        .btn-upload:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+        
+        .btn-download {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        .btn-download:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+        
         /* 알림 애니메이션 */
         @keyframes fade-in {
             from { opacity: 0; transform: translateY(-20px); }
@@ -1281,6 +1306,40 @@
     </div>
 
     <style>
+        /* 공통 버튼 스타일 */
+        .btn-generate {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            transition: all 0.2s ease;
+        }
+        .btn-generate:hover {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+        
+        .btn-upload {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            transition: all 0.2s ease;
+        }
+        .btn-upload:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-download {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            transition: all 0.2s ease;
+        }
+        .btn-download:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        
         /* Review 모달 스타일 */
         #reviewModal .tab-button {
             transition: all 0.3s ease;
@@ -1455,7 +1514,7 @@
     <script defer src="/js/services/ValidationService.js?v=1770078892"></script>
     <script defer src="/js/services/CoverService.js?v=1770091447"></script>
     <script defer src="/js/services/UploadService.js?v=1770131038"></script>
-    <script defer src="/js/services/DisplayService.js?v=1770154767"></script>
+    <script defer src="/js/services/DisplayService.js?v=1770156720"></script>
     
     <script>
         // 전역 변수 확인 및 __modules 설정
