@@ -5786,6 +5786,388 @@ function closeStatusPopup() {
         popup.remove();
     }
 }
+    if (!book) {
+        alert('동화책을 찾을 수 없습니다.');
+        return;
+    }
+    
+    // 사용 가능한 언어 목록 (한국어 + 번역 언어들)
+    const availableLanguages = ['ko'];
+    if (book.translations && typeof book.translations === 'object') {
+        availableLanguages.push(...Object.keys(book.translations));
+    }
+    
+    // 언어 이름 매핑
+    const languageNames = {
+        'ko': '한국어',
+        'en': '영어',
+        'ja': '일본어',
+        'zh': '중국어',
+        'es': '스페인어',
+        'fr': '프랑스어',
+        'de': '독일어'
+    };
+    
+    // 상태 체크
+    const status = {
+        // 캐릭터 레퍼런스
+        characterReferences: {
+            total: book.characters?.length || 0,
+            withImage: book.characters?.filter(c => c.referenceImage).length || 0,
+            missing: []
+        },
+        // 핵심 단어
+        keyObjects: {
+            total: book.key_objects?.length || 0,
+            withImage: book.keyObjectImages?.filter(img => img?.imageUrl).length || 0,
+            missing: []
+        },
+        // 페이지 삽화
+        illustrations: {
+            total: book.pages?.length || 0,
+            withIllustration: book.pages?.filter(p => p.illustrationImage).length || 0,
+            missing: []
+        },
+        // 언어별 페이지 텍스트
+        textByLanguage: {},
+        // 언어별 페이지 TTS
+        ttsByLanguage: {},
+        // 표지
+        cover: {
+            hasImage: !!book.coverImage
+        }
+    };
+    
+    // 언어별 텍스트/TTS 상태 초기화
+    availableLanguages.forEach(lang => {
+        status.textByLanguage[lang] = {
+            language: languageNames[lang] || lang,
+            total: book.pages?.length || 0,
+            withText: 0,
+            missing: []
+        };
+        
+        status.ttsByLanguage[lang] = {
+            language: languageNames[lang] || lang,
+            total: book.pages?.length || 0,
+            withTTS: 0,
+            missing: []
+        };
+    });
+    
+    // 캐릭터 레퍼런스 누락 항목
+    if (book.characters) {
+        book.characters.forEach((char, idx) => {
+            if (!char.referenceImage) {
+                status.characterReferences.missing.push(`${idx + 1}. ${char.name}`);
+            }
+        });
+    }
+    
+    // 핵심 단어 이미지 누락 항목
+    if (book.key_objects) {
+        book.key_objects.forEach((obj, idx) => {
+            const hasImage = book.keyObjectImages?.[idx]?.imageUrl;
+            if (!hasImage) {
+                status.keyObjects.missing.push(`${idx + 1}. ${obj.korean || obj.name}`);
+            }
+        });
+    }
+    
+    // 페이지 삽화 누락 항목
+    if (book.pages) {
+        book.pages.forEach((page, idx) => {
+            const pageNum = idx + 1;
+            
+            // 삽화 체크
+            if (!page.illustrationImage) {
+                status.illustrations.missing.push(`페이지 ${pageNum}`);
+            }
+            
+            // 언어별 텍스트 체크
+            availableLanguages.forEach(lang => {
+                let hasText = false;
+                
+                if (lang === 'ko') {
+                    // 한국어: 원본 텍스트
+                    hasText = !!(page.text && typeof page.text === 'string' && page.text.trim().length > 0);
+                    
+                    // 디버깅: 첫 3개 페이지만 로그
+                    if (idx < 3) {
+                        console.log(`페이지 ${pageNum} 한국어 텍스트:`, {
+                            exists: !!page.text,
+                            type: typeof page.text,
+                            length: page.text?.length,
+                            trimmed: page.text?.trim().length,
+                            hasText: hasText,
+                            preview: page.text?.substring(0, 20)
+                        });
+                    }
+                } else {
+                    // 번역 언어
+                    const translatedText = book.translations?.[lang]?.[idx];
+                    
+                    // 문자열 또는 객체 형태 모두 지원
+                    let actualText = '';
+                    if (typeof translatedText === 'string') {
+                        actualText = translatedText;
+                    } else if (translatedText && typeof translatedText === 'object' && translatedText.text) {
+                        actualText = translatedText.text;
+                    }
+                    
+                    hasText = !!(actualText && actualText.trim().length > 0);
+                    
+                    // 디버깅: 첫 3개 페이지만 로그
+                    if (idx < 3) {
+                        console.log(`페이지 ${pageNum} ${languageNames[lang] || lang} 텍스트:`, {
+                            exists: !!translatedText,
+                            type: typeof translatedText,
+                            isObject: typeof translatedText === 'object',
+                            hasTextField: translatedText?.text !== undefined,
+                            actualText: actualText?.substring?.(0, 30),
+                            length: actualText?.length,
+                            trimmed: actualText?.trim?.()?.length,
+                            hasText: hasText
+                        });
+                    }
+                }
+                
+                if (hasText) {
+                    status.textByLanguage[lang].withText++;
+                } else {
+                    status.textByLanguage[lang].missing.push(`페이지 ${pageNum}`);
+                }
+            });
+            
+            // 언어별 TTS 체크
+            availableLanguages.forEach(lang => {
+                let hasTTS = false;
+                
+                if (lang === 'ko') {
+                    // 한국어: 원본 audioUrl
+                    hasTTS = !!page.audioUrl;
+                } else {
+                    // 번역 언어
+                    hasTTS = !!page.translatedAudioUrls?.[lang];
+                }
+                
+                if (hasTTS) {
+                    status.ttsByLanguage[lang].withTTS++;
+                } else {
+                    status.ttsByLanguage[lang].missing.push(`페이지 ${pageNum}`);
+                }
+            });
+        });
+    }
+    
+    // 완성도 계산 (언어별 텍스트/TTS 포함)
+    const totalTextItems = availableLanguages.length * (book.pages?.length || 0);
+    const completedTextItems = availableLanguages.reduce((sum, lang) => 
+        sum + status.textByLanguage[lang].withText, 0);
+    
+    const totalTTSItems = availableLanguages.length * (book.pages?.length || 0);
+    const completedTTSItems = availableLanguages.reduce((sum, lang) => 
+        sum + status.ttsByLanguage[lang].withTTS, 0);
+    
+    const totalItems = 
+        status.characterReferences.total + 
+        status.keyObjects.total + 
+        status.illustrations.total + 
+        totalTextItems + 
+        totalTTSItems + 
+        1; // 표지
+    
+    const completedItems = 
+        status.characterReferences.withImage + 
+        status.keyObjects.withImage + 
+        status.illustrations.withIllustration + 
+        completedTextItems + 
+        completedTTSItems + 
+        (status.cover.hasImage ? 1 : 0);
+    
+    const completionRate = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+    
+    // 팝업 HTML 생성
+    const popupHTML = `
+        <div id="statusPopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="closeStatusPopup()">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+                <!-- 헤더 -->
+                <div class="sticky top-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 rounded-t-2xl">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold mb-2">
+                                <i class="fas fa-check-circle mr-2"></i>${book.title}
+                            </h2>
+                            <p class="text-sm opacity-90">완성도: ${completionRate}%</p>
+                        </div>
+                        <button onclick="closeStatusPopup()" class="text-white hover:text-gray-200 text-2xl">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- 진행률 바 -->
+                    <div class="mt-4 bg-white bg-opacity-20 rounded-full h-4 overflow-hidden">
+                        <div class="bg-white h-full transition-all duration-500" style="width: ${completionRate}%"></div>
+                    </div>
+                </div>
+                
+                <!-- 내용 -->
+                <div class="p-6 space-y-6">
+                    <!-- 표지 -->
+                    <div class="border-2 ${status.cover.hasImage ? 'border-green-500' : 'border-red-500'} rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-image mr-2 text-indigo-500"></i>표지 이미지
+                            </h3>
+                            <span class="text-2xl">${status.cover.hasImage ? '✅' : '❌'}</span>
+                        </div>
+                        ${status.cover.hasImage ? 
+                            '<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>표지 이미지 있음</p>' :
+                            '<p class="text-sm text-red-600"><i class="fas fa-exclamation-triangle mr-1"></i>표지 이미지 없음</p>'
+                        }
+                    </div>
+                    
+                    <!-- 캐릭터 레퍼런스 -->
+                    <div class="border-2 ${status.characterReferences.missing.length === 0 ? 'border-green-500' : 'border-yellow-500'} rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-user-friends mr-2 text-blue-500"></i>캐릭터 레퍼런스
+                            </h3>
+                            <span class="text-sm font-semibold">${status.characterReferences.withImage}/${status.characterReferences.total}</span>
+                        </div>
+                        ${status.characterReferences.missing.length > 0 ? `
+                            <p class="text-sm text-yellow-600 mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>이미지 누락:</p>
+                            <ul class="text-sm text-gray-700 ml-4 space-y-1">
+                                ${status.characterReferences.missing.map(item => `<li>• ${item}</li>`).join('')}
+                            </ul>
+                        ` : '<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 캐릭터에 레퍼런스 이미지 있음</p>'}
+                    </div>
+                    
+                    <!-- 핵심 단어 -->
+                    <div class="border-2 ${status.keyObjects.missing.length === 0 ? 'border-green-500' : 'border-yellow-500'} rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-cube mr-2 text-orange-500"></i>핵심 단어 이미지
+                            </h3>
+                            <span class="text-sm font-semibold">${status.keyObjects.withImage}/${status.keyObjects.total}</span>
+                        </div>
+                        ${status.keyObjects.missing.length > 0 ? `
+                            <p class="text-sm text-yellow-600 mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>이미지 누락:</p>
+                            <ul class="text-sm text-gray-700 ml-4 space-y-1">
+                                ${status.keyObjects.missing.map(item => `<li>• ${item}</li>`).join('')}
+                            </ul>
+                        ` : '<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 핵심 단어에 이미지 있음</p>'}
+                    </div>
+                    
+                    <!-- 페이지 삽화 (순서 변경: 텍스트보다 먼저) -->
+                    <div class="border-2 ${status.illustrations.missing.length === 0 ? 'border-green-500' : 'border-red-500'} rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-image mr-2 text-pink-500"></i>페이지 삽화
+                            </h3>
+                            <span class="text-sm font-semibold">${status.illustrations.withIllustration}/${status.illustrations.total}</span>
+                        </div>
+                        ${status.illustrations.missing.length > 0 ? `
+                            <p class="text-sm text-red-600 mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>삽화 누락:</p>
+                            <p class="text-sm text-gray-700 ml-4">${status.illustrations.missing.join(', ')}</p>
+                        ` : '<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 페이지에 삽화 있음</p>'}
+                    </div>
+                    
+                    <!-- 언어별 페이지 텍스트 -->
+                    ${availableLanguages.map(lang => {
+                        const langStatus = status.textByLanguage[lang];
+                        const allComplete = langStatus.missing.length === 0;
+                        return `
+                        <div class="border-2 ${allComplete ? 'border-green-500' : 'border-red-500'} rounded-xl p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-bold text-gray-800 flex items-center">
+                                    <i class="fas fa-align-left mr-2 text-purple-500"></i>페이지 텍스트 (${langStatus.language})
+                                </h3>
+                                <span class="text-sm font-semibold">${langStatus.withText}/${langStatus.total}</span>
+                            </div>
+                            ${langStatus.missing.length > 0 ? `
+                                <p class="text-sm text-red-600 mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>텍스트 누락:</p>
+                                <p class="text-sm text-gray-700 ml-4">${langStatus.missing.join(', ')}</p>
+                            ` : `<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 페이지에 ${langStatus.language} 텍스트 있음</p>`}
+                        </div>
+                        `;
+                    }).join('')}
+                    
+                    <!-- 언어별 페이지 TTS -->
+                    ${availableLanguages.map(lang => {
+                        const langStatus = status.ttsByLanguage[lang];
+                        const allComplete = langStatus.missing.length === 0;
+                        return `
+                        <div class="border-2 ${allComplete ? 'border-green-500' : 'border-yellow-500'} rounded-xl p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-bold text-gray-800 flex items-center">
+                                    <i class="fas fa-volume-up mr-2 text-teal-500"></i>페이지 TTS 음성 (${langStatus.language})
+                                </h3>
+                                <span class="text-sm font-semibold">${langStatus.withTTS}/${langStatus.total}</span>
+                            </div>
+                            ${langStatus.missing.length > 0 ? `
+                                <p class="text-sm text-yellow-600 mb-2"><i class="fas fa-exclamation-triangle mr-1"></i>TTS 누락:</p>
+                                <p class="text-sm text-gray-700 ml-4">${langStatus.missing.join(', ')}</p>
+                            ` : `<p class="text-sm text-green-600"><i class="fas fa-check mr-1"></i>모든 페이지에 ${langStatus.language} TTS 음성 있음</p>`}
+                        </div>
+                        `;
+                    }).join('')}
+                    
+                    <!-- 요약 -->
+                    <div class="bg-gray-50 rounded-xl p-4 border-2 border-gray-200">
+                        <h3 class="font-bold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-chart-pie mr-2 text-indigo-500"></i>전체 요약
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                                <p class="text-gray-600">총 항목</p>
+                                <p class="text-xl font-bold text-gray-800">${totalItems}개</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">완료 항목</p>
+                                <p class="text-xl font-bold text-green-600">${completedItems}개</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">누락 항목</p>
+                                <p class="text-xl font-bold text-red-600">${totalItems - completedItems}개</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">완성도</p>
+                                <p class="text-xl font-bold text-purple-600">${completionRate}%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 푸터 -->
+                <div class="sticky bottom-0 bg-gray-50 p-6 rounded-b-2xl border-t">
+                    <button 
+                        onclick="closeStatusPopup()" 
+                        class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-bold hover:from-purple-700 hover:to-pink-700 transition"
+                    >
+                        <i class="fas fa-check mr-2"></i>확인
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 팝업 추가
+    const existingPopup = document.getElementById('statusPopup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', popupHTML);
+}
+
+// 완성도 확인 팝업 닫기
+function closeStatusPopup() {
+    const popup = document.getElementById('statusPopup');
+    if (popup) {
+        popup.remove();
+    }
+}
 
 // 이미지 삭제 버튼 토글
 function toggleImageDeleteButton(imageId) {
