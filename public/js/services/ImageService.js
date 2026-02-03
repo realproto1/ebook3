@@ -314,6 +314,10 @@ class ImageService {
         const {
             model = DEFAULT_IMAGE_SETTINGS.keyObjectModel,
             aspectRatio = '1:1',
+            artStyle = '디즈니 스타일',  // ✅ artStyle 추가
+            settings = {},  // ✅ settings 추가
+            storybookId = null,  // ✅ storybookId 추가
+            storybookTitle = null,  // ✅ storybookTitle 추가
             onStart = null,
             onComplete = null,
             onError = null,
@@ -331,7 +335,11 @@ class ImageService {
                 description: keyObject.description,
                 prompt: keyObject.prompt,
                 model,
-                aspectRatio
+                aspectRatio,
+                artStyle,  // ✅ artStyle 전달
+                settings,  // ✅ settings 전달
+                storybookId,  // ✅ storybookId 전달
+                storybookTitle  // ✅ storybookTitle 전달
             }, {
                 errorMessage: 'Key Object 이미지를 생성할 수 없습니다.'
             });

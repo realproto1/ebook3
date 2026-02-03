@@ -6389,6 +6389,8 @@ async function generateSingleKeyObjectImage(objIndex) {
         }, {
             model: imageSettings.keyObjectModel || 'gemini-3-pro-image-preview',
             aspectRatio: imageSettings.aspectRatio || '1:1',
+            artStyle: currentStorybook.artStyle || '디즈니 스타일',  // ✅ artStyle 추가!
+            settings: imageSettings,  // ✅ 전체 settings 전달
             storybookId: currentStorybook.id,
             storybookTitle: currentStorybook.title,
             onStart: (element) => {
