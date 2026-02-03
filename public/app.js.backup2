@@ -1357,74 +1357,1258 @@ function addNewPage() {
     }
 }
 
-/**
- * displayStorybook - 동화책 화면 렌더링 (DisplayService 래퍼)
- * 원래 1,253줄의 거대한 함수였으나, DisplayService로 분리하여 유지보수성 향상
- */
 function displayStorybook(storybook) {
-    if (!storybook) {
-        console.warn('⚠️ displayStorybook: storybook이 null입니다');
-        return;
-    }
+    console.log('📺 displayStorybook 호출:', {
+        title: storybook.title,
+        coverImage: storybook.coverImage,
+        historyCount: (storybook.coverImageHistory || []).length
+    });
     
-    // DisplayService로 HTML 생성
-    const displayService = window.displayService;
-    if (!displayService) {
-        console.error('❌ DisplayService가 로드되지 않았습니다');
-        return;
-    }
-    
-    // imageSettings 전달
-    displayService.init(imageSettings);
-    
-    // HTML 렌더링
-    const html = displayService.renderStorybook(storybook);
-    
-    // DOM에 삽입
     const resultDiv = document.getElementById('storybookResult');
-    if (resultDiv) {
-        resultDiv.innerHTML = html;
-    }
     
-    // 표지 이미지 업데이트 (히스토리 포함)
-    if (typeof updateCoverImageDisplay === 'function') {
-        updateCoverImageDisplay();
-    }
+    // UIHelper로 헤더 렌더링
+    let html = UIHelper.renderStorybookHeader(storybook);
     
-    // UI 후처리 (select 값 업데이트 등)
-    setTimeout(() => {
-        // Gemini TTS 모델 select 초기화
-        const globalTTSModelSelect = document.getElementById('global-gemini-tts-model');
-        if (globalTTSModelSelect) {
-            globalTTSModelSelect.value = imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts';
-        }
-        
-        // TTS 음성 select 초기화
-        const pageTTSModelSelect = document.getElementById('page-tts-model');
-        if (pageTTSModelSelect) {
-            pageTTSModelSelect.value = imageSettings.ttsModel || 'Aoede';
-        }
-        
-        // 배경음악 select 업데이트
-        if (typeof updateBackgroundMusicSelect === 'function') {
-            updateBackgroundMusicSelect();
-        }
-        const bgmSelectEl = document.getElementById('backgroundMusicSelect');
-        if (bgmSelectEl && storybook.backgroundMusicId) {
-            bgmSelectEl.value = storybook.backgroundMusicId;
-            
-            const music = backgroundMusicList.find(m => m.id === storybook.backgroundMusicId);
-            if (music) {
-                const selectedMusicEl = document.getElementById('selectedBackgroundMusic');
-                if (selectedMusicEl) {
-                    selectedMusicEl.innerHTML = `
-                        <i class="fas fa-check-circle text-green-600 mr-1"></i>
-                        선택됨: <strong>${music.title}</strong>
+    // UIHelper로 배경음악 섹션 렌더링
+    html += UIHelper.renderMusicSection(storybook);
+    
+    // 나머지 섹션 (캐릭터, 표지, Key Object 등)
+    html += `
+        <div class="bg-white rounded-3xl shadow-2xl p-4 md:p-10 mb-8">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0 mb-4 md:mb-6">
+                <div class="flex-1">
+                    <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2 cursor-pointer flex items-center" onclick="toggleSection('character-section')">
+                        <i id="character-section-icon" class="fas fa-chevron-down mr-2 text-sm transition-transform"></i>
+                        <i class="fas fa-users mr-2 text-purple-500"></i>
+                        캐릭터 레퍼런스
+                    </h3>
+                    <p class="text-xs md:text-base text-gray-600">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <span class="hidden sm:inline">각 캐릭터의 레퍼런스 이미지를 생성하면 삽화에서 일관된 모습을 유지할 수 있어요.</span>
+                        <span class="sm:hidden">레퍼런스 이미지로 일관성 유지</span>
+                    </p>
+                    ${createModelSelect('character', imageSettings.characterModel || 'gemini-3-pro-image-preview', 'updateCharacterModel(this.value)')}
+                </div>
+                <div class="flex gap-2 md:gap-3">
+                    <button 
+                        onclick="generateAllCharacterReferences()"
+                        class="bg-purple-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-purple-700 transition whitespace-nowrap text-sm md:text-base"
+                    >
+                        <i class="fas fa-images mr-1 md:mr-2"></i><span class="hidden sm:inline">모든 레퍼런스 생성</span><span class="sm:hidden">전체 생성</span>
+                    </button>
+                    <button 
+                        onclick="downloadAllCharacterReferences()"
+                        class="bg-blue-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-blue-700 transition whitespace-nowrap text-sm md:text-base"
+                    >
+                        <i class="fas fa-download mr-1 md:mr-2"></i><span class="hidden sm:inline">모두 다운로드</span><span class="sm:hidden">다운</span>
+                    </button>
+                    <button 
+                        onclick="addNewCharacter()"
+                        class="bg-green-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-green-700 transition whitespace-nowrap text-sm md:text-base"
+                    >
+                        <i class="fas fa-plus mr-1 md:mr-2"></i><span class="hidden sm:inline">캐릭터 추가</span><span class="sm:hidden">추가</span>
+                    </button>
+                </div>
+            </div>
+            <div id="character-section-content" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                ${storybook.characters.map((char, idx) => `
+                    <div class="character-card card rounded-xl p-4 md:p-6">
+                        <div class="flex justify-between items-start mb-3 md:mb-4">
+                            <div class="flex-1">
+                                <input 
+                                    type="text" 
+                                    id="char-name-${idx}" 
+                                    value="${char.name}"
+                                    onchange="updateCharacterName(${idx}, this.value)"
+                                    class="text-lg md:text-2xl font-bold mb-2 bg-transparent border-b-2 border-white text-white placeholder-white w-full"
+                                />
+                                <div class="flex gap-2 items-center mb-2">
+                                    <span class="bg-white text-purple-600 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs md:text-sm font-semibold">
+                                        ${char.role}
+                                    </span>
+                                    ${char.age ? `<span class="bg-white bg-opacity-20 text-white px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs md:text-sm font-semibold">
+                                        <i class="fas fa-birthday-cake mr-1"></i>${char.age}
+                                    </span>` : ''}
+                                    <div class="flex items-center gap-1 bg-white bg-opacity-20 px-2 py-1 rounded">
+                                        <i class="fas fa-ruler-vertical text-white text-xs"></i>
+                                        <input 
+                                            type="number" 
+                                            id="char-height-${idx}" 
+                                            value="${char.height || 150}"
+                                            onchange="updateCharacterHeight(${idx}, this.value)"
+                                            class="w-12 bg-transparent text-white text-xs font-semibold text-center border-b border-white focus:outline-none"
+                                            min="50"
+                                            max="250"
+                                        />
+                                        <span class="text-white text-xs">cm</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button 
+                                onclick="deleteCharacter(${idx})"
+                                class="text-white hover:text-red-300 ml-2"
+                            >
+                                <i class="fas fa-trash text-sm md:text-base"></i>
+                            </button>
+                        </div>
+                        <p class="text-white text-xs md:text-sm mb-3 md:mb-4 opacity-90">${char.description.substring(0, 80)}...</p>
+                        <div id="char-ref-${idx}" class="mb-3 md:mb-4 min-h-[150px] md:min-h-[200px] bg-white bg-opacity-20 rounded-lg overflow-hidden">
+                            ${char.referenceImage ? 
+                                (() => {
+                                    const history = char.imageHistory || [];
+                                    return `
+                                        <div class="flex gap-2 h-full">
+                                            <!-- 메인 이미지 -->
+                                            <div class="flex-1 relative group">
+                                                <img 
+                                                    src="${char.referenceImage}" 
+                                                    alt="${char.name}" 
+                                                    class="w-full h-full object-cover rounded-lg cursor-pointer"
+                                                    onclick="toggleImageDeleteButton('char-${idx}')"
+                                                />
+                                                <button 
+                                                    id="char-${idx}-delete-btn"
+                                                    onclick="event.stopPropagation(); deleteCharacterImage(${idx})"
+                                                    class="hidden absolute top-2 right-2 bg-red-500 bg-opacity-90 text-white w-8 h-8 rounded-full hover:bg-opacity-100 transition shadow-lg flex items-center justify-center z-10"
+                                                    title="이미지 삭제"
+                                                >
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                                <button 
+                                                    onclick="downloadImage('${char.referenceImage}', '캐릭터_${char.name}.png')"
+                                                    class="absolute bottom-2 right-2 bg-white bg-opacity-90 text-purple-600 w-10 h-10 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                                                    title="다운로드"
+                                                >
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                            </div>
+                                            ${history.length > 0 ? `
+                                                <!-- 히스토리 -->
+                                                <div class="w-20 overflow-y-auto space-y-2 p-1" style="scrollbar-width: thin; scrollbar-color: rgba(168, 85, 247, 0.5) rgba(168, 85, 247, 0.1);">
+                                                    ${history.map((url, histIdx) => `
+                                                        <div class="relative group cursor-pointer border-2 border-transparent hover:border-purple-400 rounded transition" onclick="selectCharacterImageFromHistory(${idx}, ${histIdx})" title="이전 버전 ${histIdx + 1}">
+                                                            <img src="${url}" alt="이전 ${histIdx + 1}" class="w-full h-16 object-cover rounded"/>
+                                                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition rounded flex items-center justify-center">
+                                                                <i class="fas fa-check text-white text-xs opacity-0 group-hover:opacity-100 transition"></i>
+                                                            </div>
+                                                        </div>
+                                                    `).join('')}
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    `;
+                                })() :
+                                '<div class="flex items-center justify-center h-full"><p class="text-white text-xs md:text-sm text-center p-4">이미지 생성 대기중</p></div>'
+                            }
+                        </div>
+                        <textarea 
+                            id="char-prompt-${idx}" 
+                            class="w-full p-2 border border-white rounded-lg text-sm mb-2 bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70"
+                            rows="2"
+                            placeholder="프롬프트를 수정하세요"
+                        >${char.description}</textarea>
+                        <div class="flex gap-2 mb-2">
+                            <button 
+                                onclick="generateCharacterReference(${idx})"
+                                class="flex-1 bg-white text-purple-600 py-2 rounded-lg font-semibold hover:bg-opacity-90 transition"
+                            >
+                                <i class="fas fa-image mr-2"></i>생성
+                            </button>
+                            <button 
+                                onclick="openCharacterUploadModal(${idx})"
+                                class="flex-1 bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition"
+                            >
+                                <i class="fas fa-upload mr-2"></i>업로드
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+
+        <!-- 표지 생성 섹션 -->
+        <div class="bg-white rounded-3xl shadow-2xl p-4 md:p-10 mb-8">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0 mb-4 md:mb-6">
+                <div class="flex-1">
+                    <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2 cursor-pointer flex items-center" onclick="toggleSection('cover-section')">
+                        <i id="cover-section-icon" class="fas fa-chevron-right mr-2 text-sm transition-transform"></i>
+                        <i class="fas fa-book-open mr-2 text-indigo-500"></i>
+                        표지 이미지
+                    </h3>
+                    <p class="text-xs md:text-base text-gray-600">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <span class="hidden sm:inline">동화책의 첫인상을 결정하는 표지 이미지를 생성하세요.</span>
+                        <span class="sm:hidden">동화책 표지 생성</span>
+                    </p>
+                    ${createModelSelect('cover', imageSettings.coverModel || 'gemini-3-pro-image-preview', 'updateCoverModel(this.value)')}
+                </div>
+                <div class="flex gap-2 md:gap-3">
+                    <button 
+                        onclick="generateCoverImage()"
+                        class="bg-indigo-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-indigo-700 transition whitespace-nowrap text-sm md:text-base"
+                    >
+                        <i class="fas fa-image mr-1 md:mr-2"></i><span class="hidden sm:inline">${storybook.coverImage ? '표지 재생성' : '표지 생성'}</span><span class="sm:hidden">${storybook.coverImage ? '재생성' : '생성'}</span>
+                    </button>
+                    <button 
+                        onclick="openCoverUploadModal()"
+                        class="bg-blue-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-blue-700 transition whitespace-nowrap text-sm md:text-base"
+                    >
+                        <i class="fas fa-upload mr-1 md:mr-2"></i><span class="hidden sm:inline">이미지 업로드</span><span class="sm:hidden">업로드</span>
+                    </button>
+                </div>
+            </div>
+            <div id="cover-section-content" class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 hidden">
+                <!-- 표지 이미지 -->
+                <div class="card rounded-xl p-4 md:p-6 bg-gradient-to-br from-indigo-500 to-purple-600">
+                    <h4 class="text-lg md:text-xl font-bold text-white mb-3 md:mb-4">
+                        <i class="fas fa-image mr-2"></i>표지 이미지
+                    </h4>
+                    <div id="cover-image-display" class="mb-3 md:mb-4 min-h-[300px] md:min-h-[400px] bg-white bg-opacity-20 rounded-lg overflow-hidden">
+                        ${storybook.coverImage ? 
+                            (() => {
+                                const history = storybook.coverImageHistory || [];
+                                return `
+                                    <div class="flex gap-2 h-full">
+                                        <!-- 메인 이미지 -->
+                                        <div class="flex-1 relative group">
+                                            <img src="${storybook.coverImage}" alt="표지" class="w-full h-full object-cover rounded-lg"/>
+                                            <button 
+                                                onclick="downloadImage('${storybook.coverImage}', '${storybook.title}_표지.png')"
+                                                class="absolute top-3 right-3 bg-white bg-opacity-90 text-indigo-600 w-12 h-12 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                                                title="다운로드"
+                                            >
+                                                <i class="fas fa-download text-lg"></i>
+                                            </button>
+                                        </div>
+                                        ${history.length > 0 ? `
+                                            <!-- 히스토리 -->
+                                            <div class="w-24 overflow-y-auto space-y-2 p-1" style="scrollbar-width: thin; scrollbar-color: rgba(99, 102, 241, 0.5) rgba(99, 102, 241, 0.1);">
+                                                ${history.map((url, histIdx) => `
+                                                    <div class="relative group cursor-pointer border-2 border-transparent hover:border-indigo-400 rounded transition" onclick="selectCoverImageFromHistory(${histIdx})" title="이전 버전 ${histIdx + 1}">
+                                                        <img src="${url}" alt="이전 ${histIdx + 1}" class="w-full h-20 object-cover rounded"/>
+                                                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition rounded flex items-center justify-center">
+                                                            <i class="fas fa-check text-white opacity-0 group-hover:opacity-100 transition"></i>
+                                                        </div>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `;
+                            })() :
+                            '<div class="flex items-center justify-center h-full"><div class="text-center p-6"><i class="fas fa-book-open text-6xl text-white opacity-50 mb-4"></i><p class="text-white text-sm">표지 이미지 생성 대기중</p></div></div>'
+                        }
+                    </div>
+                </div>
+                
+                <!-- 표지 프롬프트 및 설정 -->
+                <div class="space-y-4">
+                    <div class="bg-gray-50 rounded-xl p-4 md:p-6">
+                        <h4 class="text-lg font-bold text-gray-800 mb-3">
+                            <i class="fas fa-edit mr-2"></i>표지 프롬프트
+                        </h4>
+                        <textarea 
+                            id="cover-prompt" 
+                            class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            rows="6"
+                            placeholder="표지 이미지 프롬프트를 작성하세요..."
+                        >${storybook.coverPrompt || buildCoverPrompt(storybook)}</textarea>
+                        <button 
+                            onclick="resetCoverPrompt()"
+                            class="mt-2 text-sm text-indigo-600 hover:text-indigo-700"
+                        >
+                            <i class="fas fa-redo mr-1"></i>기본 프롬프트로 초기화
+                        </button>
+                    </div>
+                    
+                    <!-- 표지 비율 선택 -->
+                    <div class="bg-gray-50 rounded-xl p-4 md:p-6">
+                        <h4 class="text-lg font-bold text-gray-800 mb-3">
+                            <i class="fas fa-expand-arrows-alt mr-2"></i>이미지 비율
+                        </h4>
+                        <select 
+                            id="cover-aspect-ratio" 
+                            class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        >
+                            <option value="4:3" ${!storybook.coverAspectRatio || storybook.coverAspectRatio === '4:3' ? 'selected' : ''}>4:3 (가로 표준) - 권장</option>
+                            <option value="16:9" ${storybook.coverAspectRatio === '16:9' ? 'selected' : ''}>16:9 (가로 와이드)</option>
+                            <option value="1:1" ${storybook.coverAspectRatio === '1:1' ? 'selected' : ''}>1:1 (정사각형)</option>
+                            <option value="3:4" ${storybook.coverAspectRatio === '3:4' ? 'selected' : ''}>3:4 (세로 표준)</option>
+                            <option value="9:16" ${storybook.coverAspectRatio === '9:16' ? 'selected' : ''}>9:16 (세로 와이드)</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-2">
+                            <i class="fas fa-info-circle mr-1"></i>기본값: 4:3 (책 표지에 적합)
+                        </p>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-xl p-4 md:p-6">
+                        <h4 class="text-lg font-bold text-gray-800 mb-3">
+                            <i class="fas fa-users mr-2"></i>참조할 캐릭터 선택
+                        </h4>
+                        <div class="space-y-2 max-h-64 overflow-y-auto pr-2" style="scrollbar-width: thin;">
+                            ${storybook.characters.map((char, idx) => `
+                                <label class="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg cursor-pointer">
+                                    <input 
+                                        type="checkbox" 
+                                        id="cover-char-ref-${idx}"
+                                        ${storybook.coverCharacterRefs && storybook.coverCharacterRefs.includes(idx) ? 'checked' : ''}
+                                        onchange="toggleCoverCharacterRef(${idx}, this.checked)"
+                                        class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+                                    />
+                                    <div class="flex items-center gap-2 flex-1">
+                                        ${char.referenceImage ? 
+                                            `<img src="${char.referenceImage}" class="w-10 h-10 rounded object-cover" />` :
+                                            `<div class="w-10 h-10 rounded bg-gray-200 flex items-center justify-center"><i class="fas fa-user text-gray-400"></i></div>`
+                                        }
+                                        <span class="text-sm font-medium">${char.name}</span>
+                                    </div>
+                                </label>
+                            `).join('')}
+                        </div>
+                        ${storybook.characters.length > 4 ? `<p class="text-xs text-gray-500 mt-2"><i class="fas fa-info-circle mr-1"></i>스크롤하여 더 많은 캐릭터 보기</p>` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Objects 섹션 -->
+        <div class="bg-white rounded-3xl shadow-2xl p-4 md:p-10 mb-8">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0 mb-4 md:mb-6">
+                <div class="flex-1">
+                    <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2 cursor-pointer flex items-center" onclick="toggleSection('keyobject-section')">
+                        <i id="keyobject-section-icon" class="fas fa-chevron-right mr-2 text-sm transition-transform"></i>
+                        <i class="fas fa-cube mr-2 text-orange-500"></i>
+                        핵심 사물 (Key Objects)
+                    </h3>
+                    <p class="text-xs md:text-base text-gray-600">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <span class="hidden sm:inline">스토리에서 중요한 물건들을 미리 생성하면 삽화에서 일관되게 표현할 수 있어요.</span>
+                        <span class="sm:hidden">핵심 사물로 일관성 유지</span>
+                    </p>
+                    ${createModelSelect('keyobject', imageSettings.keyObjectModel || 'gemini-3-pro-image-preview', 'updateKeyObjectModel(this.value)')}
+                </div>
+                <div class="flex gap-2 md:gap-3">
+                    <button 
+                        onclick="generateAllKeyObjectImages()"
+                        class="bg-orange-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-orange-700 transition whitespace-nowrap text-sm md:text-base"
+                    >
+                        <i class="fas fa-images mr-1 md:mr-2"></i><span class="hidden sm:inline">모든 이미지 생성</span><span class="sm:hidden">전체 생성</span>
+                    </button>
+                    <button 
+                        onclick="downloadAllKeyObjectImages()"
+                        class="bg-green-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-green-700 transition whitespace-nowrap text-sm md:text-base"
+                    >
+                        <i class="fas fa-download mr-1 md:mr-2"></i><span class="hidden sm:inline">모두 다운로드</span><span class="sm:hidden">다운</span>
+                    </button>
+                    <button 
+                        onclick="bulkUploadKeyObjectImages()"
+                        class="bg-purple-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-purple-700 transition whitespace-nowrap text-sm md:text-base"
+                    >
+                        <i class="fas fa-upload mr-1 md:mr-2"></i><span class="hidden sm:inline">일괄 업로드</span><span class="sm:hidden">업로드</span>
+                    </button>
+                    <button 
+                        onclick="addNewKeyObject()"
+                        class="bg-blue-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-blue-700 transition whitespace-nowrap text-sm md:text-base"
+                    >
+                        <i class="fas fa-plus mr-1 md:mr-2"></i><span class="hidden sm:inline">사물 추가</span><span class="sm:hidden">추가</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="keyobject-section-content" class="hidden">
+            ${storybook.key_objects && storybook.key_objects.length > 0 ? `
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                ${storybook.key_objects.map((obj, idx) => {
+                    const objImg = storybook.keyObjectImages && storybook.keyObjectImages[idx];
+                    const sizeIcon = obj.size === 'small' ? 'fa-hand-holding' : obj.size === 'large' ? 'fa-building' : 'fa-box';
+                    const sizeColor = obj.size === 'small' ? 'text-blue-600' : obj.size === 'large' ? 'text-red-600' : 'text-yellow-600';
+                    return `
+                    <div class="bg-gradient-to-br from-orange-50 to-yellow-50 p-4 rounded-xl border-2 border-orange-200">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <input 
+                                        type="text" 
+                                        id="keyobj-name-${idx}" 
+                                        value="${obj.name}"
+                                        onblur="updateKeyObjectField(${idx}, 'name', this.value)"
+                                        class="font-bold text-gray-700 bg-transparent border-b border-orange-300 focus:border-orange-500 focus:outline-none w-full"
+                                        placeholder="영어 이름"
+                                    />
+                                    <i class="${sizeIcon} ${sizeColor}" title="${obj.size}"></i>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    id="keyobj-korean-${idx}" 
+                                    value="${obj.korean}"
+                                    onblur="updateKeyObjectField(${idx}, 'korean', this.value)"
+                                    class="text-sm text-gray-600 bg-transparent border-b border-orange-200 focus:border-orange-400 focus:outline-none w-full mb-2"
+                                    placeholder="한글 이름"
+                                />
+                                <div class="flex items-center gap-2 mb-2">
+                                    <select 
+                                        id="keyobj-size-${idx}"
+                                        onchange="updateKeyObjectField(${idx}, 'size', this.value)"
+                                        class="flex-1 text-xs bg-white border border-orange-200 rounded px-2 py-1"
+                                    >
+                                        <option value="small" ${obj.size === 'small' ? 'selected' : ''}>Small</option>
+                                        <option value="medium" ${obj.size === 'medium' ? 'selected' : ''}>Medium</option>
+                                        <option value="large" ${obj.size === 'large' ? 'selected' : ''}>Large</option>
+                                    </select>
+                                    <div class="flex items-center gap-1">
+                                        <input 
+                                            type="number" 
+                                            id="keyobj-size-cm-${idx}" 
+                                            value="${obj.sizeCm || (obj.size === 'small' ? 10 : obj.size === 'large' ? 200 : 100)}"
+                                            onblur="updateKeyObjectField(${idx}, 'sizeCm', parseInt(this.value))"
+                                            class="w-12 text-xs bg-white border border-orange-200 rounded px-1 py-1 text-center"
+                                            min="1"
+                                            max="1000"
+                                        />
+                                        <span class="text-xs text-gray-600">cm</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button 
+                                onclick="deleteKeyObject(${idx})"
+                                class="text-orange-600 hover:text-red-600 ml-2"
+                                title="삭제"
+                            >
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <label class="text-xs text-gray-500 block mb-1">설명 (시각적 상세):</label>
+                            <textarea 
+                                id="keyobj-description-${idx}" 
+                                onblur="updateKeyObjectField(${idx}, 'description', this.value)"
+                                class="text-xs text-gray-700 bg-white border border-orange-200 rounded p-2 focus:border-orange-400 focus:outline-none w-full"
+                                placeholder="색상, 재질, 모양, 크기, 특징..."
+                                rows="3"
+                            >${obj.description}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="text-xs text-gray-500 block mb-1">예시 문장:</label>
+                            <input 
+                                type="text" 
+                                id="keyobj-example-${idx}" 
+                                value="${obj.example || ''}"
+                                onblur="updateKeyObjectField(${idx}, 'example', this.value)"
+                                class="text-xs text-blue-700 bg-blue-50 border border-orange-200 rounded px-2 py-1 focus:border-orange-400 focus:outline-none w-full"
+                                placeholder="이 사물이 등장하는 문장"
+                            />
+                        </div>
+                        
+                        <div id="keyobj-img-${idx}" class="bg-white rounded-lg mb-2 min-h-[180px] flex items-center justify-center overflow-hidden border-2 border-orange-200 relative">
+                            ${objImg && objImg.imageUrl ? 
+                                `<div class="relative w-full h-full group">
+                                    <img 
+                                        src="${objImg.imageUrl}" 
+                                        alt="${obj.name}" 
+                                        class="w-full h-full object-cover rounded-lg cursor-pointer"
+                                        onclick="toggleImageDeleteButton('keyobj-${idx}')"
+                                    />
+                                    <button 
+                                        id="keyobj-${idx}-delete-btn"
+                                        onclick="event.stopPropagation(); deleteKeyObjectImage(${idx})"
+                                        class="hidden absolute top-2 right-2 bg-red-500 bg-opacity-90 text-white w-8 h-8 rounded-full hover:bg-opacity-100 transition shadow-lg flex items-center justify-center z-10"
+                                        title="이미지 삭제"
+                                    >
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>` :
+                                `<p class="text-gray-400 text-sm text-center p-4">
+                                    <i class="fas fa-cube text-3xl mb-2"></i><br>
+                                    이미지 대기중
+                                </p>`
+                            }
+                        </div>
+                        
+                        <button 
+                            onclick="generateSingleKeyObjectImage(${idx})"
+                            class="w-full bg-orange-500 text-white px-2 py-2 rounded text-sm hover:bg-orange-600 transition"
+                        >
+                            <i class="fas fa-magic mr-1"></i>${objImg && objImg.imageUrl ? '재생성' : '이미지 생성'}
+                        </button>
+                    </div>
                     `;
-                }
-            }
+                }).join('')}
+            </div>
+            ` : `
+            <div class="text-center py-8 text-gray-400">
+                <i class="fas fa-cube text-5xl mb-3"></i>
+                <p class="text-lg">아직 핵심 사물이 없습니다.</p>
+                <p class="text-sm mt-2">"사물 추가" 버튼을 눌러 핵심 사물을 추가하세요.</p>
+            </div>
+            `}
+            </div>
+        </div>
+
+        <!-- 페이지 섹션 -->
+        <div class="bg-white rounded-3xl shadow-2xl p-10 mb-8">
+            <!-- 제목 -->
+            <h3 class="text-3xl font-bold text-gray-800 cursor-pointer flex items-center mb-6" onclick="toggleSection('pages-section')">
+                <i id="pages-section-icon" class="fas fa-chevron-down mr-2 text-sm transition-transform"></i>
+                <i class="fas fa-book mr-2 text-purple-500"></i>
+                스토리 페이지 (${storybook.pages.length}페이지)
+            </h3>
+            
+            <!-- 설정 옵션 -->
+            <div class="mb-6 space-y-4">
+                <div class="flex items-center gap-4 flex-wrap">
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-gray-600">이미지 모델:</label>
+                        ${createModelSelect('illustration', imageSettings.illustrationModel || 'gemini-3-pro-image-preview')}
+                    </div>
+                </div>
+                
+                <!-- 언어 탭 -->
+                ${(() => {
+                    // languages 배열이 있으면 사용, 없으면 translations에서 추출
+                    let availableLanguages = storybook.languages || [];
+                    
+                    // translations가 있으면 언어 목록에 추가
+                    if (storybook.translations && typeof storybook.translations === 'object') {
+                        const translationLangs = Object.keys(storybook.translations);
+                        availableLanguages = ['ko', ...translationLangs].filter((v, i, a) => a.indexOf(v) === i); // 중복 제거
+                    }
+                    
+                    // 언어가 없으면 한국어 기본
+                    if (availableLanguages.length === 0) {
+                        availableLanguages = ['ko'];
+                    }
+                    
+                    return `
+                        <div class="border-b border-gray-200 -mx-10 px-10 mb-6">
+                            <div class="flex items-center justify-between gap-1">
+                                <div class="flex items-center gap-1">
+                                    ${availableLanguages.map(lang => {
+                                        const languageNames = {
+                                            'ko': '🇰🇷 한국어',
+                                            'en': '🇺🇸 English',
+                                            'zh': '🇨🇳 中文',
+                                            'ja': '🇯🇵 日본어',
+                                            'es': '🇪🇸 Español',
+                                            'fr': '🇫🇷 Français'
+                                        };
+                                        const isActive = lang === (currentLanguage || 'ko');
+                                        return `
+                                            <button 
+                                                onclick="switchLanguage('${lang}')"
+                                                class="px-6 py-3 font-semibold transition-all relative ${
+                                                    isActive 
+                                                    ? 'text-purple-600' 
+                                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                                }"
+                                                style="${isActive ? 'border-bottom: 3px solid rgb(147, 51, 234); margin-bottom: -1px;' : ''}"
+                                            >
+                                                ${languageNames[lang] || lang}
+                                            </button>
+                                        `;
+                                    }).join('')}
+                                    
+                                    <!-- 언어 추가 버튼 -->
+                                    <div class="relative ml-2">
+                                    <button 
+                                        onclick="toggleAddLanguageDropdown()"
+                                        class="px-4 py-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all font-semibold text-sm border-2 border-dashed border-gray-300 hover:border-purple-400"
+                                        title="언어 추가"
+                                    >
+                                        <i class="fas fa-plus mr-1"></i>언어 추가
+                                    </button>
+                                    
+                                    <!-- 드롭다운 메뉴 -->
+                                    <div id="add-language-dropdown" class="hidden absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 min-w-[200px]">
+                                        <div class="p-3">
+                                            <p class="text-xs text-gray-600 mb-2">추가할 언어 선택</p>
+                                            ${['en', 'zh', 'ja', 'es', 'fr'].filter(lang => !availableLanguages.includes(lang)).map(lang => {
+                                                const langNames = {
+                                                    en: '🇺🇸 English',
+                                                    zh: '🇨🇳 中文',
+                                                    ja: '🇯🇵 日本어',
+                                                    es: '🇪🇸 Español',
+                                                    fr: '🇫🇷 Français'
+                                                };
+                                                return `
+                                                    <button 
+                                                        onclick="addLanguageFromTab('${lang}')"
+                                                        class="w-full text-left px-3 py-2 hover:bg-purple-50 rounded text-sm transition"
+                                                    >
+                                                        ${langNames[lang]}
+                                                    </button>
+                                                `;
+                                            }).join('')}
+                                            ${availableLanguages.length >= 6 ? '<p class="text-xs text-gray-500 p-2">모든 언어가 추가되었습니다</p>' : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 페이지 추가 버튼 (오른쪽 끝) -->
+                            <div>
+                                <button 
+                                    onclick="addNewPage()"
+                                    class="px-4 py-2 text-white bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-lg transition-all font-semibold text-sm shadow-lg hover:shadow-xl"
+                                    title="새 페이지 추가"
+                                >
+                                    <i class="fas fa-plus mr-1"></i>페이지 추가
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                })()}
+            </div>
+            
+            <!-- TTS 설정 -->
+            <div class="bg-gradient-to-r from-purple-50 to-blue-50 p-5 rounded-xl mb-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fas fa-cog text-purple-600"></i>
+                    <h4 class="font-bold text-gray-800">TTS 생성 설정</h4>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Gemini TTS 모델 -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-brain mr-1 text-purple-600"></i>
+                            Gemini 모델
+                        </label>
+                        <select 
+                            id="page-gemini-tts-model-select"
+                            onchange="updatePageGeminiTTSModel(this.value)"
+                            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
+                        >
+                            <option value="gemini-2.5-flash-preview-tts">Flash (무료 - 10회/일)</option>
+                            <option value="gemini-2.5-pro-preview-tts">Pro (유료 - 고품질)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- TTS 음성 -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-microphone mr-1 text-blue-600"></i>
+                            음성 선택
+                        </label>
+                        <select 
+                            id="page-tts-model-select"
+                            onchange="updateGlobalTTSModel(this.value)"
+                            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                        >
+                            <option value="Puck">Puck (남성, 밝고 활기찬)</option>
+                            <option value="Charon">Charon (남성, 차분하고 신중한)</option>
+                            <option value="Kore">Kore (여성, 따뜻하고 부드러운)</option>
+                            <option value="Fenrir">Fenrir (남성, 힘있고 권위적인)</option>
+                            <option value="Aoede">Aoede (여성, 우아하고 서정적인)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 액션 버튼 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                    <!-- 삽화 생성 버튼들 -->
+                    <div class="relative">
+                        <button 
+                            onclick="generateAllIllustrationsParallel()"
+                            class="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3.5 rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
+                        >
+                            <i class="fas fa-bolt"></i>
+                            <span>삽화 생성 (빠르게)</span>
+                        </button>
+                        <button 
+                            onclick="showGenerationModeHelp('parallel')"
+                            class="absolute top-2 right-2 bg-white text-red-600 w-5 h-5 rounded-full hover:bg-red-50 transition shadow-md flex items-center justify-center text-xs"
+                            title="병렬 생성 모드"
+                        >
+                            ?
+                        </button>
+                    </div>
+                    
+                    <div class="relative">
+                        <button 
+                            onclick="generateAllIllustrationsSequential()"
+                            class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-3.5 rounded-lg hover:from-red-700 hover:to-red-800 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
+                        >
+                            <i class="fas fa-layer-group"></i>
+                            <span>삽화 생성 (정확하게)</span>
+                        </button>
+                        <button 
+                            onclick="showGenerationModeHelp('sequential')"
+                            class="absolute top-2 right-2 bg-white text-red-700 w-5 h-5 rounded-full hover:bg-red-50 transition shadow-md flex items-center justify-center text-xs"
+                            title="순차 생성 모드"
+                        >
+                            ?
+                        </button>
+                    </div>
+                    
+                    <!-- TTS 생성 버튼 -->
+                    <button 
+                        onclick="generateAllTTS()"
+                        class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-3.5 rounded-lg hover:from-purple-600 hover:to-purple-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
+                    >
+                        <i class="fas fa-microphone"></i>
+                        <span>모든 TTS 생성</span>
+                    </button>
+                    
+                    ${currentLanguage !== 'ko' ? `
+                    <!-- 번역 버튼 -->
+                    <button 
+                        onclick="translateAllPages()"
+                        id="translate-all-btn"
+                        class="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-4 py-3.5 rounded-lg hover:from-indigo-600 hover:to-indigo-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
+                    >
+                        <i class="fas fa-language"></i>
+                        <span>모두 번역하기</span>
+                    </button>
+                    ` : ''}
+                    
+                    <!-- 다운로드 버튼들 -->
+                    <button 
+                        onclick="downloadAllIllustrations()"
+                        class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3.5 rounded-lg hover:from-blue-600 hover:to-blue-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
+                    >
+                        <i class="fas fa-images"></i>
+                        <span>삽화 다운로드</span>
+                    </button>
+                    
+                    <button 
+                        onclick="downloadAllAudio()"
+                        class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3.5 rounded-lg hover:from-green-600 hover:to-green-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
+                    >
+                        <i class="fas fa-headphones text-xl"></i>
+                        <span>전체 TTS 다운로드</span>
+                    </button>
+                    
+                    <button 
+                        onclick="openBatchTTSUploadModal()"
+                        class="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white px-4 py-3.5 rounded-lg hover:from-teal-600 hover:to-teal-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
+                    >
+                        <i class="fas fa-upload text-xl"></i>
+                        <span>전체 TTS 업로드</span>
+                    </button>
+                    
+                    <button 
+                        onclick="downloadAllText()"
+                        class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-3.5 rounded-lg hover:from-purple-600 hover:to-purple-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
+                    >
+                        <i class="fas fa-file-alt text-xl"></i>
+                        <span>전체 페이지 텍스트 다운로드</span>
+                    </button>
+                    
+                    <!-- 일괄 업로드 버튼 -->
+                    <button 
+                        onclick="openBatchUploadModal()"
+                        id="batch-upload-btn"
+                        class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-3.5 rounded-lg hover:from-orange-600 hover:to-orange-700 transition shadow-lg flex items-center justify-center gap-2 font-semibold"
+                    >
+                        <i class="fas fa-upload text-xl"></i>
+                        <span>삽화 일괄 업로드</span>
+                    </button>
+                    
+                    <!-- 다운로드 버튼 -->
+                </div>
+
+            <div id="pages-section-content" class="space-y-4 md:space-y-6">
+                ${storybook.pages.map((page, idx) => `
+                    <div class="page-card bg-white rounded-xl shadow-lg overflow-hidden border border-purple-200">
+                        <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-3 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-white text-purple-600 w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold shadow">
+                                    ${page.pageNumber}
+                                </span>
+                                <span class="text-white font-semibold text-base md:text-lg">페이지 ${page.pageNumber}</span>
+                            </div>
+                            <div class="flex gap-1.5">
+                                ${page.text ? '<div class="w-6 h-6 bg-white bg-opacity-90 rounded-full flex items-center justify-center" title="텍스트 완료"><i class="fas fa-align-left text-purple-600 text-xs"></i></div>' : ''}
+                                ${getPageTTS(page, currentLanguage) ? '<div class="w-6 h-6 bg-white bg-opacity-90 rounded-full flex items-center justify-center" title="TTS 완료"><i class="fas fa-volume-up text-blue-600 text-xs"></i></div>' : ''}
+                                ${page.illustrationImage ? '<div class="w-6 h-6 bg-white bg-opacity-90 rounded-full flex items-center justify-center" title="삽화 완료"><i class="fas fa-image text-green-600 text-xs"></i></div>' : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="p-3 md:p-6 space-y-4 md:space-y-5">
+                            <!-- 1️⃣ 텍스트 섹션 -->
+                            <div class="bg-purple-50 border-2 border-purple-200 rounded-lg p-3 md:p-4">
+                                <h5 class="font-bold text-purple-700 mb-3 text-sm md:text-base flex items-center justify-between">
+                                    <span class="flex items-center">
+                                        <span class="bg-purple-600 text-white w-6 h-6 rounded-full flex items-center justify-center mr-2 text-xs">1</span>
+                                        텍스트
+                                    </span>
+                                    ${currentLanguage !== 'ko' ? `
+                                    <button 
+                                        onclick="translateSinglePage(${idx})"
+                                        data-translate-page="${idx}"
+                                        class="bg-purple-600 text-white px-3 py-1.5 rounded-lg hover:bg-purple-700 transition text-xs"
+                                    >
+                                        <i class="fas fa-language mr-1"></i>번역
+                                    </button>
+                                    ` : ''}
+                                </h5>
+                                <textarea 
+                                    id="text-${idx}" 
+                                    class="w-full p-2.5 md:p-3 border-2 border-purple-300 rounded-lg text-xs md:text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white"
+                                    rows="4"
+                                    onchange="updatePageText(${idx}, this.value)"
+                                    onblur="updatePageText(${idx}, this.value)"
+                                    oninput="debouncedUpdatePageText(${idx}, this.value)"
+                                    placeholder="이 페이지의 스토리를 작성하세요..."
+                                >${getPageText(page, currentLanguage)}</textarea>
+                            </div>
+
+                            <!-- 2️⃣ TTS 섹션 -->
+                            <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-3 md:p-4">
+                                <h5 class="font-bold text-blue-700 mb-3 text-sm md:text-base flex items-center">
+                                    <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center mr-2 text-xs">2</span>
+                                    음성(TTS)
+                                </h5>
+                                
+                                <!-- 음성 설정 -->
+                                <div class="mb-3">
+                                    <label class="text-xs md:text-sm font-semibold text-gray-700 block mb-2">
+                                        <i class="fas fa-microphone-alt mr-1 text-blue-600"></i>음성 설정
+                                    </label>
+                                    <input 
+                                        id="tts-config-${idx}" 
+                                        value="${page.ttsConfig || imageSettings.ttsVoiceConfig}"
+                                        placeholder="예: 여성 목소리, 동화 낭독 스타일, 또박또박"
+                                        class="w-full p-2.5 md:p-3 border-2 border-blue-300 rounded-lg text-xs md:text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white"
+                                        onblur="updateTTSConfig(${idx}, this.value)"
+                                    />
+                                </div>
+                                
+                                <!-- 모델 선택 -->
+                                <div class="mb-3">
+                                    <label class="text-xs md:text-sm font-semibold text-gray-700 block mb-2">
+                                        <i class="fas fa-robot mr-1 text-blue-600"></i>모델 선택
+                                    </label>
+                                    ${createTTSModelSelect(page.ttsModel || imageSettings.ttsModel, idx)}
+                                </div>
+                                
+                                <button 
+                                    onclick="generatePageTTS(${idx})"
+                                    class="w-full bg-blue-600 text-white py-2.5 md:py-3 rounded-lg font-semibold hover:bg-blue-700 active:bg-blue-800 transition text-sm md:text-base shadow-md mb-2"
+                                    id="tts-btn-${idx}"
+                                >
+                                    <i class="fas fa-microphone mr-2"></i>${getPageTTS(page, currentLanguage) ? 'TTS 재생성' : 'TTS 생성'}
+                                </button>
+                                
+                                ${getPageTTS(page, currentLanguage) ? `
+                                <div class="space-y-2">
+                                    <audio controls class="w-full h-10 md:h-12">
+                                        <source src="${getPageTTS(page, currentLanguage)}" type="audio/wav">
+                                    </audio>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button 
+                                            onclick="downloadAudio('${getPageTTS(page, currentLanguage)}', '${storybook.title}_${currentLanguage}_페이지_${page.pageNumber}.wav')"
+                                            class="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 active:bg-green-800 transition text-xs md:text-sm shadow"
+                                        >
+                                            <i class="fas fa-download mr-1"></i>다운로드
+                                        </button>
+                                        <button 
+                                            onclick="openTTSUploadModal(${idx})"
+                                            class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition text-xs md:text-sm shadow"
+                                        >
+                                            <i class="fas fa-upload mr-1"></i>업로드
+                                        </button>
+                                    </div>
+                                </div>
+                                ` : `
+                                <div class="space-y-2">
+                                    <p class="text-xs text-gray-500 text-center py-3 bg-white rounded-lg border border-blue-200">TTS 생성 버튼을 클릭하세요</p>
+                                    <button 
+                                        onclick="openTTSUploadModal(${idx})"
+                                        class="w-full bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition text-xs md:text-sm shadow"
+                                    >
+                                        <i class="fas fa-upload mr-1"></i>TTS 업로드
+                                    </button>
+                                </div>
+                                `}
+                            </div>
+
+                            <!-- 3️⃣ 삽화 섹션 -->
+                            <div class="bg-green-50 border-2 border-green-200 rounded-lg p-3 md:p-4">
+                                <h5 class="font-bold text-green-700 mb-3 text-sm md:text-base flex items-center">
+                                    <span class="bg-green-600 text-white w-6 h-6 rounded-full flex items-center justify-center mr-2 text-xs">3</span>
+                                    삽화
+                                </h5>
+                                
+                                <!-- 장면 설명 -->
+                                <div class="mb-3">
+                                    <label class="text-xs md:text-sm font-semibold text-gray-700 block mb-2">
+                                        <i class="fas fa-palette mr-1 text-green-600"></i>장면 설명
+                                    </label>
+                                    <textarea 
+                                        id="scene-combined-${idx}" 
+                                        class="w-full p-2.5 md:p-3 border-2 border-green-300 rounded-lg text-xs md:text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 bg-white"
+                                        rows="3"
+                                        placeholder="장면, 캐릭터, 배경, 분위기를 자세히 설명하세요..."
+                                        onblur="updateSceneCombined(${idx}, this.value)"
+                                    >${page.scene_description || ''}</textarea>
+                                    <p class="text-[10px] text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>장면의 전체적인 모습을 하나의 텍스트로 작성하세요</p>
+                                </div>
+                                
+                                <!-- 삽화 생성 및 업로드 버튼 -->
+                                <div class="grid grid-cols-2 gap-2 mb-3">
+                                    <button 
+                                        onclick="generateIllustration(${idx})"
+                                        class="bg-green-600 text-white py-2.5 md:py-3 rounded-lg font-semibold hover:bg-green-700 active:bg-green-800 transition text-sm md:text-base shadow-md"
+                                    >
+                                        <i class="fas fa-paint-brush mr-2"></i>${page.illustrationImage ? '삽화 재생성' : '삽화 생성'}
+                                    </button>
+                                    <button 
+                                        onclick="openIllustrationUploadModal(${idx})"
+                                        class="bg-blue-600 text-white py-2.5 md:py-3 rounded-lg font-semibold hover:bg-blue-700 active:bg-blue-800 transition text-sm md:text-base shadow-md"
+                                    >
+                                        <i class="fas fa-upload mr-2"></i>이미지 업로드
+                                    </button>
+                                </div>
+                                
+                                <div id="illustration-${idx}" class="bg-white rounded-lg overflow-hidden shadow-sm border-2 border-gray-200">
+                                    ${page.illustrationImage ?
+                                        (() => {
+                                            const history = page.illustrationHistory || [];
+                                            return `
+                                                <div class="flex gap-2 h-full">
+                                                    <!-- 메인 이미지 -->
+                                                    <div class="flex-1 relative group">
+                                                        <img 
+                                                            src="${page.illustrationImage}" 
+                                                            alt="Page ${page.pageNumber}" 
+                                                            class="w-full h-auto cursor-pointer"
+                                                            onclick="toggleImageDeleteButton('page-${idx}')"
+                                                        />
+                                                        <button 
+                                                            id="page-${idx}-delete-btn"
+                                                            onclick="event.stopPropagation(); deletePageIllustration(${idx})"
+                                                            class="hidden absolute top-3 right-3 bg-red-500 bg-opacity-90 text-white w-10 h-10 rounded-full hover:bg-opacity-100 transition shadow-lg flex items-center justify-center z-10"
+                                                            title="이미지 삭제"
+                                                        >
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                        <button 
+                                                            onclick="downloadImage('${page.illustrationImage}', '${storybook.title}_페이지_${page.pageNumber}.png')"
+                                                            class="absolute bottom-3 right-3 bg-white bg-opacity-90 text-green-600 w-11 h-11 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                                                            title="다운로드"
+                                                        >
+                                                            <i class="fas fa-download text-base"></i>
+                                                        </button>
+                                                    </div>
+                                                    ${history.length > 0 ? `
+                                                        <!-- 히스토리 -->
+                                                        <div class="w-20 overflow-y-auto space-y-2 p-1" style="scrollbar-width: thin; scrollbar-color: rgba(34, 197, 94, 0.5) rgba(34, 197, 94, 0.1);">
+                                                            ${history.map((url, histIdx) => `
+                                                                <div class="relative group cursor-pointer border-2 border-transparent hover:border-green-400 rounded transition" onclick="selectIllustrationFromHistory(${idx}, ${histIdx})" title="이전 버전 ${histIdx + 1}">
+                                                                    <img src="${url}" alt="이전 ${histIdx + 1}" class="w-full h-16 object-cover rounded"/>
+                                                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition rounded flex items-center justify-center">
+                                                                        <i class="fas fa-check text-white text-xs opacity-0 group-hover:opacity-100 transition"></i>
+                                                                    </div>
+                                                                </div>
+                                                            `).join('')}
+                                                        </div>
+                                                    ` : ''}
+                                                </div>
+                                            `;
+                                        })() :
+                                        `<div class="min-h-[150px] md:min-h-[200px] flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                                            <p class="text-gray-400 text-center p-4 text-xs md:text-sm">
+                                                <i class="fas fa-image text-3xl md:text-4xl mb-2 block"></i>
+                                                삽화 생성 버튼을 클릭하세요
+                                            </p>
+                                        </div>`
+                                    }
+                                </div>
+                                
+                                ${page.illustrationImage ? `
+                                <div class="mt-2">
+                                    <label class="block text-xs font-semibold text-gray-700 mb-1">
+                                        <i class="fas fa-edit mr-1"></i>수정사항 (선택)
+                                    </label>
+                                    <textarea 
+                                        id="edit-note-${idx}" 
+                                        class="w-full p-2 border-2 border-yellow-300 rounded-lg text-xs bg-yellow-50"
+                                        rows="2"
+                                        placeholder="예: 토끼를 더 크게"
+                                    >${page.editNote || ''}</textarea>
+                                </div>
+                                ` : ''}
+                                
+                                <!-- 참조 이미지 (접기 가능) -->
+                                <div class="mt-3">
+                                    <button 
+                                        onclick="togglePageSection('ref-images-${idx}')"
+                                        class="w-full flex items-center justify-between text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 p-2 rounded-lg transition"
+                                    >
+                                        <span><i class="fas fa-images mr-1"></i>참조 이미지 (선택)</span>
+                                        <i id="ref-images-${idx}-icon" class="fas fa-chevron-down text-xs transition-transform"></i>
+                                    </button>
+                                    <div id="ref-images-${idx}-content" class="hidden mt-2">
+                                        <div class="grid grid-cols-3 md:grid-cols-4 gap-1.5 md:gap-2 max-h-28 md:max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-1.5 md:p-2 bg-white">
+                                            ${storybook.pages.map((p, pIdx) => {
+                                                if (pIdx === idx || !p.illustrationImage) return '';
+                                                return `
+                                                <div class="relative cursor-pointer touch-manipulation" onclick="toggleReferenceImage(${idx}, ${pIdx})">
+                                                    <img 
+                                                        src="${p.illustrationImage}" 
+                                                        alt="페이지 ${p.pageNumber}"
+                                                        class="w-full h-14 md:h-16 object-cover rounded border-2 border-gray-300 active:border-green-500 transition"
+                                                        id="ref-img-${idx}-${pIdx}"
+                                                    />
+                                                    <div class="absolute top-0 right-0 bg-green-600 text-white text-[10px] md:text-xs px-1 py-0.5 rounded-bl font-semibold">
+                                                        ${p.pageNumber}
+                                                    </div>
+                                                    <input 
+                                                        type="checkbox" 
+                                                        id="ref-check-${idx}-${pIdx}"
+                                                        class="absolute top-0.5 left-0.5 w-3.5 h-3.5 md:w-4 md:h-4"
+                                                    />
+                                                </div>
+                                                `;
+                                            }).join('') || '<p class="text-gray-400 text-[10px] md:text-xs col-span-3 md:col-span-4 text-center py-3">아직 다른 페이지에 이미지가 없습니다</p>'}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Key Objects (접기 가능) -->
+                                ${storybook.key_objects && storybook.key_objects.length > 0 ? `
+                                <div class="mt-2">
+                                    <button 
+                                        onclick="togglePageSection('ref-keyobj-${idx}')"
+                                        class="w-full flex items-center justify-between text-xs font-semibold text-gray-700 bg-orange-50 hover:bg-orange-100 p-2 rounded-lg transition"
+                                    >
+                                        <span><i class="fas fa-cube mr-1"></i>Key Objects (선택)</span>
+                                        <i id="ref-keyobj-${idx}-icon" class="fas fa-chevron-down text-xs transition-transform"></i>
+                                    </button>
+                                    <div id="ref-keyobj-${idx}-content" class="hidden mt-2">
+                                        <div class="grid grid-cols-3 md:grid-cols-4 gap-1.5 md:gap-2 max-h-28 md:max-h-32 overflow-y-auto border border-orange-300 rounded-lg p-1.5 md:p-2 bg-white">
+                                            ${storybook.key_objects.map((obj, objIdx) => {
+                                                const objImg = storybook.keyObjectImages && storybook.keyObjectImages[objIdx];
+                                                if (!objImg || !objImg.imageUrl) return '';
+                                                return `
+                                                <div class="relative cursor-pointer touch-manipulation" onclick="toggleKeyObjectReference(${idx}, ${objIdx})">
+                                                    <img 
+                                                        src="${objImg.imageUrl}" 
+                                                        alt="${obj.korean}"
+                                                        class="w-full h-14 md:h-16 object-cover rounded border-2 border-orange-300 active:border-orange-500 transition"
+                                                        id="ref-keyobj-${idx}-${objIdx}"
+                                                    />
+                                                    <div class="absolute top-0 right-0 bg-orange-600 text-white text-[10px] md:text-xs px-1 py-0.5 rounded-bl font-semibold">
+                                                        ${obj.korean}
+                                                    </div>
+                                                    <input 
+                                                        type="checkbox" 
+                                                        id="ref-keyobj-check-${idx}-${objIdx}"
+                                                        class="absolute top-0.5 left-0.5 w-3.5 h-3.5 md:w-4 md:h-4"
+                                                    />
+                                                </div>
+                                                `;
+                                            }).join('') || '<p class="text-gray-400 text-[10px] md:text-xs col-span-3 md:col-span-4 text-center py-3">아직 Key Object가 없습니다</p>'}
+                                        </div>
+                                    </div>
+                                </div>
+                                ` : ''}
+                                
+                                <!-- 캐릭터 레퍼런스 (접기 가능) -->
+                                ${storybook.characters && storybook.characters.length > 0 ? `
+                                <div class="mt-2">
+                                    <button 
+                                        onclick="togglePageSection('ref-chars-${idx}')"
+                                        class="w-full flex items-center justify-between text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 p-2 rounded-lg transition"
+                                    >
+                                        <span><i class="fas fa-users mr-1"></i>캐릭터 레퍼런스 (선택)</span>
+                                        <i id="ref-chars-${idx}-icon" class="fas fa-chevron-down text-xs transition-transform"></i>
+                                    </button>
+                                    <div id="ref-chars-${idx}-content" class="hidden mt-2 bg-purple-50 border-2 border-purple-200 rounded-lg p-3">
+                                        <p class="text-[10px] text-gray-600 mb-2"><i class="fas fa-info-circle mr-1"></i>삽화 생성 시 참조할 캐릭터를 선택하세요</p>
+                                        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                            ${storybook.characters.map((char, charIdx) => {
+                                                if (!char.referenceImage) return '';
+                                                return `
+                                                <label class="relative cursor-pointer group">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        id="page-char-ref-${idx}-${charIdx}"
+                                                        onchange="togglePageCharacterRef(${idx}, ${charIdx}, this.checked)"
+                                                        class="absolute top-2 left-2 w-4 h-4 z-10"
+                                                        ${page.characterRefs && page.characterRefs.includes(charIdx) ? 'checked' : ''}
+                                                    />
+                                                    <div class="border-2 rounded-lg overflow-hidden transition ${page.characterRefs && page.characterRefs.includes(charIdx) ? 'border-purple-500 ring-2 ring-purple-300' : 'border-gray-300 group-hover:border-purple-400'}">
+                                                        <img 
+                                                            src="${char.referenceImage}" 
+                                                            alt="${char.name}"
+                                                            class="w-full h-20 object-cover"
+                                                        />
+                                                        <div class="bg-white px-2 py-1 text-center">
+                                                            <p class="text-[10px] font-semibold text-gray-700 truncate">${char.name}</p>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                                `;
+                                            }).join('') || '<p class="text-gray-400 text-[10px] col-span-2 md:col-span-3 text-center py-2">레퍼런스 이미지가 있는 캐릭터가 없습니다</p>'}
+                                        </div>
+                                    </div>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+
+
+        
+                <!-- 퀴즈 섹션 -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 shadow-lg border-2 border-purple-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-xl font-bold text-purple-800">
+                            <i class="fas fa-question-circle mr-2"></i>핵심 사물 퀴즈
+                            ${storybook.quizzes && storybook.quizzes.length > 0 ? ` (${storybook.quizzes.length}개)` : ''}
+                        </h4>
+                        <button 
+                            onclick="generateQuiz()"
+                            class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm"
+                        >
+                            <i class="fas fa-plus mr-1"></i>퀴즈 ${storybook.quizzes && storybook.quizzes.length > 0 ? '더 ' : ''}만들기
+                        </button>
+                    </div>
+                    
+                    <div id="quiz-container" class="space-y-4">
+                        ${storybook.quizzes && storybook.quizzes.length > 0 ? 
+                            storybook.quizzes.map((quiz, qIdx) => {
+                                // Key Object 이미지 찾기
+                                let keyObjectImage = null;
+                                if (quiz.relatedKeyObject && storybook.key_objects) {
+                                    const keyObj = storybook.key_objects.find(obj => 
+                                        obj.name === quiz.relatedKeyObject || 
+                                        obj.name.toLowerCase().includes(quiz.relatedKeyObject.toLowerCase()) ||
+                                        quiz.relatedKeyObject.toLowerCase().includes(obj.name.toLowerCase())
+                                    );
+                                    if (keyObj && keyObj.imageUrl) {
+                                        keyObjectImage = keyObj.imageUrl;
+                                    }
+                                }
+                                
+                                return `
+                            <div class="bg-white p-5 rounded-lg border-2 border-purple-200 shadow-sm">
+                                <div class="flex gap-4">
+                                    <!-- 왼쪽: Key Object 이미지 -->
+                                    ${keyObjectImage ? `
+                                    <div class="flex-shrink-0">
+                                        <div class="w-32 h-32 rounded-lg overflow-hidden border-2 border-orange-300 shadow-md">
+                                            <img 
+                                                src="${keyObjectImage}" 
+                                                alt="${quiz.relatedKeyObject || 'Key Object'}"
+                                                class="w-full h-full object-cover"
+                                                onerror="this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gray-200 flex items-center justify-center text-gray-400\\'>이미지 없음</div>'"
+                                            />
+                                        </div>
+                                        ${quiz.relatedKeyObject ? `
+                                        <div class="mt-2 text-center">
+                                            <span class="inline-block bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-semibold">
+                                                <i class="fas fa-key mr-1"></i>${quiz.relatedKeyObject}
+                                            </span>
+                                        </div>
+                                        ` : ''}
+                                    </div>
+                                    ` : ''}
+                                    
+                                    <!-- 오른쪽: 퀴즈 내용 -->
+                                    <div class="flex-1">
+                                        <div class="flex justify-between items-start mb-3">
+                                            <div class="flex-1">
+                                                <h5 class="font-bold text-gray-800">
+                                                    <span class="inline-block bg-purple-500 text-white rounded-full w-7 h-7 text-center leading-7 text-sm mr-2">
+                                                        ${qIdx + 1}
+                                                    </span>
+                                                    ${quiz.question}
+                                                </h5>
+                                                ${!keyObjectImage && quiz.relatedKeyObject ? `
+                                                <div class="mt-2 ml-9">
+                                                    <span class="inline-block bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-semibold">
+                                                        <i class="fas fa-key mr-1"></i>${quiz.relatedKeyObject}
+                                                    </span>
+                                                </div>
+                                                ` : ''}
+                                            </div>
+                                            <button 
+                                                onclick="deleteQuiz(${qIdx})"
+                                                class="text-red-500 hover:text-red-700 ml-2"
+                                                title="삭제"
+                                            >
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="space-y-2 mb-3">
+                                            ${quiz.options.map((option, oIdx) => `
+                                            <div class="flex items-start p-3 rounded-lg ${oIdx === quiz.answer ? 'bg-green-50 border-2 border-green-400' : 'bg-gray-50 border border-gray-200'} cursor-pointer hover:bg-opacity-80 transition"
+                                                 onclick="showQuizAnswer(${qIdx})">
+                                                <span class="inline-block ${oIdx === quiz.answer ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-700'} rounded-full w-6 h-6 text-center leading-6 text-sm mr-3 flex-shrink-0">
+                                                    ${oIdx + 1}
+                                                </span>
+                                                <span class="${oIdx === quiz.answer ? 'font-semibold text-green-800' : 'text-gray-700'}">
+                                                    ${option}
+                                                    ${oIdx === quiz.answer ? '<i class="fas fa-check-circle ml-2 text-green-600"></i>' : ''}
+                                                </span>
+                                            </div>
+                                            `).join('')}
+                                        </div>
+                                        
+                                        <div id="quiz-explanation-${qIdx}" class="hidden mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
+                                            <p class="text-sm text-blue-800">
+                                                <i class="fas fa-lightbulb mr-1"></i>
+                                                <strong>정답 설명:</strong> ${quiz.explanation}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            `;
+                            }).join('') 
+                        : 
+                            `<div class="text-center py-8 text-gray-500">
+                                <i class="fas fa-question-circle text-4xl mb-3"></i>
+                                <p>아직 퀴즈가 없습니다.</p>
+                                <p class="text-sm mt-1">위의 "퀴즈 만들기" 버튼을 눌러 Key Objects 기반 퀴즈를 생성하세요.</p>
+                            </div>`
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    resultDiv.innerHTML = html;
+    resultDiv.classList.remove('hidden');
+    
+    // Gemini TTS 모델 select 초기화
+    const geminiTTSModelSelect = document.getElementById('page-gemini-tts-model-select');
+    if (geminiTTSModelSelect) {
+        geminiTTSModelSelect.value = imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts';
+    }
+    
+    // TTS 음성 select 초기화
+    const pageTTSModelSelect = document.getElementById('page-tts-model-select');
+    if (pageTTSModelSelect) {
+        pageTTSModelSelect.value = imageSettings.ttsModel || 'Aoede';
+    }
+    
+    // 배경음악 select 업데이트
+    updateBackgroundMusicSelect();
+    const bgmSelectEl = document.getElementById('backgroundMusicSelect');
+    if (bgmSelectEl && storybook.backgroundMusicId) {
+        bgmSelectEl.value = storybook.backgroundMusicId;
+        
+        // 선택된 배경음악 정보 표시
+        const music = backgroundMusicList.find(m => m.id === storybook.backgroundMusicId);
+        if (music) {
+            document.getElementById('selectedBackgroundMusic').innerHTML = `
+                <i class="fas fa-check-circle text-green-600 mr-1"></i>
+                선택됨: <strong>${music.title}</strong>
+            `;
         }
-    }, 100);
+    }
 }
 
 // 캐릭터 관리 함수
