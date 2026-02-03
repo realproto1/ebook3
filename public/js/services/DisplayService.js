@@ -511,13 +511,25 @@ class DisplayService {
                 displayTTSAudio = page.ttsAudio?.url || page.audioUrl || page.tts_audio || null;
             } else {
                 // 다른 언어: pageNumber로 찾기 (배열 인덱스가 아님!)
+                console.log(`🔍 페이지 ${page.pageNumber} 번역 찾기:`, {
+                    currentLanguage,
+                    hasTranslations: !!storybook.translations,
+                    hasCurrentLang: !!storybook.translations?.[currentLanguage],
+                    translationsArray: storybook.translations?.[currentLanguage]
+                });
+                
                 if (storybook.translations && storybook.translations[currentLanguage]) {
                     const translatedPage = storybook.translations[currentLanguage].find(
                         p => p.pageNumber === page.pageNumber
                     );
+                    console.log(`   → 찾은 번역:`, translatedPage);
+                    
                     if (translatedPage) {
                         displayText = translatedPage.text || '';
                         displayTTSAudio = translatedPage.tts_audio || null;
+                        console.log(`   ✅ 번역 텍스트 적용: "${displayText.substring(0, 50)}..."`);
+                    } else {
+                        console.warn(`   ⚠️ 페이지 ${page.pageNumber} 번역을 찾지 못함`);
                     }
                 }
             }

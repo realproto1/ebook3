@@ -88,7 +88,7 @@ if (window.api) {
 // ============================================
 let storybooks = [];
 let currentStorybook = null;
-let currentLanguage = 'ko'; // 현재 표시 중인 언어 (기본: 한국어)
+window.window.currentLanguage = 'ko'; // 현재 표시 중인 언어 (기본: 한국어) - 전역으로 노출
 let backgroundMusicList = []; // 배경음악 목록
 // imageSettings는 이제 settingsService.settings로 대체됨
 let imageSettings = settingsService.getSettings();
@@ -395,7 +395,7 @@ async function generatePageTTS(pageIndex) {
     
     const page = currentStorybook.pages[pageIndex];
     // 현재 언어의 텍스트 가져오기
-    const text = getPageText(page, currentLanguage);
+    const text = getPageText(page, window.currentLanguage);
     
     if (!text || text.trim().length === 0) {
         alert('텍스트가 없습니다.');
@@ -414,7 +414,7 @@ async function generatePageTTS(pageIndex) {
     try {
         const response = await axios.post('/api/generate-tts', {
             text: text,
-            language: currentLanguage,
+            language: window.currentLanguage,
             geminiModel: imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts',  // Gemini TTS 생성 모델
             model: imageSettings.ttsModel || 'Aoede',  // TTS Voice (Puck, Kore 등)
             voiceConfig: imageSettings.ttsVoiceConfig,
@@ -432,18 +432,18 @@ async function generatePageTTS(pageIndex) {
             }
             
             // 언어별로 TTS 저장
-            if (currentLanguage === 'ko') {
+            if (window.currentLanguage === 'ko') {
                 currentStorybook.pages[pageIndex].ttsAudio.url = response.data.audioUrl;
                 currentStorybook.pages[pageIndex].ttsAudio.model = imageSettings.ttsModel;
                 // 하위 호환성을 위해 audioUrl에도 저장
                 currentStorybook.pages[pageIndex].audioUrl = response.data.audioUrl;
             } else {
                 // 다른 언어의 경우 ttsAudio 객체에 언어별로 저장
-                if (!currentStorybook.pages[pageIndex].ttsAudio[currentLanguage]) {
-                    currentStorybook.pages[pageIndex].ttsAudio[currentLanguage] = {};
+                if (!currentStorybook.pages[pageIndex].ttsAudio[window.currentLanguage]) {
+                    currentStorybook.pages[pageIndex].ttsAudio[window.currentLanguage] = {};
                 }
-                currentStorybook.pages[pageIndex].ttsAudio[currentLanguage].url = response.data.audioUrl;
-                currentStorybook.pages[pageIndex].ttsAudio[currentLanguage].model = imageSettings.ttsModel;
+                currentStorybook.pages[pageIndex].ttsAudio[window.currentLanguage].url = response.data.audioUrl;
+                currentStorybook.pages[pageIndex].ttsAudio[window.currentLanguage].model = imageSettings.ttsModel;
             }
             
             // R2 저장 완료까지 대기
@@ -1315,7 +1315,7 @@ async function addLanguageFromTab(targetLang) {
     saveCurrentStorybook();
     
     // 새 언어로 전환
-    currentLanguage = targetLang;
+    window.currentLanguage = targetLang;
     
     // UI 업데이트
     displayStorybook(currentStorybook);
@@ -1369,7 +1369,7 @@ async function addLanguageTranslation() {
         displayStorybook(currentStorybook);
         
         // 새로 추가된 언어로 전환
-        currentLanguage = targetLang;
+        window.currentLanguage = targetLang;
         displayStorybook(currentStorybook);
         
         showNotification('success', '번역 완료!', `${langName} 번역이 완료되었습니다.`);
@@ -1561,7 +1561,7 @@ function updatePageText(pageIndex, newText) {
         const text = newText.trim();
         
         // 현재 언어가 한국어면 기본 text에 저장
-        if (currentLanguage === 'ko') {
+        if (window.currentLanguage === 'ko') {
             const oldText = currentStorybook.pages[pageIndex].text;
             currentStorybook.pages[pageIndex].text = text;
             console.log(`📝 한국어 텍스트 업데이트: "${oldText?.substring(0, 30)}..." → "${text.substring(0, 30)}..."`);
@@ -1570,25 +1570,25 @@ function updatePageText(pageIndex, newText) {
             if (!currentStorybook.translations) {
                 currentStorybook.translations = {};
             }
-            if (!currentStorybook.translations[currentLanguage]) {
+            if (!currentStorybook.translations[window.currentLanguage]) {
                 // 기존 pages를 복사해서 translations 초기화
-                currentStorybook.translations[currentLanguage] = currentStorybook.pages.map(p => ({
+                currentStorybook.translations[window.currentLanguage] = currentStorybook.pages.map(p => ({
                     pageNumber: p.pageNumber,
                     text: p.text || ''
                 }));
             }
             
             // 해당 페이지의 번역 텍스트 업데이트
-            const translatedPage = currentStorybook.translations[currentLanguage].find(p => p.pageNumber === currentStorybook.pages[pageIndex].pageNumber);
+            const translatedPage = currentStorybook.translations[window.currentLanguage].find(p => p.pageNumber === currentStorybook.pages[pageIndex].pageNumber);
             if (translatedPage) {
                 const oldText = translatedPage.text;
                 translatedPage.text = text;
-                console.log(`📝 ${currentLanguage} 번역 텍스트 업데이트: "${oldText?.substring(0, 30)}..." → "${text.substring(0, 30)}..."`);
+                console.log(`📝 ${window.currentLanguage} 번역 텍스트 업데이트: "${oldText?.substring(0, 30)}..." → "${text.substring(0, 30)}..."`);
             }
         }
         
         saveCurrentStorybook();
-        console.log(`✅ 페이지 ${pageIndex + 1} 텍스트 저장 완료 (${currentLanguage})`);
+        console.log(`✅ 페이지 ${pageIndex + 1} 텍스트 저장 완료 (${window.currentLanguage})`);
         console.log(`💾 저장된 텍스트:`, currentStorybook.pages[pageIndex].text?.substring(0, 50));
     } else {
         console.warn(`⚠️ 빈 텍스트는 저장하지 않음: 페이지 ${pageIndex + 1}`);
@@ -1750,7 +1750,7 @@ function switchTTSUploadTab(tab) {
 }
 
 async function uploadTTSAudio() {
-    await uploadService.uploadTTSAudio(currentStorybook, currentLanguage, saveCurrentStorybook, displayStorybook);
+    await uploadService.uploadTTSAudio(currentStorybook, window.currentLanguage, saveCurrentStorybook, displayStorybook);
 }
 
 function switchUploadTab(tab) {
@@ -1853,7 +1853,7 @@ async function downloadAllAudio() {
     }
     
     // 현재 언어의 TTS가 있는 페이지만 필터링
-    const pagesWithAudio = currentStorybook.pages.filter(page => getPageTTS(page, currentLanguage));
+    const pagesWithAudio = currentStorybook.pages.filter(page => getPageTTS(page, window.currentLanguage));
     
     if (pagesWithAudio.length === 0) {
         alert('생성된 TTS가 없습니다. 먼저 TTS를 생성해주세요.');
@@ -1869,7 +1869,7 @@ async function downloadAllAudio() {
         es: 'Español',
         fr: 'Français'
     };
-    const langName = languageNames[currentLanguage] || currentLanguage;
+    const langName = languageNames[window.currentLanguage] || window.currentLanguage;
     
     if (!confirm(`${langName} TTS ${pagesWithAudio.length}개의 오디오 파일을 다운로드하시겠습니까?`)) {
         return;
@@ -1879,8 +1879,8 @@ async function downloadAllAudio() {
     
     for (let i = 0; i < pagesWithAudio.length; i++) {
         const page = pagesWithAudio[i];
-        const audioUrl = getPageTTS(page, currentLanguage);
-        const filename = `${currentStorybook.title}_${currentLanguage}_페이지_${page.pageNumber}.wav`;
+        const audioUrl = getPageTTS(page, window.currentLanguage);
+        const filename = `${currentStorybook.title}_${window.currentLanguage}_페이지_${page.pageNumber}.wav`;
         
         try {
             await downloadAudio(audioUrl, filename);
@@ -2844,8 +2844,8 @@ async function generateAllTTS() {
     
     // TTS가 없는 페이지 필터링
     const pagesToGenerate = pages.filter(page => {
-        const pageText = getPageText(page, currentLanguage);
-        const pageTTS = getPageTTS(page, currentLanguage);
+        const pageText = getPageText(page, window.currentLanguage);
+        const pageTTS = getPageTTS(page, window.currentLanguage);
         return pageText?.trim() && !pageTTS;
     });
     
@@ -2855,7 +2855,7 @@ async function generateAllTTS() {
     }
     
     const estimatedTime = pagesToGenerate.length * 3;
-    if (!confirm(`${pagesToGenerate.length}개의 페이지 TTS를 생성하시겠습니까?\n\n언어: ${currentLanguage}\n예상 소요 시간: 약 ${estimatedTime}초`)) {
+    if (!confirm(`${pagesToGenerate.length}개의 페이지 TTS를 생성하시겠습니까?\n\n언어: ${window.currentLanguage}\n예상 소요 시간: 약 ${estimatedTime}초`)) {
         return;
     }
     
@@ -2864,13 +2864,13 @@ async function generateAllTTS() {
         let failCount = 0;
         const totalPages = pagesToGenerate.length;
         
-        console.log(`🎤 모든 TTS 생성 시작 (${totalPages}개 페이지, 언어: ${currentLanguage})`);
+        console.log(`🎤 모든 TTS 생성 시작 (${totalPages}개 페이지, 언어: ${window.currentLanguage})`);
         
         // 순차적으로 TTS 생성
         for (let i = 0; i < pages.length; i++) {
             const page = pages[i];
-            const pageText = getPageText(page, currentLanguage);
-            const pageTTS = getPageTTS(page, currentLanguage);
+            const pageText = getPageText(page, window.currentLanguage);
+            const pageTTS = getPageTTS(page, window.currentLanguage);
             
             if (!pageText?.trim() || pageTTS) continue;
             
@@ -2894,7 +2894,7 @@ async function generateAllTTS() {
                     model: imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts',
                     voice: imageSettings.ttsModel || 'Aoede',
                     voiceConfig: imageSettings.ttsVoiceConfig,
-                    language: currentLanguage,
+                    language: window.currentLanguage,
                     storybookId: currentStorybook?.id,
                     storybookTitle: currentStorybook?.title,
                     pageNumber: page.pageNumber
@@ -2904,12 +2904,12 @@ async function generateAllTTS() {
                     // TTS 저장
                     pages[i].ttsAudio = pages[i].ttsAudio || {};
                     
-                    if (currentLanguage === 'ko') {
+                    if (window.currentLanguage === 'ko') {
                         pages[i].ttsAudio.url = result.audioUrl;
                         pages[i].ttsAudio.model = imageSettings.ttsModel;
                         pages[i].audioUrl = result.audioUrl;
                     } else {
-                        pages[i].ttsAudio[currentLanguage] = {
+                        pages[i].ttsAudio[window.currentLanguage] = {
                             url: result.audioUrl,
                             model: imageSettings.ttsModel
                         };
@@ -5206,7 +5206,7 @@ async function completeReviewFromModal() {
 
 // 언어 전환
 function switchLanguage(lang) {
-    currentLanguage = lang;
+    window.window.currentLanguage = lang;
     console.log(`🌐 언어 전환: ${lang}`);
     
     // 페이지 다시 렌더링
@@ -5324,7 +5324,7 @@ async function translateSinglePage(pageIndex) {
     
     try {
         // TranslationService 호출
-        const result = await translationService.translateSinglePage(currentStorybook, pageIndex, currentLanguage);
+        const result = await translationService.translateSinglePage(currentStorybook, pageIndex, window.currentLanguage);
         
         // ✅ 실시간 UI 업데이트 - 해당 페이지의 textarea만 업데이트 (전체 리렌더링 방지)
         const pageTextarea = document.querySelector(`textarea[onchange*="updatePageText(${pageIndex},"]`);
@@ -5362,14 +5362,14 @@ async function translateAllPages() {
         return;
     }
     
-    if (currentLanguage === 'ko') {
+    if (window.currentLanguage === 'ko') {
         alert('한국어는 번역할 필요가 없습니다.');
         return;
     }
     
     const totalPages = currentStorybook.pages.length;
     
-    if (!confirm(`모든 페이지를 ${currentLanguage}로 번역하시겠습니까?\n\n${totalPages}개 페이지가 순차적으로 번역됩니다.\n예상 소요 시간: 약 ${totalPages * 5}초`)) {
+    if (!confirm(`모든 페이지를 ${window.currentLanguage}로 번역하시겠습니까?\n\n${totalPages}개 페이지가 순차적으로 번역됩니다.\n예상 소요 시간: 약 ${totalPages * 5}초`)) {
         return;
     }
     
@@ -5382,16 +5382,16 @@ async function translateAllPages() {
     console.log(`🌐 모든 페이지 번역 시작 (${totalPages}개 페이지)`);
     console.log('📋 번역 데이터 구조:', {
         hasTranslations: !!currentStorybook.translations,
-        hasCurrentLang: !!currentStorybook.translations?.[currentLanguage],
-        translationCount: currentStorybook.translations?.[currentLanguage]?.length || 0,
-        currentLanguage: currentLanguage
+        hasCurrentLang: !!currentStorybook.translations?.[window.currentLanguage],
+        translationCount: currentStorybook.translations?.[window.currentLanguage]?.length || 0,
+        window.currentLanguage: window.currentLanguage
     });
     
     for (let i = 0; i < currentStorybook.pages.length; i++) {
         const page = currentStorybook.pages[i];
         
         // 이미 번역된 페이지는 건너뛰기
-        const translatedPage = currentStorybook.translations?.[currentLanguage]?.find(p => p.pageNumber === page.pageNumber);
+        const translatedPage = currentStorybook.translations?.[window.currentLanguage]?.find(p => p.pageNumber === page.pageNumber);
         const hasTranslation = translatedPage && translatedPage.text && translatedPage.text.trim() !== '';
         
         console.log(`📄 페이지 ${page.pageNumber}: 번역=${hasTranslation}, 텍스트=${translatedPage?.text?.substring(0, 50)}...`);
@@ -5417,7 +5417,7 @@ async function translateAllPages() {
             
             const response = await axios.post('/api/translate-page', {
                 text: sourceText,
-                targetLanguage: currentLanguage,
+                targetLanguage: window.currentLanguage,
                 context: {
                     title: currentStorybook.title,
                     theme: currentStorybook.theme,
@@ -5432,15 +5432,15 @@ async function translateAllPages() {
                 if (!currentStorybook.translations) {
                     currentStorybook.translations = {};
                 }
-                if (!currentStorybook.translations[currentLanguage]) {
-                    currentStorybook.translations[currentLanguage] = currentStorybook.pages.map(p => ({
+                if (!currentStorybook.translations[window.currentLanguage]) {
+                    currentStorybook.translations[window.currentLanguage] = currentStorybook.pages.map(p => ({
                         pageNumber: p.pageNumber,
                         text: ''
                     }));
                 }
                 
                 // 해당 페이지 번역 텍스트 저장
-                const translationPage = currentStorybook.translations[currentLanguage].find(p => p.pageNumber === page.pageNumber);
+                const translationPage = currentStorybook.translations[window.currentLanguage].find(p => p.pageNumber === page.pageNumber);
                 if (translationPage) {
                     translationPage.text = response.data.translatedText;
                 }
@@ -5483,7 +5483,7 @@ async function translateAllPages() {
                     
                     const retryResponse = await axios.post('/api/translate-page', {
                         text: page.text,
-                        targetLanguage: currentLanguage,
+                        targetLanguage: window.currentLanguage,
                         context: {
                             title: currentStorybook.title,
                             theme: currentStorybook.theme,
@@ -5497,14 +5497,14 @@ async function translateAllPages() {
                         if (!currentStorybook.translations) {
                             currentStorybook.translations = {};
                         }
-                        if (!currentStorybook.translations[currentLanguage]) {
-                            currentStorybook.translations[currentLanguage] = currentStorybook.pages.map(p => ({
+                        if (!currentStorybook.translations[window.currentLanguage]) {
+                            currentStorybook.translations[window.currentLanguage] = currentStorybook.pages.map(p => ({
                                 pageNumber: p.pageNumber,
                                 text: ''
                             }));
                         }
                         
-                        const translationPage = currentStorybook.translations[currentLanguage].find(p => p.pageNumber === page.pageNumber);
+                        const translationPage = currentStorybook.translations[window.currentLanguage].find(p => p.pageNumber === page.pageNumber);
                         if (translationPage) {
                             translationPage.text = retryResponse.data.translatedText;
                         }
