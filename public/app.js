@@ -87,8 +87,9 @@ if (window.api) {
 // 전역 변수
 // ============================================
 let storybooks = [];
+let folders = []; // 폴더 목록 { id, name, storybookIds: [] }
 let currentStorybook = null;
-window.window.currentLanguage = 'ko'; // 현재 표시 중인 언어 (기본: 한국어) - 전역으로 노출
+window.currentLanguage = 'ko'; // 현재 표시 중인 언어 (기본: 한국어) - 전역으로 노출
 let backgroundMusicList = []; // 배경음악 목록
 // imageSettings는 이제 settingsService.settings로 대체됨
 let imageSettings = settingsService.getSettings();
@@ -736,6 +737,9 @@ async function loadStorybooks() {
         storybooks = books;
         storybookManager.storybooks = storybooks; // 동기화
         
+        // 폴더 로드
+        await loadFolders();
+        
         // 화면 업데이트
         console.log('🎨 화면 업데이트 중...');
         renderBookList();
@@ -745,6 +749,30 @@ async function loadStorybooks() {
     }
     
     console.log('🏁 loadStorybooks() 완료. 총 동화책:', storybooks.length, '권');
+}
+
+async function loadFolders() {
+    try {
+        const response = await axios.get('/api/folders');
+        if (response.data.success) {
+            folders = response.data.folders || [];
+            console.log('📁 폴더 로드 완료:', folders.length, '개');
+        }
+    } catch (error) {
+        console.log('📁 폴더 파일 없음 (첫 실행)');
+        folders = [];
+    }
+}
+
+async function saveFolders() {
+    try {
+        const response = await axios.post('/api/folders', { folders });
+        if (response.data.success) {
+            console.log('✅ 폴더 저장 완료');
+        }
+    } catch (error) {
+        console.error('❌ 폴더 저장 실패:', error);
+    }
 }
 
 function saveStorybooks() {
@@ -844,15 +872,105 @@ async function updateBookTitleInList(id, newTitle) {
     showNotification('success', '제목이 저장되었습니다!');
 }
 
+// ============================================
+// 폴더 관리
+// ============================================
+
+function createFolder() {
+    const name = prompt('폴더 이름을 입력하세요:');
+    if (!name || !name.trim()) return;
+    
+    const folder = {
+        id: Date.now().toString(),
+        name: name.trim(),
+        storybookIds: [],
+        createdAt: new Date().toISOString()
+    };
+    
+    folders.push(folder);
+    saveFolders();
+    renderBookList();
+    showNotification('success', '폴더 생성 완료', `"${folder.name}" 폴더가 생성되었습니다.`);
+}
+
+function renameFolder(folderId) {
+    const folder = folders.find(f => f.id === folderId);
+    if (!folder) return;
+    
+    const newName = prompt('새 폴더 이름을 입력하세요:', folder.name);
+    if (!newName || !newName.trim()) return;
+    
+    folder.name = newName.trim();
+    saveFolders();
+    renderBookList();
+    showNotification('success', '폴더 이름 변경', `"${folder.name}"로 변경되었습니다.`);
+}
+
+function deleteFolder(folderId) {
+    const folder = folders.find(f => f.id === folderId);
+    if (!folder) return;
+    
+    const bookCount = folder.storybookIds.length;
+    const message = bookCount > 0 
+        ? `"${folder.name}" 폴더를 삭제하시겠습니까?\n\n폴더 안의 ${bookCount}개 동화책은 삭제되지 않고 목록으로 이동됩니다.`
+        : `"${folder.name}" 폴더를 삭제하시겠습니까?`;
+    
+    if (!confirm(message)) return;
+    
+    folders = folders.filter(f => f.id !== folderId);
+    saveFolders();
+    renderBookList();
+    showNotification('success', '폴더 삭제 완료', `"${folder.name}" 폴더가 삭제되었습니다.`);
+}
+
+function toggleFolder(folderId) {
+    const folder = folders.find(f => f.id === folderId);
+    if (!folder) return;
+    
+    folder.isOpen = !folder.isOpen;
+    renderBookList();
+}
+
+function addBookToFolder(bookId, folderId) {
+    const folder = folders.find(f => f.id === folderId);
+    if (!folder) return;
+    
+    // 다른 폴더에서 제거
+    folders.forEach(f => {
+        f.storybookIds = f.storybookIds.filter(id => id !== bookId);
+    });
+    
+    // 현재 폴더에 추가
+    if (!folder.storybookIds.includes(bookId)) {
+        folder.storybookIds.push(bookId);
+    }
+    
+    saveFolders();
+    renderBookList();
+}
+
+function removeBookFromFolder(bookId, folderId) {
+    const folder = folders.find(f => f.id === folderId);
+    if (!folder) return;
+    
+    folder.storybookIds = folder.storybookIds.filter(id => id !== bookId);
+    saveFolders();
+    renderBookList();
+}
+
 // 드래그 앤 드롭 관련 변수
 let draggedElement = null;
 let draggedIndex = null;
+let draggedBookId = null; // 드래그 중인 동화책 ID
+let draggedType = null; // 'book' 또는 'folder'
 let isDragging = false; // 드래그 중 플래그
 
 // 드래그 시작
 function handleDragStart(e) {
     draggedElement = e.currentTarget;
     draggedIndex = parseInt(e.currentTarget.dataset.bookIndex);
+    draggedBookId = e.currentTarget.dataset.bookId;
+    draggedType = 'book';
     isDragging = true; // 드래그 시작
     e.currentTarget.style.opacity = '0.5';
     e.dataTransfer.effectAllowed = 'move';
@@ -5711,6 +5829,43 @@ function toggleSortOrder() {
 }
 
 // 통합 필터 적용
+function renderBookItemInFolder(book, index, folderId) {
+    return `
+        <div 
+            class="book-item ${currentStorybook && currentStorybook.id === book.id ? 'active' : ''} p-2 rounded-lg mb-1 border border-gray-200 cursor-move bg-gray-50"
+            draggable="true"
+            data-book-id="${book.id}"
+            data-book-index="${index}"
+            data-folder-id="${folderId}"
+            ondragstart="handleDragStart(event)"
+            ondragover="handleDragOver(event)"
+            ondragenter="handleDragEnter(event)"
+            ondragleave="handleDragLeave(event)"
+            ondrop="handleDrop(event)"
+            ondragend="handleDragEnd(event)"
+        >
+            <div class="flex items-start gap-2 mb-1">
+                <div class="text-gray-400 cursor-move mt-1" title="드래그하여 이동">
+                    <i class="fas fa-grip-vertical text-xs"></i>
+                </div>
+                <div class="flex-1 min-w-0" onclick="selectStorybook('${book.id}')">
+                    <div class="font-bold text-gray-800 text-xs truncate">${book.title}</div>
+                    <p class="text-xs text-gray-500">
+                        ${book.targetAge}세 · ${book.pages.length}p
+                    </p>
+                </div>
+                <button 
+                    onclick="event.stopPropagation(); removeBookFromFolder('${book.id}', '${folderId}')"
+                    class="text-gray-400 hover:text-red-600 px-1 text-xs"
+                    title="폴더에서 제거"
+                >
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
 function applyBookFilters() {
     const listDiv = document.getElementById('bookList');
     const bookCountSpan = document.getElementById('bookCount');
@@ -5780,10 +5935,10 @@ function applyBookFilters() {
         
         console.log(`📊 정렬 적용: ${currentSortOption} (${sortAscending ? '오름차순' : '내림차순'}, ${filteredBooks.length}개)`);
     } else {
-        console.log(`⏸️ 정렬 건너뜀 (드래그 중)`);
+        console.log(`⏸️ 정렬 건너뛰기 (드래그 중)`);
     }    
     // 빈 결과 처리
-    if (filteredBooks.length === 0) {
+    if (filteredBooks.length === 0 && folders.length === 0) {
         const message = currentSearchText !== '' || currentCategoryFilter !== '' 
             ? '검색 결과가 없습니다.' 
             : '아직 만든 동화책이 없어요';
@@ -5791,8 +5946,75 @@ function applyBookFilters() {
         return;
     }
     
-    // 동화책 목록 렌더링
-    listDiv.innerHTML = filteredBooks.map((book, index) => `
+    // 폴더에 없는 동화책 목록 (루트)
+    const booksInFolders = new Set(folders.flatMap(f => f.storybookIds || []));
+    const rootBooks = filteredBooks.filter(book => !booksInFolders.has(book.id));
+    
+    // 폴더 렌더링
+    let html = '';
+    
+    // 폴더 생성 버튼
+    html += `
+        <button 
+            onclick="createFolder()"
+            class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-3 py-2 rounded-lg mb-3 text-sm font-semibold hover:from-indigo-600 hover:to-purple-600 transition flex items-center justify-center gap-2"
+        >
+            <i class="fas fa-folder-plus"></i>
+            새 폴더 만들기
+        </button>
+    `;
+    
+    // 각 폴더 렌더링
+    folders.forEach(folder => {
+        const folderBooks = filteredBooks.filter(book => (folder.storybookIds || []).includes(book.id));
+        const isOpen = folder.isOpen !== false; // 기본값 true
+        
+        html += `
+            <div class="mb-3 border border-gray-300 rounded-lg overflow-hidden">
+                <div 
+                    class="folder-header bg-indigo-50 p-3 flex items-center justify-between cursor-pointer hover:bg-indigo-100 transition"
+                    onclick="toggleFolder('${folder.id}')"
+                    ondragover="event.preventDefault(); event.currentTarget.classList.add('bg-indigo-200');"
+                    ondragleave="event.currentTarget.classList.remove('bg-indigo-200');"
+                    ondrop="event.preventDefault(); event.currentTarget.classList.remove('bg-indigo-200'); if(draggedBookId) addBookToFolder(draggedBookId, '${folder.id}');"
+                >
+                    <div class="flex items-center gap-2 flex-1">
+                        <i class="fas fa-chevron-${isOpen ? 'down' : 'right'} text-indigo-600 text-sm"></i>
+                        <i class="fas fa-folder text-indigo-600"></i>
+                        <span class="font-semibold text-gray-800">${folder.name}</span>
+                        <span class="text-xs text-gray-500">(${folderBooks.length})</span>
+                    </div>
+                    <div class="flex gap-1" onclick="event.stopPropagation();">
+                        <button 
+                            onclick="renameFolder('${folder.id}')"
+                            class="text-indigo-600 hover:text-indigo-800 px-2 py-1 text-xs"
+                            title="이름 변경"
+                        >
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button 
+                            onclick="deleteFolder('${folder.id}')"
+                            class="text-red-600 hover:text-red-800 px-2 py-1 text-xs"
+                            title="삭제"
+                        >
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                ${isOpen ? `
+                    <div class="folder-content bg-white p-2">
+                        ${folderBooks.length === 0 ? 
+                            '<p class="text-gray-400 text-xs text-center py-2">폴더가 비어있습니다<br>동화책을 드래그하여 넣어보세요</p>' :
+                            folderBooks.map((book, index) => renderBookItemInFolder(book, index, folder.id)).join('')
+                        }
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    });
+    
+    // 동화책 목록 렌더링 (폴더에 없는 것들)
+    listDiv.innerHTML = html + rootBooks.map((book, index) => `
         <div 
             class="book-item ${currentStorybook && currentStorybook.id === book.id ? 'active' : ''} p-3 rounded-lg mb-2 border border-gray-200 cursor-move"
             draggable="true"
@@ -6208,6 +6430,15 @@ function openBatchTTSUpload() {
     window.openBatchIllustrationUpload = openBatchIllustrationUpload;
     window.openBatchTTSUpload = openBatchTTSUpload;
     window.togglePageCharacterRef = togglePageCharacterRef;
+    
+    // 폴더 관련 함수 전역 노출
+    window.createFolder = createFolder;
+    window.renameFolder = renameFolder;
+    window.deleteFolder = deleteFolder;
+    window.toggleFolder = toggleFolder;
+    window.addBookToFolder = addBookToFolder;
+    window.removeBookFromFolder = removeBookFromFolder;
+    
     // window.goBack = goBack;  // ❌ 함수 정의 없음
     // window.toggleLanguage = toggleLanguage;  // ❌ 함수 정의 없음
     window.openBackgroundMusicModal = openBackgroundMusicModal;

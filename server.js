@@ -4148,6 +4148,60 @@ app.get('/api/view-counts', async (req, res) => {
   }
 });
 
+// ============================================
+// 폴더 관리 API
+// ============================================
+
+// 폴더 목록 조회
+app.get('/api/folders', async (req, res) => {
+  try {
+    const { GetObjectCommand } = await import('@aws-sdk/client-s3');
+    
+    const getCommand = new GetObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: 'folders.json'
+    });
+    
+    const response = await r2Client.send(getCommand);
+    const content = await response.Body.transformToString();
+    const data = JSON.parse(content);
+    
+    res.json({ success: true, folders: data.folders || [] });
+  } catch (error) {
+    if (error.name === 'NoSuchKey') {
+      // 파일 없으면 빈 배열 반환
+      res.json({ success: true, folders: [] });
+    } else {
+      console.error('폴더 조회 오류:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
+});
+
+// 폴더 저장
+app.post('/api/folders', async (req, res) => {
+  try {
+    const { folders } = req.body;
+    
+    const { PutObjectCommand } = await import('@aws-sdk/client-s3');
+    
+    const putCommand = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: 'folders.json',
+      Body: JSON.stringify({ folders }, null, 2),
+      ContentType: 'application/json'
+    });
+    
+    await r2Client.send(putCommand);
+    console.log('✅ 폴더 저장 완료:', folders.length, '개');
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('폴더 저장 오류:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // 메인 페이지 라우팅
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'home.html'));
