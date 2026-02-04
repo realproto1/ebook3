@@ -4423,15 +4423,24 @@ function updateKeyObjectField(objIndex, field, value) {
 
 // Key Object 단일 이미지 생성
 async function generateSingleKeyObjectImage(objIndex) {
+    console.log(`🎨 [${objIndex}] generateSingleKeyObjectImage 시작`);
+    
     if (!currentStorybook || !currentStorybook.key_objects || !currentStorybook.key_objects[objIndex]) {
+        console.error(`❌ [${objIndex}] Key Object 정보가 없습니다.`);
         alert('Key Object 정보가 없습니다.');
-        return;
+        return { index: objIndex, success: false, error: 'No key object data' };
     }
     
     const obj = currentStorybook.key_objects[objIndex];
-    const objImgDiv = document.getElementById(`keyobj-img-${objIndex}`);
+    console.log(`📦 [${objIndex}] Key Object:`, obj);
     
-    if (!objImgDiv) return;
+    const objImgDiv = document.getElementById(`keyobj-img-${objIndex}`);
+    console.log(`🎯 [${objIndex}] DOM element:`, objImgDiv ? 'Found' : 'NOT FOUND');
+    
+    if (!objImgDiv) {
+        console.error(`❌ [${objIndex}] DOM element not found: keyobj-img-${objIndex}`);
+        return { index: objIndex, success: false, error: 'DOM element not found' };
+    }
     
     // 로딩 UI 표시
     if (UIHelper) {
@@ -4441,13 +4450,28 @@ async function generateSingleKeyObjectImage(objIndex) {
     }
     
     try {
-        console.log(`🎨 Generating Key Object image for: ${obj.name} (${obj.korean})`);
+        console.log(`🎨 [${objIndex}] Generating Key Object image for: ${obj.name} (${obj.korean})`);
         
         // ImageService를 통해 이미지 생성
         const service = imageService || window.imageService;
         if (!service) {
-            throw new Error('ImageService가 로드되지 않았습니다.');
+            const error = 'ImageService가 로드되지 않았습니다.';
+            console.error(`❌ [${objIndex}] ${error}`);
+            throw new Error(error);
         }
+        
+        console.log(`📡 [${objIndex}] ImageService 호출 시작...`);
+        console.log(`📋 [${objIndex}] 요청 데이터:`, {
+            name: obj.name || obj.korean,
+            description: obj.description || obj.korean || obj.name,
+            korean: obj.korean || obj.name,
+            prompt: obj.description || obj.korean || obj.name,
+            model: imageSettings.keyObjectModel || 'gemini-3-pro-image-preview',
+            aspectRatio: imageSettings.aspectRatio || '1:1',
+            artStyle: currentStorybook.artStyle || '디즈니 스타일'
+        });
+        
+        console.log(`⏳ [${objIndex}] API 응답 대기 중...`);
         
         const result = await service.generateKeyObject({
             name: obj.name || obj.korean,
@@ -4468,12 +4492,16 @@ async function generateSingleKeyObjectImage(objIndex) {
             }
         });
         
+        console.log(`✅ [${objIndex}] API 응답 받음:`, result);
+        
         if (result && result.success && result.imageUrl) {
             const imageUrl = result.imageUrl;
+            console.log(`💾 [${objIndex}] 이미지 URL 받음: ${imageUrl}`);
             
             // keyObjectImages 배열 초기화
             if (!currentStorybook.keyObjectImages) {
                 currentStorybook.keyObjectImages = [];
+                console.log(`📦 [${objIndex}] keyObjectImages 배열 초기화`);
             }
             
             // 해당 인덱스에 이미지 저장
@@ -4483,9 +4511,12 @@ async function generateSingleKeyObjectImage(objIndex) {
                 imageUrl: imageUrl,
                 success: true
             };
+            console.log(`💾 [${objIndex}] currentStorybook.keyObjectImages 업데이트 완료`);
             
             // 저장
+            console.log(`💾 [${objIndex}] saveCurrentStorybook 호출...`);
             saveCurrentStorybook();
+            console.log(`✅ [${objIndex}] saveCurrentStorybook 완료`);
             
             // UIHelper로 렌더링
             if (UIHelper) {
@@ -4550,14 +4581,27 @@ async function generateSingleKeyObjectImage(objIndex) {
  * 모든 Key Object 이미지 병렬 생성 (간소화 버전)
  */
 async function generateAllKeyObjectImages() {
+    console.log('🎯 generateAllKeyObjectImages 호출됨');
+    console.log('📖 currentStorybook:', currentStorybook?.title);
+    
     const keyObjects = currentStorybook?.key_objects;
     
     if (!keyObjects || keyObjects.length === 0) {
+        console.error('❌ Key Object 정보가 없습니다.');
         alert('Key Object 정보가 없습니다.');
         return;
     }
     
-    if (!confirm(`${keyObjects.length}개의 Key Object 이미지를 동시에 생성하시겠습니까?`)) {
+    console.log(`📦 Key Objects 개수: ${keyObjects.length}`);
+    console.log('📦 Key Objects 데이터:', keyObjects);
+    
+    // 이미 이미지가 있는지 확인
+    const existingImages = currentStorybook.keyObjectImages || [];
+    const missingCount = keyObjects.length - existingImages.filter(img => img?.imageUrl).length;
+    console.log(`📊 기존 이미지: ${existingImages.filter(img => img?.imageUrl).length}/${keyObjects.length}`);
+    console.log(`📊 생성 필요: ${missingCount}개`);
+    
+    if (!confirm(`${keyObjects.length}개의 Key Object 이미지를 동시에 생성하시겠습니까?\n(기존 이미지가 있으면 덮어씁니다)`)) {
         return;
     }
     
@@ -4568,13 +4612,25 @@ async function generateAllKeyObjectImages() {
     
     // 병렬 생성
     try {
+        console.log('⏳ Promise.all 시작...');
         const results = await Promise.all(keyObjects.map((_, i) => generateSingleKeyObjectImage(i)));
+        console.log('✅ Promise.all 완료, 결과:', results);
+        
         const successCount = results.filter(r => r?.success).length;
+        const failCount = results.length - successCount;
+        
         console.log(`✅ Key Object 이미지 생성 완료: ${successCount}/${keyObjects.length}`);
-        alert(`모든 Key Object 이미지 생성 완료!\n성공: ${successCount}/${keyObjects.length}개`);
+        console.log(`❌ 실패: ${failCount}개`);
+        
+        if (failCount > 0) {
+            alert(`Key Object 이미지 생성 완료!\n성공: ${successCount}개\n실패: ${failCount}개\n\n실패한 이미지는 개별적으로 다시 시도해주세요.`);
+        } else {
+            alert(`모든 Key Object 이미지 생성 완료!\n성공: ${successCount}/${keyObjects.length}개`);
+        }
     } catch (error) {
         console.error('❌ Key Object 이미지 생성 실패:', error);
-        alert('일부 이미지 생성에 실패했습니다. 개별적으로 다시 시도해주세요.');
+        console.error('❌ Error stack:', error.stack);
+        alert(`이미지 생성에 실패했습니다.\n\n오류: ${error.message}\n\n개별적으로 다시 시도해주세요.`);
     }
 }
 
