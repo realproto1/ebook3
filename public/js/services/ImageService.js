@@ -31,10 +31,12 @@ class ImageService {
             } = options;
 
             const response = await api.post('/api/generate-cover', {
-                prompt,
+                customPrompt: prompt,  // ✅ 서버는 customPrompt 필드를 기대함
                 characterReferences,
-                model,
-                aspectRatio
+                settings: {
+                    aspectRatio,
+                    coverModel: model
+                }
             }, {
                 errorMessage: '표지 이미지를 생성할 수 없습니다.'
             });

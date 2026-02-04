@@ -44,6 +44,9 @@ Art Style: ${this.storybook.artStyle}
 ${this.storybook.subtitle ? `Subtitle: ${this.storybook.subtitle}` : ''}
 ${this.storybook.summary ? `Summary: ${this.storybook.summary}` : ''}`;
 
+            console.log('📝 생성된 프롬프트:', prompt);
+            console.log('👥 캐릭터 레퍼런스:', characterRefs);
+
             // API 호출
             const result = await this.imageService.generateCover({
                 prompt: prompt,
