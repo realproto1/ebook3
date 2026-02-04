@@ -420,7 +420,8 @@ class DisplayService {
             ${storybook.key_objects && storybook.key_objects.length > 0 ? `
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 ${storybook.key_objects.map((obj, idx) => {
-                    const objImg = storybook.keyObjectImages && storybook.keyObjectImages[idx];
+                    const objImgData = storybook.keyObjectImages && storybook.keyObjectImages[idx];
+                    const objImg = objImgData?.imageUrl || null;
                     const sizeIcon = obj.size === 'small' ? 'fa-hand-holding' : obj.size === 'large' ? 'fa-building' : 'fa-box';
                     const sizeColor = obj.size === 'small' ? 'text-blue-600' : obj.size === 'large' ? 'text-red-600' : 'text-yellow-600';
                     return `
@@ -478,7 +479,7 @@ class DisplayService {
                                 <i class="fas fa-trash text-sm"></i>
                             </button>
                         </div>
-                        <div class="bg-white rounded-lg overflow-hidden mb-2 min-h-[120px]">
+                        <div id="keyobj-img-${idx}" class="bg-white rounded-lg overflow-hidden mb-2 min-h-[120px]">
                             ${objImg ? `
                                 <img src="${objImg}" alt="${obj.name}" class="w-full h-32 object-contain bg-gray-50" />
                             ` : `
