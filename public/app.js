@@ -4413,6 +4413,61 @@ function deleteQuiz(quizIndex) {
 
 // ==================== Key Objects 관련 함수 ====================
 
+/**
+ * 동화책의 핵심 사물(Key Objects)을 AI로 자동 생성
+ */
+async function generateKeyObjectsForStorybook() {
+    if (!currentStorybook) {
+        alert('동화책을 먼저 선택해주세요.');
+        return;
+    }
+
+    const existingCount = currentStorybook.key_objects?.length || 0;
+    
+    if (existingCount > 0) {
+        if (!confirm(`이미 ${existingCount}개의 핵심 사물이 있습니다.\n기존 핵심 사물을 모두 삭제하고 새로 생성하시겠습니까?`)) {
+            return;
+        }
+    } else {
+        if (!confirm(`이 동화책의 핵심 사물을 AI로 자동 생성하시겠습니까?\n\n동화책 내용을 분석하여 주요 사물 8개를 생성합니다.`)) {
+            return;
+        }
+    }
+
+    try {
+        console.log('🎯 핵심 사물 자동 생성 시작:', currentStorybook.title);
+
+        // 로딩 표시
+        showNotification('info', '핵심 사물 생성 중...', '동화책 내용을 분석하고 있습니다. 잠시만 기다려주세요.');
+
+        // API 호출
+        const response = await api.post('/api/generate-key-objects', {
+            storybookId: currentStorybook.id,
+            title: currentStorybook.title,
+            pages: currentStorybook.pages,
+            targetAge: currentStorybook.targetAge,
+            overwrite: existingCount > 0
+        });
+
+        if (response.success && response.keyObjects) {
+            // Key Objects 저장
+            currentStorybook.key_objects = response.keyObjects;
+            currentStorybook.keyObjectImages = []; // 이미지는 나중에 생성
+            
+            saveCurrentStorybook();
+            displayStorybook(currentStorybook);
+
+            console.log('✅ 핵심 사물 생성 완료:', response.keyObjects.length, '개');
+            showNotification('success', '핵심 사물 생성 완료!', `${response.keyObjects.length}개의 핵심 사물이 생성되었습니다.\n이제 "모든 이미지 생성" 버튼을 눌러 이미지를 만드세요.`);
+        } else {
+            throw new Error(response.message || '핵심 사물 생성 실패');
+        }
+    } catch (error) {
+        console.error('❌ 핵심 사물 생성 오류:', error);
+        showNotification('error', '생성 실패', `핵심 사물을 생성할 수 없습니다.\n\n오류: ${error.message}`);
+    }
+}
+
 // Key Object 필드 업데이트
 function updateKeyObjectField(objIndex, field, value) {
     if (!currentStorybook.key_objects || !currentStorybook.key_objects[objIndex]) return;
@@ -6450,6 +6505,7 @@ function downloadPageTTS(pageIndex) {
     window.generateVocabularyImages = generateVocabularyImages;
     window.generateAllVocabularyImages = generateAllVocabularyImages;
     window.generateSingleVocabularyImage = generateSingleVocabularyImage;
+    window.generateKeyObjectsForStorybook = generateKeyObjectsForStorybook;
     window.generateAllKeyObjectImages = generateAllKeyObjectImages;
     window.generateSingleKeyObjectImage = generateSingleKeyObjectImage;
     window.saveCurrentStorybook = saveCurrentStorybook;

@@ -391,6 +391,12 @@ class DisplayService {
             <!-- 버튼 그룹 -->
             <div class="flex flex-wrap gap-2 md:gap-3 mb-4 md:mb-6">
                 <button 
+                    onclick="generateKeyObjectsForStorybook()"
+                    class="btn-generate px-3 md:px-6 py-2 md:py-3 rounded-lg transition whitespace-nowrap text-sm md:text-base font-semibold shadow-lg"
+                >
+                    <i class="fas fa-magic mr-1 md:mr-2"></i><span class="hidden sm:inline">핵심 사물 새로 생성</span><span class="sm:hidden">사물 생성</span>
+                </button>
+                <button 
                     onclick="generateAllKeyObjectImages()"
                     class="btn-generate px-3 md:px-6 py-2 md:py-3 rounded-lg transition whitespace-nowrap text-sm md:text-base font-semibold shadow-lg"
                 >

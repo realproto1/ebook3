@@ -2822,6 +2822,128 @@ Create a single, clear, professional illustration of this key object in ${artSty
   }
 });
 
+// Key Objects 자동 생성 API
+app.post('/api/generate-key-objects', requireAPIKey, async (req, res) => {
+  try {
+    const { storybookId, title, pages, targetAge, overwrite = false } = req.body;
+
+    console.log('🎯 Key Objects 자동 생성 시작:', { storybookId, title, pageCount: pages?.length, targetAge });
+
+    if (!pages || pages.length === 0) {
+      return res.status(400).json({ success: false, message: '페이지 정보가 없습니다.' });
+    }
+
+    // 동화책 내용 수집 (각 페이지의 텍스트)
+    const storyContent = pages.map((page, idx) => `Page ${idx + 1}: ${page.text}`).join('\n\n');
+
+    // Gemini로 Key Objects 생성
+    const prompt = `Analyze this children's storybook and identify 8 key objects that appear in the story.
+
+**Story Title:** ${title}
+**Target Age:** ${targetAge}
+
+**Story Content:**
+${storyContent}
+
+**Requirements:**
+1. Select 8 important objects that children should learn from this story
+2. Objects should be concrete items (not abstract concepts)
+3. Mix of different sizes: 2-3 small objects, 3-4 medium objects, 1-2 large objects
+4. Each object needs:
+   - English name (simple, 1-2 words)
+   - Korean name (한글)
+   - Simple description for children (in Korean)
+   - Simple definition (in Korean)
+   - Example sentence from the story (in Korean)
+   - Size category (small/medium/large)
+   - Approximate size in centimeters
+
+**Output JSON format:**
+{
+  "keyObjects": [
+    {
+      "name": "Apple",
+      "korean": "사과",
+      "description": "빨갛고 둥근 과일이에요. 맛있고 건강에 좋아요.",
+      "definition": "빨갛고 둥근 과일이에요. 맛있고 건강에 좋아요.",
+      "example": "백설공주가 마녀가 준 사과를 먹었어요.",
+      "size": "small",
+      "sizeCm": 10
+    }
+  ]
+}
+
+Return ONLY valid JSON, no additional text.`;
+
+    console.log('📋 Gemini 요청 프롬프트 길이:', prompt.length);
+
+    const geminiUrl = \`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=\${GEMINI_API_KEY}\`;
+    const geminiResponse = await fetch(geminiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 2048
+        }
+      })
+    });
+
+    if (!geminiResponse.ok) {
+      throw new Error(\`Gemini API 오류: \${geminiResponse.status}\`);
+    }
+
+    const geminiData = await geminiResponse.json();
+    const responseText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!responseText) {
+      throw new Error('Gemini 응답이 비어있습니다.');
+    }
+
+    console.log('📝 Gemini 응답 길이:', responseText.length);
+
+    // JSON 파싱
+    let keyObjectsData;
+    try {
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        keyObjectsData = JSON.parse(jsonMatch[0]);
+      } else {
+        keyObjectsData = JSON.parse(responseText);
+      }
+    } catch (parseError) {
+      console.error('JSON 파싱 오류:', parseError);
+      console.log('원본 응답:', responseText);
+      throw new Error('AI 응답을 JSON으로 변환할 수 없습니다.');
+    }
+
+    const keyObjects = keyObjectsData.keyObjects || [];
+
+    if (keyObjects.length === 0) {
+      throw new Error('생성된 Key Objects가 없습니다.');
+    }
+
+    console.log(\`✅ Key Objects 생성 완료: \${keyObjects.length}개\`);
+
+    res.json({
+      success: true,
+      keyObjects: keyObjects,
+      count: keyObjects.length
+    });
+
+  } catch (error) {
+    console.error('❌ Key Objects 생성 오류:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      error: 'Key Objects 생성 실패: ' + error.message
+    });
+  }
+});
+
 // 6. 커버 이미지 생성
 app.post('/api/generate-cover', requireAPIKey, async (req, res) => {
   try {
