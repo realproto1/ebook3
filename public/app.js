@@ -2599,14 +2599,19 @@ async function generateAllIllustrationsParallel() {
                         throw new Error('ImageService가 로드되지 않았습니다.');
                     }
                     
-                    const result = await service.generateIllustration(pageData, refImageUrls, {
-                        model: imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
-                        aspectRatio: imageSettings.aspectRatio || '16:9',
+                    // ✅ 재생성 시 페이지에 저장된 설정 우선 사용
+                    const isRegeneration = !!page.illustrationImage;
+                    const apiOptions = {
+                        model: (isRegeneration && page.illustrationModel) || imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
+                        aspectRatio: (isRegeneration && page.aspectRatio) || imageSettings.aspectRatio || '16:9',
                         artStyle: artStyle,
                         storybookId: currentStorybook.id,
                         storybookTitle: currentStorybook.title,
-                        additionalPrompt: imageSettings.additionalPrompt
-                    });
+                        additionalPrompt: (isRegeneration && page.additionalPrompt) || imageSettings.additionalPrompt || ''
+                    };
+                    console.log(`🎨 삽화 생성 - 재생성: ${isRegeneration}, 모델: ${apiOptions.model}, 비율: ${apiOptions.aspectRatio}`);
+                    
+                    const result = await service.generateIllustration(pageData, refImageUrls, apiOptions);
                     
                     if (result && result.success && result.imageUrl) {
                         const page = currentStorybook.pages[pageIndex];
@@ -2627,12 +2632,17 @@ async function generateAllIllustrationsParallel() {
                         currentStorybook.pages[pageIndex].illustrationImage = result.imageUrl;
                         currentStorybook.pages[pageIndex].scene_description = sceneDesc;
                         currentStorybook.pages[pageIndex].scene_structure = sceneStructure;
+                        // ✅ 이미지 생성 설정 저장 (재생성 시 동일한 설정 사용)
+                        currentStorybook.pages[pageIndex].illustrationModel = apiOptions.model;
+                        currentStorybook.pages[pageIndex].aspectRatio = apiOptions.aspectRatio;
+                        currentStorybook.pages[pageIndex].additionalPrompt = apiOptions.additionalPrompt;
+                        console.log(`💾 이미지 생성 설정 저장: 모델=${apiOptions.model}, 비율=${apiOptions.aspectRatio}`);
                         currentStorybook.pages[pageIndex].artStyle = artStyle;
                         
                         // 성공 표시
                         const illustrationDiv = document.getElementById(`illustration-${pageIndex}`);
                         if (illustrationDiv) {
-                            illustrationDiv.innerHTML = `<img src="${result.imageUrl}" alt="Page ${page.pageNumber}" class="w-full h-full object-cover rounded-lg"/>`;
+                        // \u2705 UIHelper\ub85c \ud788\uc2a4\ud1a0\ub9ac \ud3ec\ud568\ud558\uc5ec \ub80c\ub354\ub9c1\n                        if (UIHelper) {\n                            UIHelper.renderIllustration(illustrationDiv, result.imageUrl, {\n                                pageIndex: pageIndex,\n                                storybookTitle: currentStorybook.title,\n                                history: page.illustrationHistory || []\n                            });\n                        } else {\n                            illustrationDiv.innerHTML = `<img src="${result.imageUrl}" alt="Page ${page.pageNumber}" class="w-full h-full object-cover rounded-lg"/>`;\n                        }
                         }
                         
                         return { success: true, pageIndex };
@@ -2808,15 +2818,20 @@ async function generateAllIllustrationsSequential() {
                     throw new Error('ImageService가 로드되지 않았습니다.');
                 }
                 
-                const result = await service.generateIllustration(pageData, refImageUrls, {
-                    model: imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
-                    aspectRatio: imageSettings.aspectRatio || '16:9',
+                // ✅ 재생성 시 페이지에 저장된 설정 우선 사용
+                const page = currentStorybook.pages[i];
+                const isRegeneration = !!page.illustrationImage;
+                const apiOptions = {
+                    model: (isRegeneration && page.illustrationModel) || imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
+                    aspectRatio: (isRegeneration && page.aspectRatio) || imageSettings.aspectRatio || '16:9',
                     artStyle: artStyle,
                     previousPages: previousPages,
                     storybookId: currentStorybook.id,
                     storybookTitle: currentStorybook.title,
-                    additionalPrompt: imageSettings.additionalPrompt
-                });
+                    additionalPrompt: (isRegeneration && page.additionalPrompt) || imageSettings.additionalPrompt || ''
+                };
+                
+                const result = await service.generateIllustration(pageData, refImageUrls, apiOptions);
                 
                 if (result && result.success && result.imageUrl) {
                     const page = currentStorybook.pages[i];
@@ -2843,7 +2858,16 @@ async function generateAllIllustrationsSequential() {
                     
                     // 성공 표시
                     if (illustrationDiv) {
-                        illustrationDiv.innerHTML = `<img src="${result.imageUrl}" alt="Page ${page.pageNumber}" class="w-full h-full object-cover rounded-lg"/>`;
+                        // ✅ UIHelper로 히스토리 포함하여 렌더링
+                        if (UIHelper) {
+                            UIHelper.renderIllustration(illustrationDiv, result.imageUrl, {
+                                pageIndex: i,
+                                storybookTitle: currentStorybook.title,
+                                history: page.illustrationHistory || []
+                            });
+                        } else {
+                            illustrationDiv.innerHTML = `<img src="${result.imageUrl}" alt="Page ${page.pageNumber}" class="w-full h-full object-cover rounded-lg"/>`;
+                        }
                     }
                 } else {
                     throw new Error(result.error || '이미지 생성 실패');
