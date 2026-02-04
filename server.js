@@ -2789,28 +2789,36 @@ app.post('/api/generate-key-object', requireAPIKey, async (req, res) => {
     
     console.log('🎨 Art Style:', artStyle);
     
-    const prompt = `Create a professional illustration of a key object for a children's storybook in 4:3 aspect ratio (standard horizontal format).
+    const prompt = `Create a professional illustration of a key object for a children's storybook.
 
-**CRITICAL ART STYLE:** ${artStyle} style - This is MANDATORY. The entire illustration MUST follow ${artStyle} style consistently.
+**🎨 CRITICAL - ART STYLE (HIGHEST PRIORITY):**
+${artStyle}
+
+**⚠️ MANDATORY:** You MUST follow the art style specifications above EXACTLY. This includes:
+- Exact color palette (muted blue/gray/charcoal if specified)
+- Exact texture and medium (watercolor, gouache, textured paper if specified)
+- Exact atmosphere and mood (moody, whimsical, etc. if specified)
+- Exact rendering technique (soft washes, dry-brush, layered look if specified)
+- Exact decorative patterns and visual elements (dots, scales, grain if specified)
+DO NOT deviate from the art style. DO NOT use a different color palette. DO NOT use a different rendering technique.
 
 **Object Name:** ${keyObject.name}
 
 **Object Description:** ${descriptionEn}
 
-**CRITICAL IMAGE DIMENSIONS:** Create the image in 4:3 aspect ratio. The composition must fit perfectly in standard horizontal format (4:3).
+**Image Aspect Ratio:** ${aspectRatio}
 
 **Requirements:**
-- Clean white or simple background
-- Bright, vibrant colors suitable for children
-- Professional, high-quality illustration
+- Clean white or simple background (or textured paper if specified in art style)
+- Follow the color palette from the art style above
+- Professional, high-quality illustration in the specified art style
 - Focus on the distinctive features described above
 - Make it recognizable and memorable
-- Composition designed specifically for 4:3 format
-- MUST follow ${artStyle} style exactly
+- Apply the art style consistently
 ${noTextPrompt}
 ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}
 
-Create a single, clear, professional illustration of this key object in ${artStyle} style and 4:3 format.`;
+🚨 FINAL REMINDER: The art style at the top of this prompt is MANDATORY and NON-NEGOTIABLE. Follow it EXACTLY.`;
     
     console.log('🎨 Generating key object image with settings:', { 
       modelName,
