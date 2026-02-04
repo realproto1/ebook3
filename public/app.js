@@ -2799,27 +2799,23 @@ async function generateAllTTS() {
  * 삽화 생성 (간소화 버전)
  */
 async function generateIllustration(pageIndex) {
-    // IllustrationService 사용
-    const service = window.illustrationService || illustrationService;
-    if (!service) {
-        console.error('❌ IllustrationService가 로드되지 않았습니다.');
-        alert('서비스 초기화 오류. 페이지를 새로고침 해주세요.');
-        return;
-    }
-
-    // IllustrationService 초기화 (첫 호출 시)
-    if (!service.imageService) {
-        service.initialize(window.imageService, window.UIHelper);
-    }
-
-    // 통합 메서드 호출
-    const result = await service.generateOrUpdate(currentStorybook, pageIndex, {
+    // IllustrationGenerator 사용
+    const generator = new IllustrationGenerator({
+        storybook: currentStorybook,
+        imageService: window.imageService,
         imageSettings: imageSettings,
+        uiHelper: window.UIHelper,
         saveCallback: saveCurrentStorybook,
-        updateDisplayCallback: null
+        updateCallback: () => displayStorybook(currentStorybook)
     });
 
-    return result;
+    try {
+        const result = await generator.generate(pageIndex);
+        return result;
+    } catch (error) {
+        console.error('삽화 생성 실패:', error);
+        return { success: false, error: error.message };
+    }
 }
 
 function saveCurrentStorybook() {

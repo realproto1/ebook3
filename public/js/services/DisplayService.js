@@ -723,6 +723,7 @@ class DisplayService {
                             
                             <div class="flex gap-2 mb-2">
                                 <button 
+                                    id="generate-illust-${idx}-btn"
                                     onclick="generateIllustration(${idx})"
                                     class="flex-1 btn-generate px-3 py-2 rounded-lg transition text-sm font-semibold"
                                 >

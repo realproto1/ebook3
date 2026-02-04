@@ -25,7 +25,15 @@ class IllustrationGenerator extends BaseGenerator {
         const page = this.storybook.pages[pageIndex];
         const illustrationDiv = document.getElementById(`illustration-${pageIndex}`);
 
+        // 버튼 ID 동적 설정 (없으면 설정)
+        if (!this.buttonId) {
+            this.buttonId = `generate-illust-${pageIndex}-btn`;
+        }
+
         try {
+            // 버튼 로딩 시작
+            this.setButtonLoading(true);
+            
             // 로딩 UI
             this.showLoading(illustrationDiv, 'AI가 삽화를 생성하는 중...');
 
@@ -69,6 +77,9 @@ class IllustrationGenerator extends BaseGenerator {
             this.showError(illustrationDiv, errorMessage, `generateIllustration(${pageIndex})`);
             
             throw error;
+        } finally {
+            // 버튼 로딩 해제
+            this.setButtonLoading(false);
         }
     }
 
