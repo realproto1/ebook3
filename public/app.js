@@ -2819,7 +2819,6 @@ async function generateAllIllustrationsSequential() {
                 }
                 
                 // ✅ 재생성 시 페이지에 저장된 설정 우선 사용
-                const page = currentStorybook.pages[i];
                 const isRegeneration = !!page.illustrationImage;
                 const apiOptions = {
                     model: (isRegeneration && page.illustrationModel) || imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
@@ -2834,8 +2833,6 @@ async function generateAllIllustrationsSequential() {
                 const result = await service.generateIllustration(pageData, refImageUrls, apiOptions);
                 
                 if (result && result.success && result.imageUrl) {
-                    const page = currentStorybook.pages[i];
-                    
                     // 기존 이미지가 있으면 히스토리에 추가
                     if (page.illustrationImage) {
                         if (!page.illustrationHistory) {
