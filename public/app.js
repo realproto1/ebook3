@@ -2330,74 +2330,27 @@ async function generateAllCharacterReferences() {
  * 캐릭터 레퍼런스 생성 (ImageService 사용)
  */
 async function generateCharacterReference(charIndex) {
-    const character = currentStorybook.characters[charIndex];
-    const refDiv = document.getElementById(`char-ref-${charIndex}`);
-    const customPrompt = document.getElementById(`char-prompt-${charIndex}`)?.value.trim() || character.description;
-    
-    showLoadingUI(refDiv, 'AI가 이미지 생성 중...');
-
-    try {
-        const isRegeneration = !!character.referenceImage;
-        console.log(`🎨 캐릭터 "${character.name}" ${isRegeneration ? '재생성' : '생성'} - 모델: ${imageSettings.characterModel}`);
-        
-        // ✨ ImageService 사용 (fallback 체크)
-        const service = imageService || window.imageService;
-        console.log('🔍 ImageService 체크:', {
-            fromModules: !!imageService,
-            fromWindow: !!window.imageService,
-            service: !!service
-        });
-        
-        if (!service) {
-            console.error('❌ ImageService를 찾을 수 없습니다:', {
-                modules: window.__modules,
-                imageService: window.imageService
-            });
-            throw new Error('ImageService가 로드되지 않았습니다. 페이지를 새로고침 해주세요.');
-        }
-        
-        const result = await service.generateCharacter({
-            name: character.name,
-            description: customPrompt,
-            age: character.age
-        }, {
-            model: imageSettings.characterModel || 'gemini-3-pro-image-preview',
-            artStyle: currentStorybook.artStyle || '디즈니 스타일',
-            aspectRatio: '16:9',
-            storybookId: currentStorybook.id,
-            storybookTitle: currentStorybook.title
-        });
-        
-        if (!result.success || !result.imageUrl) {
-            throw new Error(result.error || '이미지 URL을 받지 못했습니다.');
-        }
-        
-        const imageUrl = result.imageUrl;
-        console.log(`📥 이미지 생성 완료: ${imageUrl}`);
-        
-        // 히스토리 관리 및 업데이트
-        character.imageHistory = manageImageHistory(
-            character.imageHistory || [], 
-            imageUrl, 
-            character.referenceImage
-        );
-        currentStorybook.characters[charIndex].referenceImage = imageUrl;
-        
-        await saveCurrentStorybook();
-        renderCharacterImageWithHistory(charIndex);
-
-    } catch (error) {
-        console.error('캐릭터 이미지 생성 실패:', error);
-        const errorMsg = error.response?.data?.error || error.message || '알 수 없는 오류';
-        
-        // 기존 이미지 유지 또는 에러 표시
-        if (character.referenceImage) {
-            renderCharacterImageWithHistory(charIndex);
-            showNotification('error', '재생성 실패', `${errorMsg}\n기존 이미지가 유지됩니다.`);
-        } else {
-            showErrorUI(refDiv, errorMsg);
-        }
+    // CharacterReferenceService 사용
+    const service = window.characterReferenceService || characterReferenceService;
+    if (!service) {
+        console.error('❌ CharacterReferenceService가 로드되지 않았습니다.');
+        alert('서비스 초기화 오류. 페이지를 새로고침 해주세요.');
+        return;
     }
+
+    // 서비스 초기화 (첫 호출 시)
+    if (!service.imageService) {
+        service.initialize(window.imageService);
+    }
+
+    // 통합 메서드 호출
+    const result = await service.generateOrUpdate(currentStorybook, charIndex, {
+        imageSettings: imageSettings,
+        saveCallback: saveCurrentStorybook,
+        renderCallback: renderCharacterImageWithHistory
+    });
+
+    return result;
 }
 
 // 캐릭터 이미지를 히스토리와 함께 렌더링
@@ -4256,157 +4209,26 @@ function updateKeyObjectField(objIndex, field, value) {
 
 // Key Object 단일 이미지 생성
 async function generateSingleKeyObjectImage(objIndex) {
-    console.log(`🎨 [${objIndex}] generateSingleKeyObjectImage 시작`);
-    
-    if (!currentStorybook || !currentStorybook.key_objects || !currentStorybook.key_objects[objIndex]) {
-        console.error(`❌ [${objIndex}] Key Object 정보가 없습니다.`);
-        alert('Key Object 정보가 없습니다.');
-        return { index: objIndex, success: false, error: 'No key object data' };
+    // KeyObjectService 사용
+    const service = window.keyObjectService || keyObjectService;
+    if (!service) {
+        console.error('❌ KeyObjectService가 로드되지 않았습니다.');
+        alert('서비스 초기화 오류. 페이지를 새로고침 해주세요.');
+        return { index: objIndex, success: false, error: 'Service not loaded' };
     }
-    
-    const obj = currentStorybook.key_objects[objIndex];
-    console.log(`📦 [${objIndex}] Key Object:`, obj);
-    
-    const objImgDiv = document.getElementById(`keyobj-img-${objIndex}`);
-    console.log(`🎯 [${objIndex}] DOM element:`, objImgDiv ? 'Found' : 'NOT FOUND');
-    
-    if (!objImgDiv) {
-        console.error(`❌ [${objIndex}] DOM element not found: keyobj-img-${objIndex}`);
-        return { index: objIndex, success: false, error: 'DOM element not found' };
+
+    // 서비스 초기화 (첫 호출 시)
+    if (!service.imageService) {
+        service.initialize(window.imageService, window.UIHelper);
     }
-    
-    // 로딩 UI 표시
-    if (UIHelper) {
-        UIHelper.showLoadingUI(objImgDiv, '생성 중...');
-    } else {
-        objImgDiv.innerHTML = '<div class="flex flex-col items-center justify-center h-full p-4"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mb-2"></div><p class="text-gray-600 text-xs">생성 중...</p></div>';
-    }
-    
-    try {
-        console.log(`🎨 [${objIndex}] Generating Key Object image for: ${obj.name} (${obj.korean})`);
-        
-        // ImageService를 통해 이미지 생성
-        const service = imageService || window.imageService;
-        if (!service) {
-            const error = 'ImageService가 로드되지 않았습니다.';
-            console.error(`❌ [${objIndex}] ${error}`);
-            throw new Error(error);
-        }
-        
-        console.log(`📡 [${objIndex}] ImageService 호출 시작...`);
-        console.log(`📋 [${objIndex}] 요청 데이터:`, {
-            name: obj.name || obj.korean,
-            description: obj.description || obj.korean || obj.name,
-            korean: obj.korean || obj.name,
-            prompt: obj.description || obj.korean || obj.name,
-            model: imageSettings.keyObjectModel || 'gemini-3-pro-image-preview',
-            aspectRatio: imageSettings.aspectRatio || '1:1',
-            artStyle: currentStorybook.artStyle || '디즈니 스타일'
-        });
-        
-        console.log(`⏳ [${objIndex}] API 응답 대기 중...`);
-        
-        const result = await service.generateKeyObject({
-            name: obj.name || obj.korean,
-            description: obj.description || obj.korean || obj.name,  // fallback 추가
-            korean: obj.korean || obj.name,
-            prompt: obj.description || obj.korean || obj.name
-        }, {
-            model: imageSettings.keyObjectModel || 'gemini-3-pro-image-preview',
-            aspectRatio: imageSettings.aspectRatio || '1:1',
-            artStyle: currentStorybook.artStyle || '디즈니 스타일',  // ✅ artStyle 추가!
-            settings: imageSettings,  // ✅ 전체 settings 전달
-            storybookId: currentStorybook.id,
-            storybookTitle: currentStorybook.title,
-            onStart: (element) => {
-                if (element) {
-                    element.innerHTML = '<div class="flex flex-col items-center justify-center h-full p-4"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mb-2"></div><p class="text-gray-600 text-xs">생성 중...</p></div>';
-                }
-            }
-        });
-        
-        console.log(`✅ [${objIndex}] API 응답 받음:`, result);
-        
-        if (result && result.success && result.imageUrl) {
-            const imageUrl = result.imageUrl;
-            console.log(`💾 [${objIndex}] 이미지 URL 받음: ${imageUrl}`);
-            
-            // keyObjectImages 배열 초기화
-            if (!currentStorybook.keyObjectImages) {
-                currentStorybook.keyObjectImages = [];
-                console.log(`📦 [${objIndex}] keyObjectImages 배열 초기화`);
-            }
-            
-            // 해당 인덱스에 이미지 저장
-            currentStorybook.keyObjectImages[objIndex] = {
-                name: obj.name,
-                korean: obj.korean,
-                imageUrl: imageUrl,
-                success: true
-            };
-            console.log(`💾 [${objIndex}] currentStorybook.keyObjectImages 업데이트 완료`);
-            
-            // 저장
-            console.log(`💾 [${objIndex}] saveCurrentStorybook 호출...`);
-            saveCurrentStorybook();
-            console.log(`✅ [${objIndex}] saveCurrentStorybook 완료`);
-            
-            // UIHelper로 렌더링
-            if (UIHelper) {
-                UIHelper.renderKeyObjectImage(objImgDiv, imageUrl, {
-                    name: obj.name,
-                    korean: obj.korean
-                });
-            } else {
-                objImgDiv.innerHTML = `<img src="${imageUrl}" alt="${obj.name}" class="w-full h-full object-cover rounded-lg"/>`;
-            }
-            
-            
-            console.log(`✅ Key Object "${obj.name}" 이미지 생성 완료 (R2 업로드 포함)`);
-            
-            // ⭐ 모든 페이지의 참조 이미지 섹션 새로고침
-            refreshAllPageReferenceImages();
-            
-            return {
-                index: objIndex,
-                success: true,
-                imageUrl: imageUrl
-            };
-        } else {
-            throw new Error(result?.error || 'ImageService에서 이미지 URL을 받지 못했습니다.');
-        }
-    } catch (error) {
-        console.error(`Key Object 이미지 생성 오류 (${obj.name}):`, error);
-        
-        // 기존 이미지가 있는지 확인
-        const existingImage = currentStorybook.keyObjectImages && currentStorybook.keyObjectImages[objIndex];
-        
-        if (existingImage && existingImage.imageUrl) {
-            // 기존 이미지가 있으면 유지하고 에러 알림만 표시
-            objImgDiv.innerHTML = `<img src="${existingImage.imageUrl}" alt="${obj.name}" class="w-full h-full object-cover rounded-lg"/>`;
-            showNotification('error', '재생성 실패', `${obj.korean} 이미지 재생성에 실패했습니다.\n기존 이미지가 유지됩니다.`);
-        } else {
-            // 기존 이미지가 없으면 재시도 버튼 표시
-            objImgDiv.innerHTML = `
-                <div class="text-center p-4">
-                    <i class="fas fa-exclamation-circle text-red-500 text-3xl mb-2"></i>
-                    <p class="text-red-600 text-xs mb-2">생성 실패</p>
-                    <button 
-                        onclick="generateSingleKeyObjectImage(${objIndex})"
-                        class="bg-orange-500 text-white px-3 py-1 rounded text-xs hover:bg-orange-600"
-                    >
-                        <i class="fas fa-redo mr-1"></i>재시도
-                    </button>
-                </div>
-            `;
-        }
-        
-        return {
-            index: objIndex,
-            success: false,
-            error: error.message
-        };
-    }
+
+    // 통합 메서드 호출
+    const result = await service.generateOrUpdate(currentStorybook, objIndex, {
+        imageSettings: imageSettings,
+        saveCallback: saveCurrentStorybook
+    });
+
+    return result;
 }
 
 // 모든 Key Object 이미지 생성
@@ -4419,69 +4241,27 @@ let isGeneratingKeyObjectImages = false;
 async function generateAllKeyObjectImages() {
     console.log('🎯 generateAllKeyObjectImages 호출됨');
     console.log('📖 currentStorybook:', currentStorybook?.title);
-    
-    // 중복 실행 방지
-    if (isGeneratingKeyObjectImages) {
-        console.warn('⚠️ 이미 Key Object 이미지 생성 중입니다. 중복 실행 방지.');
-        alert('이미 이미지 생성 중입니다. 잠시만 기다려주세요.');
+
+    // KeyObjectService 사용
+    const service = window.keyObjectService || keyObjectService;
+    if (!service) {
+        console.error('❌ KeyObjectService가 로드되지 않았습니다.');
+        alert('서비스 초기화 오류. 페이지를 새로고침 해주세요.');
         return;
     }
-    
-    const keyObjects = currentStorybook?.key_objects;
-    
-    if (!keyObjects || keyObjects.length === 0) {
-        console.error('❌ Key Object 정보가 없습니다.');
-        alert('Key Object 정보가 없습니다.');
-        return;
+
+    // 서비스 초기화 (첫 호출 시)
+    if (!service.imageService) {
+        service.initialize(window.imageService, window.UIHelper);
     }
-    
-    console.log(`📦 Key Objects 개수: ${keyObjects.length}`);
-    console.log('📦 Key Objects 데이터:', keyObjects);
-    
-    // 이미 이미지가 있는지 확인
-    const existingImages = currentStorybook.keyObjectImages || [];
-    const missingCount = keyObjects.length - existingImages.filter(img => img?.imageUrl).length;
-    console.log(`📊 기존 이미지: ${existingImages.filter(img => img?.imageUrl).length}/${keyObjects.length}`);
-    console.log(`📊 생성 필요: ${missingCount}개`);
-    
-    if (!confirm(`${keyObjects.length}개의 Key Object 이미지를 동시에 생성하시겠습니까?\n(기존 이미지가 있으면 덮어씁니다)`)) {
-        return;
-    }
-    
-    console.log(`🎨 ${keyObjects.length}개 Key Object 이미지 병렬 생성 시작...`);
-    
-    // 생성 시작 - 플래그 설정
-    isGeneratingKeyObjectImages = true;
-    
-    // keyObjectImages 배열 초기화
-    currentStorybook.keyObjectImages = currentStorybook.keyObjectImages || new Array(keyObjects.length);
-    
-    // 병렬 생성
-    try {
-        console.log('⏳ Promise.all 시작...');
-        const results = await Promise.all(keyObjects.map((_, i) => generateSingleKeyObjectImage(i)));
-        console.log('✅ Promise.all 완료, 결과:', results);
-        
-        const successCount = results.filter(r => r?.success).length;
-        const failCount = results.length - successCount;
-        
-        console.log(`✅ Key Object 이미지 생성 완료: ${successCount}/${keyObjects.length}`);
-        console.log(`❌ 실패: ${failCount}개`);
-        
-        if (failCount > 0) {
-            alert(`Key Object 이미지 생성 완료!\n성공: ${successCount}개\n실패: ${failCount}개\n\n실패한 이미지는 개별적으로 다시 시도해주세요.`);
-        } else {
-            alert(`모든 Key Object 이미지 생성 완료!\n성공: ${successCount}/${keyObjects.length}개`);
-        }
-    } catch (error) {
-        console.error('❌ Key Object 이미지 생성 실패:', error);
-        console.error('❌ Error stack:', error.stack);
-        alert(`이미지 생성에 실패했습니다.\n\n오류: ${error.message}\n\n개별적으로 다시 시도해주세요.`);
-    } finally {
-        // 생성 완료 - 플래그 해제
-        isGeneratingKeyObjectImages = false;
-        console.log('🏁 Key Object 이미지 생성 프로세스 종료');
-    }
+
+    // 통합 메서드 호출
+    const result = await service.generateAll(currentStorybook, {
+        imageSettings: imageSettings,
+        saveCallback: saveCurrentStorybook
+    });
+
+    return result;
 }
 
 // 모든 Key Object 이미지 다운로드
