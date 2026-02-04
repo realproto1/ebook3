@@ -23,8 +23,14 @@ class CharacterReferenceGenerator extends BaseGenerator {
 
         const character = this.storybook.characters[charIndex];
         const refDiv = document.getElementById(`char-ref-${charIndex}`);
+        
+        // 버튼 ID 동적 설정
+        this.buttonId = `generate-char-${charIndex}-btn`;
 
         try {
+            // 버튼 로딩 시작
+            this.setButtonLoading(true);
+            
             // 로딩 UI
             this.showLoading(refDiv, 'AI가 캐릭터 이미지를 생성하는 중...');
 
@@ -78,6 +84,9 @@ class CharacterReferenceGenerator extends BaseGenerator {
             }
             
             throw error;
+        } finally {
+            // 버튼 로딩 해제
+            this.setButtonLoading(false);
         }
     }
 

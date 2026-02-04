@@ -159,6 +159,7 @@ class DisplayService {
                     </div>
                     <div class="flex gap-2">
                         <button 
+                            id="generate-char-${idx}-btn"
                             onclick="generateCharacterReference(${idx})"
                             class="flex-1 btn-generate px-3 py-2 rounded-lg transition text-sm font-semibold"
                         >
@@ -264,6 +265,7 @@ class DisplayService {
                             </div>
                             <div class="flex gap-2">
                                 <button 
+                                    id="generate-cover-btn"
                                     onclick="generateCoverImage()"
                                     class="flex-1 btn-generate px-6 py-3 rounded-lg transition font-semibold shadow-lg"
                                 >
@@ -397,6 +399,7 @@ class DisplayService {
                     <i class="fas fa-magic mr-1 md:mr-2"></i><span class="hidden sm:inline">핵심 사물 새로 생성</span><span class="sm:hidden">사물 생성</span>
                 </button>
                 <button 
+                    id="generate-all-keyobject-btn"
                     onclick="generateAllKeyObjectImages()"
                     class="btn-generate px-3 md:px-6 py-2 md:py-3 rounded-lg transition whitespace-nowrap text-sm md:text-base font-semibold shadow-lg"
                 >
@@ -503,6 +506,7 @@ class DisplayService {
                         >${obj.description || ''}</textarea>
                         <div class="flex gap-2">
                             <button 
+                                id="generate-keyobj-${idx}-btn"
                                 onclick="generateSingleKeyObjectImage(${idx})"
                                 class="flex-1 bg-orange-500 text-white text-xs py-1.5 px-2 rounded hover:bg-orange-600 transition"
                             >

@@ -29,7 +29,13 @@ class KeyObjectGenerator extends BaseGenerator {
             throw new Error('DOM 요소를 찾을 수 없습니다.');
         }
 
+        // 버튼 ID 동적 설정
+        this.buttonId = `generate-keyobj-${objIndex}-btn`;
+
         try {
+            // 버튼 로딩 시작
+            this.setButtonLoading(true);
+            
             // 로딩 UI
             this.showLoading(imgDiv, 'AI가 Key Object 이미지를 생성하는 중...');
 
@@ -80,6 +86,9 @@ class KeyObjectGenerator extends BaseGenerator {
                 error: errorMessage,
                 index: objIndex
             };
+        } finally {
+            // 버튼 로딩 해제
+            this.setButtonLoading(false);
         }
     }
 
