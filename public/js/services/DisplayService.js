@@ -746,7 +746,7 @@ class DisplayService {
                                 ` : ''}
                             </div>
                             
-                            <div class="bg-white rounded-lg overflow-hidden border-2 border-purple-200 min-h-[200px]">
+                            <div id="illustration-${idx}" class="bg-white rounded-lg overflow-hidden border-2 border-purple-200 min-h-[200px]">
                                 ${illustrationSection}
                             </div>
                         </div>
