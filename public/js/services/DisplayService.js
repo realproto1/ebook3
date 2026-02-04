@@ -295,7 +295,35 @@ class DisplayService {
                                 </span>
                             </div>
                             <div id="cover-image-display" class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl min-h-[300px] md:min-h-[400px] overflow-hidden shadow-lg">
-                                ${storybook.coverImage ? '' : `
+                                ${storybook.coverImage ? `
+                                    <div class="flex gap-2 h-full">
+                                        <!-- 메인 표지 -->
+                                        <div class="flex-1 relative group">
+                                            <img src="${storybook.coverImage}" 
+                                                 alt="${storybook.title} 표지" 
+                                                 class="w-full h-full object-cover rounded-lg"/>
+                                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                                                <h3 class="text-white font-bold text-lg">${storybook.title}</h3>
+                                                ${storybook.subtitle ? `<p class="text-white/80 text-sm">${storybook.subtitle}</p>` : ''}
+                                            </div>
+                                        </div>
+                                        
+                                        ${(storybook.coverHistory && storybook.coverHistory.length > 0) ? `
+                                        <!-- 히스토리 -->
+                                        <div class="w-24 overflow-y-auto space-y-2">
+                                            ${storybook.coverHistory.map((url, idx) => `
+                                                <div class="relative group cursor-pointer border-2 border-transparent hover:border-purple-400 rounded transition" 
+                                                     onclick="selectCoverFromHistory(${idx})">
+                                                    <img src="${url}" alt="이전 표지 ${idx + 1}" class="w-full h-32 object-cover rounded"/>
+                                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition rounded flex items-center justify-center">
+                                                        <i class="fas fa-check text-white opacity-0 group-hover:opacity-100 transition"></i>
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                        ` : ''}
+                                    </div>
+                                ` : `
                                     <div class="flex items-center justify-center h-full">
                                         <div class="text-center p-6">
                                             <i class="fas fa-book-open text-6xl text-white opacity-50 mb-4"></i>
