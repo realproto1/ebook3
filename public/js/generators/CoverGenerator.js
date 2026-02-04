@@ -37,20 +37,19 @@ class CoverGenerator extends BaseGenerator {
             // 캐릭터 레퍼런스 준비
             const characterRefs = this._getCharacterReferences();
 
+            // 프롬프트 생성
+            const prompt = `Create a book cover for "${this.storybook.title}". 
+Genre: ${this.storybook.genre || 'Children\'s Story'}
+Art Style: ${this.storybook.artStyle}
+${this.storybook.subtitle ? `Subtitle: ${this.storybook.subtitle}` : ''}
+${this.storybook.summary ? `Summary: ${this.storybook.summary}` : ''}`;
+
             // API 호출
             const result = await this.imageService.generateCover({
-                title: this.storybook.title,
-                subtitle: this.storybook.subtitle || '',
-                genre: this.storybook.genre || '',
-                artStyle: this.storybook.artStyle,
-                characters: this.storybook.characters || [],
-                summary: this.storybook.summary || ''
-            }, {
-                model: this.imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
-                aspectRatio: '9:16', // 표지는 세로형
+                prompt: prompt,
                 characterReferences: characterRefs,
-                storybookId: this.storybook.id,
-                storybookTitle: this.storybook.title
+                model: this.imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
+                aspectRatio: '9:16' // 표지는 세로형
             });
 
             if (!result || !result.success || !result.imageUrl) {
@@ -98,10 +97,7 @@ class CoverGenerator extends BaseGenerator {
 
         return this.storybook.characters
             .filter(char => char.referenceImage)
-            .map(char => ({
-                name: char.name,
-                imageUrl: char.referenceImage
-            }));
+            .map(char => char.referenceImage); // URL만 반환
     }
 
     /**

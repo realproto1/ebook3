@@ -31,12 +31,18 @@ class CharacterReferenceGenerator extends BaseGenerator {
             console.log(`👤 캐릭터 ${character.name} 레퍼런스 생성 시작`);
 
             // 프롬프트 수집
-            const prompt = this._getCharacterPrompt(charIndex);
+            const promptInput = document.getElementById(`char-prompt-${charIndex}`);
+            const customPrompt = promptInput && promptInput.value.trim();
+            
+            // 캐릭터 객체 준비 (커스텀 프롬프트 우선)
+            const characterData = {
+                name: character.name,
+                description: customPrompt || character.description || character.name,
+                age: character.age
+            };
             
             // API 호출
-            const result = await this.imageService.generateCharacterReference({
-                character: character,
-                prompt: prompt,
+            const result = await this.imageService.generateCharacter(characterData, {
                 model: this.imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
                 aspectRatio: '16:9',
                 artStyle: this.storybook.artStyle,
@@ -136,22 +142,6 @@ class CharacterReferenceGenerator extends BaseGenerator {
             console.error('캐릭터 배치 생성 오류:', error);
             alert('캐릭터 생성 중 오류가 발생했습니다: ' + error.message);
         }
-    }
-
-    /**
-     * 캐릭터 프롬프트 가져오기
-     */
-    _getCharacterPrompt(charIndex) {
-        const character = this.storybook.characters[charIndex];
-        
-        // DOM에서 커스텀 프롬프트 확인
-        const promptInput = document.getElementById(`char-prompt-${charIndex}`);
-        if (promptInput && promptInput.value.trim()) {
-            return promptInput.value.trim();
-        }
-        
-        // 캐릭터 설명 사용
-        return character.description || character.name;
     }
 
     /**

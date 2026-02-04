@@ -36,10 +36,7 @@ class KeyObjectGenerator extends BaseGenerator {
             console.log(`🔑 Key Object ${objIndex} (${keyObject.name}) 생성 시작`);
 
             // API 호출
-            const result = await this.imageService.generateKeyObject({
-                name: keyObject.name,
-                description: keyObject.description
-            }, {
+            const result = await this.imageService.generateKeyObject(keyObject, {
                 model: this.imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
                 aspectRatio: '16:9',
                 artStyle: this.storybook.artStyle,
