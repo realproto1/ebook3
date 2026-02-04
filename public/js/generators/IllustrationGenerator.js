@@ -5,8 +5,8 @@
 class IllustrationGenerator extends BaseGenerator {
     constructor(options = {}) {
         super({
-            ...options,
-            buttonId: 'generate-all-illust-btn'
+            ...options
+            // buttonId는 generate() 메서드에서 동적으로 설정
         });
         
         this.imageService = options.imageService || window.imageService;
@@ -25,10 +25,8 @@ class IllustrationGenerator extends BaseGenerator {
         const page = this.storybook.pages[pageIndex];
         const illustrationDiv = document.getElementById(`illustration-${pageIndex}`);
 
-        // 버튼 ID 동적 설정 (없으면 설정)
-        if (!this.buttonId) {
-            this.buttonId = `generate-illust-${pageIndex}-btn`;
-        }
+        // 버튼 ID 동적 설정 (개별 페이지 생성용)
+        this.buttonId = `generate-illust-${pageIndex}-btn`;
 
         try {
             // 버튼 로딩 시작
@@ -87,6 +85,9 @@ class IllustrationGenerator extends BaseGenerator {
      * 모든 페이지 삽화 순차 생성
      */
     async generateAll() {
+        // 버튼 ID 설정 (모든 삽화 생성용)
+        this.buttonId = 'generate-all-illust-btn';
+        
         // 1. 검증
         const validation = this._validateBeforeGeneration();
         if (!validation.valid) {
