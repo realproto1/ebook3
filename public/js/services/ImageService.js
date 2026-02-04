@@ -25,6 +25,8 @@ class ImageService {
         try {
             const {
                 prompt,
+                title = 'Untitled',
+                storybookId = '',
                 characterReferences = [],
                 model = DEFAULT_IMAGE_SETTINGS.coverModel,
                 aspectRatio = '16:9'
@@ -32,6 +34,8 @@ class ImageService {
 
             const response = await api.post('/api/generate-cover', {
                 customPrompt: prompt,  // ✅ 서버는 customPrompt 필드를 기대함
+                title,
+                storybookId,
                 characterReferences,
                 settings: {
                     aspectRatio,

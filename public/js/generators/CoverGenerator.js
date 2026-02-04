@@ -50,6 +50,8 @@ ${this.storybook.summary ? `Summary: ${this.storybook.summary}` : ''}`;
             // API 호출
             const result = await this.imageService.generateCover({
                 prompt: prompt,
+                title: this.storybook.title,
+                storybookId: this.storybook.id,
                 characterReferences: characterRefs,
                 model: this.imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
                 aspectRatio: '9:16' // 표지는 세로형
