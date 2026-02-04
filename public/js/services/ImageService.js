@@ -208,7 +208,9 @@ class ImageService {
                 settings: {
                     ...settings,
                     illustrationModel: model,
-                    aspectRatio
+                    aspectRatio,
+                    enforceCharacterConsistency: true,  // 캐릭터 일관성 강제 적용
+                    enforceNoText: true  // 텍스트 제거 강제 적용
                 },
                 editNote,
                 previousPages,
