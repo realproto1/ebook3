@@ -14,31 +14,16 @@ class CoverService {
      */
     buildCoverPrompt(storybook) {
         const title = storybook.title || '동화책';
-        const theme = storybook.theme || '';
-        const artStyle = storybook.artStyle || 'Disney animation style';
-        const characters = storybook.characters.map(c => c.name).join(', ');
         
-        return `Create a beautiful, professional book cover illustration for a children's storybook.
+        return `Create a book cover illustration for "${title}".
 
-**Book Title:** ${title}
-**Theme:** ${theme}
-**Art Style:** ${artStyle}
+**Requirements:**
+- Full illustration (no text or letters)
+- 4:3 aspect ratio
+- Suitable for children
+- Eye-catching and colorful
 
-**Main Characters:** ${characters}
-
-**Cover Requirements:**
-- Eye-catching, vibrant illustration that captures the story's essence
-- Show the main characters in an engaging scene
-- Magical, inviting atmosphere suitable for children ages 4-8
-- Professional book cover quality
-- Composition suitable for a vertical book cover layout
-
-**DO NOT include:**
-- Any text, title, or letters on the cover
-- Book spine or binding elements
-- Just pure illustration
-
-Create a captivating cover illustration that makes children want to read this story!`;
+Just draw the cover image for this storybook.`;
     }
 
     /**
@@ -230,10 +215,12 @@ Create a captivating cover illustration that makes children want to read this st
             
             console.log(`📚 표지 생성 시작 - 참조 캐릭터: ${characterReferences.length}개`);
             
-            // 재생성인 경우 기존 표지 이미지도 참조로 추가
-            if (storybook.coverImage) {
+            // 재생성인 경우 기존 표지 이미지도 참조로 추가 (아트 스타일 변경 시 제외)
+            if (storybook.coverImage && !storybook._artStyleChanged) {
                 console.log('🔄 재생성 모드: 기존 표지를 레퍼런스로 추가');
                 characterReferences.push(storybook.coverImage);
+            } else if (storybook._artStyleChanged) {
+                console.log('🎨 아트 스타일 변경됨: 기존 표지 참조 제외');
             }
             
             // 🔥 서버 API 호출 (R2 업로드 포함)
