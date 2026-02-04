@@ -2707,378 +2707,40 @@ async function generateAllIllustrationsParallel() {
 }
 
 // 한 번에 모든 삽화 생성 - 순차 (정확하게)
+/**
+ * 모든 삽화 순차 생성 (IllustrationGenerator 사용)
+ */
 async function generateAllIllustrationsSequential() {
-    const hasCharacterReferences = currentStorybook.characters.some(char => char.referenceImage);
-    if (!hasCharacterReferences) {
-        alert('먼저 캐릭터 레퍼런스 이미지를 생성해주세요!');
-        return;
-    }
-    
-    const pagesToGenerate = currentStorybook.pages.filter(page => !page.illustrationImage);
-    
-    if (pagesToGenerate.length === 0) {
-        alert('이미 모든 페이지의 삽화가 생성되었습니다.');
-        return;
-    }
-    
-    const estimatedTime = pagesToGenerate.length * 8; // 페이지당 약 8초
-    if (!confirm(`${pagesToGenerate.length}개의 삽화를 순차적으로 생성하시겠습니까?\n\n⭐ 각 페이지가 바로 전 페이지를 참조하여 더 자연스러운 연속성을 만듭니다.\n\n예상 소요 시간: 약 ${estimatedTime}초`)) {
-        return;
-    }
-    
-    // ✅ 버튼 로딩
-    setButtonLoading('generate-all-illust-btn', `생성 중 0/${pagesToGenerate.length}`);
-    
-    // 캐릭터 레퍼런스 준비 (전체 캐릭터 객체 사용)
-    const characterReferences = currentStorybook.characters
-        .filter(char => char.referenceImage);
-    
-    // 모든 페이지의 로딩 상태 표시
-    currentStorybook.pages.forEach((page, i) => {
-        if (!page.illustrationImage) {
-            const illustrationDiv = document.getElementById(`illustration-${i}`);
-            if (illustrationDiv) {
-                illustrationDiv.innerHTML = '<div class="min-h-[200px] flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg"><div class="animate-pulse rounded-full h-20 w-20 bg-purple-300 mb-4"></div><p class="text-purple-800 text-base font-bold">🔷 대기 중...</p><p class="text-purple-600 text-sm mt-2">순차적으로 생성됩니다</p><p class="text-purple-500 text-xs mt-1">페이지 ' + (i + 1) + '</p></div>';
-            }
-        }
+    const generator = new IllustrationGenerator({
+        storybook: currentStorybook,
+        imageService: imageService || window.imageService,
+        imageSettings: imageSettings,
+        uiHelper: UIHelper,
+        saveCallback: saveCurrentStorybook,
+        updateCallback: () => displayStorybook(currentStorybook)
     });
-    
-    try {
-        let successCount = 0;
-        let failCount = 0;
-        
-        // 순차적으로 페이지별 생성 (앞 페이지부터)
-        for (let i = 0; i < currentStorybook.pages.length; i++) {
-            const page = currentStorybook.pages[i];
-            
-            // 이미 이미지가 있으면 건너뛰기
-            if (page.illustrationImage) {
-                continue;
-            }
-            
-            const illustrationDiv = document.getElementById(`illustration-${i}`);
-            if (illustrationDiv) {
-                illustrationDiv.innerHTML = `<div class="min-h-[200px] flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg"><div class="animate-spin rounded-full h-20 w-20 border-b-4 border-purple-600 mb-4"></div><p class="text-purple-800 text-base font-bold">🔷 페이지 ${page.pageNumber} 생성 중...</p><p class="text-purple-600 text-sm mt-2">${successCount + failCount + 1}/${pagesToGenerate.length}</p><p class="text-purple-500 text-xs mt-1">순차 생성 (정확하게)</p></div>`;
-            }
-            
-            try {
-                const sceneCombinedElem = document.getElementById(`scene-combined-${i}`);
-                const sceneDesc = sceneCombinedElem ? sceneCombinedElem.value : page.scene_description;
-                const artStyleElem = document.getElementById(`artstyle-${i}`);
-                const artStyle = artStyleElem ? artStyleElem.value : (page.artStyle || currentStorybook.artStyle);
-                
-                // scene-combined에서 장면 구조 파싱 (또는 기존 값 사용)
-                const sceneStructure = {
-                    characters: page.scene_structure?.characters || '',
-                    background: page.scene_structure?.background || '',
-                    atmosphere: page.scene_structure?.atmosphere || ''
-                };
-                
-                // 클라이언트에서 직접 Gemini API 호출
-                const pageData = {
-                    ...page,
-                    scene_description: sceneDesc,
-                    scene_structure: sceneStructure
-                };
-                
-                const prompt = buildIllustrationPrompt(pageData, artStyle, characterReferences, imageSettings, '');
-                
-                // 🎯 페이지에 등장하는 캐릭터 자동 감지
-                const pageText = page.text || '';
-                const sceneCharacters = (sceneStructure && sceneStructure.characters) || '';
-                const allText = `${pageText} ${sceneCharacters}`.toLowerCase();
-                
-                // 이 페이지에 등장하는 캐릭터만 필터링
-                const relevantCharacters = characterReferences.filter(char => {
-                    const charName = char.name.toLowerCase();
-                    return allText.includes(charName) || 
-                           allText.includes(char.description.toLowerCase().split(' ')[0]);
-                });
-                
-                // 등장하지 않으면 모든 캐릭터 포함 (안전장치)
-                const filteredCharacterRefs = relevantCharacters.length > 0 ? relevantCharacters : characterReferences;
-                
-                // 레퍼런스 이미지 URL만 추출 (R2 URL 사용)
-                const refImageUrls = filteredCharacterRefs
-                    .map(char => char.referenceImage)
-                    .filter(url => url); // null/undefined 제거
-                
-                console.log(`📸 페이지 ${page.pageNumber} - 캐릭터 레퍼런스: ${refImageUrls.length}개`, refImageUrls);
-                
-                // ⭐ 바로 전 페이지의 이미지를 자동으로 참조 (연속성 향상)
-                let previousPages = [];
-                if (i > 0) {
-                    const previousPage = currentStorybook.pages[i - 1];
-                    if (previousPage && previousPage.illustrationImage) {
-                        console.log(`📖 페이지 ${page.pageNumber}: 바로 전 페이지(${previousPage.pageNumber})의 이미지를 자동 참조`);
-                        previousPages = [previousPage];
-                    }
-                }
-                
-                // ImageService를 통해 삽화 생성
-                const service = imageService || window.imageService;
-                if (!service) {
-                    throw new Error('ImageService가 로드되지 않았습니다.');
-                }
-                
-                // ✅ 재생성 시 페이지에 저장된 설정 우선 사용
-                const isRegeneration = !!page.illustrationImage;
-                const apiOptions = {
-                    model: (isRegeneration && page.illustrationModel) || imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
-                    aspectRatio: (isRegeneration && page.aspectRatio) || imageSettings.aspectRatio || '16:9',
-                    artStyle: artStyle,
-                    previousPages: previousPages,
-                    storybookId: currentStorybook.id,
-                    storybookTitle: currentStorybook.title,
-                    additionalPrompt: (isRegeneration && page.additionalPrompt) || imageSettings.additionalPrompt || ''
-                };
-                
-                const result = await service.generateIllustration(pageData, refImageUrls, apiOptions);
-                
-                if (result && result.success && result.imageUrl) {
-                    // 기존 이미지가 있으면 히스토리에 추가
-                    if (page.illustrationImage) {
-                        if (!page.illustrationHistory) {
-                            page.illustrationHistory = [];
-                        }
-                        page.illustrationHistory.unshift(page.illustrationImage);
-                        
-                        // 히스토리 10개 제한
-                        if (page.illustrationHistory.length > 10) {
-                            page.illustrationHistory.splice(10);
-                        }
-                    }
-                    
-                    currentStorybook.pages[i].illustrationImage = result.imageUrl;
-                    currentStorybook.pages[i].scene_description = sceneDesc;
-                    currentStorybook.pages[i].scene_structure = sceneStructure;
-                    currentStorybook.pages[i].artStyle = artStyle;
-                    saveCurrentStorybook(); // 각 페이지마다 저장
-                    successCount++;
-                    
-                    // 성공 표시
-                    if (illustrationDiv) {
-                        // ✅ UIHelper로 히스토리 포함하여 렌더링
-                        if (UIHelper) {
-                            UIHelper.renderIllustration(illustrationDiv, result.imageUrl, {
-                                pageIndex: i,
-                                storybookTitle: currentStorybook.title,
-                                history: page.illustrationHistory || []
-                            });
-                        } else {
-                            illustrationDiv.innerHTML = `<img src="${result.imageUrl}" alt="Page ${page.pageNumber}" class="w-full h-full object-cover rounded-lg"/>`;
-                        }
-                    }
-                } else {
-                    throw new Error(result.error || '이미지 생성 실패');
-                }
-            } catch (error) {
-                console.error(`❌ 삽화 ${i} 생성 실패:`, error);
-                failCount++;
-                
-                // 서버 응답에서 상세 에러 메시지 추출
-                let errorMessage = '이미지 생성 실패';
-                if (error.response && error.response.data) {
-                    if (error.response.data.error) {
-                        errorMessage = error.response.data.error;
-                        console.error('📡 서버 에러 메시지:', errorMessage);
-                    } else if (error.response.data.message) {
-                        errorMessage = error.response.data.message;
-                        console.error('📡 서버 에러 메시지:', errorMessage);
-                    }
-                } else if (error.message) {
-                    errorMessage = error.message;
-                }
-                
-                // 실패 표시
-                if (illustrationDiv) {
-                    illustrationDiv.innerHTML = `
-                        <div class="p-6 text-center">
-                            <p class="text-red-600 text-sm mb-2 font-bold">⚠️ 생성 실패</p>
-                            <p class="text-gray-700 text-xs">${errorMessage}</p>
-                        </div>
-                    `;
-                }
-            }
-        }
-        
-        // 최종 결과 표시 및 UI 업데이트
-        displayStorybook(currentStorybook);
-        
-        if (failCount > 0) {
-            alert(`삽화 생성 완료!\n✅ 성공: ${successCount}개\n❌ 실패: ${failCount}개\n\n실패한 페이지는 개별적으로 재시도해주세요.`);
-        } else {
-            showNotification('success', '모든 삽화 생성 완료! 🎯', `${successCount}개의 페이지 삽화가 순차적으로 생성되었습니다.`);
-        }
-    } catch (error) {
-        console.error('Batch generation error:', error);
-        alert('배치 생성 중 오류가 발생했습니다: ' + error.message);
-        displayStorybook(currentStorybook);
-    } finally {
-        // ✅ 버튼 로딩 해제
-        resetButtonLoading('generate-all-illust-btn');
-    }
+
+    await generator.generateAll();
 }
 
 // 모든 TTS 생성 (순차적)
 /**
  * 모든 페이지 TTS 순차 생성 (간소화 버전)
  */
+/**
+ * 모든 TTS 순차 생성 (TTSGenerator 사용)
+ */
 async function generateAllTTS() {
-    const pages = currentStorybook?.pages;
-    
-    if (!pages || pages.length === 0) {
-        alert('동화책 페이지가 없습니다.');
-        return;
-    }
-    
-    // TTS가 없는 페이지 필터링
-    const pagesToGenerate = pages.filter(page => {
-        const pageText = getPageText(page, window.currentLanguage);
-        const pageTTS = getPageTTS(page, window.currentLanguage);
-        return pageText?.trim() && !pageTTS;
+    const generator = new TTSGenerator({
+        storybook: currentStorybook,
+        ttsService: ttsService || window.ttsService,
+        imageSettings: imageSettings,
+        language: window.currentLanguage,
+        saveCallback: saveCurrentStorybook,
+        updateCallback: () => displayStorybook(currentStorybook)
     });
-    
-    if (pagesToGenerate.length === 0) {
-        alert('이미 모든 페이지의 TTS가 생성되었습니다.');
-        return;
-    }
-    
-    const estimatedTime = pagesToGenerate.length * 3;
-    if (!confirm(`${pagesToGenerate.length}개의 페이지 TTS를 생성하시겠습니까?\n\n언어: ${window.currentLanguage}\n예상 소요 시간: 약 ${estimatedTime}초`)) {
-        return;
-    }
-    
-    // ✅ 버튼 로딩
-    setButtonLoading('generate-all-tts-btn', `TTS 생성 중 0/${pagesToGenerate.length}`);
-    
-    try {
-        let successCount = 0;
-        let failCount = 0;
-        const totalPages = pagesToGenerate.length;
-        
-        console.log(`🎤 모든 TTS 생성 시작 (${totalPages}개 페이지, 언어: ${window.currentLanguage})`);
-        
-        // 순차적으로 TTS 생성
-        for (let i = 0; i < pages.length; i++) {
-            const page = pages[i];
-            const pageText = getPageText(page, window.currentLanguage);
-            const pageTTS = getPageTTS(page, window.currentLanguage);
-            
-            if (!pageText?.trim() || pageTTS) continue;
-            
-            // 버튼 업데이트
-            const ttsButton = document.getElementById(`tts-btn-${i}`);
-            if (ttsButton) {
-                ttsButton.innerHTML = `<i class="fas fa-spinner fa-spin mr-1"></i>생성중 (${successCount + failCount + 1}/${totalPages})`;
-                ttsButton.disabled = true;
-            }
-            
-            try {
-                console.log(`🎤 페이지 ${page.pageNumber} TTS 생성 중...`);
-                
-                // ✨ TTSService 사용 (fallback 체크)
-                const service = ttsService || window.ttsService;
-                if (!service) {
-                    throw new Error('TTSService가 로드되지 않았습니다. 페이지를 새로고침 해주세요.');
-                }
-                
-                const result = await service.generatePageTTS(page, {
-                    model: imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts',
-                    voice: imageSettings.ttsModel || 'Aoede',
-                    voiceConfig: imageSettings.ttsVoiceConfig,
-                    language: window.currentLanguage,
-                    storybookId: currentStorybook?.id,
-                    storybookTitle: currentStorybook?.title,
-                    pageNumber: page.pageNumber
-                });
-                
-                if (result.success && result.audioUrl) {
-                    // TTS 저장
-                    pages[i].ttsAudio = pages[i].ttsAudio || {};
-                    
-                    if (window.currentLanguage === 'ko') {
-                        pages[i].ttsAudio.url = result.audioUrl;
-                        pages[i].ttsAudio.model = imageSettings.ttsModel;
-                        pages[i].audioUrl = result.audioUrl;
-                    } else {
-                        pages[i].ttsAudio[window.currentLanguage] = {
-                            url: result.audioUrl,
-                            model: imageSettings.ttsModel
-                        };
-                    }
-                    
-                    successCount++;
-                    console.log(`✅ 페이지 ${page.pageNumber} TTS 생성 완료`);
-                    
-                    // 5페이지마다 중간 저장 및 1분 휴식
-                    if (successCount % 5 === 0) {
-                        try {
-                            console.log(`💾 중간 저장 중... (${successCount}개 완료)`);
-                            await saveToR2(currentStorybook);
-                        } catch (saveError) {
-                            console.warn(`⚠️ 중간 저장 실패:`, saveError.message);
-                        }
-                        
-                        if (successCount < totalPages) {
-                            console.log(`⏸️ API 할당량 보호: 60초 대기 중...`);
-                            showNotification('info', '잠시 대기 중...', `API 할당량 보호를 위해 60초 대기합니다.`);
-                            await new Promise(resolve => setTimeout(resolve, 60000));
-                        }
-                    }
-                } else {
-                    throw new Error('TTS 생성 실패');
-                }
-                
-            } catch (error) {
-                failCount++;
-                console.error(`❌ 페이지 ${page.pageNumber} TTS 생성 실패:`, error);
-                
-                const errorMessage = error.response?.data?.error || error.message || '알 수 없는 오류';
-                
-                // 할당량 초과 감지
-                if (errorMessage.includes('quota') || error.response?.status === 429) {
-                    console.error('🚫 API 할당량 초과!');
-                    showNotification('error', 'API 할당량 초과', 'Gemini TTS API 일일 할당량을 초과했습니다.');
-                    break;
-                }
-                
-                if (ttsButton) {
-                    ttsButton.innerHTML = '<i class="fas fa-volume-up mr-1"></i>음성 생성';
-                    ttsButton.disabled = false;
-                }
-            }
-        }
-        
-        // 최종 저장
-        if (successCount > 0) {
-            try {
-                await saveToR2(currentStorybook);
-            } catch (saveError) {
-                console.error('❌ 최종 저장 실패:', saveError);
-                showNotification('warning', '저장 실패', 'TTS는 생성되었지만 저장에 실패했습니다.');
-            }
-        }
-        
-        displayStorybook(currentStorybook);
-        
-        // 결과 알림
-        if (successCount > 0) {
-            showNotification('success', '모든 TTS 생성 완료! 🎤', `${successCount}개의 페이지 음성이 생성되었습니다.${failCount > 0 ? ` (${failCount}개 실패)` : ''}`);
-        } else if (failCount > 0) {
-            showNotification('error', 'TTS 생성 실패', `모든 페이지에서 TTS 생성에 실패했습니다. API 할당량을 확인해주세요.`);
-        }
-        
-        console.log(`✅ 모든 TTS 생성 완료: 성공 ${successCount}개, 실패 ${failCount}개`);
-        
-    } catch (error) {
-        console.error('TTS 배치 생성 오류:', error);
-        alert('TTS 생성 중 오류가 발생했습니다: ' + error.message);
-        displayStorybook(currentStorybook);
-    } finally {
-        // ✅ 버튼 로딩 해제
-        resetButtonLoading('generate-all-tts-btn');
-    }
+
+    await generator.generateAll();
 }
 
 // 페이지 삽화 생성
