@@ -526,8 +526,19 @@ async function uploadCover() {
     await coverService.uploadCover(currentStorybook, saveCurrentStorybook, displayStorybook);
 }
 
+/**
+ * 표지 이미지 생성 (CoverGenerator 사용)
+ */
 async function generateCoverImage() {
-    await coverService.generateCoverImage(currentStorybook, imageSettings, saveCurrentStorybook, updateCoverImageDisplay);
+    const generator = new CoverGenerator({
+        storybook: currentStorybook,
+        imageService: imageService || window.imageService,
+        imageSettings: imageSettings,
+        saveCallback: saveCurrentStorybook,
+        updateCallback: updateCoverImageDisplay
+    });
+
+    return await generator.generate();
 }
 
 function selectCoverImageFromHistory(historyIndex) {
@@ -2329,28 +2340,18 @@ async function generateAllCharacterReferences() {
 /**
  * 캐릭터 레퍼런스 생성 (ImageService 사용)
  */
+/**
+ * 캐릭터 레퍼런스 생성 (CharacterReferenceGenerator 사용)
+ */
 async function generateCharacterReference(charIndex) {
-    // CharacterReferenceService 사용
-    const service = window.characterReferenceService || characterReferenceService;
-    if (!service) {
-        console.error('❌ CharacterReferenceService가 로드되지 않았습니다.');
-        alert('서비스 초기화 오류. 페이지를 새로고침 해주세요.');
-        return;
-    }
-
-    // 서비스 초기화 (첫 호출 시)
-    if (!service.imageService) {
-        service.initialize(window.imageService);
-    }
-
-    // 통합 메서드 호출
-    const result = await service.generateOrUpdate(currentStorybook, charIndex, {
+    const generator = new CharacterReferenceGenerator({
+        storybook: currentStorybook,
+        imageService: imageService || window.imageService,
         imageSettings: imageSettings,
-        saveCallback: saveCurrentStorybook,
-        renderCallback: renderCharacterImageWithHistory
+        saveCallback: saveCurrentStorybook
     });
 
-    return result;
+    return await generator.generate(charIndex);
 }
 
 // 캐릭터 이미지를 히스토리와 함께 렌더링
@@ -3903,60 +3904,35 @@ function updateKeyObjectField(objIndex, field, value) {
 }
 
 // Key Object 단일 이미지 생성
+/**
+ * Key Object 이미지 생성 (KeyObjectGenerator 사용)
+ */
 async function generateSingleKeyObjectImage(objIndex) {
-    // KeyObjectService 사용
-    const service = window.keyObjectService || keyObjectService;
-    if (!service) {
-        console.error('❌ KeyObjectService가 로드되지 않았습니다.');
-        alert('서비스 초기화 오류. 페이지를 새로고침 해주세요.');
-        return { index: objIndex, success: false, error: 'Service not loaded' };
-    }
-
-    // 서비스 초기화 (첫 호출 시)
-    if (!service.imageService) {
-        service.initialize(window.imageService, window.UIHelper);
-    }
-
-    // 통합 메서드 호출
-    const result = await service.generateOrUpdate(currentStorybook, objIndex, {
+    const generator = new KeyObjectGenerator({
+        storybook: currentStorybook,
+        imageService: imageService || window.imageService,
         imageSettings: imageSettings,
         saveCallback: saveCurrentStorybook
     });
 
-    return result;
+    return await generator.generate(objIndex);
 }
 
-// 모든 Key Object 이미지 생성
-// Key Object 이미지 생성 중 플래그
-let isGeneratingKeyObjectImages = false;
-
 /**
- * 모든 Key Object 이미지 병렬 생성 (간소화 버전)
+ * 모든 Key Object 이미지 생성 (KeyObjectGenerator 사용)
  */
 async function generateAllKeyObjectImages() {
     console.log('🎯 generateAllKeyObjectImages 호출됨');
     console.log('📖 currentStorybook:', currentStorybook?.title);
 
-    // KeyObjectService 사용
-    const service = window.keyObjectService || keyObjectService;
-    if (!service) {
-        console.error('❌ KeyObjectService가 로드되지 않았습니다.');
-        alert('서비스 초기화 오류. 페이지를 새로고침 해주세요.');
-        return;
-    }
-
-    // 서비스 초기화 (첫 호출 시)
-    if (!service.imageService) {
-        service.initialize(window.imageService, window.UIHelper);
-    }
-
-    // 통합 메서드 호출
-    const result = await service.generateAll(currentStorybook, {
+    const generator = new KeyObjectGenerator({
+        storybook: currentStorybook,
+        imageService: imageService || window.imageService,
         imageSettings: imageSettings,
         saveCallback: saveCurrentStorybook
     });
 
-    return result;
+    return await generator.generateAll();
 }
 
 // 모든 Key Object 이미지 다운로드
