@@ -2726,6 +2726,9 @@ async function generateAllIllustrationsSequential() {
         return;
     }
     
+    // ✅ 버튼 로딩
+    setButtonLoading('generate-all-illust-btn', `생성 중 0/${pagesToGenerate.length}`);
+    
     // 캐릭터 레퍼런스 준비 (전체 캐릭터 객체 사용)
     const characterReferences = currentStorybook.characters
         .filter(char => char.referenceImage);
@@ -2911,6 +2914,9 @@ async function generateAllIllustrationsSequential() {
         console.error('Batch generation error:', error);
         alert('배치 생성 중 오류가 발생했습니다: ' + error.message);
         displayStorybook(currentStorybook);
+    } finally {
+        // ✅ 버튼 로딩 해제
+        resetButtonLoading('generate-all-illust-btn');
     }
 }
 
@@ -2942,6 +2948,9 @@ async function generateAllTTS() {
     if (!confirm(`${pagesToGenerate.length}개의 페이지 TTS를 생성하시겠습니까?\n\n언어: ${window.currentLanguage}\n예상 소요 시간: 약 ${estimatedTime}초`)) {
         return;
     }
+    
+    // ✅ 버튼 로딩
+    setButtonLoading('generate-all-tts-btn', `TTS 생성 중 0/${pagesToGenerate.length}`);
     
     try {
         let successCount = 0;
@@ -3066,6 +3075,9 @@ async function generateAllTTS() {
         console.error('TTS 배치 생성 오류:', error);
         alert('TTS 생성 중 오류가 발생했습니다: ' + error.message);
         displayStorybook(currentStorybook);
+    } finally {
+        // ✅ 버튼 로딩 해제
+        resetButtonLoading('generate-all-tts-btn');
     }
 }
 
