@@ -3105,7 +3105,7 @@ async function generateIllustration(pageIndex) {
     
     // 1. 입력 데이터 수집
     const sceneDesc = document.getElementById(`scene-combined-${pageIndex}`)?.value || page.scene_description || '';
-    const artStyle = document.getElementById(`artstyle-${pageIndex}`)?.value || currentStorybook.artStyle;
+    const artStyle = currentStorybook.artStyle || '디즈니 스타일';  // 동화책 전체 아트스타일 사용
     const editNote = document.getElementById(`edit-note-${pageIndex}`)?.value.trim() || '';
     
     // scene_structure 빌드
@@ -3177,15 +3177,26 @@ async function generateIllustration(pageIndex) {
         // 2. 재생성 + 수정사항 있음 → 전 페이지 + 현재 이미지 (제한 해제)
         if (isRegeneration && hasEditNote) {
             console.log('🔄 재생성 모드 (수정사항 있음): 모든 참조 이미지 사용 (제한 해제)');
-            // 바로 전 페이지
-            if (pageIndex > 0) {
+            
+            // ⚠️ 아트 스타일 변경 감지
+            const artStyleChanged = currentStorybook._artStyleChanged || false;
+            const editMentionsStyle = editNote.toLowerCase().includes('스타일') || 
+                                     editNote.toLowerCase().includes('style') ||
+                                     editNote.toLowerCase().includes('아트');
+            
+            if (artStyleChanged || editMentionsStyle) {
+                console.log('🎨 아트 스타일 변경 감지: 기존 이미지 참조 제외');
+            }
+            
+            // 바로 전 페이지 (스타일 변경 시 제외)
+            if (pageIndex > 0 && !artStyleChanged && !editMentionsStyle) {
                 const previousPage = currentStorybook.pages[pageIndex - 1];
                 if (previousPage && previousPage.illustrationImage) {
                     refImageUrls.push(previousPage.illustrationImage);
                 }
             }
-            // 현재 이미지
-            if (page.illustrationImage) {
+            // 현재 이미지 (스타일 변경 시 제외)
+            if (page.illustrationImage && !artStyleChanged && !editMentionsStyle) {
                 refImageUrls.push(page.illustrationImage);
             }
             // 사용자 선택 참조도 포함
@@ -3290,6 +3301,13 @@ async function generateIllustration(pageIndex) {
             currentStorybook.pages[pageIndex].scene_structure = sceneStructure;
             currentStorybook.pages[pageIndex].artStyle = artStyle;
             currentStorybook.pages[pageIndex].editNote = editNote; // 수정사항 저장
+            
+            // 아트 스타일 변경 플래그 리셋 (첫 이미지 생성 후)
+            if (currentStorybook._artStyleChanged) {
+                delete currentStorybook._artStyleChanged;
+                console.log('🎨 아트 스타일 변경 플래그 리셋');
+            }
+            
             saveCurrentStorybook();
             
             // ✨ UIHelper로 히스토리 포함하여 렌더링
@@ -5789,10 +5807,17 @@ function updateArtStyle(artStyle) {
         return;
     }
     
-    console.log(`🎨 아트 스타일 업데이트:`, artStyle);
+    const previousStyle = currentStorybook.artStyle;
+    console.log(`🎨 아트 스타일 업데이트:`, { 이전: previousStyle, 새로운: artStyle });
     
     // 아트 스타일 저장
     currentStorybook.artStyle = artStyle;
+    
+    // 스타일 변경 플래그 설정 (이미지 재생성 시 참조)
+    if (previousStyle && previousStyle !== artStyle) {
+        currentStorybook._artStyleChanged = true;
+        console.log('⚠️ 아트 스타일 변경됨: 이미지 재생성 시 기존 이미지 참조 제외');
+    }
     
     // R2에 자동 저장
     saveCurrentStorybook();
