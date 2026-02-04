@@ -62,8 +62,8 @@ class IllustrationGenerator extends BaseGenerator {
             // 결과 저장
             await this._saveResult(pageIndex, result, pageData, apiOptions);
 
-            // UI 업데이트
-            this._renderIllustration(pageIndex, result.imageUrl);
+            // UI 업데이트 (전체 페이지 재렌더링)
+            this.updateDisplay();
 
             console.log(`✅ 페이지 ${page.pageNumber} 삽화 생성 완료`);
             this.showSuccess(`페이지 ${page.pageNumber} 삽화 생성 완료!`);
