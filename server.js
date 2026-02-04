@@ -224,8 +224,22 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
     // 응답에서 이미지 데이터 추출
     if (data.candidates && data.candidates[0] && data.candidates[0].content) {
       const content = data.candidates[0].content;
-      const parts = content.parts;
       const finishReason = data.candidates[0].finishReason;
+      
+      // content가 빈 객체인지 확인
+      if (Object.keys(content).length === 0) {
+        console.warn('⚠️ Empty content in response');
+        console.warn('Finish Reason:', finishReason);
+        
+        // finishReason이 OTHER인 경우 재시도 가능한 에러로 처리
+        if (finishReason === 'OTHER') {
+          throw new Error('GEMINI_OTHER_ERROR: 이미지 생성 중 일시적 오류가 발생했습니다. 다시 시도해주세요.');
+        }
+        
+        throw new Error(`Image generation failed: ${finishReason} - Empty content`);
+      }
+      
+      const parts = content.parts;
       
       // parts가 없거나 배열이 아닌 경우 - 먼저 검증
       if (!parts) {
