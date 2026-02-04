@@ -334,14 +334,19 @@ function updateVocabularyModel(value) {
 // ===== 표지 관련 함수들 (CoverGenerator로 위임) =====
 
 function updateCoverModel(value) {
-    if (window.coverGenerator) {
-        window.coverGenerator.updateModel(value);
-    } else {
-        // 폴백: 직접 설정 저장
-        imageSettings.coverModel = value;
-        saveImageSettings();
-        console.log('✅ 표지 이미지 모델 변경:', value);
-    }
+    window.coverGenerator?.updateModel(value);
+}
+
+function buildCoverPrompt(storybook) {
+    return CoverGenerator.buildCoverPrompt(storybook);
+}
+
+function resetCoverPrompt() {
+    window.coverGenerator?.resetPrompt();
+}
+
+function toggleCoverCharacterRef(charIndex, checked) {
+    window.coverGenerator?.toggleCharacterRef(charIndex, checked);
 }
 
 // TTS 모델 선택 HTML 생성 (설명 포함)
@@ -497,33 +502,7 @@ async function generatePageTTS(pageIndex) {
     }
 }
 
-// 표지 관련 함수들 (CoverGenerator로 위임)
-function buildCoverPrompt(storybook) {
-    return CoverGenerator.buildCoverPrompt(storybook);
-}
 
-function resetCoverPrompt() {
-    if (window.coverGenerator) {
-        window.coverGenerator.resetPrompt();
-    } else if (currentStorybook) {
-        // 폴백: 직접 처리
-        const promptTextarea = document.getElementById('cover-prompt');
-        if (promptTextarea) {
-            promptTextarea.value = CoverGenerator.buildCoverPrompt(currentStorybook);
-            currentStorybook.coverPrompt = promptTextarea.value;
-            saveCurrentStorybook();
-        }
-    }
-}
-
-function toggleCoverCharacterRef(charIndex, checked) {
-    if (window.coverGenerator) {
-        window.coverGenerator.toggleCharacterRef(charIndex, checked);
-    } else {
-        // 폴백: CoverService 사용
-        coverService.toggleCoverCharacterRef(currentStorybook, charIndex, checked, saveCurrentStorybook);
-    }
-}
 
 function openCoverUploadModal() {
     coverService.openCoverUploadModal();
@@ -558,17 +537,11 @@ async function generateCoverImage() {
 }
 
 function selectCoverImageFromHistory(historyIndex) {
-    if (window.coverGenerator) {
-        window.coverGenerator.selectFromHistory(historyIndex);
-    } else {
-        // 폴백: CoverService 사용
-        coverService.selectCoverImageFromHistory(currentStorybook, historyIndex, saveCurrentStorybook, updateCoverImageDisplay);
-    }
+    window.coverGenerator?.selectFromHistory(historyIndex);
 }
 
 function selectCoverFromHistory(historyIndex) {
-    // selectCoverImageFromHistory와 동일한 함수 (호환성)
-    selectCoverImageFromHistory(historyIndex);
+    window.coverGenerator?.selectFromHistory(historyIndex);
 }
 
 function updateCoverImageDisplay() {
