@@ -37,25 +37,23 @@ class CoverGenerator extends BaseGenerator {
             // 캐릭터 레퍼런스 준비
             const characterRefs = this._getCharacterReferences();
 
-            // 프롬프트 생성 - 간단하고 명확하게
-            const aspectRatio = this.imageSettings?.coverAspectRatio || '9:16';
-            const prompt = `"${this.storybook.title}" 동화책 표지를 만들어주세요.
+            // 표지 프롬프트 창에서 직접 읽기
+            const promptInput = document.getElementById('cover-prompt');
+            const prompt = promptInput ? promptInput.value.trim() : '';
+            
+            if (!prompt) {
+                throw new Error('표지 프롬프트를 입력해주세요.');
+            }
 
-**중요 사항:**
-- 텍스트는 전혀 포함하지 마세요 (제목, 글자, 단어 등 없음)
-- 화면에 꽉 찬 일러스트로 그려주세요
-- 비율: ${aspectRatio}
-
-**장르:** ${this.storybook.genre || '어린이 동화'}
-
-**아트 스타일:** ${this.storybook.artStyle}
-
-${this.storybook.summary ? `**줄거리:** ${this.storybook.summary}` : ''}
-
-${characterRefs.length > 0 ? '**참조할 캐릭터:** 첨부된 캐릭터 레퍼런스 이미지를 참고하여 캐릭터를 그려주세요.' : ''}`;
-
-            console.log('📝 생성된 프롬프트:', prompt);
+            console.log('📝 사용자 입력 프롬프트:', prompt);
             console.log('👥 선택된 캐릭터 레퍼런스:', characterRefs.length, '개');
+
+            // UI에서 비율과 모델 읽기
+            const aspectRatioSelect = document.getElementById('cover-aspect-ratio');
+            const aspectRatio = aspectRatioSelect ? aspectRatioSelect.value : '9:16';
+            
+            const modelSelect = document.getElementById('cover-model-select');
+            const model = modelSelect ? modelSelect.value : (this.imageSettings.coverModel || 'gemini-3-pro-image-preview');
 
             // API 호출
             const result = await this.imageService.generateCover({
@@ -63,8 +61,8 @@ ${characterRefs.length > 0 ? '**참조할 캐릭터:** 첨부된 캐릭터 레�
                 title: this.storybook.title,
                 storybookId: this.storybook.id,
                 characterReferences: characterRefs,
-                model: this.imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
-                aspectRatio: '9:16' // 표지는 세로형
+                model: model,
+                aspectRatio: aspectRatio
             });
 
             if (!result || !result.success || !result.imageUrl) {
@@ -136,6 +134,12 @@ ${characterRefs.length > 0 ? '**참조할 캐릭터:** 첨부된 캐릭터 레�
 
         // 표지 저장
         this.storybook.coverImage = result.imageUrl;
+        
+        // 프롬프트도 저장 (다음에 사용할 때 표시)
+        const promptInput = document.getElementById('cover-prompt');
+        if (promptInput) {
+            this.storybook.coverPrompt = promptInput.value.trim();
+        }
 
         // Storybook 저장
         await this.saveStorybook();
