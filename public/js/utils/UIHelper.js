@@ -224,9 +224,25 @@ class UIHelper {
                         <h2 class="text-2xl md:text-4xl font-bold text-purple-600 mb-2">${storybook.title}</h2>
                         <p class="text-sm md:text-base text-gray-600">
                             <i class="fas fa-child mr-1 md:mr-2"></i>${storybook.targetAge}세 
-                            <i class="fas fa-palette ml-2 md:ml-4 mr-1 md:mr-2"></i><span class="hidden sm:inline">${storybook.artStyle}</span>
                             <i class="fas fa-file-alt ml-2 md:ml-4 mr-1 md:mr-2"></i>${storybook.pages.length}페이지
                         </p>
+                        <!-- 아트 스타일 편집 -->
+                        <div class="mt-3">
+                            <label class="inline-block text-sm font-semibold text-gray-700 mr-2">
+                                <i class="fas fa-palette mr-1"></i>아트 스타일:
+                            </label>
+                            <textarea 
+                                id="artstyle-edit"
+                                onblur="updateArtStyle(this.value)"
+                                class="w-full px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-800 text-sm resize-none"
+                                rows="3"
+                                placeholder="아트 스타일을 입력하세요..."
+                            >${storybook.artStyle || ''}</textarea>
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                이미지 생성 시 사용될 아트 스타일입니다. 수정 후 포커스를 벗어나면 자동 저장됩니다.
+                            </p>
+                        </div>
                         <!-- 카테고리 선택 -->
                         <div class="mt-3">
                             <label class="inline-block text-sm font-semibold text-gray-700 mr-2">

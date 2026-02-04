@@ -5780,6 +5780,27 @@ function updateStorybookCategory(category) {
     showNotification('success', '카테고리 저장 완료', `"${category || '미지정'}"로 설정되었습니다.`);
 }
 
+/**
+ * 아트 스타일 업데이트
+ */
+function updateArtStyle(artStyle) {
+    if (!currentStorybook) {
+        console.error('❌ 동화책이 선택되지 않았습니다.');
+        return;
+    }
+    
+    console.log(`🎨 아트 스타일 업데이트:`, artStyle);
+    
+    // 아트 스타일 저장
+    currentStorybook.artStyle = artStyle;
+    
+    // R2에 자동 저장
+    saveCurrentStorybook();
+    
+    // 성공 알림
+    showNotification('success', '아트 스타일 저장 완료', '이미지 생성 시 새로운 스타일이 적용됩니다.');
+}
+
 // 📚 검색 및 필터 기능
 let currentCategoryFilter = '';  // 현재 선택된 카테고리
 let currentSearchText = '';      // 현재 검색어
@@ -6605,6 +6626,7 @@ function downloadPageTTS(pageIndex) {
     
     // 기타 함수 전역 노출
     window.updateStorybookCategory = updateStorybookCategory;
+    window.updateArtStyle = updateArtStyle;
     window.updateTTSModelDescription = updateTTSModelDescription;
     window.checkStorybookStatus = checkStorybookStatus;
     
