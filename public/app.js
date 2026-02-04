@@ -4577,12 +4577,22 @@ async function generateSingleKeyObjectImage(objIndex) {
 }
 
 // 모든 Key Object 이미지 생성
+// Key Object 이미지 생성 중 플래그
+let isGeneratingKeyObjectImages = false;
+
 /**
  * 모든 Key Object 이미지 병렬 생성 (간소화 버전)
  */
 async function generateAllKeyObjectImages() {
     console.log('🎯 generateAllKeyObjectImages 호출됨');
     console.log('📖 currentStorybook:', currentStorybook?.title);
+    
+    // 중복 실행 방지
+    if (isGeneratingKeyObjectImages) {
+        console.warn('⚠️ 이미 Key Object 이미지 생성 중입니다. 중복 실행 방지.');
+        alert('이미 이미지 생성 중입니다. 잠시만 기다려주세요.');
+        return;
+    }
     
     const keyObjects = currentStorybook?.key_objects;
     
@@ -4606,6 +4616,9 @@ async function generateAllKeyObjectImages() {
     }
     
     console.log(`🎨 ${keyObjects.length}개 Key Object 이미지 병렬 생성 시작...`);
+    
+    // 생성 시작 - 플래그 설정
+    isGeneratingKeyObjectImages = true;
     
     // keyObjectImages 배열 초기화
     currentStorybook.keyObjectImages = currentStorybook.keyObjectImages || new Array(keyObjects.length);
@@ -4631,6 +4644,10 @@ async function generateAllKeyObjectImages() {
         console.error('❌ Key Object 이미지 생성 실패:', error);
         console.error('❌ Error stack:', error.stack);
         alert(`이미지 생성에 실패했습니다.\n\n오류: ${error.message}\n\n개별적으로 다시 시도해주세요.`);
+    } finally {
+        // 생성 완료 - 플래그 해제
+        isGeneratingKeyObjectImages = false;
+        console.log('🏁 Key Object 이미지 생성 프로세스 종료');
     }
 }
 
