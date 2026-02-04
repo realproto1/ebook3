@@ -2419,6 +2419,56 @@ function selectCharacterImageFromHistory(charIndex, historyIndex) {
     showNotification('✅ 이미지가 변경되었습니다.', 'success');
 }
 
+/**
+ * Key Object 이미지 히스토리에서 선택
+ */
+function selectKeyObjectImageFromHistory(objIndex, historyIndex) {
+    const keyObject = currentStorybook.key_objects[objIndex];
+    
+    if (!keyObject || !keyObject.imageHistory || !currentStorybook.keyObjectImages) {
+        return;
+    }
+    
+    const selectedImage = keyObject.imageHistory[historyIndex];
+    const currentImage = currentStorybook.keyObjectImages[objIndex];
+    
+    // 현재 이미지를 히스토리에 추가
+    keyObject.imageHistory.splice(historyIndex, 1); // 선택된 항목 제거
+    keyObject.imageHistory.unshift(currentImage); // 현재 이미지를 맨 앞에 추가
+    
+    // 선택한 이미지를 현재 이미지로 설정
+    currentStorybook.keyObjectImages[objIndex] = selectedImage;
+    
+    saveCurrentStorybook();
+    displayStorybook(currentStorybook);
+    
+    showNotification('✅ Key Object 이미지가 변경되었습니다.', 'success');
+}
+
+/**
+ * 표지 이미지 히스토리에서 선택
+ */
+function selectCoverFromHistory(historyIndex) {
+    if (!currentStorybook.coverHistory || !currentStorybook.coverImage) {
+        return;
+    }
+    
+    const selectedImage = currentStorybook.coverHistory[historyIndex];
+    const currentImage = currentStorybook.coverImage;
+    
+    // 현재 이미지를 히스토리에 추가
+    currentStorybook.coverHistory.splice(historyIndex, 1); // 선택된 항목 제거
+    currentStorybook.coverHistory.unshift(currentImage); // 현재 이미지를 맨 앞에 추가
+    
+    // 선택한 이미지를 현재 이미지로 설정
+    currentStorybook.coverImage = selectedImage;
+    
+    saveCurrentStorybook();
+    displayStorybook(currentStorybook);
+    
+    showNotification('✅ 표지 이미지가 변경되었습니다.', 'success');
+}
+
 // 병렬/순차 생성 모드 설명 표시
 function showGenerationModeHelp(mode) {
     const helpContent = mode === 'parallel' ? `

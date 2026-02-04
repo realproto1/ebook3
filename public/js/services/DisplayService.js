@@ -518,7 +518,25 @@ class DisplayService {
                         </div>
                         <div id="keyobj-img-${idx}" class="bg-white rounded-lg overflow-hidden mb-2 min-h-[120px]">
                             ${objImg ? `
-                                <img src="${objImg}" alt="${obj.name}" class="w-full h-32 object-contain bg-gray-50" />
+                                <div class="flex gap-2">
+                                    <div class="flex-1 relative">
+                                        <img src="${objImg}" alt="${obj.name}" class="w-full h-32 object-contain bg-gray-50" />
+                                    </div>
+                                    ${(obj.imageHistory && obj.imageHistory.length > 0) ? `
+                                        <div class="w-16 overflow-y-auto space-y-1 p-1 bg-gray-100">
+                                            ${obj.imageHistory.map((url, histIdx) => `
+                                                <div class="relative group cursor-pointer border-2 border-transparent hover:border-orange-400 rounded transition" 
+                                                     onclick="selectKeyObjectImageFromHistory(${idx}, ${histIdx})" 
+                                                     title="이전 버전 ${histIdx + 1}">
+                                                    <img src="${url}" alt="이전 ${histIdx + 1}" class="w-full h-12 object-contain bg-white rounded"/>
+                                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition rounded flex items-center justify-center">
+                                                        <i class="fas fa-check text-orange-500 opacity-0 group-hover:opacity-100 transition text-xs"></i>
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
                             ` : `
                                 <div class="flex items-center justify-center h-32 bg-gray-50">
                                     <i class="fas fa-image text-3xl text-gray-300"></i>

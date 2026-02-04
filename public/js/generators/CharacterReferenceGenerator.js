@@ -178,54 +178,12 @@ class CharacterReferenceGenerator extends BaseGenerator {
     }
 
     /**
-     * 캐릭터 이미지 렌더링
+     * 캐릭터 이미지 렌더링 - updateDisplay로 전체 UI 업데이트
      */
     _renderCharacterImage(charIndex) {
-        const character = this.storybook.characters[charIndex];
-        const refDiv = document.getElementById(`char-ref-${charIndex}`);
-        
-        if (!refDiv) return;
-
-        if (!character.referenceImage) {
-            refDiv.innerHTML = '<p class="text-white text-xs md:text-sm text-center p-4">이미지 생성 대기중</p>';
-            return;
-        }
-
-        const history = character.imageHistory || [];
-        
-        let html = `
-            <div class="flex gap-2 h-full">
-                <!-- 메인 이미지 -->
-                <div class="flex-1 relative group">
-                    <img src="${character.referenceImage}" alt="${character.name}" class="w-full h-full object-cover rounded-lg"/>
-                    <button 
-                        onclick="downloadImage('${character.referenceImage}', '캐릭터_${character.name}.png')"
-                        class="absolute top-2 right-2 bg-white bg-opacity-90 text-purple-600 w-10 h-10 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center"
-                        title="다운로드"
-                    >
-                        <i class="fas fa-download"></i>
-                    </button>
-                </div>
-        `;
-        
-        if (history.length > 0) {
-            html += `
-                <!-- 히스토리 -->
-                <div class="w-20 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-purple-400 scrollbar-track-purple-100">
-                    ${history.map((url, idx) => `
-                        <div class="relative group cursor-pointer border-2 border-transparent hover:border-purple-400 rounded transition" onclick="selectCharacterImageFromHistory(${charIndex}, ${idx})">
-                            <img src="${url}" alt="이전 ${idx + 1}" class="w-full h-16 object-cover rounded"/>
-                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition rounded flex items-center justify-center">
-                                <i class="fas fa-check text-white opacity-0 group-hover:opacity-100 transition"></i>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-        
-        html += `</div>`;
-        refDiv.innerHTML = html;
+        // updateDisplay()를 호출하면 DisplayService가 전체 UI를 다시 렌더링
+        // character.referenceImage가 이미 저장되어 있으므로 자동으로 표시됨
+        this.updateDisplay();
     }
 
     /**

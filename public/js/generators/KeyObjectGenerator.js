@@ -173,12 +173,26 @@ class KeyObjectGenerator extends BaseGenerator {
     }
 
     /**
-     * 결과 저장
+     * 결과 저장 (히스토리 포함)
      */
     async _saveResult(objIndex, result) {
+        const keyObject = this.storybook.key_objects[objIndex];
+        
         // keyObjectImages 배열 초기화
         if (!this.storybook.keyObjectImages) {
             this.storybook.keyObjectImages = [];
+        }
+
+        // 히스토리 관리
+        const currentImage = this.storybook.keyObjectImages[objIndex];
+        if (currentImage) {
+            if (!keyObject.imageHistory) {
+                keyObject.imageHistory = [];
+            }
+            keyObject.imageHistory = this.manageHistory(
+                keyObject.imageHistory,
+                currentImage
+            );
         }
 
         // 이미지 저장
@@ -189,29 +203,12 @@ class KeyObjectGenerator extends BaseGenerator {
     }
 
     /**
-     * Key Object 이미지 렌더링
+     * Key Object 이미지 렌더링 - updateDisplay로 전체 UI 업데이트
      */
     _renderKeyObjectImage(objIndex, imageUrl) {
-        const imgDiv = document.getElementById(`keyobj-img-${objIndex}`);
-        
-        if (!imgDiv) return;
-
-        const keyObject = this.storybook.key_objects[objIndex];
-        
-        imgDiv.innerHTML = `
-            <div class="relative group h-full">
-                <img src="${imageUrl}" 
-                     alt="${keyObject.name}" 
-                     class="w-full h-full object-cover rounded-lg"/>
-                <button 
-                    onclick="downloadImage('${imageUrl}', 'KeyObject_${keyObject.name}.png')"
-                    class="absolute top-2 right-2 bg-white bg-opacity-90 text-purple-600 w-8 h-8 rounded-full hover:bg-opacity-100 transition shadow-lg opacity-0 group-hover:opacity-100 flex items-center justify-center text-sm"
-                    title="다운로드"
-                >
-                    <i class="fas fa-download"></i>
-                </button>
-            </div>
-        `;
+        // updateDisplay()를 호출하면 DisplayService가 전체 UI를 다시 렌더링
+        // keyObjectImages[objIndex]가 이미 저장되어 있으므로 자동으로 표시됨
+        this.updateDisplay();
     }
 
     /**
