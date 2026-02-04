@@ -211,18 +211,13 @@ class StorybookManager {
             return null; // 취소
         }
         
-        const newArtStyle = prompt('새로운 그림 스타일을 입력하세요:', book.artStyle || '디즈니 스타일');
-        if (!newArtStyle) {
-            return null; // 취소
-        }
-        
         // 깊은 복사
         const duplicate = JSON.parse(JSON.stringify(book));
         
         // 새 ID 생성
         duplicate.id = Date.now().toString();
         duplicate.title = newTitle;
-        duplicate.artStyle = newArtStyle;
+        // artStyle은 기존 것 유지
         
         // 🔥 이미지 제거 (텍스트는 유지)
         
