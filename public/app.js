@@ -6483,6 +6483,7 @@ function downloadPageTTS(pageIndex) {
     // window.createNewStorybook = createNewStorybook;  // ❌ 함수 정의 없음
     window.generateStorybook = generateStorybook;
     window.generateCoverImage = generateCoverImage;
+    window.toggleCoverCharacterRef = toggleCoverCharacterRef;
     // window.regenerateCoverImage = regenerateCoverImage;  // ❌ 함수 정의 없음
     window.generateCharacterReference = generateCharacterReference;
     window.generateAllCharacterReferences = generateAllCharacterReferences;
