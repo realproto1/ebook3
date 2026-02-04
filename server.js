@@ -964,7 +964,7 @@ ${pagesText}
 // 2. 캐릭터 레퍼런스 이미지 생성
 app.post('/api/generate-character-image', requireAPIKey, async (req, res) => {
   try {
-    const { character, artStyle, settings = {}, storybookId = '', storybookTitle = '' } = req.body;
+    const { character, artStyle, referenceImages = [], settings = {}, storybookId = '', storybookTitle = '' } = req.body;
     
     // 설정값 기본값
     const aspectRatio = settings.aspectRatio || '16:9';
@@ -973,6 +973,7 @@ app.post('/api/generate-character-image', requireAPIKey, async (req, res) => {
     const modelName = settings.characterModel || 'gemini-3-pro-image-preview';  // 캐릭터 이미지 생성 모델
     
     console.log('🤖 Character model:', modelName);
+    console.log('📸 Reference images:', referenceImages.length, '개');
     
     // character.description을 영어로 번역 (한글인 경우)
     let characterDescriptionEn = character.description;
@@ -1016,6 +1017,15 @@ app.post('/api/generate-character-image', requireAPIKey, async (req, res) => {
       '\n\n**CRITICAL - NO TEXT:** Do NOT include ANY text, labels, words, letters, captions, titles, or character names in the image. Absolutely NO TEXT of any kind. Pure illustration only.' : 
       '\n\n**IMPORTANT:** Do NOT include any text, labels, words, or letters in the image. No text overlays, no character names, no captions. Pure illustration only.';
     
+    // 참조 이미지 안내
+    const referencePrompt = referenceImages.length > 0 ? 
+      `\n\n**🔍 REFERENCE IMAGE PROVIDED:**
+A reference image is attached showing the current appearance of this character.
+- **IMPORTANT:** Use this reference image to maintain visual consistency
+- Keep the same overall look, proportions, and key features as shown in the reference
+- Apply the art style specified above while preserving the character's identity from the reference
+- The reference shows the character you should recreate in the specified art style` : '';
+    
     const prompt = `Create a professional character design reference sheet for a children's storybook character. 
 
 **🎨 CRITICAL - ART STYLE (HIGHEST PRIORITY):**
@@ -1046,14 +1056,15 @@ ${character.age ? `**Character Age:** ${character.age}` : ''}
 **Quality:** Follow the art style specifications at the top with ABSOLUTE PRECISION. The character should have a warm, friendly, and appealing appearance suitable for young children aged 4-8 years. Every visual aspect must match the specified art style perfectly.
 
 **Composition:** Arrange all views in a single cohesive character sheet layout that clearly shows the character's design from different angles. Apply the art style consistently across all views.
+${referencePrompt}
 ${noTextPrompt}
 ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''}
 
 🚨 FINAL REMINDER: The art style at the top of this prompt is MANDATORY and NON-NEGOTIABLE. Follow it EXACTLY.`;
     
-    console.log('🎨 Generating character image with settings:', { modelName, aspectRatio, enforceNoText });
+    console.log('🎨 Generating character image with settings:', { modelName, aspectRatio, enforceNoText, hasReference: referenceImages.length > 0 });
 
-    const imageUrl = await generateImage(prompt, [], 0, 3, modelName);
+    const imageUrl = await generateImage(prompt, referenceImages, 0, 3, modelName);
     
     // R2에 업로드 - 통일된 파일명 규칙
     const timestamp = Date.now();

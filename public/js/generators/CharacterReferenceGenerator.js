@@ -47,13 +47,21 @@ class CharacterReferenceGenerator extends BaseGenerator {
                 age: character.age
             };
             
+            // 현재 선택된 이미지를 참조 이미지로 추가
+            const referenceImages = [];
+            if (character.referenceImage) {
+                referenceImages.push(character.referenceImage);
+                console.log(`📸 현재 캐릭터 이미지를 참조로 사용: ${character.referenceImage}`);
+            }
+            
             // API 호출
             const result = await this.imageService.generateCharacter(characterData, {
                 model: this.imageSettings.illustrationModel || 'gemini-3-pro-image-preview',
                 aspectRatio: '16:9',
                 artStyle: this.storybook.artStyle,
                 storybookId: this.storybook.id,
-                storybookTitle: this.storybook.title
+                storybookTitle: this.storybook.title,
+                referenceImages: referenceImages  // 현재 이미지 참조
             });
 
             if (!result || !result.success || !result.imageUrl) {

@@ -83,6 +83,7 @@ class ImageService {
             artStyle = '디즈니 스타일',
             storybookId = null,
             storybookTitle = null,
+            referenceImages = [],  // 참조 이미지 추가
             onStart = null,
             onProgress = null,
             onComplete = null,
@@ -103,6 +104,7 @@ class ImageService {
                     age: character.age
                 },
                 artStyle,
+                referenceImages,  // 참조 이미지 전달
                 settings: {
                     aspectRatio,
                     enforceNoText: true,
