@@ -2877,7 +2877,7 @@ Return ONLY valid JSON, no additional text.`;
 
     console.log('📋 Gemini 요청 프롬프트 길이:', prompt.length);
 
-    const geminiUrl = \`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=\${GEMINI_API_KEY}\`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
     const geminiResponse = await fetch(geminiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2893,7 +2893,7 @@ Return ONLY valid JSON, no additional text.`;
     });
 
     if (!geminiResponse.ok) {
-      throw new Error(\`Gemini API 오류: \${geminiResponse.status}\`);
+      throw new Error(`Gemini API 오류: ${geminiResponse.status}`);
     }
 
     const geminiData = await geminiResponse.json();
@@ -2926,7 +2926,7 @@ Return ONLY valid JSON, no additional text.`;
       throw new Error('생성된 Key Objects가 없습니다.');
     }
 
-    console.log(\`✅ Key Objects 생성 완료: \${keyObjects.length}개\`);
+    console.log(`✅ Key Objects 생성 완료: \${keyObjects.length}개`);
 
     res.json({
       success: true,
