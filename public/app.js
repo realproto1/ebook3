@@ -6350,6 +6350,7 @@ function downloadPageTTS(pageIndex) {
     window.showGenerationModeHelp = showGenerationModeHelp;
     window.selectStorybook = selectStorybook;
     window.deleteStorybook = deleteStorybook;
+    window.updateBookTitleInList = updateBookTitleInList;
     window.duplicateStorybook = duplicateStorybook;
     // window.createNewStorybook = createNewStorybook;  // ❌ 함수 정의 없음
     window.generateStorybook = generateStorybook;
