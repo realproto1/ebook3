@@ -458,7 +458,8 @@ class DisplayService {
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 ${storybook.key_objects.map((obj, idx) => {
                     const objImgData = storybook.keyObjectImages && storybook.keyObjectImages[idx];
-                    const objImg = objImgData?.imageUrl || null;
+                    // objImgData는 문자열(URL) 또는 객체 { imageUrl: ... } 모두 지원
+                    const objImg = typeof objImgData === 'string' ? objImgData : (objImgData?.imageUrl || null);
                     const sizeIcon = obj.size === 'small' ? 'fa-hand-holding' : obj.size === 'large' ? 'fa-building' : 'fa-box';
                     const sizeColor = obj.size === 'small' ? 'text-blue-600' : obj.size === 'large' ? 'text-red-600' : 'text-yellow-600';
                     return `
