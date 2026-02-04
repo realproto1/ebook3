@@ -331,10 +331,17 @@ function updateVocabularyModel(value) {
 }
 
 // 표지 이미지 모델 변경
+// ===== 표지 관련 함수들 (CoverGenerator로 위임) =====
+
 function updateCoverModel(value) {
-    imageSettings.coverModel = value;
-    saveImageSettings();
-    console.log('✅ 표지 이미지 모델 변경:', value);
+    if (window.coverGenerator) {
+        window.coverGenerator.updateModel(value);
+    } else {
+        // 폴백: 직접 설정 저장
+        imageSettings.coverModel = value;
+        saveImageSettings();
+        console.log('✅ 표지 이미지 모델 변경:', value);
+    }
 }
 
 // TTS 모델 선택 HTML 생성 (설명 포함)
@@ -490,24 +497,32 @@ async function generatePageTTS(pageIndex) {
     }
 }
 
-// 표지 관련 함수들 (CoverService 래퍼)
+// 표지 관련 함수들 (CoverGenerator로 위임)
 function buildCoverPrompt(storybook) {
-    return coverService.buildCoverPrompt(storybook);
+    return CoverGenerator.buildCoverPrompt(storybook);
 }
 
 function resetCoverPrompt() {
-    if (!currentStorybook) return;
-    const promptTextarea = document.getElementById('cover-prompt');
-    if (promptTextarea) {
-        promptTextarea.value = buildCoverPrompt(currentStorybook);
-        currentStorybook.coverPrompt = promptTextarea.value;
-        saveCurrentStorybook();
+    if (window.coverGenerator) {
+        window.coverGenerator.resetPrompt();
+    } else if (currentStorybook) {
+        // 폴백: 직접 처리
+        const promptTextarea = document.getElementById('cover-prompt');
+        if (promptTextarea) {
+            promptTextarea.value = CoverGenerator.buildCoverPrompt(currentStorybook);
+            currentStorybook.coverPrompt = promptTextarea.value;
+            saveCurrentStorybook();
+        }
     }
 }
 
 function toggleCoverCharacterRef(charIndex, checked) {
-    if (!currentStorybook) return;
-    coverService.toggleCoverCharacterRef(currentStorybook, charIndex, checked, saveCurrentStorybook);
+    if (window.coverGenerator) {
+        window.coverGenerator.toggleCharacterRef(charIndex, checked);
+    } else {
+        // 폴백: CoverService 사용
+        coverService.toggleCoverCharacterRef(currentStorybook, charIndex, checked, saveCurrentStorybook);
+    }
 }
 
 function openCoverUploadModal() {
@@ -530,19 +545,30 @@ async function uploadCover() {
  * 표지 이미지 생성 (CoverGenerator 사용)
  */
 async function generateCoverImage() {
-    const generator = new CoverGenerator({
+    // 글로벌 CoverGenerator 인스턴스 생성 및 저장
+    window.coverGenerator = new CoverGenerator({
         storybook: currentStorybook,
         imageService: imageService || window.imageService,
         imageSettings: imageSettings,
         saveCallback: saveCurrentStorybook,
-        updateCallback: updateCoverImageDisplay
+        updateCallback: () => displayStorybook(currentStorybook)
     });
 
-    return await generator.generate();
+    return await window.coverGenerator.generate();
 }
 
 function selectCoverImageFromHistory(historyIndex) {
-    coverService.selectCoverImageFromHistory(currentStorybook, historyIndex, saveCurrentStorybook, updateCoverImageDisplay);
+    if (window.coverGenerator) {
+        window.coverGenerator.selectFromHistory(historyIndex);
+    } else {
+        // 폴백: CoverService 사용
+        coverService.selectCoverImageFromHistory(currentStorybook, historyIndex, saveCurrentStorybook, updateCoverImageDisplay);
+    }
+}
+
+function selectCoverFromHistory(historyIndex) {
+    // selectCoverImageFromHistory와 동일한 함수 (호환성)
+    selectCoverImageFromHistory(historyIndex);
 }
 
 function updateCoverImageDisplay() {

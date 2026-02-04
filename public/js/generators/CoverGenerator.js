@@ -163,6 +163,106 @@ class CoverGenerator extends BaseGenerator {
         }
         return error.message || '표지 이미지 생성 실패';
     }
+
+    /**
+     * 표지 프롬프트 빌드 (기본 프롬프트 생성)
+     */
+    static buildCoverPrompt(storybook) {
+        if (!storybook) return '';
+        
+        return `"${storybook.title}" 동화책 표지를 만들어주세요.
+
+**중요 사항:**
+- 텍스트는 전혀 포함하지 마세요 (제목, 글자, 단어 등 없음)
+- 화면에 꽉 찬 일러스트로 그려주세요
+
+**장르:** ${storybook.genre || '어린이 동화'}
+
+**아트 스타일:** ${storybook.artStyle || '디즈니 스타일'}
+
+${storybook.summary ? `**줄거리:** ${storybook.summary}` : ''}`;
+    }
+
+    /**
+     * 표지 프롬프트 초기화
+     */
+    resetPrompt() {
+        if (!this.storybook) return;
+        
+        const promptTextarea = document.getElementById('cover-prompt');
+        if (promptTextarea) {
+            promptTextarea.value = CoverGenerator.buildCoverPrompt(this.storybook);
+            this.storybook.coverPrompt = promptTextarea.value;
+            this.saveStorybook();
+        }
+    }
+
+    /**
+     * 캐릭터 레퍼런스 체크박스 토글
+     */
+    toggleCharacterRef(charIndex, checked) {
+        if (!this.storybook) return;
+        
+        if (!this.storybook.coverCharacterRefs) {
+            this.storybook.coverCharacterRefs = [];
+        }
+        
+        if (checked) {
+            if (!this.storybook.coverCharacterRefs.includes(charIndex)) {
+                this.storybook.coverCharacterRefs.push(charIndex);
+            }
+        } else {
+            this.storybook.coverCharacterRefs = this.storybook.coverCharacterRefs.filter(i => i !== charIndex);
+        }
+        
+        this.saveStorybook();
+        console.log('✅ 표지 캐릭터 참조 업데이트:', this.storybook.coverCharacterRefs);
+    }
+
+    /**
+     * 히스토리에서 표지 선택
+     */
+    selectFromHistory(historyIndex) {
+        if (!this.storybook || !this.storybook.coverHistory) return;
+        
+        const history = this.storybook.coverHistory;
+        if (historyIndex < 0 || historyIndex >= history.length) return;
+        
+        // 현재 표지를 히스토리 맨 앞에 추가
+        const currentCover = this.storybook.coverImage;
+        const selectedCover = history[historyIndex];
+        
+        // 선택한 이미지를 히스토리에서 제거
+        history.splice(historyIndex, 1);
+        
+        // 현재 표지를 히스토리 맨 앞에 추가
+        if (currentCover) {
+            history.unshift(currentCover);
+        }
+        
+        // 선택한 이미지를 현재 표지로 설정
+        this.storybook.coverImage = selectedCover;
+        this.storybook.coverHistory = history;
+        
+        this.saveStorybook();
+        this.updateDisplay();
+        
+        this.showSuccess('✅ 표지가 변경되었습니다.');
+    }
+
+    /**
+     * 모델 변경
+     */
+    updateModel(value) {
+        if (this.imageSettings) {
+            this.imageSettings.coverModel = value;
+            // SettingsService를 통해 저장
+            if (window.settingsService) {
+                window.settingsService.saveSettings(this.imageSettings);
+            }
+            console.log('✅ 표지 이미지 모델 변경:', value);
+        }
+    }
 }
 
 // Export
