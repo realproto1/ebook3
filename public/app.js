@@ -5833,6 +5833,7 @@ function downloadPageTTS(pageIndex) {
     window.downloadIllustration = downloadIllustration;
     window.downloadPageTTS = downloadPageTTS;
     window.updatePageIllustrationPrompt = updatePageIllustrationPrompt;
+    window.updatePageText = updatePageText;
     window.openBatchIllustrationUpload = openBatchIllustrationUpload;
     window.openBatchTTSUpload = openBatchTTSUpload;
     window.togglePageCharacterRef = togglePageCharacterRef;
@@ -5857,6 +5858,7 @@ function downloadPageTTS(pageIndex) {
     window.createModelSelect = createModelSelect;
     window.updateCharacterModel = updateCharacterModel;
     window.updateKeyObjectModel = updateKeyObjectModel;
+    window.updateKeyObjectField = updateKeyObjectField;
     window.updateIllustrationModel = updateIllustrationModel;
     window.updateVocabularyModel = updateVocabularyModel;
     window.updateCoverModel = updateCoverModel;
