@@ -3696,6 +3696,40 @@ app.get('/api/viewer/storybooks/:id', async (req, res) => {
   }
 });
 
+// ===== R2 파일 다운로드 프록시 (CORS 우회) =====
+app.get('/api/download-audio/:filename', async (req, res) => {
+  try {
+    const { filename } = req.params;
+    
+    console.log(`📥 오디오 다운로드 요청: ${filename}`);
+    
+    // R2에서 파일 가져오기
+    const getCommand = new GetObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: filename
+    });
+    
+    const r2Response = await r2Client.send(getCommand);
+    
+    // Content-Disposition 헤더 설정 (강제 다운로드)
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
+    res.setHeader('Content-Type', r2Response.ContentType || 'audio/wav');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    // 스트림 전달
+    r2Response.Body.pipe(res);
+    
+    console.log(`✅ 오디오 다운로드 시작: ${filename}`);
+    
+  } catch (error) {
+    console.error('❌ 오디오 다운로드 실패:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: '파일 다운로드 실패: ' + error.message 
+    });
+  }
+});
+
 // ===== 5️⃣ 댓글 API =====
 
 // 댓글 목록 조회 (인증 불필요)

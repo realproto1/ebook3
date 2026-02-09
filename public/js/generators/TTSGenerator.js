@@ -344,6 +344,7 @@ class TTSGenerator extends BaseGenerator {
      * 오디오 플레이어 실시간 업데이트
      */
     _updateAudioPlayer(pageIndex, audioUrl) {
+        // pageIndex는 배열 인덱스 (0부터), HTML ID는 pageIndex를 그대로 사용
         const player = document.getElementById(`tts-player-${pageIndex}`);
         if (player) {
             // 기존 플레이어의 src 업데이트
@@ -355,14 +356,14 @@ class TTSGenerator extends BaseGenerator {
             }
         } else {
             // 플레이어가 없으면 새로 생성
-            const container = document.querySelector(`#page-${pageIndex} .tts-section`);
-            if (container) {
-                container.innerHTML = `
-                    <audio id="tts-player-${pageIndex}" controls class="w-full" style="height: 32px;">
-                        <source src="${audioUrl}" type="audio/wav">
-                    </audio>
-                `;
-                console.log(`✨ 페이지 ${pageIndex} 오디오 플레이어 생성: ${audioUrl}`);
+            const page = this.storybook.pages[pageIndex];
+            const pageNum = page?.pageNumber || pageIndex + 1;
+            console.log(`⚠️ 플레이어 없음 (ID: tts-player-${pageIndex}). 페이지 재렌더링 필요 (페이지번호: ${pageNum})`);
+            
+            // DisplayService를 통해 페이지 전체 재렌더링
+            if (window.displayService && this.storybook) {
+                window.displayStorybook(this.storybook);
+                console.log(`✨ 동화책 전체 재렌더링 완료`);
             }
         }
     }
