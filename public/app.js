@@ -5705,8 +5705,17 @@ function downloadVideoFromUrl() {
         return;
     }
     
-    // 새 탭에서 열기 (브라우저가 자동으로 다운로드 처리)
-    window.open(url, '_blank');
+    // 파일명 추출 (URL에서 마지막 부분)
+    const filename = url.split('/').pop() || 'video.mp4';
+    
+    // a 태그를 만들어서 다운로드
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
 
 // 배경음악 삭제
