@@ -5621,22 +5621,14 @@ async function generateVideo() {
         });
         
         if (response.success) {
-            // 성공 알림 - 다운로드 링크 표시
-            const message = `✅ 동영상 생성 완료!\n\n다운로드 링크가 클립보드에 복사되었습니다.\n\n${response.videoUrl}`;
+            // 동영상 생성 완료 - 결과 모달 표시
+            console.log('✅ 동영상 생성 완료:', response.videoUrl);
             
-            // 클립보드에 URL 복사
-            try {
-                await navigator.clipboard.writeText(response.videoUrl);
-                console.log('📋 URL 클립보드 복사 완료');
-            } catch (err) {
-                console.warn('⚠️ 클립보드 복사 실패:', err);
-            }
-            
-            // 알림창에 다운로드 링크 표시
-            alert(message);
-            
-            // 모달 닫기
+            // 생성 모달 닫기
             closeVideoGenerationModal();
+            
+            // 결과 모달 열기
+            openVideoResultModal(response.videoUrl);
         } else {
             throw new Error(response.message || '동영상 생성 실패');
         }
@@ -5648,6 +5640,73 @@ async function generateVideo() {
         btn.disabled = false;
         btn.innerHTML = originalText;
     }
+}
+
+/**
+ * 동영상 결과 모달 열기
+ */
+function openVideoResultModal(videoUrl) {
+    // URL 저장
+    window.currentVideoUrl = videoUrl;
+    
+    // URL 표시
+    document.getElementById('videoResultUrl').textContent = videoUrl;
+    
+    // 모달 표시
+    const modal = document.getElementById('videoResultModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+/**
+ * 동영상 결과 모달 닫기
+ */
+function closeVideoResultModal() {
+    const modal = document.getElementById('videoResultModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    
+    // URL 초기화
+    window.currentVideoUrl = null;
+}
+
+/**
+ * 동영상 URL 복사
+ */
+async function copyVideoUrl() {
+    const url = window.currentVideoUrl;
+    if (!url) {
+        alert('복사할 URL이 없습니다.');
+        return;
+    }
+    
+    try {
+        await navigator.clipboard.writeText(url);
+        alert('✅ URL이 클립보드에 복사되었습니다!');
+    } catch (err) {
+        console.error('❌ 클립보드 복사 실패:', err);
+        // 폴백: 텍스트 선택
+        const urlEl = document.getElementById('videoResultUrl');
+        const range = document.createRange();
+        range.selectNode(urlEl);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        alert('⚠️ 자동 복사에 실패했습니다. URL을 선택했으니 Ctrl+C로 복사해주세요.');
+    }
+}
+
+/**
+ * 동영상 다운로드
+ */
+function downloadVideoFromUrl() {
+    const url = window.currentVideoUrl;
+    if (!url) {
+        alert('다운로드할 URL이 없습니다.');
+        return;
+    }
+    
+    // 새 탭에서 열기 (브라우저가 자동으로 다운로드 처리)
+    window.open(url, '_blank');
 }
 
 // 배경음악 삭제
@@ -5962,6 +6021,10 @@ function downloadPageTTS(pageIndex) {
     window.openVideoGenerationModal = openVideoGenerationModal;
     window.closeVideoGenerationModal = closeVideoGenerationModal;
     window.generateVideo = generateVideo;
+    window.openVideoResultModal = openVideoResultModal;
+    window.closeVideoResultModal = closeVideoResultModal;
+    window.copyVideoUrl = copyVideoUrl;
+    window.downloadVideoFromUrl = downloadVideoFromUrl;
     
     // 기타 함수 전역 노출
     window.updateStorybookCategory = updateStorybookCategory;
