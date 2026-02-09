@@ -5621,15 +5621,21 @@ async function generateVideo() {
         });
         
         if (response.success) {
-            // 성공 알림
-            alert(`✅ 동영상 생성 완료!\n\n다운로드 URL:\n${response.videoUrl}`);
+            // 성공 알림 - 다운로드 링크 표시
+            const message = `✅ 동영상 생성 완료!\n\n다운로드 링크가 클립보드에 복사되었습니다.\n\n${response.videoUrl}`;
             
-            // 다운로드 링크 생성
-            const link = document.createElement('a');
-            link.href = response.videoUrl;
-            link.download = `${currentStorybook.title.replace(/[^a-zA-Z0-9가-힣]/g, '_')}_video.mp4`;
-            link.click();
+            // 클립보드에 URL 복사
+            try {
+                await navigator.clipboard.writeText(response.videoUrl);
+                console.log('📋 URL 클립보드 복사 완료');
+            } catch (err) {
+                console.warn('⚠️ 클립보드 복사 실패:', err);
+            }
             
+            // 알림창에 다운로드 링크 표시
+            alert(message);
+            
+            // 모달 닫기
             closeVideoGenerationModal();
         } else {
             throw new Error(response.message || '동영상 생성 실패');

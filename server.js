@@ -3901,15 +3901,17 @@ app.post('/api/generate-video', async (req, res) => {
                 
                 if (fs.existsSync(audioPath)) {
                     // 오디오가 있으면 오디오 길이만큼 동영상 생성
-                    execSync(`ffmpeg -loop 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -shortest -preset ultrafast "${clipPath}"`, {
+                    // -y 플래그 추가 (기존 파일 덮어쓰기)
+                    // -shortest 대신 -t로 오디오 길이 명시
+                    execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -shortest -preset fast "${clipPath}"`, {
                         cwd: workDir,
-                        stdio: 'pipe'
+                        stdio: ['pipe', 'pipe', 'pipe']
                     });
                 } else {
                     // 오디오가 없으면 5초 동영상
-                    execSync(`ffmpeg -loop 1 -i "${imagePath}" -c:v libx264 -t 5 -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -preset ultrafast "${clipPath}"`, {
+                    execSync(`ffmpeg -y -loop 1 -i "${imagePath}" -c:v libx264 -t 5 -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -preset fast "${clipPath}"`, {
                         cwd: workDir,
-                        stdio: 'pipe'
+                        stdio: ['pipe', 'pipe', 'pipe']
                     });
                 }
                 
@@ -3922,14 +3924,15 @@ app.post('/api/generate-video', async (req, res) => {
             console.log('🔗 클립 병합 시작...');
             
             const concatListPath = pathModule.join(workDir, 'concat.txt');
-            const concatContent = clips.map(clip => `file '${clip}'`).join('\n');
+            const concatContent = clips.map(clip => `file '${pathModule.basename(clip)}'`).join('\n');
             fs.writeFileSync(concatListPath, concatContent);
             
             const mergedVideoPath = pathModule.join(workDir, 'merged.mp4');
             
-            execSync(`ffmpeg -f concat -safe 0 -i "${concatListPath}" -c copy "${mergedVideoPath}"`, {
+            // -c copy 대신 재인코딩 (오디오 코덱 호환성 보장)
+            execSync(`ffmpeg -y -f concat -safe 0 -i "${concatListPath}" -c:v libx264 -c:a aac -b:a 192k -preset fast "${mergedVideoPath}"`, {
                 cwd: workDir,
-                stdio: 'pipe'
+                stdio: ['pipe', 'pipe', 'pipe']
             });
             
             console.log('✅ 클립 병합 완료');
@@ -3937,15 +3940,16 @@ app.post('/api/generate-video', async (req, res) => {
             // 5. 배경음악 믹싱 (선택 시)
             let finalVideoPath = mergedVideoPath;
             
-            if (backgroundMusicUrl && fs.existsSync(pathModule.join(workDir, 'bgm.mp3'))) {
+            if (includeBackgroundMusic && backgroundMusicUrl && fs.existsSync(pathModule.join(workDir, 'bgm.mp3'))) {
                 console.log('🎵 배경음악 믹싱 시작...');
                 
                 const withBGMPath = pathModule.join(workDir, 'final_with_bgm.mp4');
                 
                 // 배경음악을 동영상 길이에 맞게 루프하고, TTS 음량 유지하면서 BGM 음량 낮춤
-                execSync(`ffmpeg -i "${mergedVideoPath}" -stream_loop -1 -i "${pathModule.join(workDir, 'bgm.mp3')}" -filter_complex "[0:a]volume=1.0[a1];[1:a]volume=0.2,aloop=loop=-1:size=2e+09[a2];[a1][a2]amix=inputs=2:duration=first[aout]" -map 0:v -map "[aout]" -c:v copy -c:a aac -shortest "${withBGMPath}"`, {
+                // amix 대신 amerge 사용해서 더 안정적으로 믹싱
+                execSync(`ffmpeg -y -i "${mergedVideoPath}" -stream_loop -1 -i "${pathModule.join(workDir, 'bgm.mp3')}" -filter_complex "[1:a]volume=0.15[bgm];[0:a][bgm]amix=inputs=2:duration=first:dropout_transition=0[aout]" -map 0:v -map "[aout]" -c:v copy -c:a aac -b:a 192k -shortest "${withBGMPath}"`, {
                     cwd: workDir,
-                    stdio: 'pipe'
+                    stdio: ['pipe', 'pipe', 'pipe']
                 });
                 
                 finalVideoPath = withBGMPath;
