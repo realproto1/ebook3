@@ -3784,13 +3784,26 @@ app.post('/api/generate-video', async (req, res) => {
         // 배경음악 URL 가져오기
         let backgroundMusicUrl = null;
         if (includeBackgroundMusic && storybook.backgroundMusicId) {
-            // 메모리에서 배경음악 찾기
-            const music = backgroundMusicList.find(m => m.id === storybook.backgroundMusicId);
-            if (music) {
-                backgroundMusicUrl = music.url;
-                console.log('✅ 배경음악 찾음:', music.title, backgroundMusicUrl);
-            } else {
-                console.warn('⚠️ 배경음악을 찾을 수 없습니다:', storybook.backgroundMusicId);
+            try {
+                // R2에서 배경음악 목록 가져오기
+                const musicListCommand = new GetObjectCommand({
+                    Bucket: config.r2.bucketName,
+                    Key: 'background-music.json'
+                });
+                const musicListResponse = await r2Client.send(musicListCommand);
+                const musicListText = await musicListResponse.Body.transformToString();
+                const musicList = JSON.parse(musicListText);
+                
+                // ID로 배경음악 찾기
+                const music = musicList.find(m => m.id === storybook.backgroundMusicId);
+                if (music) {
+                    backgroundMusicUrl = music.url;
+                    console.log('✅ 배경음악 찾음:', music.title, backgroundMusicUrl);
+                } else {
+                    console.warn('⚠️ 배경음악을 찾을 수 없습니다:', storybook.backgroundMusicId);
+                }
+            } catch (err) {
+                console.warn('⚠️ 배경음악 목록을 가져올 수 없습니다:', err.message);
             }
         }
         
