@@ -31,6 +31,18 @@ class TTSService {
                 pageNumber
             } = options;
 
+            console.log('🌐 API 요청 시작:', {
+                url: '/api/generate-tts',
+                textPreview: (page.audio_text || page.text).substring(0, 50) + '...',
+                geminiModel: model,
+                voice: voice,
+                voiceConfig,
+                language,
+                storybookId,
+                storybookTitle,
+                pageNumber
+            });
+
             const response = await api.post('/api/generate-tts', {
                 text: page.audio_text || page.text,
                 geminiModel: model,
@@ -44,6 +56,8 @@ class TTSService {
                 errorMessage: 'TTS를 생성할 수 없습니다.',
                 timeout: 180000
             });
+
+            console.log('✅ API 응답 받음:', response);
 
             // 히스토리 저장
             const pageId = page.id || page.order;
