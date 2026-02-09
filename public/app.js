@@ -1090,9 +1090,10 @@ function updateStorybookTitle(newTitle) {
 }
 
 // 뷰어 공개 상태 변경
-async function togglePublicStatus(storybookId) {
+async function togglePublicStatus(storybookId, isPublicOverride = null) {
+    // 체크박스가 있으면 읽고, 없으면 파라미터 사용
     const checkbox = document.getElementById(`public-${storybookId}`);
-    const isPublic = checkbox.checked;
+    const isPublic = isPublicOverride !== null ? isPublicOverride : (checkbox ? checkbox.checked : false);
     
     try {
         console.log(`🔄 Toggling public status for ${storybookId}: ${isPublic}`);
@@ -1136,7 +1137,9 @@ async function togglePublicStatus(storybookId) {
         console.error('❌ 공개 상태 변경 실패:', error);
         
         // 체크박스 원상복구
-        checkbox.checked = !isPublic;
+        if (checkbox) {
+            checkbox.checked = !isPublic;
+        }
         
         showNotification(
             'error',
@@ -5191,15 +5194,26 @@ function renderBookItemInFolder(book, index, folderId) {
                     <div class="font-bold text-gray-800 text-xs truncate">${book.title}</div>
                     <p class="text-xs text-gray-500">
                         ${book.targetAge}세 · ${book.pages.length}p
+                        ${book.isPublic ? '<span class="ml-2 text-green-600"><i class="fas fa-eye"></i> 공개</span>' : ''}
                     </p>
                 </div>
-                <button 
-                    onclick="event.stopPropagation(); removeBookFromFolder('${book.id}', '${folderId}')"
-                    class="text-gray-400 hover:text-red-600 px-1 text-xs"
-                    title="폴더에서 제거"
-                >
-                    <i class="fas fa-times"></i>
-                </button>
+                <div class="flex items-center gap-1">
+                    <label class="flex items-center cursor-pointer" title="뷰어에 공개" onclick="event.stopPropagation();">
+                        <input 
+                            type="checkbox" 
+                            ${book.isPublic ? 'checked' : ''}
+                            onchange="togglePublicStatus('${book.id}', this.checked)"
+                            class="w-3 h-3 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                        >
+                    </label>
+                    <button 
+                        onclick="event.stopPropagation(); removeBookFromFolder('${book.id}', '${folderId}')"
+                        class="text-gray-400 hover:text-red-600 px-1 text-xs"
+                        title="폴더에서 제거"
+                    >
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             </div>
         </div>
     `;
