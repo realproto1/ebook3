@@ -70,6 +70,11 @@ class TTSGenerator extends BaseGenerator {
             // 결과 저장
             this._saveResult(pageIndex, result);
 
+            // R2에 저장
+            console.log('💾 TTS 생성 후 R2에 저장 중...');
+            await this._saveToR2();
+            console.log('✅ R2 저장 완료');
+
             // 버튼 복원
             if (ttsButton) {
                 ttsButton.innerHTML = '<i class="fas fa-volume-up mr-1"></i>음성 생성';
