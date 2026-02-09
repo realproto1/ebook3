@@ -407,13 +407,18 @@ async function generatePageTTS(pageIndex) {
     }
     
     const page = currentStorybook.pages[pageIndex];
-    // 현재 언어의 텍스트 가져오기
-    const text = getPageText(page, window.currentLanguage);
+    
+    // ✅ DOM에서 직접 최신 텍스트 읽기
+    const textareaId = `page-text-${window.currentLanguage}-${pageIndex}`;
+    const textarea = document.getElementById(textareaId);
+    const text = textarea ? textarea.value : getPageText(page, window.currentLanguage);
     
     if (!text || text.trim().length === 0) {
         alert('텍스트가 없습니다.');
         return;
     }
+    
+    console.log(`🎙️ TTS 생성 시작 (페이지 ${pageIndex + 1}):`, text.substring(0, 50) + '...');
     
     const ttsButton = document.getElementById(`tts-btn-${pageIndex}`);
     const ttsPlayer = document.getElementById(`tts-player-${pageIndex}`);
@@ -429,7 +434,7 @@ async function generatePageTTS(pageIndex) {
             text: text,
             language: window.currentLanguage,
             geminiModel: imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts',  // Gemini TTS 생성 모델
-            model: imageSettings.ttsModel || 'Aoede',  // TTS Voice (Puck, Kore 등)
+            model: imageSettings.ttsModel || 'Aoede',  // TTS Voice (Aoede=여자, Puck=남자, Kore 등)
             voiceConfig: imageSettings.ttsVoiceConfig,
             storybookId: currentStorybook?.id,
             storybookTitle: currentStorybook?.title,

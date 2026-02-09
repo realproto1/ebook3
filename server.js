@@ -1875,8 +1875,8 @@ app.post('/api/generate-tts', requireAPIKey, async (req, res) => {
       model: ttsModelName
     });
     
-    // 음성 이름 (기본값: Puck)
-    const voiceName = model || 'Puck';
+    // 음성 이름 (기본값: Aoede - 여자)
+    const voiceName = model || 'Aoede';
     
     console.log(`🎵 Using Model: ${ttsModelName} - Voice: ${voiceName}`);
     
