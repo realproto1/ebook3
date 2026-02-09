@@ -22,6 +22,10 @@ class TTSGenerator extends BaseGenerator {
             throw new Error('유효하지 않은 페이지입니다.');
         }
 
+        // ✅ 1단계: DOM에서 최신 텍스트를 읽어서 storybook 업데이트
+        await this._updatePageTextFromDOM(pageIndex);
+
+        // ✅ 2단계: 업데이트된 storybook에서 텍스트 가져오기
         const page = this.storybook.pages[pageIndex];
         const pageText = this._getPageText(page);
         
@@ -38,7 +42,7 @@ class TTSGenerator extends BaseGenerator {
                 ttsButton.disabled = true;
             }
 
-            console.log(`🎤 페이지 ${page.pageNumber} TTS 생성 중...`);
+            console.log(`🎤 페이지 ${page.pageNumber} TTS 생성 중... 텍스트: "${pageText.substring(0, 50)}..."`);
 
             // API 호출
             const result = await this.ttsService.generatePageTTS(page, {
@@ -145,6 +149,9 @@ class TTSGenerator extends BaseGenerator {
                 }
 
                 try {
+                    // ✅ 각 페이지 생성 전 storybook 저장 (최신 텍스트 반영)
+                    await this._saveToR2();
+                    
                     await this.generate(i);
                     successCount++;
 
@@ -212,6 +219,46 @@ class TTSGenerator extends BaseGenerator {
         } finally {
             this.setButtonLoading(false);
         }
+    }
+
+    /**
+     * DOM에서 최신 텍스트를 읽어서 storybook 업데이트
+     */
+    async _updatePageTextFromDOM(pageIndex) {
+        const textareaId = `page-text-${this.language}-${pageIndex}`;
+        const textarea = document.getElementById(textareaId);
+        
+        if (!textarea) {
+            console.warn(`⚠️ textarea not found: ${textareaId}`);
+            return;
+        }
+        
+        const latestText = textarea.value;
+        console.log(`📝 DOM에서 최신 텍스트 읽기 (페이지 ${pageIndex + 1}, 언어: ${this.language})`);
+        
+        // storybook에 최신 텍스트 반영
+        if (this.language === 'ko') {
+            this.storybook.pages[pageIndex].text = latestText;
+        } else {
+            // 다른 언어의 경우 translations 업데이트
+            if (!this.storybook.translations) {
+                this.storybook.translations = {};
+            }
+            if (!this.storybook.translations[this.language]) {
+                this.storybook.translations[this.language] = this.storybook.pages.map(p => ({
+                    pageNumber: p.pageNumber,
+                    text: ''
+                }));
+            }
+            const translationPage = this.storybook.translations[this.language].find(
+                p => p.pageNumber === this.storybook.pages[pageIndex].pageNumber
+            );
+            if (translationPage) {
+                translationPage.text = latestText;
+            }
+        }
+        
+        console.log(`✅ storybook 텍스트 업데이트 완료: "${latestText.substring(0, 50)}..."`);
     }
 
     /**
