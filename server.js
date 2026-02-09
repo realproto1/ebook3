@@ -1856,12 +1856,13 @@ app.post('/api/generate-tts', requireAPIKey, async (req, res) => {
       });
     }
     
-    console.log(`\n🎙️ Generating TTS for text: "${text.substring(0, 50)}..."`);
-    console.log(`Voice config: ${voiceConfig}`);
-    console.log(`Voice: ${model}`);
-    console.log(`📥 Received geminiModel parameter: ${geminiModel}`);
-    console.log(`🔧 Will use Gemini Model: ${geminiModel || 'gemini-2.5-flash-preview-tts'} (default if null)`);
-    console.log(`Language: ${language || 'ko'}`);
+    console.log(`\n🎙️ ========== TTS 생성 시작 ==========`);
+    console.log(`📝 텍스트: "${text.substring(0, 50)}..."`);
+    console.log(`🎵 클라이언트에서 받은 model 파라미터: "${model}" (voice)`);
+    console.log(`📥 클라이언트에서 받은 geminiModel 파라미터: "${geminiModel}"`);
+    console.log(`🔧 사용할 Gemini Model: ${geminiModel || 'gemini-2.5-flash-preview-tts'}`);
+    console.log(`🌍 언어: ${language || 'ko'}`);
+    console.log(`⚙️ voiceConfig: ${voiceConfig}`);
     
     // GoogleGenerativeAI 인스턴스 생성
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -1869,7 +1870,7 @@ app.post('/api/generate-tts', requireAPIKey, async (req, res) => {
     // TTS 모델 설정 - 클라이언트에서 받은 모델 또는 기본값
     const ttsModelName = geminiModel || "gemini-2.5-flash-preview-tts";
     
-    console.log(`✅ Final TTS Model Name: ${ttsModelName}`);
+    console.log(`✅ 최종 TTS 모델: ${ttsModelName}`);
     
     const ttsModel = genAI.getGenerativeModel({ 
       model: ttsModelName
@@ -1878,7 +1879,8 @@ app.post('/api/generate-tts', requireAPIKey, async (req, res) => {
     // 음성 이름 (기본값: Aoede - 여자)
     const voiceName = model || 'Aoede';
     
-    console.log(`🎵 Using Model: ${ttsModelName} - Voice: ${voiceName}`);
+    console.log(`🎤 최종 사용 음성: "${voiceName}" ${voiceName === 'Aoede' ? '(여자 목소리)' : voiceName === 'Puck' ? '(남자 목소리)' : ''}`);
+    console.log(`========================================\n`);
     
     // TTS 요청
     const result = await ttsModel.generateContent({

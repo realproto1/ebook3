@@ -12,6 +12,11 @@ class TTSGenerator extends BaseGenerator {
         this.ttsService = options.ttsService || window.ttsService;
         this.imageSettings = options.imageSettings || window.imageSettings || {};
         this.language = options.language || window.currentLanguage || 'ko';
+        
+        // 🔍 디버깅: imageSettings 확인
+        console.log('🔧 TTSGenerator 초기화:');
+        console.log('   imageSettings.ttsModel:', this.imageSettings.ttsModel);
+        console.log('   imageSettings.geminiTTSModel:', this.imageSettings.geminiTTSModel);
     }
 
     /**
@@ -42,7 +47,10 @@ class TTSGenerator extends BaseGenerator {
                 ttsButton.disabled = true;
             }
 
-            console.log(`🎤 페이지 ${page.pageNumber} TTS 생성 중... 텍스트: "${pageText.substring(0, 50)}..."`);
+            console.log(`🎤 페이지 ${page.pageNumber} TTS 생성 중...`);
+            console.log(`   📝 텍스트: "${pageText.substring(0, 50)}..."`);
+            console.log(`   🎵 음성: ${this.imageSettings.ttsModel || 'Aoede'} (기본값: Aoede)`);
+            console.log(`   🔧 모델: ${this.imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts'}`);
 
             // API 호출
             const result = await this.ttsService.generatePageTTS(page, {
