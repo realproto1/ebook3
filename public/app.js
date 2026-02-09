@@ -5701,24 +5701,53 @@ async function copyVideoUrl() {
 /**
  * 동영상 다운로드
  */
-function downloadVideoFromUrl() {
+async function downloadVideoFromUrl() {
     const url = window.currentVideoUrl;
     if (!url) {
         alert('다운로드할 URL이 없습니다.');
         return;
     }
     
-    // 파일명 추출 (URL에서 마지막 부분)
-    const filename = url.split('/').pop() || 'video.mp4';
-    
-    // a 태그를 만들어서 다운로드
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    try {
+        // 파일명 추출
+        const filename = url.split('/').pop() || 'video.mp4';
+        
+        // 로딩 표시
+        const btn = document.querySelector('button[onclick="downloadVideoFromUrl()"]');
+        if (btn) {
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>다운로드 중...';
+        }
+        
+        // fetch로 다운로드
+        const response = await fetch(url);
+        const blob = await response.blob();
+        
+        // blob URL 생성
+        const blobUrl = window.URL.createObjectURL(blob);
+        
+        // a 태그로 다운로드
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        // blob URL 해제
+        window.URL.revokeObjectURL(blobUrl);
+        
+        // 버튼 복원
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    } catch (error) {
+        console.error('다운로드 오류:', error);
+        alert('다운로드 실패: ' + error.message);
+    }
 }
 
 // 배경음악 삭제

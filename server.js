@@ -3895,7 +3895,7 @@ app.post('/api/generate-video', async (req, res) => {
                 if (transition === 'fade') {
                     // 페이드인 (0.5초) + 페이드아웃 (0.5초)
                     const fadeOutStart = Math.max(0, coverDuration - 0.5);
-                    coverFilter += `,fade=t=in:st=0:d=0.5:alpha=1,fade=t=out:st=${fadeOutStart}:d=0.5:alpha=1`;
+                    coverFilter += `,fade=t=in:st=0:d=0.5,fade=t=out:st=${fadeOutStart}:d=0.5`;
                 }
                 
                 // 표지에도 무음 오디오 추가 (다른 클립과 호환성)
@@ -3954,13 +3954,20 @@ app.post('/api/generate-video', async (req, res) => {
                             const fadeInDuration = 0.5;
                             const fadeOutStart = Math.max(0, audioDuration - 0.5);
                             const fadeOutDuration = 0.5;
-                            videoFilter += `,fade=t=in:st=0:d=${fadeInDuration}:alpha=1,fade=t=out:st=${fadeOutStart}:d=${fadeOutDuration}:alpha=1`;
+                            videoFilter += `,fade=t=in:st=0:d=${fadeInDuration},fade=t=out:st=${fadeOutStart}:d=${fadeOutDuration}`;
+                        }
+                        
+                        // 페이지 간 간격이 있으면 오디오에 무음 추가
+                        let audioFilter = '';
+                        if (gap > 0) {
+                            // 오디오 끝에 무음 추가
+                            audioFilter = `-af "apad=pad_dur=${gap}"`;
                         }
                         
                         // 페이지 간 간격이 있으면 총 길이 연장
                         const clipDurationStr = gap > 0 ? totalDuration : audioDuration;
                         
-                        const result = execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -r 1 -vf "${videoFilter}" -t ${clipDurationStr} -preset fast "${clipPath}"`, {
+                        const result = execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -r 1 -vf "${videoFilter}" ${audioFilter} -t ${clipDurationStr} -preset fast "${clipPath}"`, {
                             cwd: workDir
                         });
                         
@@ -4004,7 +4011,7 @@ app.post('/api/generate-video', async (req, res) => {
                     
                     let noAudioFilter = `scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2`;
                     if (transition === 'fade') {
-                        noAudioFilter += `,fade=t=in:st=0:d=0.5:alpha=1,fade=t=out:st=4.5:d=0.5:alpha=1`;
+                        noAudioFilter += `,fade=t=in:st=0:d=0.5,fade=t=out:st=4.5:d=0.5`;
                     }
                     
                     execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -c:v libx264 -r 1 -t 5 -pix_fmt yuv420p -vf "${noAudioFilter}" -preset fast "${clipPath}"`, {
