@@ -3941,33 +3941,31 @@ app.post('/api/generate-video', async (req, res) => {
                     }
                     
                     try {
-                        // 오디오 길이를 명시적으로 -t 옵션으로 지정
-                        // -r 1 추가: 출력 프레임레이트를 1fps로 고정 (비디오 길이 = 오디오 길이)
-                        
-                        // 페이드 효과 필터
+                        // 새로운 방식: 페이지 시작 시 이미지만 보여주고 (gap초), 그 후 TTS 재생
+                        // gap = 페이지 시작 전 정지 시간 (이미지만 보임)
                         const gap = parseFloat(pageGap) || 0;
-                        const totalDuration = audioDuration + gap;
+                        const totalDuration = gap + audioDuration;
+                        
+                        // 비디오 필터 설정
                         let videoFilter = `scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2`;
                         
+                        // 전환 효과 추가
                         if (transition === 'fade') {
-                            // 페이드 효과: 간격의 절반씩 페이드인/아웃
-                            // 이렇게 하면 검은 화면이 최소화됨
-                            const fadeDuration = Math.min(0.5, gap / 2 || 0.3);
-                            const fadeOutStart = Math.max(0, audioDuration - fadeDuration);
-                            videoFilter += `,fade=t=in:st=0:d=${fadeDuration},fade=t=out:st=${fadeOutStart}:d=${fadeDuration}`;
+                            // 페이드인만 적용 (시작 시)
+                            videoFilter += `,fade=t=in:st=0:d=0.3`;
+                        } else if (transition === 'slideleft' || transition === 'slideright') {
+                            // 슬라이드 효과는 병합 시 적용
                         }
                         
-                        // 페이지 간 간격이 있으면 오디오에 무음 추가
+                        // 오디오 필터: gap초 동안 무음 추가 (오디오 시작 전)
                         let audioFilter = '';
                         if (gap > 0) {
-                            // 오디오 끝에 무음 추가
-                            audioFilter = `-af "apad=pad_dur=${gap}"`;
+                            // 오디오 앞에 무음 추가 (delay)
+                            audioFilter = `-af "adelay=${Math.round(gap * 1000)}|${Math.round(gap * 1000)}"`;
                         }
                         
-                        // 페이지 간 간격이 있으면 총 길이 연장
-                        const clipDurationStr = gap > 0 ? totalDuration : audioDuration;
-                        
-                        const result = execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -r 1 -vf "${videoFilter}" ${audioFilter} -t ${clipDurationStr} -preset fast "${clipPath}"`, {
+                        // 클립 생성
+                        const result = execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -r 1 -vf "${videoFilter}" ${audioFilter} -t ${totalDuration} -preset fast "${clipPath}"`, {
                             cwd: workDir
                         });
                         
