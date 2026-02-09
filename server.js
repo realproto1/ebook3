@@ -3901,17 +3901,38 @@ app.post('/api/generate-video', async (req, res) => {
                 
                 if (fs.existsSync(audioPath)) {
                     // 오디오가 있으면 오디오 길이만큼 동영상 생성
-                    // -y 플래그 추가 (기존 파일 덮어쓰기)
-                    // -shortest 대신 -t로 오디오 길이 명시
-                    execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -shortest -preset fast "${clipPath}"`, {
-                        cwd: workDir,
-                        stdio: ['pipe', 'pipe', 'pipe']
-                    });
+                    console.log(`     오디오 파일 존재: ${pathModule.basename(audioPath)}`);
+                    
+                    try {
+                        // -y 플래그 추가 (기존 파일 덮어쓰기)
+                        const result = execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -shortest -preset fast "${clipPath}"`, {
+                            cwd: workDir
+                        });
+                        
+                        // 생성된 클립 검증
+                        const clipStats = fs.statSync(clipPath);
+                        console.log(`     ✅ 클립 생성 완료 (${(clipStats.size / 1024 / 1024).toFixed(2)} MB)`);
+                        
+                        // 오디오 스트림 확인
+                        const probeResult = execSync(`ffprobe -v error -select_streams a -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "${clipPath}"`, {
+                            cwd: workDir,
+                            encoding: 'utf8'
+                        }).trim();
+                        
+                        if (probeResult) {
+                            console.log(`     🔊 오디오 코덱: ${probeResult}`);
+                        } else {
+                            console.warn(`     ⚠️ 오디오 스트림이 없습니다!`);
+                        }
+                    } catch (err) {
+                        console.error(`     ❌ FFmpeg 에러:`, err.message);
+                        throw err;
+                    }
                 } else {
                     // 오디오가 없으면 5초 동영상
+                    console.log(`     오디오 파일 없음 - 5초 클립 생성`);
                     execSync(`ffmpeg -y -loop 1 -i "${imagePath}" -c:v libx264 -t 5 -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -preset fast "${clipPath}"`, {
-                        cwd: workDir,
-                        stdio: ['pipe', 'pipe', 'pipe']
+                        cwd: workDir
                     });
                 }
                 
@@ -3927,13 +3948,47 @@ app.post('/api/generate-video', async (req, res) => {
             const concatContent = clips.map(clip => `file '${pathModule.basename(clip)}'`).join('\n');
             fs.writeFileSync(concatListPath, concatContent);
             
+            console.log('📄 concat.txt 내용:');
+            console.log(concatContent);
+            
             const mergedVideoPath = pathModule.join(workDir, 'merged.mp4');
             
-            // -c copy 대신 재인코딩 (오디오 코덱 호환성 보장)
-            execSync(`ffmpeg -y -f concat -safe 0 -i "${concatListPath}" -c:v libx264 -c:a aac -b:a 192k -preset fast "${mergedVideoPath}"`, {
-                cwd: workDir,
-                stdio: ['pipe', 'pipe', 'pipe']
-            });
+            // concat demuxer로 병합 (오디오 보존)
+            try {
+                execSync(`ffmpeg -y -f concat -safe 0 -i "${concatListPath}" -c copy "${mergedVideoPath}"`, {
+                    cwd: workDir
+                });
+                
+                // 병합된 파일 검증
+                const mergedStats = fs.statSync(mergedVideoPath);
+                console.log(`✅ 병합 완료 (${(mergedStats.size / 1024 / 1024).toFixed(2)} MB)`);
+                
+                // 오디오 스트림 확인
+                const audioCheck = execSync(`ffprobe -v error -select_streams a -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "${mergedVideoPath}"`, {
+                    cwd: workDir,
+                    encoding: 'utf8'
+                }).trim();
+                
+                if (audioCheck) {
+                    console.log(`🔊 병합 파일 오디오 코덱: ${audioCheck}`);
+                } else {
+                    console.warn(`⚠️ 병합 파일에 오디오가 없습니다! 재인코딩 시도...`);
+                    
+                    // 재인코딩으로 다시 시도
+                    const reencoded = pathModule.join(workDir, 'merged_reencoded.mp4');
+                    execSync(`ffmpeg -y -f concat -safe 0 -i "${concatListPath}" -c:v libx264 -c:a aac -b:a 192k -preset fast "${reencoded}"`, {
+                        cwd: workDir
+                    });
+                    
+                    // 원본 삭제하고 재인코딩 파일 사용
+                    fs.unlinkSync(mergedVideoPath);
+                    fs.renameSync(reencoded, mergedVideoPath);
+                    console.log(`✅ 재인코딩 완료`);
+                }
+            } catch (err) {
+                console.error('❌ 병합 에러:', err.message);
+                throw err;
+            }
             
             console.log('✅ 클립 병합 완료');
             
