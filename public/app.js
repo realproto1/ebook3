@@ -401,150 +401,23 @@ function updateTTSVoiceConfig(value) {
 
 // 페이지 TTS 생성
 async function generatePageTTS(pageIndex) {
-    if (!currentStorybook || !currentStorybook.pages[pageIndex]) {
-        alert('페이지 정보가 없습니다.');
-        return;
-    }
-    
-    // ✅ 1단계: DOM에서 최신 텍스트를 읽어서 currentStorybook 업데이트
-    const textareaId = `page-text-${window.currentLanguage}-${pageIndex}`;
-    const textarea = document.getElementById(textareaId);
-    
-    if (textarea) {
-        const latestText = textarea.value;
-        console.log(`📝 최신 텍스트로 currentStorybook 업데이트 (페이지 ${pageIndex + 1})`);
-        
-        // currentStorybook에 최신 텍스트 반영
-        if (window.currentLanguage === 'ko') {
-            currentStorybook.pages[pageIndex].text = latestText;
-        } else {
-            // 다른 언어의 경우 translations 업데이트
-            if (!currentStorybook.translations) {
-                currentStorybook.translations = {};
-            }
-            if (!currentStorybook.translations[window.currentLanguage]) {
-                currentStorybook.translations[window.currentLanguage] = currentStorybook.pages.map(p => ({
-                    pageNumber: p.pageNumber,
-                    text: ''
-                }));
-            }
-            const translationPage = currentStorybook.translations[window.currentLanguage].find(
-                p => p.pageNumber === currentStorybook.pages[pageIndex].pageNumber
-            );
-            if (translationPage) {
-                translationPage.text = latestText;
-            }
-        }
-        
-        // R2에 저장
-        try {
-            await saveCurrentStorybook();
-            console.log('✅ currentStorybook 저장 완료');
-        } catch (saveError) {
-            console.error('❌ currentStorybook 저장 실패:', saveError);
-            // 저장 실패해도 TTS 생성은 계속 진행
-        }
-    }
-    
-    // ✅ 2단계: 업데이트된 currentStorybook에서 텍스트 가져오기
-    const page = currentStorybook.pages[pageIndex];
-    const text = getPageText(page, window.currentLanguage);
-    
-    if (!text || text.trim().length === 0) {
-        alert('텍스트가 없습니다.');
-        return;
-    }
-    
-    console.log(`🎙️ TTS 생성 시작 (페이지 ${pageIndex + 1}):`, text.substring(0, 50) + '...');
-    
-    const ttsButton = document.getElementById(`tts-btn-${pageIndex}`);
-    const ttsPlayer = document.getElementById(`tts-player-${pageIndex}`);
-    
-    // 로딩 표시
-    if (ttsButton) {
-        ttsButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>생성중...';
-        ttsButton.disabled = true;
-    }
-    
+    // ✅ TTSGenerator 사용 (generateAllTTS와 동일)
+    const generator = new TTSGenerator({
+        storybook: currentStorybook,
+        ttsService: ttsService || window.ttsService,
+        imageSettings: imageSettings,
+        language: window.currentLanguage,
+        saveCallback: saveCurrentStorybook,
+        updateCallback: () => displayStorybook(currentStorybook)
+    });
+
     try {
-        const response = await axios.post('/api/generate-tts', {
-            text: text,
-            language: window.currentLanguage,
-            geminiModel: imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts',  // Gemini TTS 생성 모델
-            model: imageSettings.ttsModel || 'Aoede',  // TTS Voice (Aoede=여자, Puck=남자, Kore 등)
-            voiceConfig: imageSettings.ttsVoiceConfig,
-            storybookId: currentStorybook?.id,
-            storybookTitle: currentStorybook?.title,
-            pageNumber: currentStorybook.pages[pageIndex].pageNumber
-        }, {
-            timeout: 180000 // 3분 타임아웃
-        });
-        
-        if (response.data.success && response.data.audioUrl) {
-            // 언어별 TTS 저장
-            if (!currentStorybook.pages[pageIndex].ttsAudio) {
-                currentStorybook.pages[pageIndex].ttsAudio = {};
-            }
-            
-            // 언어별로 TTS 저장
-            if (window.currentLanguage === 'ko') {
-                currentStorybook.pages[pageIndex].ttsAudio.url = response.data.audioUrl;
-                currentStorybook.pages[pageIndex].ttsAudio.model = imageSettings.ttsModel;
-                // 하위 호환성을 위해 audioUrl에도 저장
-                currentStorybook.pages[pageIndex].audioUrl = response.data.audioUrl;
-            } else {
-                // 다른 언어의 경우 ttsAudio 객체에 언어별로 저장
-                if (!currentStorybook.pages[pageIndex].ttsAudio[window.currentLanguage]) {
-                    currentStorybook.pages[pageIndex].ttsAudio[window.currentLanguage] = {};
-                }
-                currentStorybook.pages[pageIndex].ttsAudio[window.currentLanguage].url = response.data.audioUrl;
-                currentStorybook.pages[pageIndex].ttsAudio[window.currentLanguage].model = imageSettings.ttsModel;
-            }
-            
-            // R2 저장 완료까지 대기
-            console.log('💾 TTS 생성 후 R2 저장 중...');
-            try {
-                await saveToR2(currentStorybook);
-                console.log('✅ R2 저장 완료');
-            } catch (saveError) {
-                console.error('❌ R2 저장 최종 실패:', saveError);
-                // 저장 실패해도 TTS는 메모리에 있으므로 계속 진행
-            }
-            
-            // UI 즉시 업데이트 - 현재 동화책을 다시 렌더링
-            displayStorybook(currentStorybook);
-            
-            showNotification('success', 'TTS 생성 완료!', '음성이 생성되었습니다.');
-        } else {
-            throw new Error(response.data.error || 'TTS 생성 실패');
-        }
+        await generator.generate(pageIndex);
     } catch (error) {
-        console.error('TTS 생성 오류:', error);
-        
-        let errorMsg = 'TTS 생성 중 오류가 발생했습니다.';
-        
-        // 할당량 초과 에러
-        if (error.response?.status === 429 || error.message.includes('quota') || error.message.includes('Quota')) {
-            errorMsg = '🚫 API 할당량 초과\n\nGemini TTS API 일일 할당량을 초과했습니다.\n\n해결 방법:\n1. 내일 다시 시도\n2. Google AI Studio에서 할당량 늘리기\n3. 청구 설정 활성화';
-        } else if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-            errorMsg += '\n\n⏱️ 시간이 초과되었습니다.\n텍스트가 너무 길거나 서버가 응답하지 않습니다.';
-        } else if (error.response?.data?.error) {
-            errorMsg += '\n\n' + error.response.data.error;
-        } else {
-            errorMsg += '\n\n' + error.message;
-        }
-        
-        alert(errorMsg);
-        
-        // 버튼 복원
-        if (ttsButton) {
-            ttsButton.innerHTML = '<i class="fas fa-volume-up mr-1"></i>음성 생성';
-            ttsButton.disabled = false;
-        }
+        console.error('TTS 생성 실패:', error);
+        showNotification('error', 'TTS 생성 실패', error.message);
     }
 }
-
-
 
 function openCoverUploadModal() {
     coverService.openCoverUploadModal();
