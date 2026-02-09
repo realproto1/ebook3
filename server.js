@@ -3784,17 +3784,13 @@ app.post('/api/generate-video', async (req, res) => {
         // 배경음악 URL 가져오기
         let backgroundMusicUrl = null;
         if (includeBackgroundMusic && storybook.backgroundMusicId) {
-            const musicKey = `music-${storybook.backgroundMusicId}.json`;
-            try {
-                const musicObject = await r2Client.send(new GetObjectCommand({
-                    Bucket: config.r2.bucketName,
-                    Key: musicKey
-                }));
-                const musicText = await musicObject.Body.transformToString();
-                const music = JSON.parse(musicText);
+            // 메모리에서 배경음악 찾기
+            const music = backgroundMusicList.find(m => m.id === storybook.backgroundMusicId);
+            if (music) {
                 backgroundMusicUrl = music.url;
-            } catch (err) {
-                console.warn('⚠️ 배경음악을 찾을 수 없습니다:', err.message);
+                console.log('✅ 배경음악 찾음:', music.title, backgroundMusicUrl);
+            } else {
+                console.warn('⚠️ 배경음악을 찾을 수 없습니다:', storybook.backgroundMusicId);
             }
         }
         
@@ -3904,7 +3900,17 @@ app.post('/api/generate-video', async (req, res) => {
                 
                 if (fs.existsSync(audioPath)) {
                     // 오디오가 있으면 오디오 길이만큼 동영상 생성
-                    console.log(`     오디오 파일 존재: ${pathModule.basename(audioPath)}`);
+                    const audioStats = fs.statSync(audioPath);
+                    console.log(`     오디오 파일 존재: ${pathModule.basename(audioPath)} (${(audioStats.size / 1024).toFixed(2)} KB)`);
+                    
+                    // 오디오 길이 확인
+                    try {
+                        const audioDuration = execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioPath}"`, {
+                            cwd: workDir,
+                            encoding: 'utf8'
+                        }).trim();
+                        console.log(`     ⏱️ 오디오 길이: ${parseFloat(audioDuration).toFixed(2)}초`);
+                    } catch {}
                     
                     try {
                         // -y 플래그 추가 (기존 파일 덮어쓰기)
@@ -3915,6 +3921,15 @@ app.post('/api/generate-video', async (req, res) => {
                         // 생성된 클립 검증
                         const clipStats = fs.statSync(clipPath);
                         console.log(`     ✅ 클립 생성 완료 (${(clipStats.size / 1024 / 1024).toFixed(2)} MB)`);
+                        
+                        // 클립 길이 확인
+                        try {
+                            const clipDuration = execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${clipPath}"`, {
+                                cwd: workDir,
+                                encoding: 'utf8'
+                            }).trim();
+                            console.log(`     ⏱️ 클립 길이: ${parseFloat(clipDuration).toFixed(2)}초`);
+                        } catch {}
                         
                         // 오디오 스트림 확인
                         const probeResult = execSync(`ffprobe -v error -select_streams a -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "${clipPath}"`, {
