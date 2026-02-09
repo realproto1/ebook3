@@ -3917,17 +3917,22 @@ app.post('/api/generate-video', async (req, res) => {
                     console.log(`     오디오 파일 존재: ${pathModule.basename(audioPath)} (${(audioStats.size / 1024).toFixed(2)} KB)`);
                     
                     // 오디오 길이 확인
+                    let audioDuration = 5; // 기본값
                     try {
-                        const audioDuration = execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioPath}"`, {
+                        const durationStr = execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioPath}"`, {
                             cwd: workDir,
                             encoding: 'utf8'
                         }).trim();
-                        console.log(`     ⏱️ 오디오 길이: ${parseFloat(audioDuration).toFixed(2)}초`);
-                    } catch {}
+                        audioDuration = parseFloat(durationStr);
+                        console.log(`     ⏱️ 오디오 길이: ${audioDuration.toFixed(2)}초`);
+                    } catch (err) {
+                        console.warn(`     ⚠️ 오디오 길이 확인 실패, 기본값 사용: ${audioDuration}초`);
+                    }
                     
                     try {
-                        // -y 플래그 추가 (기존 파일 덮어쓰기)
-                        const result = execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -shortest -preset fast "${clipPath}"`, {
+                        // 오디오 길이를 명시적으로 -t 옵션으로 지정
+                        // -shortest 대신 -t 사용으로 정확한 길이 보장
+                        const result = execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -t ${audioDuration} -preset fast "${clipPath}"`, {
                             cwd: workDir
                         });
                         
@@ -3941,7 +3946,13 @@ app.post('/api/generate-video', async (req, res) => {
                                 cwd: workDir,
                                 encoding: 'utf8'
                             }).trim();
-                            console.log(`     ⏱️ 클립 길이: ${parseFloat(clipDuration).toFixed(2)}초`);
+                            const clipDur = parseFloat(clipDuration);
+                            console.log(`     ⏱️ 클립 길이: ${clipDur.toFixed(2)}초`);
+                            
+                            // 길이 차이 경고
+                            if (Math.abs(clipDur - audioDuration) > 0.5) {
+                                console.warn(`     ⚠️ 클립 길이와 오디오 길이가 다릅니다! (차이: ${Math.abs(clipDur - audioDuration).toFixed(2)}초)`);
+                            }
                         } catch {}
                         
                         // 오디오 스트림 확인
