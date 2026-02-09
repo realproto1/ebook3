@@ -3879,10 +3879,13 @@ app.post('/api/generate-video', async (req, res) => {
                 console.log(`  → 표지 클립 생성 (${coverDuration}초)...`);
                 const coverClipPath = pathModule.join(workDir, 'clip_cover.mp4');
                 
-                execSync(`ffmpeg -loop 1 -i "${pathModule.join(workDir, 'cover.jpg')}" -c:v libx264 -t ${coverDuration} -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -preset ultrafast "${coverClipPath}"`, {
-                    cwd: workDir,
-                    stdio: 'pipe'
+                // 표지에도 무음 오디오 추가 (다른 클립과 호환성)
+                execSync(`ffmpeg -y -loop 1 -i "${pathModule.join(workDir, 'cover.jpg')}" -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=24000 -c:v libx264 -c:a aac -b:a 192k -t ${coverDuration} -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -preset fast -shortest "${coverClipPath}"`, {
+                    cwd: workDir
                 });
+                
+                const coverStats = fs.statSync(coverClipPath);
+                console.log(`     ✅ 표지 클립 생성 완료 (${(coverStats.size / 1024 / 1024).toFixed(2)} MB)`);
                 
                 clips.push(coverClipPath);
             }
