@@ -406,12 +406,49 @@ async function generatePageTTS(pageIndex) {
         return;
     }
     
-    const page = currentStorybook.pages[pageIndex];
-    
-    // ✅ DOM에서 직접 최신 텍스트 읽기
+    // ✅ 1단계: DOM에서 최신 텍스트를 읽어서 currentStorybook 업데이트
     const textareaId = `page-text-${window.currentLanguage}-${pageIndex}`;
     const textarea = document.getElementById(textareaId);
-    const text = textarea ? textarea.value : getPageText(page, window.currentLanguage);
+    
+    if (textarea) {
+        const latestText = textarea.value;
+        console.log(`📝 최신 텍스트로 currentStorybook 업데이트 (페이지 ${pageIndex + 1})`);
+        
+        // currentStorybook에 최신 텍스트 반영
+        if (window.currentLanguage === 'ko') {
+            currentStorybook.pages[pageIndex].text = latestText;
+        } else {
+            // 다른 언어의 경우 translations 업데이트
+            if (!currentStorybook.translations) {
+                currentStorybook.translations = {};
+            }
+            if (!currentStorybook.translations[window.currentLanguage]) {
+                currentStorybook.translations[window.currentLanguage] = currentStorybook.pages.map(p => ({
+                    pageNumber: p.pageNumber,
+                    text: ''
+                }));
+            }
+            const translationPage = currentStorybook.translations[window.currentLanguage].find(
+                p => p.pageNumber === currentStorybook.pages[pageIndex].pageNumber
+            );
+            if (translationPage) {
+                translationPage.text = latestText;
+            }
+        }
+        
+        // R2에 저장
+        try {
+            await saveCurrentStorybook();
+            console.log('✅ currentStorybook 저장 완료');
+        } catch (saveError) {
+            console.error('❌ currentStorybook 저장 실패:', saveError);
+            // 저장 실패해도 TTS 생성은 계속 진행
+        }
+    }
+    
+    // ✅ 2단계: 업데이트된 currentStorybook에서 텍스트 가져오기
+    const page = currentStorybook.pages[pageIndex];
+    const text = getPageText(page, window.currentLanguage);
     
     if (!text || text.trim().length === 0) {
         alert('텍스트가 없습니다.');
