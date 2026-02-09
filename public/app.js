@@ -5655,14 +5655,25 @@ function downloadPageTTS(pageIndex) {
         return;
     }
     
-    const link = document.createElement('a');
-    link.href = audioUrl;
-    link.download = `${currentStorybook.title}_page${page.pageNumber || pageIndex + 1}_${currentLanguage}_tts.mp3`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    showNotification('success', 'TTS 다운로드', 'TTS 오디오가 다운로드되었습니다.');
+    // fetch를 사용해서 blob으로 다운로드
+    fetch(audioUrl)
+        .then(response => response.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${currentStorybook.title}_page${page.pageNumber || pageIndex + 1}_${currentLanguage}_tts.wav`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            showNotification('success', 'TTS 다운로드', 'TTS 오디오가 다운로드되었습니다.');
+        })
+        .catch(error => {
+            console.error('다운로드 실패:', error);
+            showNotification('error', '다운로드 실패', '다운로드 중 오류가 발생했습니다.');
+        });
 }
 
     // ============================================

@@ -75,6 +75,9 @@ class TTSGenerator extends BaseGenerator {
             await this._saveToR2();
             console.log('✅ R2 저장 완료');
 
+            // 오디오 플레이어 업데이트
+            this._updateAudioPlayer(pageIndex, result.audioUrl);
+
             // 버튼 복원
             if (ttsButton) {
                 ttsButton.innerHTML = '<i class="fas fa-volume-up mr-1"></i>음성 생성';
@@ -334,6 +337,33 @@ class TTSGenerator extends BaseGenerator {
             return await window.saveToR2(this.storybook);
         } else {
             await this.saveStorybook();
+        }
+    }
+
+    /**
+     * 오디오 플레이어 실시간 업데이트
+     */
+    _updateAudioPlayer(pageIndex, audioUrl) {
+        const player = document.getElementById(`tts-player-${pageIndex}`);
+        if (player) {
+            // 기존 플레이어의 src 업데이트
+            const source = player.querySelector('source');
+            if (source) {
+                source.src = audioUrl;
+                player.load(); // 새 소스 로드
+                console.log(`🔄 페이지 ${pageIndex} 오디오 플레이어 업데이트: ${audioUrl}`);
+            }
+        } else {
+            // 플레이어가 없으면 새로 생성
+            const container = document.querySelector(`#page-${pageIndex} .tts-section`);
+            if (container) {
+                container.innerHTML = `
+                    <audio id="tts-player-${pageIndex}" controls class="w-full" style="height: 32px;">
+                        <source src="${audioUrl}" type="audio/wav">
+                    </audio>
+                `;
+                console.log(`✨ 페이지 ${pageIndex} 오디오 플레이어 생성: ${audioUrl}`);
+            }
         }
     }
 }
