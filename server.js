@@ -3889,7 +3889,8 @@ app.post('/api/generate-video', async (req, res) => {
                 const coverClipPath = pathModule.join(workDir, 'clip_cover.mp4');
                 
                 // 표지에도 무음 오디오 추가 (다른 클립과 호환성)
-                execSync(`ffmpeg -y -loop 1 -i "${pathModule.join(workDir, 'cover.jpg')}" -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=24000 -c:v libx264 -c:a aac -b:a 192k -t ${coverDuration} -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -preset fast -shortest "${coverClipPath}"`, {
+                // -r 1 추가: 출력 프레임레이트를 1fps로 고정
+                execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${pathModule.join(workDir, 'cover.jpg')}" -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=24000 -c:v libx264 -c:a aac -b:a 192k -r 1 -t ${coverDuration} -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -preset fast -shortest "${coverClipPath}"`, {
                     cwd: workDir
                 });
                 
@@ -3931,8 +3932,8 @@ app.post('/api/generate-video', async (req, res) => {
                     
                     try {
                         // 오디오 길이를 명시적으로 -t 옵션으로 지정
-                        // -shortest 대신 -t 사용으로 정확한 길이 보장
-                        const result = execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -t ${audioDuration} -preset fast "${clipPath}"`, {
+                        // -r 1 추가: 출력 프레임레이트를 1fps로 고정 (비디오 길이 = 오디오 길이)
+                        const result = execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -r 1 -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -t ${audioDuration} -preset fast "${clipPath}"`, {
                             cwd: workDir
                         });
                         
@@ -3973,7 +3974,7 @@ app.post('/api/generate-video', async (req, res) => {
                 } else {
                     // 오디오가 없으면 5초 동영상
                     console.log(`     오디오 파일 없음 - 5초 클립 생성`);
-                    execSync(`ffmpeg -y -loop 1 -i "${imagePath}" -c:v libx264 -t 5 -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -preset fast "${clipPath}"`, {
+                    execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -c:v libx264 -r 1 -t 5 -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -preset fast "${clipPath}"`, {
                         cwd: workDir
                     });
                 }
