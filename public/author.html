@@ -1300,10 +1300,28 @@
                                 id="videoTransition" 
                                 class="w-full px-4 py-2 border-2 border-green-300 rounded-lg"
                             >
-                                <option value="fade" selected>페이드</option>
                                 <option value="none">없음</option>
+                                <option value="fade" selected>페이드</option>
                             </select>
                         </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-hourglass-half mr-2"></i>페이지 간 간격 (초)
+                        </label>
+                        <input 
+                            type="number" 
+                            id="videoPageGap"
+                            min="0"
+                            max="5"
+                            step="0.5"
+                            value="0.5"
+                            class="w-full px-4 py-2 border-2 border-green-300 rounded-lg focus:outline-none focus:border-green-500"
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            각 페이지 TTS 종료 후 다음 페이지로 넘어가기 전 간격 (0-5초)
+                        </p>
                     </div>
                 </div>
             </div>
@@ -1731,6 +1749,6 @@
         console.log('✅ 모듈 로드 완료', window.__modules);
     </script>
     
-    <script defer src="/app.js?v=1770653792"></script>
+    <script defer src="/app.js?v=1770655039"></script>
 </body>
 </html>

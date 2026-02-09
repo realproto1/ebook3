@@ -3746,7 +3746,8 @@ app.post('/api/generate-video', async (req, res) => {
             coverDuration,
             includeBackgroundMusic,
             resolution,
-            transition 
+            transition,
+            pageGap
         } = req.body;
         
         console.log('🎬 동영상 생성 요청:', {
@@ -3757,7 +3758,8 @@ app.post('/api/generate-video', async (req, res) => {
             coverDuration,
             includeBackgroundMusic,
             resolution,
-            transition
+            transition,
+            pageGap
         });
         
         // 스토리북 가져오기
@@ -3888,9 +3890,17 @@ app.post('/api/generate-video', async (req, res) => {
                 console.log(`  → 표지 클립 생성 (${coverDuration}초)...`);
                 const coverClipPath = pathModule.join(workDir, 'clip_cover.mp4');
                 
+                // 표지 비디오 필터 (페이드 효과 포함)
+                let coverFilter = `scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2`;
+                if (transition === 'fade') {
+                    // 페이드인 (0.5초) + 페이드아웃 (0.5초)
+                    const fadeOutStart = Math.max(0, coverDuration - 0.5);
+                    coverFilter += `,fade=t=in:st=0:d=0.5:alpha=1,fade=t=out:st=${fadeOutStart}:d=0.5:alpha=1`;
+                }
+                
                 // 표지에도 무음 오디오 추가 (다른 클립과 호환성)
                 // -r 1 추가: 출력 프레임레이트를 1fps로 고정
-                execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${pathModule.join(workDir, 'cover.jpg')}" -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=24000 -c:v libx264 -c:a aac -b:a 192k -r 1 -t ${coverDuration} -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -preset fast -shortest "${coverClipPath}"`, {
+                execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${pathModule.join(workDir, 'cover.jpg')}" -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=24000 -c:v libx264 -c:a aac -b:a 192k -r 1 -t ${coverDuration} -pix_fmt yuv420p -vf "${coverFilter}" -preset fast -shortest "${coverClipPath}"`, {
                     cwd: workDir
                 });
                 
@@ -3933,7 +3943,24 @@ app.post('/api/generate-video', async (req, res) => {
                     try {
                         // 오디오 길이를 명시적으로 -t 옵션으로 지정
                         // -r 1 추가: 출력 프레임레이트를 1fps로 고정 (비디오 길이 = 오디오 길이)
-                        const result = execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -r 1 -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -t ${audioDuration} -preset fast "${clipPath}"`, {
+                        
+                        // 페이드 효과 필터
+                        const gap = parseFloat(pageGap) || 0;
+                        const totalDuration = audioDuration + gap;
+                        let videoFilter = `scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2`;
+                        
+                        if (transition === 'fade') {
+                            // 페이드인 (0.5초) + 페이드아웃 (0.5초)
+                            const fadeInDuration = 0.5;
+                            const fadeOutStart = Math.max(0, audioDuration - 0.5);
+                            const fadeOutDuration = 0.5;
+                            videoFilter += `,fade=t=in:st=0:d=${fadeInDuration}:alpha=1,fade=t=out:st=${fadeOutStart}:d=${fadeOutDuration}:alpha=1`;
+                        }
+                        
+                        // 페이지 간 간격이 있으면 총 길이 연장
+                        const clipDurationStr = gap > 0 ? totalDuration : audioDuration;
+                        
+                        const result = execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -r 1 -vf "${videoFilter}" -t ${clipDurationStr} -preset fast "${clipPath}"`, {
                             cwd: workDir
                         });
                         
@@ -3974,7 +4001,13 @@ app.post('/api/generate-video', async (req, res) => {
                 } else {
                     // 오디오가 없으면 5초 동영상
                     console.log(`     오디오 파일 없음 - 5초 클립 생성`);
-                    execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -c:v libx264 -r 1 -t 5 -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -preset fast "${clipPath}"`, {
+                    
+                    let noAudioFilter = `scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2`;
+                    if (transition === 'fade') {
+                        noAudioFilter += `,fade=t=in:st=0:d=0.5:alpha=1,fade=t=out:st=4.5:d=0.5:alpha=1`;
+                    }
+                    
+                    execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -c:v libx264 -r 1 -t 5 -pix_fmt yuv420p -vf "${noAudioFilter}" -preset fast "${clipPath}"`, {
                         cwd: workDir
                     });
                 }

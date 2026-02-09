@@ -5583,6 +5583,7 @@ async function generateVideo() {
     const includeBackgroundMusic = document.getElementById('videoIncludeBackgroundMusic').checked;
     const resolution = document.getElementById('videoResolution').value;
     const transition = document.getElementById('videoTransition').value;
+    const pageGap = parseFloat(document.getElementById('videoPageGap').value);
     
     // 유효성 검사
     if (startPage < 1 || endPage > currentStorybook.pages.length || startPage > endPage) {
@@ -5605,7 +5606,8 @@ async function generateVideo() {
             coverDuration,
             includeBackgroundMusic,
             resolution,
-            transition
+            transition,
+            pageGap
         });
         
         // API 호출
@@ -5617,7 +5619,8 @@ async function generateVideo() {
             coverDuration,
             includeBackgroundMusic,
             resolution,
-            transition
+            transition,
+            pageGap
         });
         
         if (response.success) {
