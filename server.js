@@ -3112,6 +3112,13 @@ async function saveStorybookToR2(storybook) {
   await updateStorybooksIndex(storybook);
   console.log(`✅ [INDEX] Index update completed`);
   
+  // 공개된 동화책이면 viewer metadata도 업데이트
+  if (storybook.isPublic) {
+    console.log(`🔄 [VIEWER] Updating viewer metadata for public storybook: ${storybook.title}`);
+    await updateViewerMetadata();
+    console.log(`✅ [VIEWER] Viewer metadata updated`);
+  }
+  
   return {
     success: true,
     id: storybook.id,
