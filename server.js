@@ -3893,9 +3893,9 @@ app.post('/api/generate-video', async (req, res) => {
                 // 표지 비디오 필터 (페이드 효과 포함)
                 let coverFilter = `scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2`;
                 if (transition === 'fade') {
-                    // 페이드인 (0.5초) + 페이드아웃 (0.5초)
-                    const fadeOutStart = Math.max(0, coverDuration - 0.5);
-                    coverFilter += `,fade=t=in:st=0:d=0.5,fade=t=out:st=${fadeOutStart}:d=0.5`;
+                    // 페이드인/아웃 (0.3초)
+                    const fadeOutStart = Math.max(0, coverDuration - 0.3);
+                    coverFilter += `,fade=t=in:st=0:d=0.3,fade=t=out:st=${fadeOutStart}:d=0.3`;
                 }
                 
                 // 표지에도 무음 오디오 추가 (다른 클립과 호환성)
@@ -3950,11 +3950,11 @@ app.post('/api/generate-video', async (req, res) => {
                         let videoFilter = `scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2`;
                         
                         if (transition === 'fade') {
-                            // 페이드인 (0.5초) + 페이드아웃 (0.5초)
-                            const fadeInDuration = 0.5;
-                            const fadeOutStart = Math.max(0, audioDuration - 0.5);
-                            const fadeOutDuration = 0.5;
-                            videoFilter += `,fade=t=in:st=0:d=${fadeInDuration},fade=t=out:st=${fadeOutStart}:d=${fadeOutDuration}`;
+                            // 페이드 효과: 간격의 절반씩 페이드인/아웃
+                            // 이렇게 하면 검은 화면이 최소화됨
+                            const fadeDuration = Math.min(0.5, gap / 2 || 0.3);
+                            const fadeOutStart = Math.max(0, audioDuration - fadeDuration);
+                            videoFilter += `,fade=t=in:st=0:d=${fadeDuration},fade=t=out:st=${fadeOutStart}:d=${fadeDuration}`;
                         }
                         
                         // 페이지 간 간격이 있으면 오디오에 무음 추가
@@ -4011,7 +4011,7 @@ app.post('/api/generate-video', async (req, res) => {
                     
                     let noAudioFilter = `scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2`;
                     if (transition === 'fade') {
-                        noAudioFilter += `,fade=t=in:st=0:d=0.5,fade=t=out:st=4.5:d=0.5`;
+                        noAudioFilter += `,fade=t=in:st=0:d=0.3,fade=t=out:st=4.7:d=0.3`;
                     }
                     
                     execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -c:v libx264 -r 1 -t 5 -pix_fmt yuv420p -vf "${noAudioFilter}" -preset fast "${clipPath}"`, {
