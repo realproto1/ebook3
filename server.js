@@ -3084,51 +3084,80 @@ app.post('/api/generate-cover', requireAPIKey, async (req, res) => {
 });
 
 // 7. 동화책 저장/업데이트 API
+// 동화책 저장 함수 (POST와 PUT에서 공통 사용)
+async function saveStorybookToR2(storybook) {
+  if (!storybook.id) {
+    throw new Error('동화책 ID가 필요합니다.');
+  }
+  
+  console.log(`💾 Saving storybook: ${storybook.title} (ID: ${storybook.id})`);
+  
+  // R2에 JSON 파일로 저장
+  const filename = `storybook-${storybook.id}.json`;
+  const jsonContent = JSON.stringify(storybook, null, 2);
+  
+  const command = new PutObjectCommand({
+    Bucket: R2_BUCKET_NAME,
+    Key: filename,
+    Body: Buffer.from(jsonContent, 'utf-8'),
+    ContentType: 'application/json',
+  });
+  
+  await r2Client.send(command);
+  
+  console.log(`✅ Storybook saved to R2: ${filename}`);
+  
+  // 동화책 목록 인덱스 업데이트
+  console.log(`📝 [INDEX] Starting index update for: ${storybook.title}`);
+  await updateStorybooksIndex(storybook);
+  console.log(`✅ [INDEX] Index update completed`);
+  
+  return {
+    success: true,
+    id: storybook.id,
+    message: '동화책이 저장되었습니다.',
+    r2Url: `${R2_PUBLIC_URL}/${filename}`
+  };
+}
+
+// POST /api/storybooks - 새 동화책 생성
 app.post('/api/storybooks', async (req, res) => {
   try {
     const storybook = req.body;
-    
-    if (!storybook.id) {
-      return res.status(400).json({ 
-        success: false, 
-        error: '동화책 ID가 필요합니다.' 
-      });
-    }
-    
-    console.log(`💾 Saving storybook: ${storybook.title} (ID: ${storybook.id})`);
-    
-    // R2에 JSON 파일로 저장
-    const filename = `storybook-${storybook.id}.json`;
-    const jsonContent = JSON.stringify(storybook, null, 2);
-    
-    const command = new PutObjectCommand({
-      Bucket: R2_BUCKET_NAME,
-      Key: filename,
-      Body: Buffer.from(jsonContent, 'utf-8'),
-      ContentType: 'application/json',
-    });
-    
-    await r2Client.send(command);
-    
-    console.log(`✅ Storybook saved to R2: ${filename}`);
-    
-    // 동화책 목록 인덱스 업데이트
-    console.log(`📝 [INDEX] Starting index update for: ${storybook.title}`);
-    await updateStorybooksIndex(storybook);
-    console.log(`✅ [INDEX] Index update completed`);
-    
-    res.json({
-      success: true,
-      id: storybook.id,
-      message: '동화책이 저장되었습니다.',
-      r2Url: `${R2_PUBLIC_URL}/${filename}`
-    });
-    
+    const result = await saveStorybookToR2(storybook);
+    res.json(result);
   } catch (error) {
     console.error('동화책 저장 오류:', error);
     res.status(500).json({ 
       success: false,
       error: '동화책 저장 실패: ' + error.message
+    });
+  }
+});
+
+// PUT /api/storybooks/:id - 기존 동화책 업데이트
+app.put('/api/storybooks/:id', async (req, res) => {
+  try {
+    const storybook = req.body;
+    const id = req.params.id;
+    
+    // ID 검증
+    if (!storybook.id || storybook.id !== id) {
+      return res.status(400).json({ 
+        success: false, 
+        error: '동화책 ID가 일치하지 않습니다.' 
+      });
+    }
+    
+    console.log(`📝 Updating storybook: ${storybook.title} (ID: ${id})`);
+    
+    const result = await saveStorybookToR2(storybook);
+    res.json(result);
+  } catch (error) {
+    console.error('동화책 업데이트 오류:', error);
+    res.status(500).json({ 
+      success: false,
+      error: '동화책 업데이트 실패: ' + error.message
     });
   }
 });
