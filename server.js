@@ -3736,7 +3736,7 @@ app.get('/api/download-audio/:filename', async (req, res) => {
  * POST /api/generate-video
  * 동화책을 FFmpeg로 동영상으로 생성
  */
-app.post('/api/generate-video', async (c) => {
+app.post('/api/generate-video', async (req, res) => {
     try {
         const { 
             storybookId, 
@@ -3747,7 +3747,7 @@ app.post('/api/generate-video', async (c) => {
             includeBackgroundMusic,
             resolution,
             transition 
-        } = await c.req.json();
+        } = req.body;
         
         console.log('🎬 동영상 생성 요청:', {
             storybookId,
@@ -3762,37 +3762,45 @@ app.post('/api/generate-video', async (c) => {
         
         // 스토리북 가져오기
         const storybookKey = `storybook-${storybookId}.json`;
-        const storybookObject = await c.env.R2.get(storybookKey);
+        const storybookObject = await r2Client.send(new GetObjectCommand({
+            Bucket: config.r2.bucketName,
+            Key: storybookKey
+        }));
         
         if (!storybookObject) {
-            return c.json({ success: false, message: '동화책을 찾을 수 없습니다.' }, 404);
+            return res.status(404).json({ success: false, message: '동화책을 찾을 수 없습니다.' });
         }
         
-        const storybook = JSON.parse(await storybookObject.text());
+        const storybookText = await storybookObject.Body.transformToString();
+        const storybook = JSON.parse(storybookText);
         
         // 페이지 범위 추출
         const pages = storybook.pages.slice(startPage - 1, endPage);
         
         if (pages.length === 0) {
-            return c.json({ success: false, message: '선택한 페이지가 없습니다.' }, 400);
+            return res.status(400).json({ success: false, message: '선택한 페이지가 없습니다.' });
         }
         
         // 배경음악 URL 가져오기
         let backgroundMusicUrl = null;
         if (includeBackgroundMusic && storybook.backgroundMusicId) {
             const musicKey = `music-${storybook.backgroundMusicId}.json`;
-            const musicObject = await c.env.R2.get(musicKey);
-            if (musicObject) {
-                const music = JSON.parse(await musicObject.text());
+            try {
+                const musicObject = await r2Client.send(new GetObjectCommand({
+                    Bucket: config.r2.bucketName,
+                    Key: musicKey
+                }));
+                const musicText = await musicObject.Body.transformToString();
+                const music = JSON.parse(musicText);
                 backgroundMusicUrl = music.url;
+            } catch (err) {
+                console.warn('⚠️ 배경음악을 찾을 수 없습니다:', err.message);
             }
         }
         
         // 표지 이미지 URL
         const coverImageUrl = includeCover && storybook.coverImage ? storybook.coverImage : null;
         
-        // TODO: FFmpeg 동영상 생성 로직
-        // 현재는 임시로 성공 응답 반환
         console.log('📦 동영상 생성 데이터:', {
             pages: pages.length,
             coverImageUrl,
@@ -3801,32 +3809,198 @@ app.post('/api/generate-video', async (c) => {
             transition
         });
         
-        // 임시: 클라이언트에게 데이터만 전달
-        return c.json({
-            success: false,
-            message: '동영상 생성 기능은 구현 중입니다. 서버에서 FFmpeg를 실행해야 합니다.',
-            data: {
-                storybookTitle: storybook.title,
-                pages: pages.map(p => ({
-                    pageNumber: p.pageNumber,
-                    text: p.text,
-                    imageUrl: p.illustrationImage,
-                    ttsUrl: p.ttsAudio?.url || p.audioUrl
-                })),
-                coverImageUrl,
-                coverDuration,
-                backgroundMusicUrl,
-                resolution,
-                transition
+        // FFmpeg로 동영상 생성
+        const { execSync } = await import('child_process');
+        const fs = await import('fs');
+        const os = await import('os');
+        const pathModule = await import('path');
+        
+        // 임시 작업 디렉토리 생성
+        const workDir = pathModule.join(os.tmpdir(), `video-${storybookId}-${Date.now()}`);
+        fs.mkdirSync(workDir, { recursive: true });
+        
+        console.log('📁 작업 디렉토리:', workDir);
+        
+        try {
+            // 1. 이미지와 오디오 다운로드
+            console.log('⬇️ 에셋 다운로드 시작...');
+            
+            const downloadFile = async (url, filename) => {
+                const response = await axios.get(url, { responseType: 'arraybuffer' });
+                fs.writeFileSync(pathModule.join(workDir, filename), Buffer.from(response.data));
+            };
+            
+            // 표지 다운로드 (선택 시)
+            if (coverImageUrl) {
+                console.log('  → 표지 다운로드...');
+                await downloadFile(coverImageUrl, 'cover.jpg');
             }
-        });
+            
+            // 페이지 이미지 및 오디오 다운로드
+            for (let i = 0; i < pages.length; i++) {
+                const page = pages[i];
+                const pageNum = i + 1;
+                
+                console.log(`  → 페이지 ${pageNum} 다운로드...`);
+                
+                if (page.illustrationImage) {
+                    const ext = page.illustrationImage.includes('.png') ? 'png' : 'jpg';
+                    await downloadFile(page.illustrationImage, `page${pageNum}.${ext}`);
+                }
+                
+                const ttsUrl = page.ttsAudio?.url || page.audioUrl;
+                if (ttsUrl) {
+                    await downloadFile(ttsUrl, `page${pageNum}.wav`);
+                }
+            }
+            
+            // 배경음악 다운로드 (선택 시)
+            if (backgroundMusicUrl) {
+                console.log('  → 배경음악 다운로드...');
+                await downloadFile(backgroundMusicUrl, 'bgm.mp3');
+            }
+            
+            console.log('✅ 에셋 다운로드 완료');
+            
+            // 2. 해상도 설정
+            const resolutionMap = {
+                '720p': '1280:720',
+                '1080p': '1920:1080'
+            };
+            const videoSize = resolutionMap[resolution] || '1280:720';
+            
+            // 3. 클립 생성
+            console.log('🎞️ 클립 생성 시작...');
+            
+            const clips = [];
+            
+            // 표지 클립 생성 (선택 시)
+            if (coverImageUrl) {
+                console.log(`  → 표지 클립 생성 (${coverDuration}초)...`);
+                const coverClipPath = pathModule.join(workDir, 'clip_cover.mp4');
+                
+                execSync(`ffmpeg -loop 1 -i "${pathModule.join(workDir, 'cover.jpg')}" -c:v libx264 -t ${coverDuration} -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -preset ultrafast "${coverClipPath}"`, {
+                    cwd: workDir,
+                    stdio: 'pipe'
+                });
+                
+                clips.push(coverClipPath);
+            }
+            
+            // 페이지 클립 생성
+            for (let i = 0; i < pages.length; i++) {
+                const pageNum = i + 1;
+                console.log(`  → 페이지 ${pageNum} 클립 생성...`);
+                
+                const imagePath = fs.existsSync(pathModule.join(workDir, `page${pageNum}.png`)) 
+                    ? pathModule.join(workDir, `page${pageNum}.png`)
+                    : pathModule.join(workDir, `page${pageNum}.jpg`);
+                
+                const audioPath = pathModule.join(workDir, `page${pageNum}.wav`);
+                const clipPath = pathModule.join(workDir, `clip${pageNum}.mp4`);
+                
+                if (fs.existsSync(audioPath)) {
+                    // 오디오가 있으면 오디오 길이만큼 동영상 생성
+                    execSync(`ffmpeg -loop 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -shortest -preset ultrafast "${clipPath}"`, {
+                        cwd: workDir,
+                        stdio: 'pipe'
+                    });
+                } else {
+                    // 오디오가 없으면 5초 동영상
+                    execSync(`ffmpeg -loop 1 -i "${imagePath}" -c:v libx264 -t 5 -pix_fmt yuv420p -vf "scale=${videoSize}:force_original_aspect_ratio=decrease,pad=${videoSize}:(ow-iw)/2:(oh-ih)/2" -preset ultrafast "${clipPath}"`, {
+                        cwd: workDir,
+                        stdio: 'pipe'
+                    });
+                }
+                
+                clips.push(clipPath);
+            }
+            
+            console.log('✅ 클립 생성 완료');
+            
+            // 4. 클립 병합
+            console.log('🔗 클립 병합 시작...');
+            
+            const concatListPath = pathModule.join(workDir, 'concat.txt');
+            const concatContent = clips.map(clip => `file '${clip}'`).join('\n');
+            fs.writeFileSync(concatListPath, concatContent);
+            
+            const mergedVideoPath = pathModule.join(workDir, 'merged.mp4');
+            
+            execSync(`ffmpeg -f concat -safe 0 -i "${concatListPath}" -c copy "${mergedVideoPath}"`, {
+                cwd: workDir,
+                stdio: 'pipe'
+            });
+            
+            console.log('✅ 클립 병합 완료');
+            
+            // 5. 배경음악 믹싱 (선택 시)
+            let finalVideoPath = mergedVideoPath;
+            
+            if (backgroundMusicUrl && fs.existsSync(pathModule.join(workDir, 'bgm.mp3'))) {
+                console.log('🎵 배경음악 믹싱 시작...');
+                
+                const withBGMPath = pathModule.join(workDir, 'final_with_bgm.mp4');
+                
+                // 배경음악을 동영상 길이에 맞게 루프하고, TTS 음량 유지하면서 BGM 음량 낮춤
+                execSync(`ffmpeg -i "${mergedVideoPath}" -stream_loop -1 -i "${pathModule.join(workDir, 'bgm.mp3')}" -filter_complex "[0:a]volume=1.0[a1];[1:a]volume=0.2,aloop=loop=-1:size=2e+09[a2];[a1][a2]amix=inputs=2:duration=first[aout]" -map 0:v -map "[aout]" -c:v copy -c:a aac -shortest "${withBGMPath}"`, {
+                    cwd: workDir,
+                    stdio: 'pipe'
+                });
+                
+                finalVideoPath = withBGMPath;
+                console.log('✅ 배경음악 믹싱 완료');
+            }
+            
+            // 6. R2에 업로드
+            console.log('☁️ R2 업로드 시작...');
+            
+            const timestamp = Date.now();
+            const videoFilename = `${storybookId}-video-${timestamp}.mp4`;
+            const videoKey = `videos/${videoFilename}`;
+            
+            const videoBuffer = fs.readFileSync(finalVideoPath);
+            
+            await r2Client.send(new PutObjectCommand({
+                Bucket: config.r2.bucketName,
+                Key: videoKey,
+                Body: videoBuffer,
+                ContentType: 'video/mp4'
+            }));
+            
+            const videoUrl = `${config.r2.publicUrl}/${videoKey}`;
+            
+            console.log('✅ R2 업로드 완료:', videoUrl);
+            
+            // 7. 임시 파일 정리
+            console.log('🧹 임시 파일 정리...');
+            fs.rmSync(workDir, { recursive: true, force: true });
+            
+            console.log('✅ 동영상 생성 완료!');
+            
+            return res.json({
+                success: true,
+                videoUrl,
+                message: '동영상이 성공적으로 생성되었습니다.'
+            });
+            
+        } catch (error) {
+            console.error('❌ FFmpeg 실행 오류:', error);
+            
+            // 에러 발생 시 임시 파일 정리
+            try {
+                fs.rmSync(workDir, { recursive: true, force: true });
+            } catch {}
+            
+            throw error;
+        }
         
     } catch (error) {
         console.error('❌ 동영상 생성 오류:', error);
-        return c.json({ 
+        return res.status(500).json({ 
             success: false, 
             message: '동영상 생성 중 오류가 발생했습니다: ' + error.message 
-        }, 500);
+        });
     }
 });
 
