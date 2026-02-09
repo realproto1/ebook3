@@ -5534,6 +5534,116 @@ async function uploadBackgroundMusic() {
     }
 }
 
+// ===== 동영상 생성 관련 함수들 =====
+
+/**
+ * 동영상 생성 모달 열기
+ */
+function openVideoGenerationModal() {
+    if (!currentStorybook) {
+        alert('동화책을 먼저 선택해주세요.');
+        return;
+    }
+    
+    // 기본값 설정
+    document.getElementById('videoStartPage').value = 1;
+    document.getElementById('videoEndPage').value = currentStorybook.pages.length;
+    document.getElementById('videoStartPage').max = currentStorybook.pages.length;
+    document.getElementById('videoEndPage').max = currentStorybook.pages.length;
+    
+    // 모달 표시
+    const modal = document.getElementById('videoGenerationModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+/**
+ * 동영상 생성 모달 닫기
+ */
+function closeVideoGenerationModal() {
+    const modal = document.getElementById('videoGenerationModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+/**
+ * 동영상 생성 실행
+ */
+async function generateVideo() {
+    if (!currentStorybook) {
+        alert('동화책을 먼저 선택해주세요.');
+        return;
+    }
+    
+    // 입력값 가져오기
+    const startPage = parseInt(document.getElementById('videoStartPage').value);
+    const endPage = parseInt(document.getElementById('videoEndPage').value);
+    const includeCover = document.getElementById('videoIncludeCover').checked;
+    const coverDuration = parseInt(document.getElementById('videoCoverDuration').value);
+    const includeBackgroundMusic = document.getElementById('videoIncludeBackgroundMusic').checked;
+    const resolution = document.getElementById('videoResolution').value;
+    const transition = document.getElementById('videoTransition').value;
+    
+    // 유효성 검사
+    if (startPage < 1 || endPage > currentStorybook.pages.length || startPage > endPage) {
+        alert('페이지 범위가 올바르지 않습니다.');
+        return;
+    }
+    
+    // 버튼 비활성화
+    const btn = document.getElementById('generateVideoBtn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>동영상 생성 중...';
+    
+    try {
+        console.log('🎬 동영상 생성 시작:', {
+            storybookId: currentStorybook.id,
+            startPage,
+            endPage,
+            includeCover,
+            coverDuration,
+            includeBackgroundMusic,
+            resolution,
+            transition
+        });
+        
+        // API 호출
+        const response = await api.post('/api/generate-video', {
+            storybookId: currentStorybook.id,
+            startPage,
+            endPage,
+            includeCover,
+            coverDuration,
+            includeBackgroundMusic,
+            resolution,
+            transition
+        });
+        
+        if (response.success) {
+            // 성공 알림
+            alert(`✅ 동영상 생성 완료!\n\n다운로드 URL:\n${response.videoUrl}`);
+            
+            // 다운로드 링크 생성
+            const link = document.createElement('a');
+            link.href = response.videoUrl;
+            link.download = `${currentStorybook.title.replace(/[^a-zA-Z0-9가-힣]/g, '_')}_video.mp4`;
+            link.click();
+            
+            closeVideoGenerationModal();
+        } else {
+            throw new Error(response.message || '동영상 생성 실패');
+        }
+    } catch (error) {
+        console.error('❌ 동영상 생성 오류:', error);
+        alert('❌ 동영상 생성 실패: ' + error.message);
+    } finally {
+        // 버튼 복원
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
 // 배경음악 삭제
 async function deleteBackgroundMusic(id) {
     if (!confirm('이 배경음악을 삭제하시겠습니까?')) {
@@ -5841,6 +5951,11 @@ function downloadPageTTS(pageIndex) {
     window.uploadTTSAudio = uploadTTSAudio;
     window.uploadCharacter = uploadCharacter;
     window.uploadBackgroundMusic = uploadBackgroundMusic;
+    
+    // 동영상 생성 함수들
+    window.openVideoGenerationModal = openVideoGenerationModal;
+    window.closeVideoGenerationModal = closeVideoGenerationModal;
+    window.generateVideo = generateVideo;
     
     // 기타 함수 전역 노출
     window.updateStorybookCategory = updateStorybookCategory;

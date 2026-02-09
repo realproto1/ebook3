@@ -1,0 +1,813 @@
+{
+  "title": "빨간 모자 소녀*",
+  "theme": "숲 속에서 만난 늑대의 위험을 극복하고 할머니와 함께 안전을 찾는 이야기예요.",
+  "pages": [
+    {
+      "pageNumber": 1,
+      "text": "옛날 옛적, 푸른 숲 속 옆 작은 마을에 늘 빨간 모자를 쓰고 다니는 소녀가 살고 있었어요. 사람들은 소녀를 ‘빨간 모자’라고 불렀답니다.",
+      "scene_description": "푸른 숲과 작은 집들이 있는 평화로운 마을 풍경. 빨간 모자를 쓴 소녀가 환하게 웃으며 서 있어요. 햇살이 밝게 비치고 있어요.",
+      "scene_structure": {
+        "characters": "빨간 모자 소녀가 화면 중앙에 서서 미소 짓고 있어요. 뒤로는 작은 마을 집들이 보여요.",
+        "background": "푸른 나무가 우거진 숲과 아기자기한 마을 집들이 보여요.",
+        "atmosphere": "밝고 따뜻하며 평화로운 분위기예요. 행복한 느낌이 들어요."
+      },
+      "illustrationPrompt": "푸른 숲과 작은 집들이 있는 평화로운 마을 풍경. 빨간 모자를 쓴 소녀가 환하게 웃으며 서 있어요. 햇살이 밝게 비치고 있어요.",
+      "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page01-1770210299227.png",
+      "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+      "illustrationModel": "gemini-3-pro-image-preview",
+      "aspectRatio": "16:9",
+      "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n",
+      "ttsAudio": {
+        "url": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page1-ko-1770644903123.wav",
+        "model": "Puck"
+      },
+      "audioUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page1-ko-1770644903123.wav"
+    },
+    {
+      "pageNumber": 2,
+      "text": "어느 날, 빨간 모자 소녀의 할머니가 많이 아프셨어요. 빨간 모자 소녀는 할머니께 드릴 맛있는 빵과 과일들을 바구니에 담았어요.",
+      "scene_description": "빨간 모자 소녀가 부엌에서 작은 바구니에 빵과 과일을 조심스럽게 담고 있어요. 햇살이 창문으로 들어와 밝아요.",
+      "scene_structure": {
+        "characters": "빨간 모자 소녀가 테이블 옆에 서서 바구니에 음식을 담고 있어요. 얼굴에는 할머니를 걱정하는 마음이 살짝 보여요.",
+        "background": "따뜻한 느낌의 주방 안이에요. 창밖으로는 파란 하늘이 보여요.",
+        "atmosphere": "차분하고 따뜻한 느낌이에요. 할머니를 생각하는 다정한 마음이 느껴져요."
+      },
+      "illustrationPrompt": "빨간 모자 소녀가 부엌에서 작은 바구니에 빵과 과일을 조심스럽게 담고 있어요. 햇살이 창문으로 들어와 밝아요.",
+      "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page02-1770210345878.png",
+      "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+      "illustrationModel": "gemini-3-pro-image-preview",
+      "aspectRatio": "16:9",
+      "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n",
+      "ttsAudio": {
+        "url": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page2-ko-1770644964433.wav",
+        "model": "Puck"
+      },
+      "audioUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page2-ko-1770644964433.wav"
+    },
+    {
+      "pageNumber": 3,
+      "text": "빨간 모자 소녀는 콧노래를 부르며 숲길을 걷고 있었어요. 그런데 갑자기! 나무 뒤에서 커다란 늑대가 불쑥 나타났어요.",
+      "scene_description": "어두운 숲길에서 빨간 모자 소녀가 걷고 있어요. 뒤쪽 커다란 나무 뒤에서 늑대가 슬그머니 나타나 소녀를 바라보고 있어요. 늑대는 살짝 웃고 있어요.",
+      "scene_structure": {
+        "characters": "빨간 모자 소녀가 숲길 중앙을 걷고 있어요. 늑대가 소녀의 왼쪽 뒤편 큰 나무 옆에서 고개를 내밀고 있어요.",
+        "background": "울창한 나무들이 가득한 숲속 길이에요. 나뭇잎 사이로 햇빛이 조금 비쳐요.",
+        "atmosphere": "처음에는 밝지만, 늑대 등장 후 살짝 긴장감이 돌아요. 늑대의 음흉한 눈빛이 강조되어요."
+      },
+      "illustrationPrompt": "어두운 숲길에서 빨간 모자 소녀가 걷고 있어요. 뒤쪽 커다란 나무 뒤에서 늑대가 슬그머니 나타나 소녀를 바라보고 있어요. 늑대는 살짝 웃고 있어요.",
+      "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page3-1770631557085.jfif",
+      "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+      "illustrationModel": "gemini-3-pro-image-preview",
+      "aspectRatio": "16:9",
+      "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n",
+      "illustrationHistory": [
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page03-1770210384377.png"
+      ],
+      "ttsAudio": {
+        "url": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page3-ko-1770644982583.wav",
+        "model": "Puck"
+      },
+      "audioUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page3-ko-1770644982583.wav"
+    },
+    {
+      "pageNumber": 4,
+      "text": "“안녕 예쁜 아가씨! 어디로 가는 길이니?” 늑대가 물었어요. 빨간 모자 소녀는 깜짝 놀랐지만, 착한 마음에 천천히 대답했어요. “네, 할머니 댁에 가는 길이에요. 할머니가 아프셔서요.”",
+      "scene_description": "빨간 모자 소녀와 늑대가 숲길에서 마주 보고 서 있어요. 빨간 모자는 살짝 놀란 표정이고, 늑대는 여전히 부드러운 표정을 짓고 있어요. 바구니를 꼭 잡고 있어요.",
+      "scene_structure": {
+        "characters": "빨간 모자 소녀는 늑대를 마주 보고, 늑대는 소녀를 내려다보고 있어요.",
+        "background": "초록색 잎이 무성한 숲길이에요. 햇살이 나뭇가지 사이로 내려와요.",
+        "atmosphere": "겉으로는 평화롭지만, 늑대의 속마음 때문에 불안감이 느껴져요. 살짝 긴장된 분위기예요."
+      },
+      "illustrationPrompt": "빨간 모자 소녀와 늑대가 숲길에서 마주 보고 서 있어요. 빨간 모자는 살짝 놀란 표정이고, 늑대는 여전히 부드러운 표정을 짓고 있어요. 바구니를 꼭 잡고 있어요.",
+      "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page4-1770616707618.jfif",
+      "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+      "illustrationModel": "gemini-3-pro-image-preview",
+      "aspectRatio": "16:9",
+      "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n",
+      "illustrationHistory": [
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page04-1770210430767.png"
+      ],
+      "ttsAudio": {
+        "url": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page4-ko-1770645018370.wav",
+        "model": "Puck"
+      },
+      "audioUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page4-ko-1770645018370.wav"
+    },
+    {
+      "pageNumber": 5,
+      "text": "늑대는 근처에 할머니가 있다는 사실을 알게 되었어요. 늑대는 고개를 끄덕이며 씨익 웃었어요. 마음속으로는 음흉한 계획을 세우고 있었답니다. '내가 먼저 가야겠어!'",
+      "scene_description": "늑대가 뒤돌아서서 먼 곳을 바라보며 사악하게 웃고 있어요. 빨간 모자는 늑대의 뒷모습을 보며 아무것도 모르고 서 있어요. 늑대의 눈빛이 아주 교활해 보여요.",
+      "scene_structure": {
+        "characters": "늑대가 화면 중앙을 향해 살짝 옆모습을 보이며 서 있어요. 빨간 모자 소녀는 뒤편에서 작은 모습으로 서 있어요.",
+        "background": "깊은 숲이 끝없이 이어지는 모습이 보여요.",
+        "atmosphere": "늑대의 사악한 계획 때문에 어둡고 긴장된 분위기가 더해져요."
+      },
+      "illustrationPrompt": "늑대가 뒤돌아서서 먼 곳을 바라보며 사악하게 웃고 있어요. 빨간 모자는 늑대의 뒷모습을 보며 아무것도 모르고 서 있어요. 늑대의 눈빛이 아주 교활해 보여요.",
+      "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page5-1770617285671.jfif",
+      "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+      "illustrationModel": "gemini-3-pro-image-preview",
+      "aspectRatio": "16:9",
+      "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n",
+      "illustrationHistory": [
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page05-1770210489621.png"
+      ],
+      "ttsAudio": {
+        "url": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page5-ko-1770641561867.wav",
+        "model": "Puck"
+      },
+      "audioUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page5-ko-1770641561867.wav"
+    },
+    {
+      "pageNumber": 6,
+      "text": "늑대는 꾀를 부렸어요. “저기 저 길에 예쁜 꽃들이 아주 많단다. 할머니께 가져다 드리면 분명 좋아하실 거야. 늑대는 달콤한 목소리로 말했어요.",
+      "scene_description": "늑대가 빨간 모자 소녀에게 손짓하며 숲속의 한 방향을 가리키고 있어요. 빨간 모자는 늑대가 가리키는 곳을 궁금한 눈빛으로 바라보고 있어요. 숲속에 예쁜 꽃들이 피어 있어요.",
+      "scene_structure": {
+        "characters": "늑대가 빨간 모자 소녀 옆에 서서 손으로 한쪽 숲길을 가리키고 있어요. 빨간 모자 소녀는 그곳을 바라보고 있어요.",
+        "background": "숲길 옆으로 알록달록한 꽃들이 많이 피어있는 꽃밭이 보여요.",
+        "atmosphere": "늑대의 교활함이 느껴지지만, 꽃밭은 예뻐서 아이들을 유혹하는 느낌이에요."
+      },
+      "illustrationPrompt": "늑대가 빨간 모자 소녀에게 손짓하며 숲속의 한 방향을 가리키고 있어요. 빨간 모자는 늑대가 가리키는 곳을 궁금한 눈빛으로 바라보고 있어요. 숲속에 예쁜 꽃들이 피어 있어요.",
+      "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page6-1770630787672.jfif",
+      "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+      "illustrationModel": "gemini-3-pro-image-preview",
+      "aspectRatio": "16:9",
+      "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n",
+      "illustrationHistory": [
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page6-1770620520216.jfif",
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page06-1770210537079.png"
+      ],
+      "ttsAudio": {
+        "url": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page6-ko-1770641569784.wav",
+        "model": "Puck"
+      },
+      "audioUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page6-ko-1770641569784.wav"
+    },
+    {
+      "pageNumber": 7,
+      "text": "빨간 모자 소녀는 잠시 생각했어요. 꽃을 좋아하시는 할머니의 얼굴이 떠올랐지요. 그래서 빨간 모자 소녀는 늑대의 말대로 숲길을 벗어나고 말았어요.",
+      "scene_description": "빨간 모자 소녀가 숲길에서 벗어나 꽃밭으로 발걸음을 옮기고 있어요. 뒤편에는 늑대가 만족스러운 표정으로 빨간 모자를 바라보고 있어요. 꽃들이 예쁘게 피어 있어요.",
+      "scene_structure": {
+        "characters": "빨간 모자 소녀가 꽃밭으로 향하고 있어요. 늑대는 뒤에서 소녀를 지켜보며 음흉하게 웃고 있어요.",
+        "background": "아름다운 꽃들이 가득한 넓은 꽃밭과 울창한 숲이 보여요.",
+        "atmosphere": "빨간 모자 소녀의 순수한 마음과 늑대의 사악한 마음이 대비되어요."
+      },
+      "illustrationPrompt": "빨간 모자 소녀가 숲길에서 벗어나 꽃밭으로 발걸음을 옮기고 있어요. 뒤편에는 늑대가 만족스러운 표정으로 빨간 모자를 바라보고 있어요. 꽃들이 예쁘게 피어 있어요.",
+      "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page07-1770210578832.png",
+      "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+      "illustrationModel": "gemini-3-pro-image-preview",
+      "aspectRatio": "16:9",
+      "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n",
+      "ttsAudio": {
+        "url": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page7-ko-1770645045639.wav",
+        "model": "Puck"
+      },
+      "audioUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page7-ko-1770645045639.wav"
+    },
+    {
+      "pageNumber": 8,
+      "text": "빨간 모자 소녀가 꽃을 고르는 동안, 늑대는 재빨리 숲을 가로질러 할머니의 집으로 달려갔어요. 늑대는 아주 아주 빨랐지요.",
+      "scene_description": "빨간 모자 소녀가 꽃밭에서 행복하게 꽃을 꺾고 있어요. 멀리 배경에는 늑대가 빠른 속도로 숲길을 달려가는 모습이 작게 보여요. 빨간 모자는 아무것도 모르고 있어요.",
+      "scene_structure": {
+        "characters": "빨간 모자 소녀가 꽃밭에서 꽃을 꺾고 있어요. 늑대는 멀리 배경에서 아주 빠르게 달려가는 모습으로 작게 보여요.",
+        "background": "화려한 꽃밭과 그 너머로 깊은 숲이 보여요.",
+        "atmosphere": "평화로운 꽃밭과 대비되는 늑대의 빠른 움직임이 긴장감을 주어요."
+      },
+      "illustrationPrompt": "빨간 모자 소녀가 꽃밭에서 행복하게 꽃을 꺾고 있어요. 멀리 배경에는 늑대가 빠른 속도로 숲길을 달려가는 모습이 작게 보여요. 빨간 모자는 아무것도 모르고 있어요.",
+      "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page08-1770210628548.png",
+      "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+      "illustrationModel": "gemini-3-pro-image-preview",
+      "aspectRatio": "16:9",
+      "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n",
+      "ttsAudio": {
+        "url": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page8-ko-1770641704516.wav",
+        "model": "Puck"
+      },
+      "audioUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page8-ko-1770641704516.wav"
+    },
+    {
+      "pageNumber": 9,
+      "text": "늑대는 할머니 집에 도착해 문을 똑똑 두드렸어요. “할머니, 저예요.” 빨간 모자 소녀를 흉내 내며 속삭이자, 할머니는 문을 활짝 열어주셨어요.",
+      "scene_description": "늑대가 할머니 집 문 앞에서 손가락으로 문을 똑똑 두드리고 있어요. 늑대는 할머니 목소리를 흉내 내는 표정을 짓고 있어요. 집 안에서 할머니의 실루엣이 보여요.",
+      "scene_structure": {
+        "characters": "늑대가 할머니 집 문 앞에 서서 문을 두드리고 있어요. 문이 살짝 열리면서 할머니의 모습이 보여요.",
+        "background": "숲속의 작은 오두막집 문 앞이에요. 주변에는 나무들이 서 있어요.",
+        "atmosphere": "늑대의 속임수 때문에 긴장감이 느껴져요. 곧 위험한 일이 일어날 것 같아요."
+      },
+      "illustrationPrompt": "늑대가 할머니 집 문 앞에서 손가락으로 문을 똑똑 두드리고 있어요. 늑대는 할머니 목소리를 흉내 내는 표정을 짓고 있어요. 집 안에서 할머니의 실루엣이 보여요.",
+      "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page09-1770210668681.png",
+      "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+      "illustrationModel": "gemini-3-pro-image-preview",
+      "aspectRatio": "16:9",
+      "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n",
+      "ttsAudio": {
+        "url": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page9-ko-1770641713267.wav",
+        "model": "Puck"
+      },
+      "audioUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page9-ko-1770641713267.wav"
+    },
+    {
+      "pageNumber": 10,
+      "text": "문이 열리자 늑대는 번개처럼 할머니를 꿀꺽 삼켰어요. 그리고 침대에 누워 이불을 목까지 덮고 빨간 모자 소녀를 기다렸지요.",
+      "scene_description": "늑대가 침대에 누워 이불을 머리끝까지 덮고 있어요. 늑대의 배가 불룩 튀어나와 있어요. 할머니의 안경이 침대 옆 탁자에 놓여 있어요. 어두운 방 안이에요.",
+      "scene_structure": {
+        "characters": "늑대가 침대에 누워 이불을 덮고 있어요. 얼굴은 보이지 않지만, 불룩한 배가 강조되어 보여요.",
+        "background": "작고 어두운 할머니의 침실이에요. 창문에서 희미한 빛이 들어와요.",
+        "atmosphere": "어둡고 무서운 분위기예요. 늑대의 사악함이 잘 드러나요."
+      },
+      "illustrationPrompt": "늑대가 침대에 누워 이불을 머리끝까지 덮고 있어요. 늑대의 배가 불룩 튀어나와 있어요. 할머니의 안경이 침대 옆 탁자에 놓여 있어요. 어두운 방 안이에요.",
+      "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page10-1770631868955.jfif",
+      "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+      "illustrationModel": "gemini-3-pro-image-preview",
+      "aspectRatio": "16:9",
+      "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n",
+      "illustrationHistory": [
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page10-1770621094230.jfif",
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page10-1770620827202.jfif",
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page10-1770210729272.png"
+      ],
+      "ttsAudio": {
+        "url": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page10-ko-1770641721137.wav",
+        "model": "Puck"
+      },
+      "audioUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page10-ko-1770641721137.wav"
+    },
+    {
+      "pageNumber": 11,
+      "text": "잠시 후, 빨간 모자 소녀가 할머니 집에 도착했어요. “할머니, 저 왔어요!” 그러자 침대 속에서 아주 낮은 목소리가 들려왔지요. “들어오렴, 아가.”",
+      "scene_description": "빨간 모자 소녀가 할머니 집 문을 열고 조용히 안으로 들어서고 있어요. 침대에 누워있는 늑대(할머니로 변장)의 실루엣이 어렴풋이 보여요. 집 안은 살짝 어두워요.",
+      "scene_structure": {
+        "characters": "빨간 모자 소녀가 문가에 서서 침대 쪽을 바라보고 있어요. 침대에는 늑대가 누워 있어요.",
+        "background": "할머니 집의 거실과 침실이 이어지는 풍경이에요. 살짝 어두운 실내 공간이에요.",
+        "atmosphere": "고요하고 살짝 불안한 분위기예요. 늑대의 속임수 때문에 긴장감이 느껴져요."
+      },
+      "illustrationPrompt": "빨간 모자 소녀가 할머니 집 문을 열고 조용히 안으로 들어서고 있어요. 침대에 누워있는 늑대(할머니로 변장)의 실루엣이 어렴풋이 보여요. 집 안은 살짝 어두워요.할머니의 안경이 침대 옆 탁자에 놓여 있어요.",
+      "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page11-1770630338013.jfif",
+      "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+      "illustrationModel": "gemini-3-pro-image-preview",
+      "aspectRatio": "16:9",
+      "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n",
+      "illustrationHistory": [
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page11-1770621545930.jfif",
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page11-1770621469121.png",
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page11-1770210772626.png"
+      ],
+      "ttsAudio": {
+        "url": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page11-ko-1770643950752.wav",
+        "model": "Puck"
+      },
+      "audioUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page11-ko-1770643950752.wav"
+    },
+    {
+      "pageNumber": 12,
+      "text": "빨간 모자 소녀는 침대 가까이 다가갔어요. “할머니, 귀가 왜 이렇게 커요?” 늑대가 말했어요. “네 목소리를 잘 들으려고.” “그럼 눈은 왜 이렇게 커요?” “너를 더 잘 보려고.” 빨간 모자 소녀는 다시 물었어요. “그럼… 입은 왜 이렇게 커요?”",
+      "scene_description": "빨간 모자 소녀가 침대 옆에 서서 할머니로 변장한 늑대를 빤히 바라보고 있어요. 늑대의 귀, 눈, 입이 점점 더 커지는 모습이 강조되어 보여요. 빨간 모자의 얼굴에는 의아한 표정이 있어요.",
+      "scene_structure": {
+        "characters": "빨간 모자 소녀가 침대 옆에 서서 늑대(변장)를 바라보고 있어요. 늑대는 이불을 덮은 채 몸을 웅크리고 있어요.",
+        "background": "할머니의 침실이에요. 침대 주변의 작은 가구들이 보여요.",
+        "atmosphere": "점점 더 긴장되고 무서운 분위기예요. 빨간 모자의 질문에 늑대가 당황하는 모습이 살짝 보여요."
+      },
+      "illustrationPrompt": "빨간 모자 소녀가 침대 옆에 서서 할머니로 변장한 늑대를 빤히 바라보고 있어요. 늑대의 귀, 눈, 입이 점점 더 커지는 모습이 강조되어 보여요. 빨간 모자의 얼굴에는 의아한 표정이 있어요.",
+      "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page12-1770645923555.jfif",
+      "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+      "illustrationModel": "gemini-3-pro-image-preview",
+      "aspectRatio": "16:9",
+      "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n",
+      "illustrationHistory": [
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page12-1770623309716.jfif",
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page12-1770622062496.jfif",
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page12-1770210821901.png"
+      ],
+      "ttsAudio": {
+        "url": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page12-ko-1770641806761.wav",
+        "model": "Puck"
+      },
+      "audioUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page12-ko-1770641806761.wav"
+    },
+    {
+      "pageNumber": 13,
+      "text": "그 순간, 늑대가 벌떡 일어나 무섭게 소리쳤어요!\n“너를 잡아먹으려고!”\n늑대는 빨간 모자 소녀도 한입에 꿀꺽 삼켰지요. 배가 더 빵빵해진 늑대는 그 자리에서 스르륵 잠들었어요.",
+      "scene_description": "늑대가 침대에서 벌떡 일어나서 크게 입을 벌리고 있어요. 빨간 모자 소녀는 놀라서 비명을 지르고 있어요. 늑대의 커다란 입이 강조되어 무서운 분위기예요. 이내 늑대가 잠들어 코를 골고 있어요.",
+      "scene_structure": {
+        "characters": "늑대가 침대에서 벌떡 일어나 빨간 모자 소녀를 향해 입을 벌리고 있어요. 빨간 모자 소녀는 놀라서 뒤로 물러나고 있어요.",
+        "background": "어두운 할머니의 침실이에요. 침대와 벽이 보여요.",
+        "atmosphere": "아주 무섭고 긴장된 분위기예요. 절정의 순간이 잘 드러나요."
+      },
+      "illustrationPrompt": "늑대가 침대에서 벌떡 일어나서 크게 입을 벌리고 있어요. 빨간 모자 소녀는 놀라서 비명을 지르고 있어요. 늑대의 커다란 입이 강조되어 무서운 분위기예요. 이내 늑대가 잠들어 코를 골고 있어요.",
+      "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page13-1770624163169.jfif",
+      "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+      "illustrationModel": "gemini-3-pro-image-preview",
+      "aspectRatio": "16:9",
+      "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n",
+      "illustrationHistory": [
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page13-1770210870393.png"
+      ],
+      "ttsAudio": {
+        "url": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page13-ko-1770641818202.wav",
+        "model": "Puck"
+      },
+      "audioUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page13-ko-1770641818202.wav"
+    },
+    {
+      "pageNumber": 14,
+      "text": "마침 그때, 집 근처를 지나던 씩씩한 사냥꾼이 있었어요.\n사냥꾼은 늑대의 커다란 코고는 소리를 듣고 이상하게 여겼지요.\n눈치 빠른 사냥꾼은 조용히 집 안으로 들어가,\n늑대의 배를 가르고 할머니와 빨간 모자 소녀를 구해냈어요.",
+      "scene_description": "사냥꾼이 커다란 칼을 들고 잠든 늑대 배 옆에 서 있어요. 늑대의 배가 열려 있고, 그 안에서 할머니와 빨간 모자 소녀가 조심스럽게 나오고 있어요. 사냥꾼은 용감한 표정이에요.",
+      "scene_structure": {
+        "characters": "잠든 늑대가 침대에 누워있고, 사냥꾼이 그 옆에 서 있어요. 할머니와 빨간 모자 소녀가 늑대의 배 속에서 나오고 있어요.",
+        "background": "할머니의 침실이에요. 침대와 벽이 보여요.",
+        "atmosphere": "무서움이 가시고 안심하는 분위기예요. 사냥꾼의 용감함이 느껴져요."
+      },
+      "illustrationPrompt": "사냥꾼이 커다란 칼을 들고 잠든 늑대 배 옆에 서 있어요. 늑대의 배가 열려 있고, 그 안에서 할머니와 빨간 모자 소녀가 조심스럽게 나오고 있어요. 사냥꾼은 용감한 표정이에요.",
+      "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page14-1770626516737.jfif",
+      "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+      "illustrationModel": "gemini-3-pro-image-preview",
+      "aspectRatio": "16:9",
+      "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n",
+      "illustrationHistory": [
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page14-1770210927024.png"
+      ],
+      "ttsAudio": {
+        "url": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page14-ko-1770645785650.wav",
+        "model": "Puck"
+      },
+      "audioUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page14-ko-1770645785650.wav"
+    },
+    {
+      "pageNumber": 15,
+      "text": "사냥꾼은 늑대의 배에 무거운 돌들을 넣고 꿰맸어요.\n늑대는 더 이상 누구도 해치지 못했지요.\n빨간 모자 소녀는 할머니 손을 꼭 잡고\n낯선 사람의 말은 듣지 않겠다고 약속했어요.\n그 후로 할머니와 빨간 모자 소녀는 오래 오래 행복하게 살았답니다.",
+      "scene_description": "할머니와 빨간 모자 소녀가 서로의 손을 꼭 잡고 웃고 있어요. 사냥꾼은 그들을 흐뭇하게 바라보고 있어요. 멀리 배경에는 무거운 돌멩이로 배가 채워진 늑대가 잠들어 있어요. 따뜻하고 행복한 분위기예요.",
+      "scene_structure": {
+        "characters": "빨간 모자 소녀와 할머니가 화면 중앙에서 손을 잡고 행복하게 웃고 있어요. 사냥꾼이 그들 뒤에서 미소 짓고 서 있어요. 늑대는 멀리 배경에 작게 잠들어 있어요.",
+        "background": "할머니의 집 안, 따뜻한 거실이에요. 창밖으로 햇살이 들어와요.",
+        "atmosphere": "아주 평화롭고 행복한 분위기예요. 위험이 사라지고 모두가 안심하는 모습이에요."
+      },
+      "illustrationPrompt": "할머니와 빨간 모자 소녀가 서로의 손을 꼭 잡고 웃고 있어요. 사냥꾼은 그들을 흐뭇하게 바라보고 있어요. 멀리 배경에는 무거운 돌멩이로 배가 채워진 늑대가 잠들어 있어요. 따뜻하고 행복한 분위기예요.",
+      "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page15-1770629511442.jfif",
+      "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+      "illustrationModel": "gemini-3-pro-image-preview",
+      "aspectRatio": "16:9",
+      "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n",
+      "illustrationHistory": [
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page15-1770210974814.png"
+      ],
+      "ttsAudio": {
+        "url": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page15-ko-1770641849965.wav",
+        "model": "Puck"
+      },
+      "audioUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간-모자-소녀--tts-page15-ko-1770641849965.wav"
+    }
+  ],
+  "characters": [
+    {
+      "name": "빨간 모자 소녀",
+      "role": "주인공",
+      "description": "항상 빨간 모자를 쓰고 다니는 착하고 순수한 소녀. 할머니를 사랑하는 마음이 깊어요.",
+      "age": "5세",
+      "height": 100,
+      "referenceImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-character-빨간모자-1770210113664.png",
+      "imageHistory": [
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-character-빨간모자-1770210077632.png"
+      ]
+    },
+    {
+      "name": "할머니",
+      "role": "조연",
+      "description": "빨간 모자의 할머니. 몸이 약해서 숲속 집에 혼자 살아요. 빨간 모자를 무척 아껴요. 할머니는 모자를 쓰지 않는다.",
+      "age": "노인",
+      "height": 150,
+      "referenceImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-character-할머니-1770616655806.png",
+      "imageHistory": [
+        "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-character-할머니-1770210118781.png"
+      ]
+    },
+    {
+      "name": "늑대",
+      "role": "악당",
+      "description": "크고 사악하며 교활한 늑대. 사람들을 속여 잡아먹으려는 나쁜 마음을 가지고 있어요.",
+      "age": "성인",
+      "height": 180,
+      "referenceImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-character-늑대-1770210115070.png"
+    },
+    {
+      "name": "사냥꾼",
+      "role": "조력자",
+      "description": "용감하고 힘센 사냥꾼. 숲속의 위험으로부터 사람들을 지켜주는 정의로운 사람이에요.",
+      "age": "성인",
+      "height": 185,
+      "referenceImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-character-사냥꾼-1770210117221.png"
+    }
+  ],
+  "educational_content": {
+    "vocabulary": [
+      {
+        "word": "Hood",
+        "korean": "모자",
+        "definition": "머리에 쓰는 물건이에요. 따뜻하게 하거나 햇볕을 가려줘요.",
+        "example": "빨간 모자 소녀는 예쁜 빨간 모자를 썼어요."
+      },
+      {
+        "word": "Village",
+        "korean": "마을",
+        "definition": "사람들이 모여 사는 작은 동네예요. 집들이 모여 있어요.",
+        "example": "빨간 모자 소녀는 숲 옆 마을에 살았어요."
+      },
+      {
+        "word": "Forest",
+        "korean": "숲",
+        "definition": "나무가 아주 많이 있는 곳이에요. 동물들도 많이 살아요.",
+        "example": "빨간 모자 소녀는 숲길을 걸어갔어요."
+      },
+      {
+        "word": "Basket",
+        "korean": "바구니",
+        "definition": "물건을 담는 그릇이에요. 손잡이가 있어서 들고 다닐 수 있어요.",
+        "example": "빨간 모자 소녀는 바구니에 빵을 담았어요."
+      },
+      {
+        "word": "Bread",
+        "korean": "빵",
+        "definition": "밀가루로 만들어 오븐에 구운 음식이에요. 맛있는 냄새가 나요.",
+        "example": "빨간 모자 소녀는 할머니께 빵을 가져다드렸어요."
+      },
+      {
+        "word": "Wolf",
+        "korean": "늑대",
+        "definition": "숲에 사는 동물이에요. 개처럼 생겼지만 더 크고 야생적이에요.",
+        "example": "커다란 늑대가 빨간 모자 소녀 앞에 나타났어요."
+      },
+      {
+        "word": "Flower",
+        "korean": "꽃",
+        "definition": "아름다운 색깔과 향기를 가진 식물이에요. 풀밭이나 나무에 피어요.",
+        "example": "늑대는 빨간 모자에게 꽃을 꺾으라고 말했어요."
+      },
+      {
+        "word": "House",
+        "korean": "집",
+        "definition": "사람들이 먹고 자고 쉬는 건물이에요. 가족과 함께 살아요.",
+        "example": "할머니는 숲속 작은 집에 살았어요."
+      },
+      {
+        "word": "Bed",
+        "korean": "침대",
+        "definition": "사람이 누워서 편안하게 잠을 자는 가구예요.",
+        "example": "늑대는 침대에 누워 할머니인 척했어요."
+      },
+      {
+        "word": "Stone",
+        "korean": "돌멩이",
+        "definition": "땅에 굴러다니는 작고 단단한 돌이에요. 여러 모양과 크기가 있어요.",
+        "example": "사냥꾼은 늑대 배 속에 돌멩이를 넣었어요."
+      }
+    ]
+  },
+  "key_objects": [
+    {
+      "name": "Hood",
+      "korean": "모자",
+      "description": "머리에 쓰는 물건이에요. 따뜻하게 하거나 햇볕을 가려줘요.",
+      "definition": "머리에 쓰는 물건이에요. 따뜻하게 하거나 햇볕을 가려줘요.",
+      "example": "빨간 모자 소녀는 예쁜 빨간 모자를 썼어요.",
+      "size": "medium",
+      "sizeCm": 86
+    },
+    {
+      "name": "Village",
+      "korean": "마을",
+      "description": "사람들이 모여 사는 작은 동네예요. 집들이 모여 있어요.",
+      "definition": "사람들이 모여 사는 작은 동네예요. 집들이 모여 있어요.",
+      "example": "빨간 모자 소녀는 숲 옆 마을에 살았어요.",
+      "size": "large",
+      "sizeCm": 110
+    },
+    {
+      "name": "Forest",
+      "korean": "숲",
+      "description": "나무가 아주 많이 있는 곳이에요. 동물들도 많이 살아요.",
+      "definition": "나무가 아주 많이 있는 곳이에요. 동물들도 많이 살아요.",
+      "example": "빨간 모자 소녀는 숲길을 걸어갔어요.",
+      "size": "medium",
+      "sizeCm": 68
+    },
+    {
+      "name": "Basket",
+      "korean": "바구니",
+      "description": "물건을 담는 그릇이에요. 손잡이가 있어서 들고 다닐 수 있어요.",
+      "definition": "물건을 담는 그릇이에요. 손잡이가 있어서 들고 다닐 수 있어요.",
+      "example": "빨간 모자 소녀는 바구니에 빵을 담았어요.",
+      "size": "large",
+      "sizeCm": 170
+    },
+    {
+      "name": "Bread",
+      "korean": "빵",
+      "description": "밀가루로 만들어 오븐에 구운 음식이에요. 맛있는 냄새가 나요.",
+      "definition": "밀가루로 만들어 오븐에 구운 음식이에요. 맛있는 냄새가 나요.",
+      "example": "빨간 모자 소녀는 할머니께 빵을 가져다드렸어요.",
+      "size": "medium",
+      "sizeCm": 99
+    },
+    {
+      "name": "Flower",
+      "korean": "꽃",
+      "description": "아름다운 색깔과 향기를 가진 식물이에요. 풀밭이나 나무에 피어요.",
+      "definition": "아름다운 색깔과 향기를 가진 식물이에요. 풀밭이나 나무에 피어요.",
+      "example": "늑대는 빨간 모자에게 꽃을 꺾으라고 말했어요.",
+      "size": "medium",
+      "sizeCm": 59
+    },
+    {
+      "name": "House",
+      "korean": "집",
+      "description": "사람들이 먹고 자고 쉬는 건물이에요. 가족과 함께 살아요.",
+      "definition": "사람들이 먹고 자고 쉬는 건물이에요. 가족과 함께 살아요.",
+      "example": "할머니는 숲속 작은 집에 살았어요.",
+      "size": "large",
+      "sizeCm": 127
+    },
+    {
+      "name": "Bed",
+      "korean": "침대",
+      "description": "사람이 누워서 편안하게 잠을 자는 가구예요.",
+      "definition": "사람이 누워서 편안하게 잠을 자는 가구예요.",
+      "example": "늑대는 침대에 누워 할머니인 척했어요.",
+      "size": "large",
+      "sizeCm": 175
+    },
+    {
+      "name": "Stone",
+      "korean": "돌멩이",
+      "description": "땅에 굴러다니는 작고 단단한 돌이에요. 여러 모양과 크기가 있어요.",
+      "definition": "땅에 굴러다니는 작고 단단한 돌이에요. 여러 모양과 크기가 있어요.",
+      "example": "사냥꾼은 늑대 배 속에 돌멩이를 넣었어요.",
+      "size": "large",
+      "sizeCm": 190
+    }
+  ],
+  "id": "1770209480564",
+  "targetAge": "5",
+  "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+  "createdAt": "2026-02-04T12:51:20.565Z",
+  "category": "기타",
+  "r2JsonUrl": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/storybook-1770209480564.json",
+  "languages": [
+    "ko"
+  ],
+  "translations": {
+    "ko": [
+      {
+        "pageNumber": 1,
+        "text": "옛날 옛적, 푸른 숲 옆에 작은 마을이 있었어요. 이 마을에는 예쁜 빨간 모자를 항상 쓰고 다니는 소녀가 살고 있었답니다. 사람들은 이 소녀를 ‘빨간 모자’라고 불렀어요.",
+        "scene_description": "푸른 숲과 작은 집들이 있는 평화로운 마을 풍경. 빨간 모자를 쓴 소녀가 환하게 웃으며 서 있어요. 햇살이 밝게 비치고 있어요.",
+        "scene_structure": {
+          "characters": "빨간 모자 소녀가 화면 중앙에 서서 미소 짓고 있어요. 뒤로는 작은 마을 집들이 보여요.",
+          "background": "푸른 나무가 우거진 숲과 아기자기한 마을 집들이 보여요.",
+          "atmosphere": "밝고 따뜻하며 평화로운 분위기예요. 행복한 느낌이 들어요."
+        },
+        "illustrationPrompt": "푸른 숲과 작은 집들이 있는 평화로운 마을 풍경. 빨간 모자를 쓴 소녀가 환하게 웃으며 서 있어요. 햇살이 밝게 비치고 있어요.",
+        "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page01-1770210299227.png",
+        "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+        "illustrationModel": "gemini-3-pro-image-preview",
+        "aspectRatio": "16:9",
+        "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n"
+      },
+      {
+        "pageNumber": 2,
+        "text": "어느 날, 빨간 모자의 할머니가 많이 아프셨어요. 빨간 모자는 할머니께 드릴 맛있는 빵과 과일들을 바구니에 담았어요.",
+        "scene_description": "빨간 모자 소녀가 부엌에서 작은 바구니에 빵과 과일을 조심스럽게 담고 있어요. 햇살이 창문으로 들어와 밝아요.",
+        "scene_structure": {
+          "characters": "빨간 모자 소녀가 테이블 옆에 서서 바구니에 음식을 담고 있어요. 얼굴에는 할머니를 걱정하는 마음이 살짝 보여요.",
+          "background": "따뜻한 느낌의 주방 안이에요. 창밖으로는 파란 하늘이 보여요.",
+          "atmosphere": "차분하고 따뜻한 느낌이에요. 할머니를 생각하는 다정한 마음이 느껴져요."
+        },
+        "illustrationPrompt": "빨간 모자 소녀가 부엌에서 작은 바구니에 빵과 과일을 조심스럽게 담고 있어요. 햇살이 창문으로 들어와 밝아요.",
+        "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page02-1770210345878.png",
+        "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+        "illustrationModel": "gemini-3-pro-image-preview",
+        "aspectRatio": "16:9",
+        "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n"
+      },
+      {
+        "pageNumber": 3,
+        "text": "빨간 모자는 노래를 부르며 숲길을 걸어갔어요. 사뿐사뿐 걸어가는데, 갑자기 커다란 늑대가 나무 뒤에서 불쑥 나타났어요. 늑대는 아주 부드러운 목소리로 말을 걸었지요.",
+        "scene_description": "어두운 숲길에서 빨간 모자 소녀가 걷고 있어요. 뒤쪽 커다란 나무 뒤에서 늑대가 슬그머니 나타나 소녀를 바라보고 있어요. 늑대는 살짝 웃고 있어요.",
+        "scene_structure": {
+          "characters": "빨간 모자 소녀가 숲길 중앙을 걷고 있어요. 늑대가 소녀의 왼쪽 뒤편 큰 나무 옆에서 고개를 내밀고 있어요.",
+          "background": "울창한 나무들이 가득한 숲속 길이에요. 나뭇잎 사이로 햇빛이 조금 비쳐요.",
+          "atmosphere": "처음에는 밝지만, 늑대 등장 후 살짝 긴장감이 돌아요. 늑대의 음흉한 눈빛이 강조되어요."
+        },
+        "illustrationPrompt": "어두운 숲길에서 빨간 모자 소녀가 걷고 있어요. 뒤쪽 커다란 나무 뒤에서 늑대가 슬그머니 나타나 소녀를 바라보고 있어요. 늑대는 살짝 웃고 있어요.",
+        "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page03-1770210384377.png",
+        "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+        "illustrationModel": "gemini-3-pro-image-preview",
+        "aspectRatio": "16:9",
+        "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n"
+      },
+      {
+        "pageNumber": 4,
+        "text": "“안녕, 예쁜 아가씨! 어디로 가는 길이니?” 늑대가 물었어요. 빨간 모자는 깜짝 놀랐지만, 착한 마음에 천천히 대답했어요. “네, 할머니 댁에 가는 길이에요. 할머니가 아프셔서요.”",
+        "scene_description": "빨간 모자 소녀와 늑대가 숲길에서 마주 보고 서 있어요. 빨간 모자는 살짝 놀란 표정이고, 늑대는 여전히 부드러운 표정을 짓고 있어요. 바구니를 꼭 잡고 있어요.",
+        "scene_structure": {
+          "characters": "빨간 모자 소녀는 늑대를 마주 보고, 늑대는 소녀를 내려다보고 있어요.",
+          "background": "초록색 잎이 무성한 숲길이에요. 햇살이 나뭇가지 사이로 내려와요.",
+          "atmosphere": "겉으로는 평화롭지만, 늑대의 속마음 때문에 불안감이 느껴져요. 살짝 긴장된 분위기예요."
+        },
+        "illustrationPrompt": "빨간 모자 소녀와 늑대가 숲길에서 마주 보고 서 있어요. 빨간 모자는 살짝 놀란 표정이고, 늑대는 여전히 부드러운 표정을 짓고 있어요. 바구니를 꼭 잡고 있어요.",
+        "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page04-1770210430767.png",
+        "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+        "illustrationModel": "gemini-3-pro-image-preview",
+        "aspectRatio": "16:9",
+        "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n"
+      },
+      {
+        "pageNumber": 5,
+        "text": "늑대는 근처에 할머니가 있다는 사실을 알게 되었어요. 늑대는 고개를 끄덕이며 씨익 웃었어요. 마음속으로는 음흉한 계획을 세우고 있었답니다. '내가 먼저 가야겠어!'",
+        "scene_description": "늑대가 뒤돌아서서 먼 곳을 바라보며 사악하게 웃고 있어요. 빨간 모자는 늑대의 뒷모습을 보며 아무것도 모르고 서 있어요. 늑대의 눈빛이 아주 교활해 보여요.",
+        "scene_structure": {
+          "characters": "늑대가 화면 중앙을 향해 살짝 옆모습을 보이며 서 있어요. 빨간 모자 소녀는 뒤편에서 작은 모습으로 서 있어요.",
+          "background": "깊은 숲이 끝없이 이어지는 모습이 보여요.",
+          "atmosphere": "늑대의 사악한 계획 때문에 어둡고 긴장된 분위기가 더해져요."
+        },
+        "illustrationPrompt": "늑대가 뒤돌아서서 먼 곳을 바라보며 사악하게 웃고 있어요. 빨간 모자는 늑대의 뒷모습을 보며 아무것도 모르고 서 있어요. 늑대의 눈빛이 아주 교활해 보여요.",
+        "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page05-1770210489621.png",
+        "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+        "illustrationModel": "gemini-3-pro-image-preview",
+        "aspectRatio": "16:9",
+        "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n"
+      },
+      {
+        "pageNumber": 6,
+        "text": "늑대는 꾀를 부렸어요. “저기 저 길에 예쁜 꽃들이 아주 많단다. 할머니께 가져다드리면 분명 좋아하실 거야. 꽃을 꺾어서 가면 얼마나 좋을까?” 늑대는 달콤한 목소리로 말했어요.",
+        "scene_description": "늑대가 빨간 모자 소녀에게 손짓하며 숲속의 한 방향을 가리키고 있어요. 빨간 모자는 늑대가 가리키는 곳을 궁금한 눈빛으로 바라보고 있어요. 숲속에 예쁜 꽃들이 피어 있어요.",
+        "scene_structure": {
+          "characters": "늑대가 빨간 모자 소녀 옆에 서서 손으로 한쪽 숲길을 가리키고 있어요. 빨간 모자 소녀는 그곳을 바라보고 있어요.",
+          "background": "숲길 옆으로 알록달록한 꽃들이 많이 피어있는 꽃밭이 보여요.",
+          "atmosphere": "늑대의 교활함이 느껴지지만, 꽃밭은 예뻐서 아이들을 유혹하는 느낌이에요."
+        },
+        "illustrationPrompt": "늑대가 빨간 모자 소녀에게 손짓하며 숲속의 한 방향을 가리키고 있어요. 빨간 모자는 늑대가 가리키는 곳을 궁금한 눈빛으로 바라보고 있어요. 숲속에 예쁜 꽃들이 피어 있어요.",
+        "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page06-1770210537079.png",
+        "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+        "illustrationModel": "gemini-3-pro-image-preview",
+        "aspectRatio": "16:9",
+        "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n"
+      },
+      {
+        "pageNumber": 7,
+        "text": "빨간 모자는 잠시 생각했어요. ‘우리 할머니는 꽃을 정말 좋아하시지!’ 예쁜 꽃을 받고 기뻐하실 할머니 얼굴이 떠올랐어요. 그래서 빨간 모자는 늑대의 말대로 숲길을 벗어났어요.",
+        "scene_description": "빨간 모자 소녀가 숲길에서 벗어나 꽃밭으로 발걸음을 옮기고 있어요. 뒤편에는 늑대가 만족스러운 표정으로 빨간 모자를 바라보고 있어요. 꽃들이 예쁘게 피어 있어요.",
+        "scene_structure": {
+          "characters": "빨간 모자 소녀가 꽃밭으로 향하고 있어요. 늑대는 뒤에서 소녀를 지켜보며 음흉하게 웃고 있어요.",
+          "background": "아름다운 꽃들이 가득한 넓은 꽃밭과 울창한 숲이 보여요.",
+          "atmosphere": "빨간 모자 소녀의 순수한 마음과 늑대의 사악한 마음이 대비되어요."
+        },
+        "illustrationPrompt": "빨간 모자 소녀가 숲길에서 벗어나 꽃밭으로 발걸음을 옮기고 있어요. 뒤편에는 늑대가 만족스러운 표정으로 빨간 모자를 바라보고 있어요. 꽃들이 예쁘게 피어 있어요.",
+        "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page07-1770210578832.png",
+        "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+        "illustrationModel": "gemini-3-pro-image-preview",
+        "aspectRatio": "16:9",
+        "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n"
+      },
+      {
+        "pageNumber": 8,
+        "text": "빨간 모자가 예쁜 꽃을 고르고 있을 때, 늑대는 재빨리 움직였어요. 늑대는 숲을 가로질러 쏜살같이 할머니의 집으로 달려갔답니다. 늑대는 아주 아주 빨랐어요.",
+        "scene_description": "빨간 모자 소녀가 꽃밭에서 행복하게 꽃을 꺾고 있어요. 멀리 배경에는 늑대가 빠른 속도로 숲길을 달려가는 모습이 작게 보여요. 빨간 모자는 아무것도 모르고 있어요.",
+        "scene_structure": {
+          "characters": "빨간 모자 소녀가 꽃밭에서 꽃을 꺾고 있어요. 늑대는 멀리 배경에서 아주 빠르게 달려가는 모습으로 작게 보여요.",
+          "background": "화려한 꽃밭과 그 너머로 깊은 숲이 보여요.",
+          "atmosphere": "평화로운 꽃밭과 대비되는 늑대의 빠른 움직임이 긴장감을 주어요."
+        },
+        "illustrationPrompt": "빨간 모자 소녀가 꽃밭에서 행복하게 꽃을 꺾고 있어요. 멀리 배경에는 늑대가 빠른 속도로 숲길을 달려가는 모습이 작게 보여요. 빨간 모자는 아무것도 모르고 있어요.",
+        "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page08-1770210628548.png",
+        "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+        "illustrationModel": "gemini-3-pro-image-preview",
+        "aspectRatio": "16:9",
+        "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n"
+      },
+      {
+        "pageNumber": 9,
+        "text": "늑대는 할머니 집에 도착했어요. 문을 똑똑 두드렸지요. “할머니, 저예요.” 늑대는 빨간 모자 소녀를 흉내 내며 속삭였어요. 할머니가 문을 활짝 열어주셨어요.",
+        "scene_description": "늑대가 할머니 집 문 앞에서 손가락으로 문을 똑똑 두드리고 있어요. 늑대는 할머니 목소리를 흉내 내는 표정을 짓고 있어요. 집 안에서 할머니의 실루엣이 보여요.",
+        "scene_structure": {
+          "characters": "늑대가 할머니 집 문 앞에 서서 문을 두드리고 있어요. 문이 살짝 열리면서 할머니의 모습이 보여요.",
+          "background": "숲속의 작은 오두막집 문 앞이에요. 주변에는 나무들이 서 있어요.",
+          "atmosphere": "늑대의 속임수 때문에 긴장감이 느껴져요. 곧 위험한 일이 일어날 것 같아요."
+        },
+        "illustrationPrompt": "늑대가 할머니 집 문 앞에서 손가락으로 문을 똑똑 두드리고 있어요. 늑대는 할머니 목소리를 흉내 내는 표정을 짓고 있어요. 집 안에서 할머니의 실루엣이 보여요.",
+        "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page09-1770210668681.png",
+        "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+        "illustrationModel": "gemini-3-pro-image-preview",
+        "aspectRatio": "16:9",
+        "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n"
+      },
+      {
+        "pageNumber": 10,
+        "text": "문이 열리는 순간, 늑대는 할머니를 번개같이 꿀꺽 삼켜 버렸어요. 그리고는 얼른 침대에 누웠어요. 이불을 목까지 덮고는 빨간 모자를 기다렸답니다. 늑대의 배가 아주 빵빵해졌어요.",
+        "scene_description": "늑대가 침대에 누워 이불을 머리끝까지 덮고 있어요. 늑대의 배가 불룩 튀어나와 있어요. 할머니의 안경이 침대 옆 탁자에 놓여 있어요. 어두운 방 안이에요.",
+        "scene_structure": {
+          "characters": "늑대가 침대에 누워 이불을 덮고 있어요. 얼굴은 보이지 않지만, 불룩한 배가 강조되어 보여요.",
+          "background": "작고 어두운 할머니의 침실이에요. 창문에서 희미한 빛이 들어와요.",
+          "atmosphere": "어둡고 무서운 분위기예요. 늑대의 사악함이 잘 드러나요."
+        },
+        "illustrationPrompt": "늑대가 침대에 누워 이불을 머리끝까지 덮고 있어요. 늑대의 배가 불룩 튀어나와 있어요. 할머니의 안경이 침대 옆 탁자에 놓여 있어요. 어두운 방 안이에요.",
+        "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page10-1770210729272.png",
+        "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+        "illustrationModel": "gemini-3-pro-image-preview",
+        "aspectRatio": "16:9",
+        "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n"
+      },
+      {
+        "pageNumber": 11,
+        "text": "잠시 후, 빨간 모자가 할머니 집에 도착했어요. “할머니, 저 왔어요!” 빨간 모자가 큰 소리로 불렀지요. 침대 속에서 아주 낮은 목소리가 들려왔어요. “들어오렴, 아가.”",
+        "scene_description": "빨간 모자 소녀가 할머니 집 문을 열고 조용히 안으로 들어서고 있어요. 침대에 누워있는 늑대(할머니로 변장)의 실루엣이 어렴풋이 보여요. 집 안은 살짝 어두워요.",
+        "scene_structure": {
+          "characters": "빨간 모자 소녀가 문가에 서서 침대 쪽을 바라보고 있어요. 침대에는 늑대가 누워 있어요.",
+          "background": "할머니 집의 거실과 침실이 이어지는 풍경이에요. 살짝 어두운 실내 공간이에요.",
+          "atmosphere": "고요하고 살짝 불안한 분위기예요. 늑대의 속임수 때문에 긴장감이 느껴져요."
+        },
+        "illustrationPrompt": "빨간 모자 소녀가 할머니 집 문을 열고 조용히 안으로 들어서고 있어요. 침대에 누워있는 늑대(할머니로 변장)의 실루엣이 어렴풋이 보여요. 집 안은 살짝 어두워요.",
+        "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page11-1770210772626.png",
+        "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+        "illustrationModel": "gemini-3-pro-image-preview",
+        "aspectRatio": "16:9",
+        "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n"
+      },
+      {
+        "pageNumber": 12,
+        "text": "빨간 모자는 침대 가까이 다가갔어요. “할머니, 귀가 왜 이렇게 커요?” 늑대가 말했어요. “네 목소리를 잘 들으려고.” “그럼 눈은 왜 이렇게 커요?” “너를 더 잘 보려고.” 빨간 모자는 다시 물었어요. “그럼… 입은 왜 이렇게 커요?”",
+        "scene_description": "빨간 모자 소녀가 침대 옆에 서서 할머니로 변장한 늑대를 빤히 바라보고 있어요. 늑대의 귀, 눈, 입이 점점 더 커지는 모습이 강조되어 보여요. 빨간 모자의 얼굴에는 의아한 표정이 있어요.",
+        "scene_structure": {
+          "characters": "빨간 모자 소녀가 침대 옆에 서서 늑대(변장)를 바라보고 있어요. 늑대는 이불을 덮은 채 몸을 웅크리고 있어요.",
+          "background": "할머니의 침실이에요. 침대 주변의 작은 가구들이 보여요.",
+          "atmosphere": "점점 더 긴장되고 무서운 분위기예요. 빨간 모자의 질문에 늑대가 당황하는 모습이 살짝 보여요."
+        },
+        "illustrationPrompt": "빨간 모자 소녀가 침대 옆에 서서 할머니로 변장한 늑대를 빤히 바라보고 있어요. 늑대의 귀, 눈, 입이 점점 더 커지는 모습이 강조되어 보여요. 빨간 모자의 얼굴에는 의아한 표정이 있어요.",
+        "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page12-1770210821901.png",
+        "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+        "illustrationModel": "gemini-3-pro-image-preview",
+        "aspectRatio": "16:9",
+        "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n"
+      },
+      {
+        "pageNumber": 13,
+        "text": "그 순간, 늑대가 벌떡 일어났어요! 늑대는 큰 소리로 무섭게 외쳤어요. “너를 잡아먹으려고!” 늑대는 빨간 모자도 한입에 꿀꺽 삼켜 버렸답니다. 배가 더욱 빵빵해진 늑대는 그 자리에서 스르륵 잠들었어요.",
+        "scene_description": "늑대가 침대에서 벌떡 일어나서 크게 입을 벌리고 있어요. 빨간 모자 소녀는 놀라서 비명을 지르고 있어요. 늑대의 커다란 입이 강조되어 무서운 분위기예요. 이내 늑대가 잠들어 코를 골고 있어요.",
+        "scene_structure": {
+          "characters": "늑대가 침대에서 벌떡 일어나 빨간 모자 소녀를 향해 입을 벌리고 있어요. 빨간 모자 소녀는 놀라서 뒤로 물러나고 있어요.",
+          "background": "어두운 할머니의 침실이에요. 침대와 벽이 보여요.",
+          "atmosphere": "아주 무섭고 긴장된 분위기예요. 절정의 순간이 잘 드러나요."
+        },
+        "illustrationPrompt": "늑대가 침대에서 벌떡 일어나서 크게 입을 벌리고 있어요. 빨간 모자 소녀는 놀라서 비명을 지르고 있어요. 늑대의 커다란 입이 강조되어 무서운 분위기예요. 이내 늑대가 잠들어 코를 골고 있어요.",
+        "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page13-1770210870393.png",
+        "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+        "illustrationModel": "gemini-3-pro-image-preview",
+        "aspectRatio": "16:9",
+        "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n"
+      },
+      {
+        "pageNumber": 14,
+        "text": "마침 그때, 집 근처를 지나가던 씩씩한 사냥꾼이 있었어요. 사냥꾼은 늑대의 커다란 코고는 소리를 듣고 이상하게 생각했어요. 사냥꾼은 조용히 집 안으로 들어섰어요. 사냥꾼은 늑대 배를 조심스럽게 갈라 할머니와 빨간 모자를 구해냈어요.",
+        "scene_description": "사냥꾼이 커다란 칼을 들고 잠든 늑대 배 옆에 서 있어요. 늑대의 배가 열려 있고, 그 안에서 할머니와 빨간 모자 소녀가 조심스럽게 나오고 있어요. 사냥꾼은 용감한 표정이에요.",
+        "scene_structure": {
+          "characters": "잠든 늑대가 침대에 누워있고, 사냥꾼이 그 옆에 서 있어요. 할머니와 빨간 모자 소녀가 늑대의 배 속에서 나오고 있어요.",
+          "background": "할머니의 침실이에요. 침대와 벽이 보여요.",
+          "atmosphere": "무서움이 가시고 안심하는 분위기예요. 사냥꾼의 용감함이 느껴져요."
+        },
+        "illustrationPrompt": "사냥꾼이 커다란 칼을 들고 잠든 늑대 배 옆에 서 있어요. 늑대의 배가 열려 있고, 그 안에서 할머니와 빨간 모자 소녀가 조심스럽게 나오고 있어요. 사냥꾼은 용감한 표정이에요.",
+        "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page14-1770210927024.png",
+        "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+        "illustrationModel": "gemini-3-pro-image-preview",
+        "aspectRatio": "16:9",
+        "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n"
+      },
+      {
+        "pageNumber": 15,
+        "text": "사냥꾼은 늑대의 배 속에 무거운 돌멩이들을 가득 넣고 다시 꿰맸어요. 늑대는 더 이상 아무도 해칠 수 없게 되었지요. 빨간 모자는 할머니 손을 꼭 잡고 다시는 낯선 사람의 말을 듣지 않기로 약속했어요. 이제 할머니와 빨간 모자는 함께 행복하게 살았답니다.",
+        "scene_description": "할머니와 빨간 모자 소녀가 서로의 손을 꼭 잡고 웃고 있어요. 사냥꾼은 그들을 흐뭇하게 바라보고 있어요. 멀리 배경에는 무거운 돌멩이로 배가 채워진 늑대가 잠들어 있어요. 따뜻하고 행복한 분위기예요.",
+        "scene_structure": {
+          "characters": "빨간 모자 소녀와 할머니가 화면 중앙에서 손을 잡고 행복하게 웃고 있어요. 사냥꾼이 그들 뒤에서 미소 짓고 서 있어요. 늑대는 멀리 배경에 작게 잠들어 있어요.",
+          "background": "할머니의 집 안, 따뜻한 거실이에요. 창밖으로 햇살이 들어와요.",
+          "atmosphere": "아주 평화롭고 행복한 분위기예요. 위험이 사라지고 모두가 안심하는 모습이에요."
+        },
+        "illustrationPrompt": "할머니와 빨간 모자 소녀가 서로의 손을 꼭 잡고 웃고 있어요. 사냥꾼은 그들을 흐뭇하게 바라보고 있어요. 멀리 배경에는 무거운 돌멩이로 배가 채워진 늑대가 잠들어 있어요. 따뜻하고 행복한 분위기예요.",
+        "illustrationImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-illustration-page15-1770210974814.png",
+        "artStyle": "A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+        "illustrationModel": "gemini-3-pro-image-preview",
+        "aspectRatio": "16:9",
+        "additionalPrompt": "\n## ✅ 이미지 생성 AI 고정 규칙 (정밀 버전)\n\n> 아래 규칙은 **권장 사항이 아니라 필수 조건**이다.\n> 하나라도 위반될 경우 결과는 오류로 간주하며, 전체를 다시 수정한다.\n> 모든 장면은 이 규칙을 **동시에, 반복적으로** 적용한다.\n\n---\n\n### 1️⃣ 스타일 관련 (저작권 안전 고정 규칙)\n\n* 디즈니 애니메이션의 **색감, 명도 대비, 화면 연출 방식**만 참고한다.\n* 특정 디즈니 작품이나 캐릭터가 **직접 연상되는 얼굴형, 눈 모양, 의상 구조, 실루엣은 사용 금지**.\n* “디즈니풍”이 아닌 **‘디즈니에 영감을 받은 오리지널 애니메이션 스타일’**로 해석할 것.\n* 기존 디즈니 캐릭터와 **나란히 놓았을 때 동일 인물로 오인될 가능성이 있으면 오류**로 간주한다.\n\n---\n\n### 2️⃣ 등장인물 배치 규칙 (중복·복제 방지)\n\n* 동일 인물은 **한 장면당 1회만 등장** 가능하다.\n* 동일한 얼굴, 동일한 의상, 동일한 체형이 두 번 이상 보이면 **즉시 오류**다.\n* 거울, 그림자, 배경 반사, 군중 속 반복 노출도 **복제 표현으로 간주**한다.\n* 쌍둥이처럼 보이거나 “복사 붙여넣기” 느낌의 배치는 절대 허용하지 않는다.\n\n---\n\n### 3️⃣ 시간대 표현 규칙 (낮/밤 혼선 방지)\n\n* 각 장면은 **하나의 명확한 시간대만** 가진다.\n* ‘낮’으로 설정된 장면에서는\n\n  * 밝은 하늘색\n  * 명확한 태양광 방향\n  * 선명한 그림자\n    를 반드시 포함한다.\n* 다음 장면에서 시간대가 바뀌지 않는 한,\n  **하늘색·조명·그림자 톤은 이전 장면과 연속성을 유지**해야 한다.\n* 어둡거나 푸른 조명, 노을빛, 별, 달, 야간 분위기는\n  → **밤 또는 해질녘으로 오인될 수 있으므로 전면 금지**한다.\n\n---\n\n### 4️⃣ 등장인물 정확성 규칙 (누락·오류 방지)\n\n* 해당 장면의 서사에 **필요한 인물만 등장**시킨다.\n* 등장해서는 안 되는 인물이 그려질 경우 오류다.\n* 주요 인물은\n\n  * 배경 속 실루엣\n  * 너무 작게 축소된 형태\n  * 일부만 잘린 상태\n    로 표현되지 않도록 한다.\n* “있긴 있는데 잘 안 보임”은 **등장하지 않은 것으로 간주**한다.\n\n---\n\n### 5️⃣ 장면 중복 방지 규칙 (컷 차별화)\n\n* 이전 장면과\n\n  * 카메라 각도\n  * 인물 배치\n  * 동작\n  * 공간 구조\n    가 유사하면 오류다.\n* 각 장면은 **이야기 흐름상 명확히 다른 사건**을 담아야 한다.\n* 감정, 행동, 상황 중 최소 하나는 이전 장면과 **분명히 달라야** 한다.\n\n---\n\n### 6️⃣ 캐릭터 일관성 고정 규칙 (스타일 잠금)\n\n* 캐릭터의\n\n  * 얼굴 비율\n  * 눈·코·입 위치\n  * 체형\n  * 키 비율\n  * 의상 스타일\n    은 모든 장면에서 동일해야 한다.\n* 장면에 따라\n\n  * 갑자기 어려 보이거나\n  * 체격이 커지거나\n  * 머리 크기가 달라지거나\n  * 그림체가 바뀌는 경우\n    → 전부 오류로 간주한다.\n* 캐릭터는 **처음 설정된 디자인을 기준으로 ‘잠금(lock)’ 상태**로 유지한다.\n\n---\n\n### 7️⃣ 원근감·공간감 규칙 (시각적 오류 방지)\n\n* 모든 장면은 **일관된 원근감(perspective)**을 유지해야 한다.\n* 인물, 배경, 사물의 크기는 **카메라와의 거리 관계에 따라 자연스럽게 표현**할 것.\n* 가까운 인물이 배경 인물보다 작게 보이거나,\n  멀리 있는 사물이 비정상적으로 크게 표현되면 **즉시 오류**로 간주한다.\n* 바닥, 벽, 동굴, 거리, 건물 등 공간 요소는\n  **소실점이 일관된 하나의 시점**을 기준으로 구성한다.\n* 인물의 발이 바닥에 닿아 보이지 않거나\n  공간 위에 떠 있는 듯한 느낌을 주는 경우는 허용하지 않는다.\n* 장면마다 카메라 시점이 바뀌더라도,\n  **해당 장면 내부에서는 원근 법칙이 반드시 유지**되어야 한다.\n\n🔍 **원근감 오류 금지 예시**\n\n* 배경 인물이 주인공보다 더 크게 보이는 경우\n* 바닥 패턴과 인물 발 위치가 어긋나는 경우\n* 동굴·문·거리 입구가 비정상적으로 과장된 크기로 표현되는 경우\n  → 위 항목은 모두 **원근감 오류**로 처리한다.\n\n---\n\n### 8️⃣ 신체 구조 정확성 규칙 (팔·신체 오류 방지)\n\n* 모든 인간형 캐릭터는 **정상적인 인체 구조**를 따른다.\n* 팔의 개수는 **양쪽 합쳐 정확히 2개만 허용**한다.\n* 팔이 3개 이상이거나,\n  팔이 분리되어 보이거나,\n  추가적인 손·팔이 어깨·몸통 주변에 나타나는 경우\n  → **명백한 오류로 간주**한다.\n* 포즈나 동작으로 인해 팔이 겹쳐 보이더라도\n  **해부학적으로 팔이 추가된 것처럼 인식되면 오류**다.\n* 소매, 망토, 그림자, 배경 요소로 인해\n  팔처럼 보이는 형태가 생성되지 않도록 주의한다.\n\n---\n\n### ✅ 최종 검증 지시 (중요)\n\n> 이미지를 생성한 뒤,\n> **위 1️⃣~8️⃣번 규칙을 하나씩 대조 검토한 후**\n> 모든 항목을 충족한 결과만 최종 이미지로 출력하라.\n"
+      }
+    ]
+  },
+  "keyObjectImages": [
+    "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-keyobject-Hood-1770210226226.png",
+    "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-keyobject-Village-1770210225920.png",
+    "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-keyobject-Forest-1770210231952.png",
+    "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-keyobject-Basket-1770210223508.png",
+    "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-keyobject-Bread-1770210223847.png",
+    "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-keyobject-Flower-1770210223687.png",
+    "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-keyobject-House-1770210224885.png",
+    "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-keyobject-Bed-1770210223186.png",
+    "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-keyobject-Stone-1770210225081.png"
+  ],
+  "coverImage": "https://pub-554d78bf0f2346cfb850060ac23280a7.r2.dev/1770209480564-빨간모자소녀-cover-1770640141204.jfif",
+  "coverPrompt": "\"빨간 모자 소녀*\" 동화책 표지를 만들어주세요.\n\n**중요 사항:**\n- 텍스트는 전혀 포함하지 마세요 (제목, 글자, 단어 등 없음)\n- 화면에 꽉 찬 일러스트로 그려주세요\n\n**장르:** 어린이 동화\n\n**아트 스타일:** A hand-drawn colored pencil children's book illustration with visible pencil strokes, grainy texture, and crosshatching. Simple, minimalist character design with basic geometric shapes - small dots for eyes, simple curved line for smile, stick-like limbs, and round heads. Flat color application with directional colored pencil strokes clearly visible. Limited bright color palette using primary colors - yellows, blues, greens, oranges, reds, and browns. Naive, childlike drawing style with charmingly imperfect lines and innocent simplicity reminiscent of kindergarten art. The texture should show individual colored pencil marks with white paper showing through in places. Characters have simple facial features with minimal detail. The overall aesthetic is handmade, warm, innocent, and endearing with a homemade storybook quality. Backgrounds filled with solid colored pencil strokes showing texture. The style should feel like it was lovingly drawn by hand with colored pencils on textured paper, celebrating imperfection and childlike wonder.",
+  "isPublic": true,
+  "publishedAt": "2026-02-09T13:55:17.052Z"
+}

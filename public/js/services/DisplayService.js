@@ -859,11 +859,22 @@ class DisplayService {
         return `
         <!-- 페이지 섹션 -->
         <div class="bg-white rounded-3xl shadow-2xl p-10 mb-8">
-            <h3 class="text-3xl font-bold text-gray-800 cursor-pointer flex items-center mb-6" onclick="toggleSection('pages-section')">
-                <i id="pages-section-icon" class="fas fa-chevron-down mr-2 text-sm transition-transform"></i>
-                <i class="fas fa-book mr-2 text-purple-500"></i>
-                스토리 페이지 (${storybook.pages.length}페이지)
-            </h3>
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-3xl font-bold text-gray-800 cursor-pointer flex items-center" onclick="toggleSection('pages-section')">
+                    <i id="pages-section-icon" class="fas fa-chevron-down mr-2 text-sm transition-transform"></i>
+                    <i class="fas fa-book mr-2 text-purple-500"></i>
+                    스토리 페이지 (${storybook.pages.length}페이지)
+                </h3>
+                
+                <!-- 동영상 생성 버튼 -->
+                <button 
+                    onclick="openVideoGenerationModal()"
+                    class="bg-gradient-to-r from-red-500 to-pink-600 text-white px-6 py-3 rounded-lg font-bold hover:from-red-600 hover:to-pink-700 transition shadow-lg flex items-center gap-2"
+                >
+                    <i class="fas fa-video"></i>
+                    <span>동영상 생성</span>
+                </button>
+            </div>
             
             <div class="mb-6 space-y-4">
                 <div class="flex items-center gap-4">

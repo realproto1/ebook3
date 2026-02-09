@@ -3730,6 +3730,106 @@ app.get('/api/download-audio/:filename', async (req, res) => {
   }
 });
 
+// ===== 🎬 동영상 생성 API =====
+
+/**
+ * POST /api/generate-video
+ * 동화책을 FFmpeg로 동영상으로 생성
+ */
+app.post('/api/generate-video', async (c) => {
+    try {
+        const { 
+            storybookId, 
+            startPage, 
+            endPage, 
+            includeCover, 
+            coverDuration,
+            includeBackgroundMusic,
+            resolution,
+            transition 
+        } = await c.req.json();
+        
+        console.log('🎬 동영상 생성 요청:', {
+            storybookId,
+            startPage,
+            endPage,
+            includeCover,
+            coverDuration,
+            includeBackgroundMusic,
+            resolution,
+            transition
+        });
+        
+        // 스토리북 가져오기
+        const storybookKey = `storybook-${storybookId}.json`;
+        const storybookObject = await c.env.R2.get(storybookKey);
+        
+        if (!storybookObject) {
+            return c.json({ success: false, message: '동화책을 찾을 수 없습니다.' }, 404);
+        }
+        
+        const storybook = JSON.parse(await storybookObject.text());
+        
+        // 페이지 범위 추출
+        const pages = storybook.pages.slice(startPage - 1, endPage);
+        
+        if (pages.length === 0) {
+            return c.json({ success: false, message: '선택한 페이지가 없습니다.' }, 400);
+        }
+        
+        // 배경음악 URL 가져오기
+        let backgroundMusicUrl = null;
+        if (includeBackgroundMusic && storybook.backgroundMusicId) {
+            const musicKey = `music-${storybook.backgroundMusicId}.json`;
+            const musicObject = await c.env.R2.get(musicKey);
+            if (musicObject) {
+                const music = JSON.parse(await musicObject.text());
+                backgroundMusicUrl = music.url;
+            }
+        }
+        
+        // 표지 이미지 URL
+        const coverImageUrl = includeCover && storybook.coverImage ? storybook.coverImage : null;
+        
+        // TODO: FFmpeg 동영상 생성 로직
+        // 현재는 임시로 성공 응답 반환
+        console.log('📦 동영상 생성 데이터:', {
+            pages: pages.length,
+            coverImageUrl,
+            backgroundMusicUrl,
+            resolution,
+            transition
+        });
+        
+        // 임시: 클라이언트에게 데이터만 전달
+        return c.json({
+            success: false,
+            message: '동영상 생성 기능은 구현 중입니다. 서버에서 FFmpeg를 실행해야 합니다.',
+            data: {
+                storybookTitle: storybook.title,
+                pages: pages.map(p => ({
+                    pageNumber: p.pageNumber,
+                    text: p.text,
+                    imageUrl: p.illustrationImage,
+                    ttsUrl: p.ttsAudio?.url || p.audioUrl
+                })),
+                coverImageUrl,
+                coverDuration,
+                backgroundMusicUrl,
+                resolution,
+                transition
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ 동영상 생성 오류:', error);
+        return c.json({ 
+            success: false, 
+            message: '동영상 생성 중 오류가 발생했습니다: ' + error.message 
+        }, 500);
+    }
+});
+
 // ===== 5️⃣ 댓글 API =====
 
 // 댓글 목록 조회 (인증 불필요)
