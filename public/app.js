@@ -1622,11 +1622,6 @@ function displayStorybook(storybook) {
         if (pageTTSModelSelect) {
             pageTTSModelSelect.value = imageSettings.ttsModel || 'Aoede';
         }
-        
-        // 배경음악 select 업데이트
-        if (typeof updateBackgroundMusicSelect === 'function') {
-            updateBackgroundMusicSelect();
-        }
         const bgmSelectEl = document.getElementById('backgroundMusicSelect');
         if (bgmSelectEl && storybook.backgroundMusicId) {
             bgmSelectEl.value = storybook.backgroundMusicId;
@@ -5632,8 +5627,8 @@ function openVideoGenerationModal() {
     document.getElementById('videoStartPage').max = currentStorybook.pages.length;
     document.getElementById('videoEndPage').max = currentStorybook.pages.length;
     
-    // 배경음악 리스트 로드
-    loadBackgroundMusicList();
+    // 배경음악 리스트 로드 (동영상 생성용)
+    loadVideoBackgroundMusicList();
     
     // 모달 표시
     const modal = document.getElementById('videoGenerationModal');
@@ -5644,7 +5639,10 @@ function openVideoGenerationModal() {
 /**
  * 배경음악 리스트 로드
  */
-async function loadBackgroundMusicList() {
+/**
+ * 동영상 생성 모달 - 배경음악 리스트 로드
+ */
+async function loadVideoBackgroundMusicList() {
     try {
         const response = await axios.get('/api/background-music');
         const musicList = response.data.music || [];
@@ -5669,9 +5667,9 @@ async function loadBackgroundMusicList() {
             select.appendChild(option);
         });
         
-        console.log('✅ 배경음악 리스트 로드 완료:', musicList.length, '개');
+        console.log('✅ 동영상 배경음악 리스트 로드 완료:', musicList.length, '개');
     } catch (error) {
-        console.error('❌ 배경음악 리스트 로드 실패:', error);
+        console.error('❌ 동영상 배경음악 리스트 로드 실패:', error);
     }
 }
 
