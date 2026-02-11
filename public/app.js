@@ -419,6 +419,41 @@ async function generatePageTTS(pageIndex) {
     }
 }
 
+// 페이지 TTS 삭제
+async function deletePageTTS(pageIndex) {
+    if (!currentStorybook || !currentStorybook.pages[pageIndex]) {
+        alert('유효하지 않은 페이지입니다.');
+        return;
+    }
+
+    if (!confirm(`페이지 ${pageIndex + 1}의 TTS를 삭제하시겠습니까?`)) {
+        return;
+    }
+
+    try {
+        const page = currentStorybook.pages[pageIndex];
+        const currentLanguage = window.currentLanguage || 'ko';
+
+        // TTS 삭제
+        if (currentLanguage === 'ko' && page.audioUrl) {
+            console.log(`🗑️ 페이지 ${pageIndex + 1} TTS 삭제: ${page.audioUrl}`);
+            page.audioUrl = null;
+        } else if (page.ttsAudio && page.ttsAudio[currentLanguage]) {
+            console.log(`🗑️ 페이지 ${pageIndex + 1} TTS 삭제: ${page.ttsAudio[currentLanguage].url}`);
+            delete page.ttsAudio[currentLanguage];
+        }
+
+        // 저장 및 화면 업데이트
+        saveCurrentStorybook();
+        displayStorybook(currentStorybook);
+
+        showNotification('success', 'TTS 삭제 완료', `페이지 ${pageIndex + 1}의 TTS가 삭제되었습니다.`);
+    } catch (error) {
+        console.error('TTS 삭제 실패:', error);
+        showNotification('error', 'TTS 삭제 실패', error.message);
+    }
+}
+
 function openCoverUploadModal() {
     coverService.openCoverUploadModal();
 }
@@ -6040,6 +6075,7 @@ function downloadPageTTS(pageIndex) {
     window.downloadAllIllustrations = downloadAllIllustrations;
     window.downloadAllKeyObjectImages = downloadAllKeyObjectImages;
     window.generatePageTTS = generatePageTTS;
+    window.deletePageTTS = deletePageTTS;
     window.generateAllTTS = generateAllTTS;
     window.generateQuiz = generateQuiz;
     window.generateVocabularyImages = generateVocabularyImages;

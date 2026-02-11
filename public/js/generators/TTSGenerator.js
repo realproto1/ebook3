@@ -27,6 +27,14 @@ class TTSGenerator extends BaseGenerator {
             throw new Error('유효하지 않은 페이지입니다.');
         }
 
+        // ✅ 0단계: 기존 TTS 삭제 (재생성 시)
+        const page = this.storybook.pages[pageIndex];
+        const existingTTS = this._getPageTTS(page);
+        if (existingTTS) {
+            console.log(`🗑️ 페이지 ${page.pageNumber} 기존 TTS 삭제 중...`);
+            this._deletePageTTS(pageIndex);
+        }
+
         // ✅ 1단계: DOM에서 최신 텍스트를 읽어서 storybook 업데이트
         await this._updatePageTextFromDOM(pageIndex);
 
@@ -346,6 +354,23 @@ class TTSGenerator extends BaseGenerator {
             return await window.saveToR2(this.storybook);
         } else {
             await this.saveStorybook();
+        }
+    }
+
+    /**
+     * 페이지 TTS 삭제
+     */
+    _deletePageTTS(pageIndex) {
+        const page = this.storybook.pages[pageIndex];
+        if (!page) return;
+
+        // 언어별 TTS 삭제
+        if (this.language === 'ko' && page.audioUrl) {
+            console.log(`   🗑️ 기존 TTS 삭제: ${page.audioUrl}`);
+            page.audioUrl = null;
+        } else if (page.ttsAudio && page.ttsAudio[this.language]) {
+            console.log(`   🗑️ 기존 TTS 삭제: ${page.ttsAudio[this.language].url}`);
+            delete page.ttsAudio[this.language];
         }
     }
 
