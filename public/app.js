@@ -434,22 +434,43 @@ async function deletePageTTS(pageIndex) {
         const page = currentStorybook.pages[pageIndex];
         const currentLanguage = window.currentLanguage || 'ko';
 
+        console.log('🗑️ TTS 삭제 시작:', {
+            pageIndex,
+            currentLanguage,
+            audioUrl: page.audioUrl,
+            ttsAudio: page.ttsAudio
+        });
+
         // TTS 삭제
+        let deleted = false;
         if (currentLanguage === 'ko' && page.audioUrl) {
-            console.log(`🗑️ 페이지 ${pageIndex + 1} TTS 삭제: ${page.audioUrl}`);
+            console.log(`🗑️ 페이지 ${pageIndex + 1} TTS 삭제 (ko): ${page.audioUrl}`);
             page.audioUrl = null;
+            deleted = true;
         } else if (page.ttsAudio && page.ttsAudio[currentLanguage]) {
-            console.log(`🗑️ 페이지 ${pageIndex + 1} TTS 삭제: ${page.ttsAudio[currentLanguage].url}`);
+            console.log(`🗑️ 페이지 ${pageIndex + 1} TTS 삭제 (${currentLanguage}): ${page.ttsAudio[currentLanguage].url}`);
             delete page.ttsAudio[currentLanguage];
+            deleted = true;
         }
 
+        if (!deleted) {
+            console.warn('⚠️ 삭제할 TTS가 없습니다');
+            alert('삭제할 TTS가 없습니다.');
+            return;
+        }
+
+        console.log('💾 R2에 저장 중...', { storybookId: currentStorybook.id });
+
         // 저장 및 화면 업데이트
-        saveCurrentStorybook();
+        await saveCurrentStorybook();
+        
+        console.log('✅ R2 저장 완료');
+        
         displayStorybook(currentStorybook);
 
         showNotification('success', 'TTS 삭제 완료', `페이지 ${pageIndex + 1}의 TTS가 삭제되었습니다.`);
     } catch (error) {
-        console.error('TTS 삭제 실패:', error);
+        console.error('❌ TTS 삭제 실패:', error);
         showNotification('error', 'TTS 삭제 실패', error.message);
     }
 }
@@ -2811,7 +2832,7 @@ async function generateIllustration(pageIndex) {
     }
 }
 
-function saveCurrentStorybook() {
+async function saveCurrentStorybook() {
     const index = storybooks.findIndex(b => b.id === currentStorybook.id);
     if (index !== -1) {
         storybooks[index] = currentStorybook;
@@ -2824,10 +2845,15 @@ function saveCurrentStorybook() {
     
     renderBookList();
     
-    // ✅ R2에만 저장 (비동기, 백그라운드)
-    saveToR2(currentStorybook).catch(error => {
-        console.error('R2 저장 실패:', error);
-    });
+    // ✅ R2에 저장 (동기적으로 대기)
+    try {
+        await saveToR2(currentStorybook);
+        console.log('✅ saveCurrentStorybook: R2 저장 완료');
+        return true;
+    } catch (error) {
+        console.error('❌ saveCurrentStorybook: R2 저장 실패:', error);
+        return false;
+    }
 }
 
 // R2에 동화책 저장 (서버 API 호출) - 재시도 로직 포함
