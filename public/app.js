@@ -430,6 +430,15 @@ async function deletePageTTS(pageIndex) {
         return;
     }
 
+    // 삭제 버튼 찾기 및 로딩 상태 표시
+    const deleteBtn = document.getElementById(`tts-delete-btn-${pageIndex}`);
+    const originalBtnText = deleteBtn ? deleteBtn.innerHTML : '';
+    
+    if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 삭제 중...';
+    }
+
     try {
         const page = currentStorybook.pages[pageIndex];
         const currentLanguage = window.currentLanguage || 'ko';
@@ -471,6 +480,13 @@ async function deletePageTTS(pageIndex) {
         showNotification('success', 'TTS 삭제 완료', `페이지 ${pageIndex + 1}의 TTS가 삭제되었습니다.`);
     } catch (error) {
         console.error('❌ TTS 삭제 실패:', error);
+        
+        // 오류 발생 시 버튼 복원
+        if (deleteBtn) {
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = originalBtnText;
+        }
+        
         showNotification('error', 'TTS 삭제 실패', error.message);
     }
 }

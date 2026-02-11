@@ -709,7 +709,7 @@ class DisplayService {
                                 ${UIHelper.renderButton('generate', `generatePageTTS(${idx})`, displayTTSAudio ? '재생성' : '생성', 'fas fa-magic', { fullWidth: true, id: `tts-btn-${idx}` })}
                                 ${UIHelper.renderButton('upload', `uploadPageTTS(${idx})`, '업로드', 'fas fa-upload', { fullWidth: true, id: `tts-upload-btn-${idx}` })}
                                 ${displayTTSAudio ? UIHelper.renderButton('download', `downloadPageTTS(${idx})`, '', 'fas fa-download') : ''}
-                                ${displayTTSAudio ? `<button onclick="deletePageTTS(${idx})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition text-sm" title="TTS 삭제"><i class="fas fa-trash"></i></button>` : ''}
+                                ${displayTTSAudio ? `<button id="tts-delete-btn-${idx}" onclick="deletePageTTS(${idx})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition text-sm" title="TTS 삭제"><i class="fas fa-trash"></i></button>` : ''}
                             </div>
                             
                             ${ttsSection}
