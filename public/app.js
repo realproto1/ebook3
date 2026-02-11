@@ -1575,6 +1575,13 @@ function displayStorybook(storybook) {
             globalTTSModelSelect.value = imageSettings.geminiTTSModel || 'gemini-2.5-flash-preview-tts';
         }
         
+        // 배경음악 드롭다운 업데이트
+        if (typeof loadBackgroundMusicList === 'function') {
+            loadBackgroundMusicList().catch(err => {
+                console.warn('⚠️ 배경음악 리스트 로드 실패:', err);
+            });
+        }
+        
         // TTS 음성 select 초기화
         const pageTTSModelSelect = document.getElementById('page-tts-model');
         if (pageTTSModelSelect) {
