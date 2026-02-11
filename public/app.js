@@ -5590,10 +5590,47 @@ function openVideoGenerationModal() {
     document.getElementById('videoStartPage').max = currentStorybook.pages.length;
     document.getElementById('videoEndPage').max = currentStorybook.pages.length;
     
+    // 배경음악 리스트 로드
+    loadBackgroundMusicList();
+    
     // 모달 표시
     const modal = document.getElementById('videoGenerationModal');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+}
+
+/**
+ * 배경음악 리스트 로드
+ */
+async function loadBackgroundMusicList() {
+    try {
+        const response = await axios.get('/api/background-music');
+        const musicList = response.data.music || [];
+        
+        const select = document.getElementById('videoBackgroundMusicId');
+        if (!select) return;
+        
+        // 기존 옵션 유지 (동화책 설정 음악 사용)
+        select.innerHTML = '<option value="">동화책 설정 음악 사용</option>';
+        
+        // 배경음악 리스트 추가
+        musicList.forEach(music => {
+            const option = document.createElement('option');
+            option.value = music.id;
+            option.textContent = music.title;
+            
+            // 현재 동화책에 설정된 배경음악이면 선택
+            if (currentStorybook && currentStorybook.backgroundMusicId === music.id) {
+                option.selected = true;
+            }
+            
+            select.appendChild(option);
+        });
+        
+        console.log('✅ 배경음악 리스트 로드 완료:', musicList.length, '개');
+    } catch (error) {
+        console.error('❌ 배경음악 리스트 로드 실패:', error);
+    }
 }
 
 /**
@@ -5620,6 +5657,7 @@ async function generateVideo() {
     const includeCover = document.getElementById('videoIncludeCover').checked;
     const coverDuration = parseInt(document.getElementById('videoCoverDuration').value);
     const includeBackgroundMusic = document.getElementById('videoIncludeBackgroundMusic').checked;
+    const backgroundMusicId = document.getElementById('videoBackgroundMusicId').value; // 선택한 배경음악 ID
     const resolution = document.getElementById('videoResolution').value;
     const transition = document.getElementById('videoTransition').value;
     const pageGap = parseFloat(document.getElementById('videoPageGap').value);
@@ -5644,6 +5682,7 @@ async function generateVideo() {
             includeCover,
             coverDuration,
             includeBackgroundMusic,
+            backgroundMusicId: backgroundMusicId || '동화책 설정 음악',
             resolution,
             transition,
             pageGap
@@ -5657,6 +5696,7 @@ async function generateVideo() {
             includeCover,
             coverDuration,
             includeBackgroundMusic,
+            backgroundMusicId: backgroundMusicId || undefined, // 빈 문자열이면 undefined 전달
             resolution,
             transition,
             pageGap

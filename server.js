@@ -3745,6 +3745,7 @@ app.post('/api/generate-video', async (req, res) => {
             includeCover, 
             coverDuration,
             includeBackgroundMusic,
+            backgroundMusicId, // 선택한 배경음악 ID (옵션)
             resolution,
             transition,
             pageGap
@@ -3757,6 +3758,7 @@ app.post('/api/generate-video', async (req, res) => {
             includeCover,
             coverDuration,
             includeBackgroundMusic,
+            backgroundMusicId: backgroundMusicId || '동화책 설정 음악',
             resolution,
             transition,
             pageGap
@@ -3785,27 +3787,34 @@ app.post('/api/generate-video', async (req, res) => {
         
         // 배경음악 URL 가져오기
         let backgroundMusicUrl = null;
-        if (includeBackgroundMusic && storybook.backgroundMusicId) {
-            try {
-                // R2에서 배경음악 목록 가져오기
-                const musicListCommand = new GetObjectCommand({
-                    Bucket: config.r2.bucketName,
-                    Key: 'background-music.json'
-                });
-                const musicListResponse = await r2Client.send(musicListCommand);
-                const musicListText = await musicListResponse.Body.transformToString();
-                const musicList = JSON.parse(musicListText);
-                
-                // ID로 배경음악 찾기
-                const music = musicList.find(m => m.id === storybook.backgroundMusicId);
-                if (music) {
-                    backgroundMusicUrl = music.url;
-                    console.log('✅ 배경음악 찾음:', music.title, backgroundMusicUrl);
-                } else {
-                    console.warn('⚠️ 배경음악을 찾을 수 없습니다:', storybook.backgroundMusicId);
+        if (includeBackgroundMusic) {
+            // 선택한 배경음악 ID 또는 동화책에 설정된 배경음악 ID 사용
+            const musicIdToUse = backgroundMusicId || storybook.backgroundMusicId;
+            
+            if (musicIdToUse) {
+                try {
+                    // R2에서 배경음악 목록 가져오기
+                    const musicListCommand = new GetObjectCommand({
+                        Bucket: config.r2.bucketName,
+                        Key: 'background-music.json'
+                    });
+                    const musicListResponse = await r2Client.send(musicListCommand);
+                    const musicListText = await musicListResponse.Body.transformToString();
+                    const musicList = JSON.parse(musicListText);
+                    
+                    // ID로 배경음악 찾기
+                    const music = musicList.find(m => m.id === musicIdToUse);
+                    if (music) {
+                        backgroundMusicUrl = music.url;
+                        console.log('✅ 배경음악 찾음:', music.title, backgroundMusicUrl);
+                    } else {
+                        console.warn('⚠️ 배경음악을 찾을 수 없습니다:', musicIdToUse);
+                    }
+                } catch (err) {
+                    console.warn('⚠️ 배경음악 목록을 가져올 수 없습니다:', err.message);
                 }
-            } catch (err) {
-                console.warn('⚠️ 배경음악 목록을 가져올 수 없습니다:', err.message);
+            } else {
+                console.log('ℹ️ 선택된 배경음악이 없습니다.');
             }
         }
         
