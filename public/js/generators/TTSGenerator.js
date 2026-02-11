@@ -127,9 +127,14 @@ class TTSGenerator extends BaseGenerator {
 
         // 2. 예상 시간 계산 및 확인
         const estimatedTime = this.estimateTime(pagesToGenerate.length, 3);
-        if (!confirm(`${pagesToGenerate.length}개의 페이지 TTS를 생성하시겠습니까?\n\n언어: ${this.language}\n예상 소요 시간: 약 ${estimatedTime}초`)) {
+        if (!confirm(`${pagesToGenerate.length}개의 페이지 TTS를 생성하시겠습니까?\n\n음성: Aoede (여자 목소리)\n언어: ${this.language}\n예상 소요 시간: 약 ${estimatedTime}초`)) {
             return;
         }
+        
+        // ✅ 전체 TTS 생성 시 무조건 Aoede(여자 목소리) 사용
+        const originalTtsModel = this.imageSettings.ttsModel;
+        this.imageSettings.ttsModel = 'Aoede';
+        console.log('🎤 전체 TTS 생성: Aoede (여자 목소리) 강제 사용');
 
         // 3. 버튼 로딩 시작
         this.setButtonLoading(true);
@@ -233,6 +238,10 @@ class TTSGenerator extends BaseGenerator {
             console.error('TTS 배치 생성 오류:', error);
             alert('TTS 생성 중 오류가 발생했습니다: ' + error.message);
         } finally {
+            // ✅ 원래 TTS 모델 설정 복원
+            this.imageSettings.ttsModel = originalTtsModel;
+            console.log('🔄 TTS 모델 설정 복원:', originalTtsModel);
+            
             this.setButtonLoading(false);
         }
     }
