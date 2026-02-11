@@ -39,7 +39,6 @@ class TTSGenerator extends BaseGenerator {
         await this._updatePageTextFromDOM(pageIndex);
 
         // ✅ 2단계: 업데이트된 storybook에서 텍스트 가져오기
-        const page = this.storybook.pages[pageIndex];
         const pageText = this._getPageText(page);
         
         if (!pageText?.trim()) {
