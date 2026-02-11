@@ -596,8 +596,8 @@ class DisplayService {
             
             // TTS 오디오 가져오기
             if (currentLanguage === 'ko') {
-                // 한국어: ttsAudio.url 또는 하위 호환용 audioUrl
-                displayTTSAudio = page.ttsAudio?.url || page.audioUrl || page.tts_audio || null;
+                // 한국어: ttsAudio.ko.url 또는 하위 호환용 audioUrl
+                displayTTSAudio = page.ttsAudio?.ko?.url || page.audioUrl || page.tts_audio || null;
             } else {
                 // 다른 언어: pageNumber로 찾기 (배열 인덱스가 아님!)
                 console.log(`🔍 페이지 ${page.pageNumber} 번역 찾기:`, {

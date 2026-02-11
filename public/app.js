@@ -447,19 +447,32 @@ async function deletePageTTS(pageIndex) {
             pageIndex,
             currentLanguage,
             audioUrl: page.audioUrl,
-            ttsAudio: page.ttsAudio
+            ttsAudio: page.ttsAudio,
+            'ttsAudio.ko': page.ttsAudio?.ko
         });
 
-        // TTS 삭제
+        // TTS 삭제 (한국어의 경우 두 가지 위치 모두 확인)
         let deleted = false;
-        if (currentLanguage === 'ko' && page.audioUrl) {
-            console.log(`🗑️ 페이지 ${pageIndex + 1} TTS 삭제 (ko): ${page.audioUrl}`);
-            page.audioUrl = null;
-            deleted = true;
-        } else if (page.ttsAudio && page.ttsAudio[currentLanguage]) {
-            console.log(`🗑️ 페이지 ${pageIndex + 1} TTS 삭제 (${currentLanguage}): ${page.ttsAudio[currentLanguage].url}`);
-            delete page.ttsAudio[currentLanguage];
-            deleted = true;
+        
+        if (currentLanguage === 'ko') {
+            // 한국어 TTS 삭제: page.ttsAudio.ko 또는 page.audioUrl
+            if (page.ttsAudio?.ko) {
+                console.log(`🗑️ 페이지 ${pageIndex + 1} TTS 삭제 (ttsAudio.ko): ${page.ttsAudio.ko.url}`);
+                delete page.ttsAudio.ko;
+                deleted = true;
+            }
+            if (page.audioUrl) {
+                console.log(`🗑️ 페이지 ${pageIndex + 1} TTS 삭제 (audioUrl): ${page.audioUrl}`);
+                page.audioUrl = null;
+                deleted = true;
+            }
+        } else {
+            // 다른 언어: page.ttsAudio[language]
+            if (page.ttsAudio && page.ttsAudio[currentLanguage]) {
+                console.log(`🗑️ 페이지 ${pageIndex + 1} TTS 삭제 (${currentLanguage}): ${page.ttsAudio[currentLanguage].url}`);
+                delete page.ttsAudio[currentLanguage];
+                deleted = true;
+            }
         }
 
         if (!deleted) {
