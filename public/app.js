@@ -898,16 +898,24 @@ window.draggedBookId = null;
 // 드래그 시작
 function handleDragStart(e) {
     draggedElement = e.currentTarget;
-    draggedIndex = parseInt(e.currentTarget.dataset.bookIndex);
-    draggedBookId = e.currentTarget.dataset.bookId;
-    window.draggedBookId = draggedBookId; // 전역 참조 업데이트
-    draggedType = 'book';
+    
+    // 페이지 드래그인지 동화책 드래그인지 확인
+    if (e.currentTarget.dataset.pageIndex !== undefined) {
+        draggedIndex = parseInt(e.currentTarget.dataset.pageIndex);
+        draggedType = 'page';
+        console.log('🖐️ 페이지 드래그 시작:', draggedIndex);
+    } else {
+        draggedIndex = parseInt(e.currentTarget.dataset.bookIndex);
+        draggedBookId = e.currentTarget.dataset.bookId;
+        window.draggedBookId = draggedBookId; // 전역 참조 업데이트
+        draggedType = 'book';
+        console.log('🖐️ 동화책 드래그 시작:', draggedIndex);
+    }
+    
     isDragging = true; // 드래그 시작
     e.currentTarget.style.opacity = '0.5';
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', e.currentTarget.innerHTML);
-    
-    console.log('🖐️ 드래그 시작:', draggedIndex);
 }
 
 // 드래그 오버
@@ -939,23 +947,47 @@ function handleDrop(e) {
     e.preventDefault();
     
     if (draggedElement !== e.currentTarget) {
-        const targetIndex = parseInt(e.currentTarget.dataset.bookIndex);
-        
-        // undefined/null 항목 제거
-        storybooks = storybooks.filter(b => b && b.id);
-        
-        // 배열에서 순서 변경
-        const draggedBook = storybooks[draggedIndex];
-        if (draggedBook && draggedBook.id) {
-            storybooks.splice(draggedIndex, 1);
-            storybooks.splice(targetIndex, 0, draggedBook);
+        if (draggedType === 'page') {
+            // 페이지 순서 변경
+            const targetIndex = parseInt(e.currentTarget.dataset.pageIndex);
             
-            console.log(`✅ 순서 변경: ${draggedIndex} → ${targetIndex}`);
+            if (!currentStorybook || !currentStorybook.pages) {
+                console.error('❌ 현재 동화책이 없습니다');
+                return false;
+            }
             
-            saveStorybooks();
-            renderBookList();
+            const draggedPage = currentStorybook.pages[draggedIndex];
+            if (draggedPage) {
+                currentStorybook.pages.splice(draggedIndex, 1);
+                currentStorybook.pages.splice(targetIndex, 0, draggedPage);
+                
+                console.log(`✅ 페이지 순서 변경: ${draggedIndex + 1} → ${targetIndex + 1}`);
+                
+                saveCurrentStorybook();
+                displayStorybook(currentStorybook);
+                
+                showNotification('success', '페이지 순서가 변경되었습니다!');
+            }
+        } else {
+            // 동화책 순서 변경
+            const targetIndex = parseInt(e.currentTarget.dataset.bookIndex);
             
-            showNotification('success', '순서가 변경되었습니다!');
+            // undefined/null 항목 제거
+            storybooks = storybooks.filter(b => b && b.id);
+            
+            // 배열에서 순서 변경
+            const draggedBook = storybooks[draggedIndex];
+            if (draggedBook && draggedBook.id) {
+                storybooks.splice(draggedIndex, 1);
+                storybooks.splice(targetIndex, 0, draggedBook);
+                
+                console.log(`✅ 동화책 순서 변경: ${draggedIndex} → ${targetIndex}`);
+                
+                saveStorybooks();
+                renderBookList();
+                
+                showNotification('success', '순서가 변경되었습니다!');
+            }
         }
     }
     
@@ -969,14 +1001,21 @@ function handleDragEnd(e) {
     isDragging = false; // 드래그 종료
     
     // 모든 요소의 하이라이트 제거
-    document.querySelectorAll('.book-item').forEach(item => {
-        item.classList.remove('border-purple-500', 'bg-purple-50');
-    });
+    if (draggedType === 'page') {
+        document.querySelectorAll('[data-page-index]').forEach(item => {
+            item.classList.remove('border-purple-500', 'bg-purple-50');
+        });
+    } else {
+        document.querySelectorAll('.book-item').forEach(item => {
+            item.classList.remove('border-purple-500', 'bg-purple-50');
+        });
+    }
     
     draggedElement = null;
     draggedIndex = null;
     draggedBookId = null; // 드래그 중인 동화책 ID 초기화
     window.draggedBookId = null; // 전역 참조 초기화
+    draggedType = null;
 }
 
 // 동화책 제목 업데이트 (메인 페이지)
