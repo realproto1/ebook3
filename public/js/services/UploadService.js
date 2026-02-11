@@ -677,11 +677,11 @@ class UploadService {
                         
                         // 언어별 TTS 저장
                         if (currentLanguage === 'ko') {
-                            // 한국어: ttsAudio.url 구조 사용
+                            // 한국어: ttsAudio.ko.url 구조 사용
                             if (!page.ttsAudio) {
                                 page.ttsAudio = {};
                             }
-                            page.ttsAudio.url = audioUrl;
+                            page.ttsAudio.ko = { url: audioUrl };
                             // 하위 호환성
                             page.audioUrl = audioUrl;
                         } else {

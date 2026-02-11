@@ -196,7 +196,10 @@
             
             for (const page of pagesWithAudio) {
                 const filename = `page_${String(page.pageNumber).padStart(2, '0')}_audio.mp3`;
-                await this.downloadAudio(page.ttsAudio, filename);
+                const audioUrl = page.ttsAudio?.ko?.url || page.audioUrl;
+                if (audioUrl) {
+                    await this.downloadAudio(audioUrl, filename);
+                }
                 
                 // 다운로드 간 딜레이
                 await new Promise(resolve => setTimeout(resolve, 300));

@@ -3868,7 +3868,7 @@ app.post('/api/generate-video', async (req, res) => {
                     await downloadFile(page.illustrationImage, `page${pageNum}.${ext}`);
                 }
                 
-                const ttsUrl = page.ttsAudio?.url || page.audioUrl;
+                const ttsUrl = page.ttsAudio?.ko?.url || page.audioUrl;
                 if (ttsUrl) {
                     await downloadFile(ttsUrl, `page${pageNum}.wav`);
                 }

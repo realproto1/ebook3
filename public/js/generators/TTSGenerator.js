@@ -318,7 +318,7 @@ class TTSGenerator extends BaseGenerator {
         
         // Fallback
         if (this.language === 'ko') {
-            return page.ttsAudio?.url || page.audioUrl;
+            return page.ttsAudio?.ko?.url || page.audioUrl;
         }
         return page.ttsAudio?.[this.language]?.url;
     }
@@ -334,8 +334,10 @@ class TTSGenerator extends BaseGenerator {
         }
 
         if (this.language === 'ko') {
-            page.ttsAudio.url = result.audioUrl;
-            page.ttsAudio.model = this.imageSettings.ttsModel;
+            page.ttsAudio.ko = {
+                url: result.audioUrl,
+                model: this.imageSettings.ttsModel
+            };
             page.audioUrl = result.audioUrl;
         } else {
             page.ttsAudio[this.language] = {
@@ -364,9 +366,16 @@ class TTSGenerator extends BaseGenerator {
         if (!page) return;
 
         // 언어별 TTS 삭제
-        if (this.language === 'ko' && page.audioUrl) {
-            console.log(`   🗑️ 기존 TTS 삭제: ${page.audioUrl}`);
-            page.audioUrl = null;
+        if (this.language === 'ko') {
+            // 한국어: ttsAudio.ko와 audioUrl 모두 삭제
+            if (page.ttsAudio?.ko) {
+                console.log(`   🗑️ 기존 TTS 삭제 (ttsAudio.ko): ${page.ttsAudio.ko.url}`);
+                delete page.ttsAudio.ko;
+            }
+            if (page.audioUrl) {
+                console.log(`   🗑️ 기존 TTS 삭제 (audioUrl): ${page.audioUrl}`);
+                page.audioUrl = null;
+            }
         } else if (page.ttsAudio && page.ttsAudio[this.language]) {
             console.log(`   🗑️ 기존 TTS 삭제: ${page.ttsAudio[this.language].url}`);
             delete page.ttsAudio[this.language];

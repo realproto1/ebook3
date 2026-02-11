@@ -1367,7 +1367,7 @@ function getPageTTS(page, lang) {
     
     // 한국어인 경우
     if (lang === 'ko') {
-        return page.audioUrl || page.ttsAudio?.url || null;
+        return page.audioUrl || page.ttsAudio?.ko?.url || null;
     }
     
     // 다른 언어인 경우

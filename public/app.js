@@ -6035,7 +6035,7 @@ function downloadPageTTS(pageIndex) {
     
     let audioUrl = null;
     if (currentLanguage === 'ko') {
-        audioUrl = page.ttsAudio?.url || page.audioUrl || page.tts_audio;
+        audioUrl = page.ttsAudio?.ko?.url || page.audioUrl || page.tts_audio;
     } else {
         audioUrl = page.ttsAudio?.[currentLanguage]?.url || null;
     }
