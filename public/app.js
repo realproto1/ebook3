@@ -5918,10 +5918,13 @@ async function generateVideo() {
                 storybooks[bookIndex] = currentStorybook;
             }
             
-            // 생성 모달 닫기
-            closeVideoGenerationModal();
+            // 기존 동영상 링크 영역 업데이트
+            displayExistingVideos();
             
-            // 결과 모달 열기
+            // 생성 완료 알림
+            alert('✅ YouTube 동영상 생성 완료!\n\n영상 링크가 상단에 표시되었습니다.');
+            
+            // 결과 모달도 함께 열기
             openVideoResultModal(response.videoUrl);
         } else {
             throw new Error(response.message || '동영상 생성 실패');
@@ -6016,10 +6019,13 @@ async function generateInstagramVideo() {
                 storybooks[bookIndex] = currentStorybook;
             }
             
-            // 생성 모달 닫기
-            closeVideoGenerationModal();
+            // 기존 동영상 링크 영역 업데이트
+            displayExistingVideos();
             
-            // 결과 모달 열기
+            // 생성 완료 알림
+            alert('✅ Instagram 동영상 생성 완료!\n\n영상 링크가 상단에 표시되었습니다.');
+            
+            // 결과 모달도 함께 열기
             openVideoResultModal(response.videoUrl);
         } else {
             throw new Error(response.message || 'Instagram 동영상 생성 실패');
