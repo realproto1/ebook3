@@ -4426,7 +4426,8 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 const subtitle = page.text || '';
                 
                 // TTS 길이 계산
-                let duration = 5;
+                let ttsDuration = 5;  // TTS 실제 길이
+                let totalDuration = 5;  // TTS + pageGap
                 let hasAudio = false;
                 
                 if (fs.existsSync(audioPath)) {
@@ -4434,7 +4435,8 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                         `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioPath}"`,
                         { cwd: workDir, encoding: 'utf8' }
                     ).trim();
-                    duration = parseFloat(durationStr) + (parseFloat(pageGap) || 0);
+                    ttsDuration = parseFloat(durationStr);
+                    totalDuration = ttsDuration + (parseFloat(pageGap) || 0);
                     hasAudio = true;
                 }
                 
@@ -4446,7 +4448,9 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                     audio_path: hasAudio ? audioPath : null,
                     title: title,
                     subtitle: subtitle,
-                    duration: duration,
+                    tts_duration: ttsDuration,      // TTS 실제 길이
+                    page_gap: parseFloat(pageGap) || 0,  // 페이지 간격
+                    total_duration: totalDuration,   // 전체 길이
                     width: width,
                     height: height,
                     output_path: clipPath
