@@ -5933,11 +5933,26 @@ async function generateVideo() {
         }
     } catch (error) {
         console.error('❌ 동영상 생성 오류:', error);
-        alert('❌ 동영상 생성 실패: ' + error.message);
-    } finally {
-        // 버튼 복원
-        btn.disabled = false;
-        btn.innerHTML = originalText;
+        
+        // 타임아웃 에러인 경우 특별 처리
+        if (error.isTimeout) {
+            alert('⏳ ' + error.message + '\n\n잠시 후 페이지를 새로고침하면 생성된 동영상을 확인할 수 있습니다.');
+            
+            // 버튼 텍스트를 "처리 중..." 으로 변경하고 비활성화 유지
+            btn.innerHTML = '<i class="fas fa-clock mr-2"></i>백그라운드 처리 중...';
+            
+            // 30초 후 자동 새로고침 제안
+            setTimeout(() => {
+                if (confirm('동영상 생성이 완료되었을 수 있습니다.\n페이지를 새로고침하시겠습니까?')) {
+                    location.reload();
+                }
+            }, 30000);
+        } else {
+            alert('❌ 동영상 생성 실패: ' + error.message);
+            // 버튼 복원
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
     }
 }
 
@@ -6036,11 +6051,26 @@ async function generateInstagramVideo() {
         }
     } catch (error) {
         console.error('❌ Instagram 동영상 생성 오류:', error);
-        alert('❌ Instagram 동영상 생성 실패: ' + error.message);
-    } finally {
-        // 버튼 복원
-        btn.disabled = false;
-        btn.innerHTML = originalText;
+        
+        // 타임아웃 에러인 경우 특별 처리
+        if (error.isTimeout) {
+            alert('⏳ ' + error.message + '\n\n잠시 후 페이지를 새로고침하면 생성된 동영상을 확인할 수 있습니다.');
+            
+            // 버튼 텍스트를 "처리 중..." 으로 변경하고 비활성화 유지
+            btn.innerHTML = '<i class="fas fa-clock mr-2"></i>백그라운드 처리 중...';
+            
+            // 30초 후 자동 새로고침 제안
+            setTimeout(() => {
+                if (confirm('동영상 생성이 완료되었을 수 있습니다.\n페이지를 새로고침하시겠습니까?')) {
+                    location.reload();
+                }
+            }, 30000);
+        } else {
+            alert('❌ Instagram 동영상 생성 실패: ' + error.message);
+            // 버튼 복원
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
     }
 }
 

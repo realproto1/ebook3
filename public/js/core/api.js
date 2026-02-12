@@ -35,9 +35,24 @@ class API {
                     throw new Error(message || '데이터를 찾을 수 없습니다.');
                 case 500:
                     throw new Error('서버 오류가 발생했습니다.');
+                case 502:
+                    // 502 Bad Gateway - 서버가 처리 중일 때 발생
+                    const timeoutError = new Error('서버가 동영상을 생성하고 있습니다. 작업은 백그라운드에서 계속 진행됩니다.');
+                    timeoutError.isTimeout = true;
+                    throw timeoutError;
+                case 524:
+                    // 524 Gateway Timeout - Cloudflare 타임아웃
+                    const cloudflareTimeoutError = new Error('동영상 생성 시간이 예상보다 오래 걸리고 있습니다. 작업은 백그라운드에서 계속 진행됩니다.');
+                    cloudflareTimeoutError.isTimeout = true;
+                    throw cloudflareTimeoutError;
                 default:
                     throw new Error(message || `서버 오류 (${status})`);
             }
+        } else if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+            // Axios 타임아웃 에러
+            const timeoutError = new Error('요청 시간이 초과되었습니다. 동영상 생성은 백그라운드에서 계속 진행됩니다.');
+            timeoutError.isTimeout = true;
+            throw timeoutError;
         } else if (error.request) {
             // 요청은 보냈지만 응답 없음
             throw new Error('서버에 연결할 수 없습니다.');
