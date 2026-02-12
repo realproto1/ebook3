@@ -6000,7 +6000,7 @@ async function generateInstagramVideo() {
             pageGap
         });
         
-        // API 호출 (타임아웃 10분)
+        // API 호출 - 즉시 jobId 반환
         const response = await api.post('/api/generate-instagram-video', {
             storybookId: currentStorybook.id,
             startPage,
@@ -6012,65 +6012,88 @@ async function generateInstagramVideo() {
             transition,
             pageGap
         }, {
-            timeout: 600000  // 10분 (600초)
+            timeout: 30000  // 30초 타임아웃 (jobId 받는 시간)
         });
         
-        if (response.success) {
-            console.log('✅ Instagram 동영상 생성 완료:', response.videoUrl);
+        if (response.success && response.jobId) {
+            console.log('✅ 작업 ID 받음:', response.jobId);
             
-            // currentStorybook.videos 업데이트
-            if (!currentStorybook.videos) {
-                currentStorybook.videos = {};
-            }
-            currentStorybook.videos.instagram = {
-                url: response.videoUrl,
-                createdAt: new Date().toISOString(),
-                aspectRatio,
-                maxDuration,
-                transition,
-                includeBackgroundMusic,
-                pageRange: { start: startPage, end: endPage }
+            // 폴링으로 작업 상태 확인
+            const checkJobStatus = async () => {
+                try {
+                    const statusResponse = await api.get(`/api/video-job-status/${response.jobId}`);
+                    
+                    if (statusResponse.success) {
+                        const { status, videoUrl, error, progress } = statusResponse;
+                        
+                        if (status === 'processing') {
+                            // 진행 중 - 버튼 텍스트 업데이트
+                            btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>${progress || '동영상 생성 중...'}`;
+                            
+                            // 3초 후 다시 확인
+                            setTimeout(checkJobStatus, 3000);
+                        } else if (status === 'completed') {
+                            // 완료
+                            console.log('✅ Instagram 동영상 생성 완료:', videoUrl);
+                            
+                            // currentStorybook.videos 업데이트
+                            if (!currentStorybook.videos) {
+                                currentStorybook.videos = {};
+                            }
+                            currentStorybook.videos.instagram = {
+                                url: videoUrl,
+                                createdAt: new Date().toISOString(),
+                                aspectRatio,
+                                maxDuration,
+                                transition,
+                                includeBackgroundMusic,
+                                pageRange: { start: startPage, end: endPage }
+                            };
+                            
+                            // 메모리의 storybooks 배열도 업데이트
+                            const bookIndex = storybooks.findIndex(b => b.id === currentStorybook.id);
+                            if (bookIndex !== -1) {
+                                storybooks[bookIndex] = currentStorybook;
+                            }
+                            
+                            // 기존 동영상 링크 영역 업데이트
+                            displayExistingVideos();
+                            
+                            // 버튼 복원
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                            
+                            // 생성 완료 알림
+                            alert('✅ Instagram 동영상 생성 완료!\n\n영상 링크가 상단에 표시되었습니다.');
+                            
+                            // 결과 모달도 함께 열기
+                            openVideoResultModal(videoUrl);
+                        } else if (status === 'failed') {
+                            // 실패
+                            console.error('❌ Instagram 동영상 생성 실패:', error);
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                            alert('❌ Instagram 동영상 생성 실패: ' + error);
+                        }
+                    }
+                } catch (pollError) {
+                    console.error('⚠️ 상태 확인 오류:', pollError);
+                    // 폴링 에러 시에도 계속 시도
+                    setTimeout(checkJobStatus, 5000);
+                }
             };
             
-            // 메모리의 storybooks 배열도 업데이트
-            const bookIndex = storybooks.findIndex(b => b.id === currentStorybook.id);
-            if (bookIndex !== -1) {
-                storybooks[bookIndex] = currentStorybook;
-            }
-            
-            // 기존 동영상 링크 영역 업데이트
-            displayExistingVideos();
-            
-            // 생성 완료 알림
-            alert('✅ Instagram 동영상 생성 완료!\n\n영상 링크가 상단에 표시되었습니다.');
-            
-            // 결과 모달도 함께 열기
-            openVideoResultModal(response.videoUrl);
+            // 폴링 시작
+            checkJobStatus();
         } else {
             throw new Error(response.message || 'Instagram 동영상 생성 실패');
         }
     } catch (error) {
         console.error('❌ Instagram 동영상 생성 오류:', error);
-        
-        // 타임아웃 에러인 경우 특별 처리
-        if (error.isTimeout) {
-            alert('⏳ ' + error.message + '\n\n잠시 후 페이지를 새로고침하면 생성된 동영상을 확인할 수 있습니다.');
-            
-            // 버튼 텍스트를 "처리 중..." 으로 변경하고 비활성화 유지
-            btn.innerHTML = '<i class="fas fa-clock mr-2"></i>백그라운드 처리 중...';
-            
-            // 30초 후 자동 새로고침 제안
-            setTimeout(() => {
-                if (confirm('동영상 생성이 완료되었을 수 있습니다.\n페이지를 새로고침하시겠습니까?')) {
-                    location.reload();
-                }
-            }, 30000);
-        } else {
-            alert('❌ Instagram 동영상 생성 실패: ' + error.message);
-            // 버튼 복원
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-        }
+        alert('❌ Instagram 동영상 생성 실패: ' + error.message);
+        // 버튼 복원
+        btn.disabled = false;
+        btn.innerHTML = originalText;
     }
 }
 

@@ -64,6 +64,9 @@ const uploadJSONToR2 = R2Storage.uploadJSONToR2;
 const getJSONFromR2 = R2Storage.getJSONFromR2;
 const cleanupOldHistoryImage = R2Storage.deleteImageFromR2;
 
+// 동영상 생성 작업 상태 추적
+const videoGenerationJobs = new Map();  // jobId -> { status, videoUrl, error, progress }
+
 
 // Gemini 이미지 생성 함수 (Nano Banana Pro) - 멀티모달 지원 + 자동 재시도
 async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRetries = 3, modelName = 'gemini-3-pro-image-preview') {
@@ -4194,79 +4197,131 @@ app.post('/api/generate-video', async (req, res) => {
 });
 
 // ===== Instagram용 동영상 생성 API =====
+// 동영상 생성 작업 상태 확인 API
+app.get('/api/video-job-status/:jobId', (req, res) => {
+    const { jobId } = req.params;
+    const job = videoGenerationJobs.get(jobId);
+    
+    if (!job) {
+        return res.status(404).json({ success: false, message: '작업을 찾을 수 없습니다.' });
+    }
+    
+    res.json({
+        success: true,
+        status: job.status,  // 'processing', 'completed', 'failed'
+        videoUrl: job.videoUrl,
+        error: job.error,
+        progress: job.progress
+    });
+});
+
 app.post('/api/generate-instagram-video', async (req, res) => {
-    try {
-        const { 
-            storybookId, 
-            startPage, 
-            endPage, 
-            aspectRatio,  // 9:16, 1:1, 4:5
-            maxDuration,  // 60 or 90
-            includeBackgroundMusic,
-            backgroundMusicId,
-            transition,
-            pageGap
-        } = req.body;
-        
-        console.log('📸 Instagram 동영상 생성 요청:', {
-            storybookId,
-            startPage,
-            endPage,
-            aspectRatio,
-            maxDuration,
-            includeBackgroundMusic,
-            backgroundMusicId: backgroundMusicId || '동화책 설정 음악',
-            transition,
-            pageGap
-        });
-        
-        // 스토리북 가져오기
-        const storybookKey = `storybook-${storybookId}.json`;
-        const storybookObject = await r2Client.send(new GetObjectCommand({
-            Bucket: config.r2.bucketName,
-            Key: storybookKey
-        }));
-        
-        if (!storybookObject) {
-            return res.status(404).json({ success: false, message: '동화책을 찾을 수 없습니다.' });
-        }
-        
-        const storybookText = await storybookObject.Body.transformToString();
-        const storybook = JSON.parse(storybookText);
-        
-        const pages = storybook.pages.slice(startPage - 1, endPage);
-        if (pages.length === 0) {
-            return res.status(400).json({ success: false, message: '선택한 페이지가 없습니다.' });
-        }
-        
-        // 배경음악 URL 가져오기
-        let backgroundMusicUrl = null;
-        if (includeBackgroundMusic) {
-            const musicIdToUse = backgroundMusicId || storybook.backgroundMusicId;
-            if (musicIdToUse) {
-                try {
-                    // R2에서 배경음악 목록 가져오기
-                    const musicListCommand = new GetObjectCommand({
-                        Bucket: config.r2.bucketName,
-                        Key: 'background-music.json'
-                    });
-                    const musicListResponse = await r2Client.send(musicListCommand);
-                    const musicListText = await musicListResponse.Body.transformToString();
-                    const musicList = JSON.parse(musicListText);
-                    
-                    // ID로 배경음악 찾기
-                    const music = musicList.find(m => m.id === musicIdToUse);
-                    if (music) {
-                        backgroundMusicUrl = music.url;
-                        console.log('✅ 배경음악 찾음:', music.title, backgroundMusicUrl);
-                    } else {
-                        console.warn('⚠️ 배경음악을 찾을 수 없습니다:', musicIdToUse);
+    const jobId = `job-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    // 작업 상태 초기화
+    videoGenerationJobs.set(jobId, {
+        status: 'processing',
+        progress: '작업 시작 중...',
+        videoUrl: null,
+        error: null
+    });
+    
+    // 즉시 jobId 반환
+    res.json({
+        success: true,
+        jobId: jobId,
+        message: '동영상 생성을 시작했습니다. 작업 상태를 확인해주세요.'
+    });
+    
+    // 백그라운드에서 동영상 생성 처리
+    (async () => {
+        try {
+            const { 
+                storybookId, 
+                startPage, 
+                endPage, 
+                aspectRatio,  // 9:16, 1:1, 4:5
+                maxDuration,  // 60 or 90
+                includeBackgroundMusic,
+                backgroundMusicId,
+                transition,
+                pageGap
+            } = req.body;
+            
+            console.log('📸 Instagram 동영상 생성 요청:', {
+                jobId,
+                storybookId,
+                startPage,
+                endPage,
+                aspectRatio,
+                maxDuration,
+                includeBackgroundMusic,
+                backgroundMusicId: backgroundMusicId || '동화책 설정 음악',
+                transition,
+                pageGap
+            });
+            
+            videoGenerationJobs.set(jobId, {
+                status: 'processing',
+                progress: '동화책 데이터 로딩 중...',
+                videoUrl: null,
+                error: null
+            });
+            
+            // 스토리북 가져오기
+            const storybookKey = `storybook-${storybookId}.json`;
+            const storybookObject = await r2Client.send(new GetObjectCommand({
+                Bucket: config.r2.bucketName,
+                Key: storybookKey
+            }));
+            
+            if (!storybookObject) {
+                throw new Error('동화책을 찾을 수 없습니다.');
+            }
+            
+            const storybookText = await storybookObject.Body.transformToString();
+            const storybook = JSON.parse(storybookText);
+            
+            const pages = storybook.pages.slice(startPage - 1, endPage);
+            if (pages.length === 0) {
+                throw new Error('선택한 페이지가 없습니다.');
+            }
+            
+            videoGenerationJobs.set(jobId, {
+                status: 'processing',
+                progress: '배경음악 준비 중...',
+                videoUrl: null,
+                error: null
+            });
+            
+            // 배경음악 URL 가져오기
+            let backgroundMusicUrl = null;
+            if (includeBackgroundMusic) {
+                const musicIdToUse = backgroundMusicId || storybook.backgroundMusicId;
+                if (musicIdToUse) {
+                    try {
+                        // R2에서 배경음악 목록 가져오기
+                        const musicListCommand = new GetObjectCommand({
+                            Bucket: config.r2.bucketName,
+                            Key: 'background-music.json'
+                        });
+                        const musicListResponse = await r2Client.send(musicListCommand);
+                        const musicListText = await musicListResponse.Body.transformToString();
+                        const musicList = JSON.parse(musicListText);
+                        
+                        // ID로 배경음악 찾기
+                        const music = musicList.find(m => m.id === musicIdToUse);
+                        if (music) {
+                            backgroundMusicUrl = music.url;
+                            console.log('✅ 배경음악 찾음:', music.title, backgroundMusicUrl);
+                        } else {
+                            console.warn('⚠️ 배경음악을 찾을 수 없습니다:', musicIdToUse);
+                        }
+                    } catch (err) {
+                        console.warn('⚠️ 배경음악 목록을 가져올 수 없습니다:', err.message);
                     }
-                } catch (err) {
-                    console.warn('⚠️ 배경음악 목록을 가져올 수 없습니다:', err.message);
                 }
             }
-        }
         
         // FFmpeg로 동영상 생성에 필요한 모듈 import
         const { execSync, execFileSync } = await import('child_process');
@@ -4327,6 +4382,12 @@ app.post('/api/generate-instagram-video', async (req, res) => {
             
             // 3. 클립 생성 (Instagram 스타일: 제목 + 콘텐츠 + 자막)
             console.log('🎬 Instagram 클립 생성 시작...');
+            videoGenerationJobs.set(jobId, {
+                status: 'processing',
+                progress: `클립 생성 중 (0/${pages.length})...`,
+                videoUrl: null,
+                error: null
+            });
             
             const titleHeight = 200;
             const subtitleHeight = 150;
@@ -4353,6 +4414,12 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 }
                 
                 console.log(`  → 페이지 ${pageNum} 클립 생성...`);
+                videoGenerationJobs.set(jobId, {
+                    status: 'processing',
+                    progress: `클립 생성 중 (${pageNum}/${pages.length})...`,
+                    videoUrl: null,
+                    error: null
+                });
                 const clipPath = pathModule.join(workDir, `clip_${pageNum}.mp4`);
                 
                 // 텍스트를 지정된 길이로 줄바꿈하는 함수
@@ -4395,10 +4462,9 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 
                 const title = escapeText(storybook.title || '동화책');
                 
-                // 자막: 줄바꿈 적용 (최대 3줄, 각 줄 25자)
+                // 자막: FFmpeg 7.0+ text_w 자동 줄바꿈 사용
                 const rawText = page.text || '';
-                const wrappedLines = wrapText(rawText, 25).split('\n').slice(0, 3);  // 최대 3줄만
-                const subtitleLines = wrappedLines.map(line => escapeText(line));
+                const subtitle = escapeText(rawText);  // 전체 텍스트를 그대로 사용
                 
                 // TTS 길이 계산
                 let duration = 5;
@@ -4413,18 +4479,18 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                     hasAudio = true;
                 }
                 
-                // Instagram 스타일 레이아웃
+                // Instagram 스타일 레이아웃 (FFmpeg 7.0+ text_w 자동 줄바꿈)
                 // 1. 검은 배경
                 // 2. 상단 제목
-                // 3. 중앙에 이미지 (비율 유지하며 최대 650px 높이)
-                // 4. 이미지 바로 아래 자막 (최대 3줄, 25자/줄, 폰트 크게)
+                // 3. 중앙에 이미지 (비율 유지하며 최대 680px 높이)
+                // 4. 이미지 바로 아래 자막 (text_w로 자동 줄바꿈, 폰트 크게)
                 
                 const titleHeight = 150;
                 const maxImageHeight = 680;  // 이미지 높이
                 const titleY = 40;
                 const imageStartY = titleHeight;
                 const subtitleStartY = imageStartY + maxImageHeight + 30;  // 이미지 끝 + 30px
-                const lineHeight = 50;  // 각 줄 사이 간격
+                const subtitleMaxWidth = width - 80;  // 좌우 40px 여백
                 
                 // 한글 폰트 경로
                 const fontPath = '/usr/share/fonts/truetype/nanum/NanumSquareRoundB.ttf';
@@ -4436,20 +4502,8 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 complexFilter += `[bg][img]overlay=(W-w)/2:${imageStartY}+(${maxImageHeight}-h)/2[with_img];`;
                 // 제목 추가 (상단 중앙, 폰트 크게)
                 complexFilter += `[with_img]drawtext=text='${title}':fontsize=60:fontcolor=white:x=(w-text_w)/2:y=${titleY}:fontfile=${fontPath}[with_title];`;
-                
-                // 자막 추가 (각 줄을 따로 그리기)
-                let currentLabel = 'with_title';
-                subtitleLines.forEach((line, index) => {
-                    const yPos = subtitleStartY + (index * lineHeight);
-                    const nextLabel = index === subtitleLines.length - 1 ? 'out' : `with_subtitle_${index}`;
-                    complexFilter += `[${currentLabel}]drawtext=text='${line}':fontsize=38:fontcolor=white:x=(w-text_w)/2:y=${yPos}:fontfile=${fontPath}[${nextLabel}];`;
-                    currentLabel = nextLabel;
-                });
-                
-                // 마지막 세미콜론 제거
-                if (complexFilter.endsWith(';')) {
-                    complexFilter = complexFilter.slice(0, -1);
-                }
+                // 자막 추가 (text_w로 자동 줄바꿈, line_spacing 적용)
+                complexFilter += `[with_title]drawtext=text='${subtitle}':fontsize=38:fontcolor=white:x=(w-text_w)/2:y=${subtitleStartY}:text_w=${subtitleMaxWidth}:line_spacing=10:fontfile=${fontPath}[out]`;
                 
                 // FFmpeg 명령어 구성 (배열 형태로 안전하게)
                 const ffmpegArgs = [
@@ -4590,11 +4644,18 @@ app.post('/api/generate-instagram-video', async (req, res) => {
             
             console.log('✅ Instagram 동영상 생성 완료!');
             
-            return res.json({
-                success: true,
-                videoUrl,
-                message: 'Instagram 동영상이 성공적으로 생성되었습니다.'
+            // 작업 완료 상태 업데이트
+            videoGenerationJobs.set(jobId, {
+                status: 'completed',
+                progress: '동영상 생성 완료!',
+                videoUrl: videoUrl,
+                error: null
             });
+            
+            // 5분 후 작업 정보 삭제
+            setTimeout(() => {
+                videoGenerationJobs.delete(jobId);
+            }, 5 * 60 * 1000);
             
         } catch (error) {
             console.error('❌ FFmpeg 실행 오류:', error);
@@ -4609,11 +4670,21 @@ app.post('/api/generate-instagram-video', async (req, res) => {
         
     } catch (error) {
         console.error('❌ Instagram 동영상 생성 오류:', error);
-        return res.status(500).json({ 
-            success: false, 
-            message: error.message || 'Instagram 동영상 생성 중 오류가 발생했습니다.' 
+        
+        // 작업 실패 상태 업데이트
+        videoGenerationJobs.set(jobId, {
+            status: 'failed',
+            progress: null,
+            videoUrl: null,
+            error: error.message || 'Instagram 동영상 생성 중 오류가 발생했습니다.'
         });
+        
+        // 5분 후 작업 정보 삭제
+        setTimeout(() => {
+            videoGenerationJobs.delete(jobId);
+        }, 5 * 60 * 1000);
     }
+    })();
 });
 
 // ===== 5️⃣ 댓글 API =====
