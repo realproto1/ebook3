@@ -4245,7 +4245,7 @@ app.post('/api/generate-instagram-video', async (req, res) => {
         }
         
         // FFmpeg로 동영상 생성에 필요한 모듈 import
-        const { execSync } = await import('child_process');
+        const { execSync, execFileSync } = await import('child_process');
         const fs = await import('fs');
         const pathModule = await import('path');
         
@@ -4324,9 +4324,21 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 console.log(`  → 페이지 ${pageNum} 클립 생성...`);
                 const clipPath = pathModule.join(workDir, `clip_${pageNum}.mp4`);
                 
-                // 텍스트 이스케이프
+                // 텍스트 이스케이프 (FFmpeg drawtext용)
                 const escapeText = (text) => {
-                    return text.replace(/\\/g, '\\\\\\\\').replace(/'/g, "\\'").replace(/:/g, '\\:').replace(/\n/g, ' ');
+                    if (!text) return '';
+                    return text
+                        .replace(/\\/g, '\\\\\\\\')    // 백슬래시
+                        .replace(/'/g, "'\\\\\\''")     // 작은따옴표
+                        .replace(/:/g, '\\:')           // 콜론
+                        .replace(/\n/g, ' ')            // 줄바꿈
+                        .replace(/\r/g, '')             // 캐리지리턴
+                        .replace(/,/g, '\\,')           // 쉼표
+                        .replace(/\[/g, '\\[')          // 대괄호
+                        .replace(/\]/g, '\\]')          
+                        .replace(/\(/g, '\\(')          // 소괄호
+                        .replace(/\)/g, '\\)')
+                        .trim();
                 };
                 
                 const title = escapeText(storybook.title || '동화책');
@@ -4358,18 +4370,40 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 complexFilter += `[with_img]drawtext=text='${title}':fontsize=80:fontcolor=white:x=(w-text_w)/2:y=50:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf[with_title];`;
                 complexFilter += `[with_title]drawtext=text='${subtitle}':fontsize=50:fontcolor=white:x=(w-text_w)/2:y=${height - 120}:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf[out]`;
                 
-                // FFmpeg 명령어 구성
-                let ffmpegCmd = `ffmpeg -y -loop 1 -i "${imagePath}"`;
-                if (hasAudio) {
-                    ffmpegCmd += ` -i "${audioPath}"`;
-                }
-                ffmpegCmd += ` -filter_complex "${complexFilter}" -map "[out]"`;
-                if (hasAudio) {
-                    ffmpegCmd += ` -map 1:a`;
-                }
-                ffmpegCmd += ` -c:v libx264 -c:a aac -b:a 192k -t ${duration} -pix_fmt yuv420p -preset fast "${clipPath}"`;
+                // FFmpeg 명령어 구성 (배열 형태로 안전하게)
+                const ffmpegArgs = [
+                    '-y',
+                    '-loop', '1',
+                    '-i', imagePath
+                ];
                 
-                execSync(ffmpegCmd, { cwd: workDir, stdio: ['pipe', 'pipe', 'pipe'] });
+                if (hasAudio) {
+                    ffmpegArgs.push('-i', audioPath);
+                }
+                
+                ffmpegArgs.push(
+                    '-filter_complex', complexFilter,
+                    '-map', '[out]'
+                );
+                
+                if (hasAudio) {
+                    ffmpegArgs.push('-map', '1:a');
+                }
+                
+                ffmpegArgs.push(
+                    '-c:v', 'libx264',
+                    '-c:a', 'aac',
+                    '-b:a', '192k',
+                    '-t', duration.toString(),
+                    '-pix_fmt', 'yuv420p',
+                    '-preset', 'fast',
+                    clipPath
+                );
+                
+                execFileSync('ffmpeg', ffmpegArgs, { 
+                    cwd: workDir,
+                    stdio: ['pipe', 'pipe', 'pipe']
+                });
                 
                 clips.push(clipPath);
             }
