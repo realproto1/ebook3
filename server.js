@@ -4356,7 +4356,7 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 const clipPath = pathModule.join(workDir, `clip_${pageNum}.mp4`);
                 
                 // 텍스트를 지정된 길이로 줄바꿈하는 함수
-                const wrapText = (text, maxCharsPerLine = 28) => {
+                const wrapText = (text, maxCharsPerLine = 25) => {
                     if (!text) return '';
                     const words = text.split(' ');
                     const lines = [];
@@ -4373,8 +4373,8 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                     }
                     if (currentLine) lines.push(currentLine);
                     
-                    // 최대 3줄까지만
-                    return lines.slice(0, 3).join('\\n');
+                    // 최대 3줄까지만, 실제 줄바꿈 문자로 결합
+                    return lines.slice(0, 3).join('\n');
                 };
                 
                 // 텍스트 이스케이프 (FFmpeg drawtext용)
@@ -4385,6 +4385,7 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                         .replace(/'/g, "'\\\\\\''")     // 작은따옴표
                         .replace(/:/g, '\\:')           // 콜론
                         .replace(/\r/g, '')             // 캐리지리턴
+                        .replace(/\n/g, '\\n')          // 줄바꿈을 FFmpeg 형식으로
                         .replace(/,/g, '\\,')           // 쉼표
                         .replace(/\[/g, '\\[')          // 대괄호
                         .replace(/\]/g, '\\]')          
@@ -4396,7 +4397,7 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 const title = escapeText(storybook.title || '동화책');
                 // 자막: 줄바꿈 적용 후 이스케이프
                 const rawText = page.text || '';
-                const wrappedText = wrapText(rawText, 28);  // 28자마다 줄바꿈
+                const wrappedText = wrapText(rawText, 25);  // 25자마다 줄바꿈 (짧게)
                 const subtitle = escapeText(wrappedText);
                 
                 // TTS 길이 계산
@@ -4415,27 +4416,27 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 // Instagram 스타일 레이아웃
                 // 1. 검은 배경
                 // 2. 상단 제목
-                // 3. 중앙에 이미지 (비율 유지하며 최대 680px 높이)
-                // 4. 이미지 바로 아래 자막 (최대 3줄, 28자/줄)
+                // 3. 중앙에 이미지 (비율 유지하며 최대 650px 높이)
+                // 4. 이미지 바로 아래 자막 (최대 3줄, 25자/줄, 폰트 크게)
                 
                 const titleHeight = 150;
-                const maxImageHeight = 680;  // 이미지 높이 줄여서 자막 공간 확보
+                const maxImageHeight = 650;  // 이미지 높이 더 줄여서 자막 공간 확보
                 const titleY = 40;
                 const imageStartY = titleHeight;
-                const subtitleY = imageStartY + maxImageHeight + 30;  // 이미지 끝 + 30px
+                const subtitleY = imageStartY + maxImageHeight + 35;  // 이미지 끝 + 35px
                 
                 // 한글 폰트 경로
                 const fontPath = '/usr/share/fonts/truetype/nanum/NanumSquareRoundB.ttf';
                 
                 let complexFilter = `color=black:s=${width}x${height}:d=${duration}[bg];`;
-                // 이미지를 최대 680px 높이로 스케일하고 중앙 배치
+                // 이미지를 최대 650px 높이로 스케일하고 중앙 배치
                 complexFilter += `[0:v]scale=${width}:${maxImageHeight}:force_original_aspect_ratio=decrease,setsar=1[img];`;
                 // 이미지를 배경에 오버레이 (중앙 정렬, 제목 아래 시작)
                 complexFilter += `[bg][img]overlay=(W-w)/2:${imageStartY}+(${maxImageHeight}-h)/2[with_img];`;
-                // 제목 추가 (상단 중앙)
-                complexFilter += `[with_img]drawtext=text='${title}':fontsize=55:fontcolor=white:x=(w-text_w)/2:y=${titleY}:fontfile=${fontPath}[with_title];`;
-                // 자막 추가 (이미지 바로 아래, 최대 3줄)
-                complexFilter += `[with_title]drawtext=text='${subtitle}':fontsize=30:fontcolor=white:x=(w-text_w)/2:y=${subtitleY}:fontfile=${fontPath}[out]`;
+                // 제목 추가 (상단 중앙, 폰트 크게)
+                complexFilter += `[with_img]drawtext=text='${title}':fontsize=60:fontcolor=white:x=(w-text_w)/2:y=${titleY}:fontfile=${fontPath}[with_title];`;
+                // 자막 추가 (이미지 바로 아래, 최대 3줄, 폰트 크게)
+                complexFilter += `[with_title]drawtext=text='${subtitle}':fontsize=38:fontcolor=white:x=(w-text_w)/2:y=${subtitleY}:fontfile=${fontPath}[out]`;
                 
                 // FFmpeg 명령어 구성 (배열 형태로 안전하게)
                 const ffmpegArgs = [
