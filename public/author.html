@@ -1484,6 +1484,29 @@
                     </select>
                 </div>
 
+                <!-- 페이지 간격 -->
+                <div class="bg-purple-50 p-4 rounded-lg border-2 border-purple-200">
+                    <label class="block text-gray-800 font-bold mb-3">
+                        <i class="fas fa-clock mr-2"></i>페이지 사이 쉬는 타임
+                    </label>
+                    <div class="flex items-center gap-4">
+                        <input 
+                            type="number" 
+                            id="instaPageGap" 
+                            class="w-32 px-4 py-2 border-2 border-purple-300 rounded-lg"
+                            value="1"
+                            min="0"
+                            max="5"
+                            step="0.5"
+                        >
+                        <span class="text-gray-700">초</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        각 페이지 TTS 재생 후 다음 페이지로 넘어가기 전 대기 시간입니다.
+                    </p>
+                </div>
+
                 <!-- 프리뷰 안내 -->
                 <div class="bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
                     <p class="text-sm text-gray-700">
@@ -1926,6 +1949,6 @@
         console.log('✅ 모듈 로드 완료', window.__modules);
     </script>
     
-    <script defer src="/app.js?v=1770913826321"></script>
+    <script defer src="/app.js?v=1770914073802"></script>
 </body>
 </html>

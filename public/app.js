@@ -5958,7 +5958,7 @@ async function generateInstagramVideo() {
     const includeBackgroundMusic = document.getElementById('instaIncludeBackgroundMusic').checked;
     const backgroundMusicId = document.getElementById('instaBackgroundMusicId').value;
     const transition = document.getElementById('instaTransition').value;
-    const pageGap = 1; // Instagram은 기본 1초
+    const pageGap = parseFloat(document.getElementById('instaPageGap').value) || 1; // 페이지 간격 (기본 1초)
     
     // 페이지 범위 검증
     if (startPage < 1 || endPage > currentStorybook.pages.length || startPage > endPage) {
