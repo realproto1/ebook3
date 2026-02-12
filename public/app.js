@@ -5880,7 +5880,7 @@ async function generateVideo() {
             pageGap
         });
         
-        // API 호출 (타임아웃 4분)
+        // API 호출 (타임아웃 10분)
         const response = await api.post('/api/generate-video', {
             storybookId: currentStorybook.id,
             startPage,
@@ -5893,7 +5893,7 @@ async function generateVideo() {
             transition,
             pageGap
         }, {
-            timeout: 240000  // 4분 (240초)
+            timeout: 600000  // 10분 (600초)
         });
         
         if (response.success) {
@@ -5985,7 +5985,7 @@ async function generateInstagramVideo() {
             pageGap
         });
         
-        // API 호출 (타임아웃 4분)
+        // API 호출 (타임아웃 10분)
         const response = await api.post('/api/generate-instagram-video', {
             storybookId: currentStorybook.id,
             startPage,
@@ -5997,7 +5997,7 @@ async function generateInstagramVideo() {
             transition,
             pageGap
         }, {
-            timeout: 240000  // 4분 (240초)
+            timeout: 600000  // 10분 (600초)
         });
         
         if (response.success) {
