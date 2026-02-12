@@ -4422,49 +4422,17 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 });
                 const clipPath = pathModule.join(workDir, `clip_${pageNum}.mp4`);
                 
-                // 텍스트를 지정된 길이로 줄바꿈하는 함수
-                const wrapText = (text, maxCharsPerLine = 28) => {
-                    if (!text) return '';
-                    const words = text.split(' ');
-                    const lines = [];
-                    let currentLine = '';
-                    
-                    for (const word of words) {
-                        const testLine = currentLine ? `${currentLine} ${word}` : word;
-                        if (testLine.length <= maxCharsPerLine) {
-                            currentLine = testLine;
-                        } else {
-                            if (currentLine) lines.push(currentLine);
-                            currentLine = word;
-                        }
-                    }
-                    if (currentLine) lines.push(currentLine);
-                    
-                    // 최대 5줄까지 반환
-                    return lines.slice(0, 5);
+                const title = storybook.title || '동화책';
+                const subtitle = page.text || '';
+                
+                // duration을 SRT 시간 형식으로 변환 (00:00:05,000)
+                const formatDuration = (seconds) => {
+                    const hrs = Math.floor(seconds / 3600);
+                    const mins = Math.floor((seconds % 3600) / 60);
+                    const secs = Math.floor(seconds % 60);
+                    const ms = Math.floor((seconds % 1) * 1000);
+                    return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
                 };
-                
-                // 텍스트 이스케이프 (FFmpeg drawtext용)
-                const escapeText = (text) => {
-                    if (!text) return '';
-                    return text
-                        .replace(/\\/g, '\\\\\\\\')    // 백슬래시
-                        .replace(/'/g, "'\\\\\\''")     // 작은따옴표
-                        .replace(/:/g, '\\:')           // 콜론
-                        .replace(/\r/g, '')             // 캐리지리턴
-                        .replace(/,/g, '\\,')           // 쉼표
-                        .replace(/\[/g, '\\[')          // 대괄호
-                        .replace(/\]/g, '\\]')          
-                        .replace(/\(/g, '\\(')          // 소괄호
-                        .replace(/\)/g, '\\)')
-                        .trim();
-                };
-                
-                const title = escapeText(storybook.title || '동화책');
-                
-                // 자막: 수동 줄바꿈 (최대 5줄, 각 줄 28자)
-                const rawText = page.text || '';
-                const subtitleLines = wrapText(rawText, 28).map(line => escapeText(line));
                 
                 // TTS 길이 계산
                 let duration = 5;
@@ -4479,45 +4447,42 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                     hasAudio = true;
                 }
                 
-                // Instagram 스타일 레이아웃 (수동 줄바꿈, 최대 5줄)
-                // 1. 검은 배경
-                // 2. 상단 제목
-                // 3. 중앙에 이미지 (비율 유지하며 최대 650px 높이)
-                // 4. 이미지 바로 아래 자막 (각 줄마다 개별 drawtext, 폰트 35pt)
+                // Instagram 스타일 레이아웃 (SRT 자막 사용)
+                // 1. 검은 배경 + 이미지 + 제목
+                // 2. SRT 자막 파일로 자동 줄바꿈 처리
                 
                 const titleHeight = 150;
-                const maxImageHeight = 650;  // 이미지 높이
+                const maxImageHeight = 700;  // 이미지 높이
                 const titleY = 40;
                 const imageStartY = titleHeight;
-                const subtitleStartY = imageStartY + maxImageHeight + 25;  // 이미지 끝 + 25px
-                const lineHeight = 45;  // 각 줄 사이 간격
                 
                 // 한글 폰트 경로
                 const fontPath = '/usr/share/fonts/truetype/nanum/NanumSquareRoundB.ttf';
                 
+                // SRT 자막 파일 생성
+                const srtPath = pathModule.join(workDir, `subtitle_${pageNum}.srt`);
+                const srtContent = `1
+00:00:00,000 --> ${formatDuration(duration)}
+${subtitle}
+`;
+                fs.writeFileSync(srtPath, srtContent, 'utf-8');
+                
+                // 제목만 drawtext로, 자막은 subtitles 필터 사용
+                const titleFilter = `drawtext=text='${title.replace(/'/g, "\\'")}':fontsize=60:fontcolor=white:x=(w-text_w)/2:y=${titleY}:fontfile=${fontPath}`;
+                
+                // SRT 자막 스타일 (하단 중앙, 자동 줄바꿈)
+                const subtitleStyle = `FontName=NanumSquareRoundB,FontSize=38,PrimaryColour=&HFFFFFF&,Alignment=2,MarginV=100`;
+                
                 let complexFilter = `color=black:s=${width}x${height}:d=${duration}[bg];`;
-                // 이미지를 최대 650px 높이로 스케일하고 중앙 배치
+                // 이미지 스케일 및 오버레이
                 complexFilter += `[0:v]scale=${width}:${maxImageHeight}:force_original_aspect_ratio=decrease,setsar=1[img];`;
-                // 이미지를 배경에 오버레이 (중앙 정렬, 제목 아래 시작)
                 complexFilter += `[bg][img]overlay=(W-w)/2:${imageStartY}+(${maxImageHeight}-h)/2[with_img];`;
-                // 제목 추가 (상단 중앙, 폰트 크게)
-                complexFilter += `[with_img]drawtext=text='${title}':fontsize=60:fontcolor=white:x=(w-text_w)/2:y=${titleY}:fontfile=${fontPath}[with_title];`;
+                // 제목 추가
+                complexFilter += `[with_img]${titleFilter}[with_title];`;
+                // SRT 자막 추가
+                complexFilter += `[with_title]subtitles=${srtPath}:force_style='${subtitleStyle}'[out]`;
                 
-                // 자막 추가 (각 줄을 따로 그리기)
-                let currentLabel = 'with_title';
-                subtitleLines.forEach((line, index) => {
-                    const yPos = subtitleStartY + (index * lineHeight);
-                    const nextLabel = index === subtitleLines.length - 1 ? 'out' : `with_subtitle_${index}`;
-                    complexFilter += `[${currentLabel}]drawtext=text='${line}':fontsize=35:fontcolor=white:x=(w-text_w)/2:y=${yPos}:fontfile=${fontPath}[${nextLabel}];`;
-                    currentLabel = nextLabel;
-                });
-                
-                // 마지막 세미콜론 제거
-                if (complexFilter.endsWith(';')) {
-                    complexFilter = complexFilter.slice(0, -1);
-                }
-                
-                // FFmpeg 명령어 구성 (배열 형태로 안전하게)
+                // FFmpeg 명령어 구성
                 const ffmpegArgs = [
                     '-y',
                     '-loop', '1',
