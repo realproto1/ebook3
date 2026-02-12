@@ -65,7 +65,7 @@ def create_clip(image_path, audio_path, title, subtitle, tts_duration, page_gap,
         color='white',
         size=(width - 60, None),  # 너비 1020px (좌우 30px 여백으로 확장), 높이 자동
         method='caption',         # 자동 줄바꿈
-        interline=-5              # 줄 간격 (음수는 간격 좁히기, 양수는 넓히기)
+        interline=10              # 줄 간격 (양수로 변경: 10px)
     ).with_position(('center', 820)).with_duration(total_duration)  # 위치 상승
     
     # 5. 모든 클립 합성
