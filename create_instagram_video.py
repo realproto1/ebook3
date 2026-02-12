@@ -85,6 +85,25 @@ def create_clip(image_path, audio_path, title, subtitle, tts_duration, page_gap,
         if tts_duration < audio.duration:
             audio = audio.subclipped(0, tts_duration - 0.01)
         # tts_duration이 audio.duration과 같거나 크면 자르지 않음
+        
+        # 중요: pageGap > 0이면 TTS 뒤에 무음 추가
+        # TTS: 0~tts_duration, 무음: tts_duration~total_duration
+        if page_gap > 0:
+            from moviepy.audio.AudioClip import AudioClip
+            # 무음 클립 생성 (page_gap 길이)
+            silence = AudioClip(lambda t: 0, duration=page_gap)
+            # TTS와 무음을 연결
+            from moviepy.audio.fx.MultiplyVolume import MultiplyVolume
+            audio = audio.with_duration(tts_duration)  # TTS 길이 명시
+            # concatenate_audioclips 사용
+            try:
+                from moviepy.audio.AudioClip import concatenate_audioclips
+                audio = concatenate_audioclips([audio, silence])
+            except:
+                # MoviePy 버전에 따라 import 경로가 다를 수 있음
+                from moviepy.audio.compositing.concatenate import concatenate_audioclips
+                audio = concatenate_audioclips([audio, silence])
+        
         video = video.with_audio(audio)
     
     # 7. 비디오 출력
