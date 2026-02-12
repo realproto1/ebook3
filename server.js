@@ -4470,8 +4470,10 @@ ${subtitle}
                 // 제목만 drawtext로, 자막은 subtitles 필터 사용
                 const titleFilter = `drawtext=text='${title.replace(/'/g, "\\'")}':fontsize=60:fontcolor=white:x=(w-text_w)/2:y=${titleY}:fontfile=${fontPath}`;
                 
-                // SRT 자막 스타일 (하단 중앙, 자동 줄바꿈)
-                const subtitleStyle = `FontName=NanumSquareRoundB,FontSize=38,PrimaryColour=&HFFFFFF&,Alignment=2,MarginV=100`;
+                // SRT 자막 스타일 (최하단 중앙, 자동 줄바꿈)
+                // FontSize: 32pt (가독성 유지하면서 작게)
+                // MarginV: 50 (하단 여백 50px로 줄여서 더 아래로)
+                const subtitleStyle = `FontName=NanumSquareRoundB,FontSize=32,PrimaryColour=&HFFFFFF&,Alignment=2,MarginV=50`;
                 
                 let complexFilter = `color=black:s=${width}x${height}:d=${duration}[bg];`;
                 // 이미지 스케일 및 오버레이
