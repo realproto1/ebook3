@@ -5898,6 +5898,26 @@ async function generateVideo() {
             // 동영상 생성 완료 - 결과 모달 표시
             console.log('✅ 동영상 생성 완료:', response.videoUrl);
             
+            // currentStorybook.videos 업데이트
+            if (!currentStorybook.videos) {
+                currentStorybook.videos = {};
+            }
+            currentStorybook.videos.youtube = {
+                url: response.videoUrl,
+                createdAt: new Date().toISOString(),
+                resolution,
+                transition,
+                includeBackgroundMusic,
+                pageRange: { start: startPage, end: endPage },
+                includeCover
+            };
+            
+            // 메모리의 storybooks 배열도 업데이트
+            const bookIndex = storybooks.findIndex(b => b.id === currentStorybook.id);
+            if (bookIndex !== -1) {
+                storybooks[bookIndex] = currentStorybook;
+            }
+            
             // 생성 모달 닫기
             closeVideoGenerationModal();
             
@@ -5976,14 +5996,31 @@ async function generateInstagramVideo() {
         if (response.success) {
             console.log('✅ Instagram 동영상 생성 완료:', response.videoUrl);
             
+            // currentStorybook.videos 업데이트
+            if (!currentStorybook.videos) {
+                currentStorybook.videos = {};
+            }
+            currentStorybook.videos.instagram = {
+                url: response.videoUrl,
+                createdAt: new Date().toISOString(),
+                aspectRatio,
+                maxDuration,
+                transition,
+                includeBackgroundMusic,
+                pageRange: { start: startPage, end: endPage }
+            };
+            
+            // 메모리의 storybooks 배열도 업데이트
+            const bookIndex = storybooks.findIndex(b => b.id === currentStorybook.id);
+            if (bookIndex !== -1) {
+                storybooks[bookIndex] = currentStorybook;
+            }
+            
             // 생성 모달 닫기
             closeVideoGenerationModal();
             
             // 결과 모달 열기
             openVideoResultModal(response.videoUrl);
-            
-            // 동화책 데이터 다시 불러오기 (동영상 링크 업데이트)
-            await loadStorybook(currentStorybook.id);
         } else {
             throw new Error(response.message || 'Instagram 동영상 생성 실패');
         }

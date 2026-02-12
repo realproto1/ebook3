@@ -4293,11 +4293,12 @@ app.post('/api/generate-instagram-video', async (req, res) => {
             
             // 2. 해상도 설정
             const resolutionMap = {
+                '3:4': '1080:1440',
                 '9:16': '1080:1920',
                 '1:1': '1080:1080',
                 '4:5': '1080:1350'
             };
-            const videoSize = resolutionMap[aspectRatio] || '1080:1920';
+            const videoSize = resolutionMap[aspectRatio] || '1080:1440';
             const [width, height] = videoSize.split(':').map(Number);
             
             // 3. 클립 생성 (Instagram 스타일: 제목 + 콘텐츠 + 자막)
