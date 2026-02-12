@@ -4335,8 +4335,7 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 
                 // TTS 길이 계산
                 let duration = 5;
-                let audioInput = '';
-                let audioMap = '';
+                let hasAudio = false;
                 
                 if (fs.existsSync(audioPath)) {
                     const durationStr = execSync(
@@ -4344,11 +4343,7 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                         { cwd: workDir, encoding: 'utf8' }
                     ).trim();
                     duration = parseFloat(durationStr) + (parseFloat(pageGap) || 0);
-                    audioInput = `-i "${audioPath}"`;
-                    audioMap = '-map 1:a';
-                } else {
-                    audioInput = '';
-                    audioMap = '';
+                    hasAudio = true;
                 }
                 
                 // Instagram 스타일 레이아웃
@@ -4358,15 +4353,23 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 // 4. 하단 자막
                 
                 let complexFilter = `color=black:s=${width}x${height}:d=${duration}[bg];`;
-                complexFilter += `movie='${imagePath}',scale=${width}:${contentHeight}:force_original_aspect_ratio=decrease,setsar=1[img];`;
+                complexFilter += `[0:v]scale=${width}:${contentHeight}:force_original_aspect_ratio=decrease,setsar=1[img];`;
                 complexFilter += `[bg][img]overlay=(W-w)/2:${contentY}[with_img];`;
                 complexFilter += `[with_img]drawtext=text='${title}':fontsize=80:fontcolor=white:x=(w-text_w)/2:y=50:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf[with_title];`;
                 complexFilter += `[with_title]drawtext=text='${subtitle}':fontsize=50:fontcolor=white:x=(w-text_w)/2:y=${height - 120}:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf[out]`;
                 
-                execSync(
-                    `ffmpeg -y ${audioInput} -filter_complex "${complexFilter}" -map "[out]" ${audioMap} -c:v libx264 -c:a aac -b:a 192k -t ${duration} -pix_fmt yuv420p -preset fast "${clipPath}"`,
-                    { cwd: workDir, stdio: ['pipe', 'pipe', 'pipe'] }
-                );
+                // FFmpeg 명령어 구성
+                let ffmpegCmd = `ffmpeg -y -loop 1 -i "${imagePath}"`;
+                if (hasAudio) {
+                    ffmpegCmd += ` -i "${audioPath}"`;
+                }
+                ffmpegCmd += ` -filter_complex "${complexFilter}" -map "[out]"`;
+                if (hasAudio) {
+                    ffmpegCmd += ` -map 1:a`;
+                }
+                ffmpegCmd += ` -c:v libx264 -c:a aac -b:a 192k -t ${duration} -pix_fmt yuv420p -preset fast "${clipPath}"`;
+                
+                execSync(ffmpegCmd, { cwd: workDir, stdio: ['pipe', 'pipe', 'pipe'] });
                 
                 clips.push(clipPath);
             }
