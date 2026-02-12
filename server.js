@@ -4158,8 +4158,6 @@ app.post('/api/generate-video', async (req, res) => {
                 console.log('💾 동영상 URL DB 저장 완료 (YouTube용)');
             } catch (dbError) {
                 console.error('⚠️ 동영상 URL DB 저장 실패:', dbError);
-            } catch (dbError) {
-                console.error('⚠️ 동영상 URL DB 저장 실패:', dbError);
                 // DB 저장 실패해도 동영상 URL은 반환
             }
             
