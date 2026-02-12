@@ -81,7 +81,10 @@ def create_clip(image_path, audio_path, title, subtitle, tts_duration, page_gap,
     if audio_path:
         audio = AudioFileClip(audio_path)
         # TTS 오디오를 tts_duration 길이로 자르기 (pageGap 제외)
-        audio = audio.subclipped(0, tts_duration)
+        # 주의: subclipped의 end_time은 duration보다 작아야 하므로 0.01초 빼기
+        if tts_duration < audio.duration:
+            audio = audio.subclipped(0, tts_duration - 0.01)
+        # tts_duration이 audio.duration과 같거나 크면 자르지 않음
         video = video.with_audio(audio)
     
     # 7. 비디오 출력
