@@ -4485,9 +4485,9 @@ ${formattedSubtitle}
                 const titleFilter = `drawtext=text='${title.replace(/'/g, "\\'")}':fontsize=60:fontcolor=white:x=(w-text_w)/2:y=${titleY}:fontfile=${fontPath}`;
                 
                 // SRT 자막 스타일 (최하단 중앙, 문장별 줄바꿈)
-                // FontSize: 24pt (작게)
+                // FontSize: 14pt (매우 작게)
                 // MarginV: 50 (하단 여백 50px)
-                const subtitleStyle = `FontName=NanumSquareRoundB,FontSize=24,PrimaryColour=&HFFFFFF&,Alignment=2,MarginV=50`;
+                const subtitleStyle = `FontName=NanumSquareRoundB,FontSize=14,PrimaryColour=&HFFFFFF&,Alignment=2,MarginV=50`;
                 
                 let complexFilter = `color=black:s=${width}x${height}:d=${duration}[bg];`;
                 // 이미지 스케일 및 오버레이
