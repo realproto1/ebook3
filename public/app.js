@@ -5682,8 +5682,17 @@ function openVideoGenerationModal() {
     document.getElementById('videoStartPage').max = currentStorybook.pages.length;
     document.getElementById('videoEndPage').max = currentStorybook.pages.length;
     
+    // Instagram 탭 기본값 설정
+    document.getElementById('instaVideoStartPage').value = 1;
+    document.getElementById('instaVideoEndPage').value = currentStorybook.pages.length;
+    document.getElementById('instaVideoStartPage').max = currentStorybook.pages.length;
+    document.getElementById('instaVideoEndPage').max = currentStorybook.pages.length;
+    
     // 배경음악 리스트 로드 (동영상 생성용)
     loadVideoBackgroundMusicList();
+    
+    // 기존 동영상 링크 표시
+    displayExistingVideos();
     
     // 모달 표시
     const modal = document.getElementById('videoGenerationModal');
@@ -5735,6 +5744,78 @@ function closeVideoGenerationModal() {
     const modal = document.getElementById('videoGenerationModal');
     modal.classList.add('hidden');
     modal.classList.remove('flex');
+}
+
+/**
+ * 동영상 탭 전환 (YouTube용/Instagram용)
+ */
+function switchVideoTab(tab) {
+    const youtubeSettings = document.getElementById('youtubeSettings');
+    const instagramSettings = document.getElementById('instagramSettings');
+    const youtubeTab = document.getElementById('youtubeTabBtn');
+    const instagramTab = document.getElementById('instagramTabBtn');
+    
+    if (tab === 'youtube') {
+        youtubeSettings.classList.remove('hidden');
+        instagramSettings.classList.add('hidden');
+        youtubeTab.classList.add('border-red-500', 'text-red-600');
+        youtubeTab.classList.remove('border-transparent', 'text-gray-500');
+        instagramTab.classList.remove('border-pink-500', 'text-pink-600');
+        instagramTab.classList.add('border-transparent', 'text-gray-500');
+    } else {
+        instagramSettings.classList.remove('hidden');
+        youtubeSettings.classList.add('hidden');
+        instagramTab.classList.add('border-pink-500', 'text-pink-600');
+        instagramTab.classList.remove('border-transparent', 'text-gray-500');
+        youtubeTab.classList.remove('border-red-500', 'text-red-600');
+        youtubeTab.classList.add('border-transparent', 'text-gray-500');
+    }
+}
+
+/**
+ * 기존 동영상 링크 표시
+ */
+function displayExistingVideos() {
+    if (!currentStorybook || !currentStorybook.videos) return;
+    
+    const videos = currentStorybook.videos;
+    let html = '<div class="bg-indigo-50 p-4 rounded-lg border-2 border-indigo-200 mb-6"><h3 class="font-bold text-gray-800 mb-3"><i class="fas fa-film mr-2"></i>생성된 동영상</h3>';
+    
+    if (videos.youtube) {
+        html += `
+            <div class="mb-2">
+                <span class="font-semibold text-gray-700"><i class="fab fa-youtube mr-2 text-red-600"></i>YouTube용:</span>
+                <a href="${videos.youtube.url}" target="_blank" class="text-blue-600 hover:underline ml-2">${videos.youtube.url}</a>
+                <span class="text-xs text-gray-500 ml-2">(생성: ${new Date(videos.youtube.createdAt).toLocaleString('ko-KR')})</span>
+            </div>
+        `;
+    }
+    
+    if (videos.instagram) {
+        html += `
+            <div>
+                <span class="font-semibold text-gray-700"><i class="fab fa-instagram mr-2 text-pink-600"></i>Instagram용:</span>
+                <a href="${videos.instagram.url}" target="_blank" class="text-blue-600 hover:underline ml-2">${videos.instagram.url}</a>
+                <span class="text-xs text-gray-500 ml-2">(생성: ${new Date(videos.instagram.createdAt).toLocaleString('ko-KR')})</span>
+            </div>
+        `;
+    }
+    
+    if (!videos.youtube && !videos.instagram) {
+        html += '<p class="text-gray-500 text-sm">아직 생성된 동영상이 없습니다.</p>';
+    }
+    
+    html += '</div>';
+    
+    // 탭 메뉴 다음에 삽입
+    const modal = document.querySelector('#videoGenerationModal .space-y-6');
+    if (modal) {
+        const existingDiv = modal.querySelector('.bg-indigo-50');
+        if (existingDiv) {
+            existingDiv.remove();
+        }
+        modal.insertAdjacentHTML('afterbegin', html);
+    }
 }
 
 /**
@@ -6237,6 +6318,8 @@ function downloadPageTTS(pageIndex) {
     window.openVideoGenerationModal = openVideoGenerationModal;
     window.closeVideoGenerationModal = closeVideoGenerationModal;
     window.generateVideo = generateVideo;
+    window.switchVideoTab = switchVideoTab;
+    window.displayExistingVideos = displayExistingVideos;
     window.openVideoResultModal = openVideoResultModal;
     window.closeVideoResultModal = closeVideoResultModal;
     window.copyVideoUrl = copyVideoUrl;

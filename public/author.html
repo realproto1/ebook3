@@ -1204,7 +1204,26 @@
                 동영상 생성
             </h2>
             
-            <div class="space-y-6">
+            <!-- 탭 메뉴 (YouTube용/Instagram용) -->
+            <div class="flex border-b-2 border-gray-200 mb-6">
+                <button 
+                    id="youtubeTabBtn"
+                    onclick="switchVideoTab('youtube')"
+                    class="flex-1 py-3 font-bold text-center border-b-4 border-red-500 text-red-600 transition"
+                >
+                    <i class="fab fa-youtube mr-2"></i>YouTube용
+                </button>
+                <button 
+                    id="instagramTabBtn"
+                    onclick="switchVideoTab('instagram')"
+                    class="flex-1 py-3 font-bold text-center border-b-4 border-transparent text-gray-500 hover:text-gray-700 transition"
+                >
+                    <i class="fab fa-instagram mr-2"></i>Instagram용
+                </button>
+            </div>
+            
+            <!-- YouTube용 설정 -->
+            <div id="youtubeSettings" class="space-y-6">
                 <!-- 페이지 범위 선택 -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -1337,6 +1356,141 @@
                             각 페이지 이미지를 보여준 후 TTS가 시작되기 전 대기 시간 (0-3초)
                         </p>
                     </div>
+                </div>
+            </div>
+            
+            <!-- Instagram용 설정 (UI만 먼저 만들기) -->
+            <div id="instagramSettings" class="space-y-6 hidden">
+                <!-- 페이지 범위 선택 -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">
+                            <i class="fas fa-play mr-2"></i>시작 페이지
+                        </label>
+                        <input 
+                            type="number" 
+                            id="instaVideoStartPage"
+                            min="1"
+                            value="1"
+                            class="w-full px-4 py-3 border-2 border-pink-300 rounded-lg focus:outline-none focus:border-pink-500"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">
+                            <i class="fas fa-stop mr-2"></i>종료 페이지
+                        </label>
+                        <input 
+                            type="number" 
+                            id="instaVideoEndPage"
+                            min="1"
+                            value="15"
+                            class="w-full px-4 py-3 border-2 border-pink-300 rounded-lg focus:outline-none focus:border-pink-500"
+                        />
+                    </div>
+                </div>
+
+                <!-- Instagram 특화 설정 -->
+                <div class="bg-pink-50 p-4 rounded-lg border-2 border-pink-200">
+                    <label class="block text-gray-800 font-bold mb-3">
+                        <i class="fab fa-instagram mr-2"></i>Instagram 설정
+                    </label>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                화면 비율
+                            </label>
+                            <select 
+                                id="instaAspectRatio" 
+                                class="w-full px-4 py-2 border-2 border-pink-300 rounded-lg"
+                            >
+                                <option value="9:16" selected>9:16 (세로 영상 - Reels/Story)</option>
+                                <option value="1:1">1:1 (정사각형 - 피드)</option>
+                                <option value="4:5">4:5 (세로 - 피드)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                해상도
+                            </label>
+                            <select 
+                                id="instaResolution" 
+                                class="w-full px-4 py-2 border-2 border-pink-300 rounded-lg"
+                            >
+                                <option value="1080x1920" selected>1080x1920 (9:16 Reels)</option>
+                                <option value="1080x1080">1080x1080 (1:1 피드)</option>
+                                <option value="1080x1350">1080x1350 (4:5 피드)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                영상 길이 제한
+                            </label>
+                            <select 
+                                id="instaMaxDuration" 
+                                class="w-full px-4 py-2 border-2 border-pink-300 rounded-lg"
+                            >
+                                <option value="60" selected>60초 (Reels 권장)</option>
+                                <option value="90">90초 (최대)</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-2">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Instagram Reels는 60초 이하 영상을 권장합니다.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 배경음악 선택 -->
+                <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+                    <label class="flex items-center mb-3">
+                        <input type="checkbox" id="instaIncludeBackgroundMusic" checked class="mr-3 w-5 h-5" onchange="document.getElementById('instaBackgroundMusicSelect').style.display = this.checked ? 'block' : 'none'">
+                        <span class="text-gray-800 font-bold">
+                            <i class="fas fa-music mr-2"></i>배경음악 포함하기
+                        </span>
+                    </label>
+                    <div id="instaBackgroundMusicSelect" class="mt-3">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            배경음악 선택
+                        </label>
+                        <select 
+                            id="instaBackgroundMusicId" 
+                            class="w-full px-4 py-2 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-500"
+                        >
+                            <option value="">동화책 설정 음악 사용</option>
+                            <!-- 배경음악 리스트는 JavaScript로 동적 로드 -->
+                        </select>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        배경음악은 TTS보다 작은 음량(15%)으로 재생됩니다.
+                    </p>
+                </div>
+
+                <!-- 전환 효과 -->
+                <div class="bg-green-50 p-4 rounded-lg border-2 border-green-200">
+                    <label class="block text-gray-800 font-bold mb-3">
+                        <i class="fas fa-magic mr-2"></i>페이지 전환 효과
+                    </label>
+                    <select 
+                        id="instaTransition" 
+                        class="w-full px-4 py-2 border-2 border-green-300 rounded-lg"
+                    >
+                        <option value="none">없음</option>
+                        <option value="fade" selected>페이드</option>
+                        <option value="slideleft">슬라이드 (좌→우)</option>
+                        <option value="slideright">슬라이드 (우→좌)</option>
+                    </select>
+                </div>
+
+                <!-- 프리뷰 안내 -->
+                <div class="bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
+                    <p class="text-sm text-gray-700">
+                        <i class="fas fa-lightbulb mr-2 text-yellow-600"></i>
+                        <strong>Instagram용 동영상 설정:</strong><br>
+                        - Reels는 9:16 비율, 60초 이하 권장<br>
+                        - 피드 게시물은 1:1 또는 4:5 비율 추천<br>
+                        - 구현은 아직 준비 중입니다.
+                    </p>
                 </div>
             </div>
             
@@ -1763,6 +1917,6 @@
         console.log('✅ 모듈 로드 완료', window.__modules);
     </script>
     
-    <script defer src="/app.js?v=1770822515646"></script>
+    <script defer src="/app.js?v=1770907799495"></script>
 </body>
 </html>

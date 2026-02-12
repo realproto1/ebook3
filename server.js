@@ -4091,8 +4091,8 @@ app.post('/api/generate-video', async (req, res) => {
                 const withBGMPath = pathModule.join(workDir, 'final_with_bgm.mp4');
                 
                 // 배경음악을 동영상 길이에 맞게 루프하고, TTS 음량 유지하면서 BGM 음량 낮춤
-                // amix 대신 amerge 사용해서 더 안정적으로 믹싱
-                execSync(`ffmpeg -y -i "${mergedVideoPath}" -stream_loop -1 -i "${pathModule.join(workDir, 'bgm.mp3')}" -filter_complex "[1:a]volume=0.15[bgm];[0:a][bgm]amix=inputs=2:duration=first:dropout_transition=0[aout]" -map 0:v -map "[aout]" -c:v copy -c:a aac -b:a 192k -shortest "${withBGMPath}"`, {
+                // duration=first로 비디오 길이만큼 출력 (-shortest 제거: 길이가 짤리는 문제 해결)
+                execSync(`ffmpeg -y -i "${mergedVideoPath}" -stream_loop -1 -i "${pathModule.join(workDir, 'bgm.mp3')}" -filter_complex "[1:a]volume=0.15[bgm];[0:a][bgm]amix=inputs=2:duration=first:dropout_transition=0[aout]" -map 0:v -map "[aout]" -c:v copy -c:a aac -b:a 192k "${withBGMPath}"`, {
                     cwd: workDir,
                     stdio: ['pipe', 'pipe', 'pipe']
                 });
@@ -4120,6 +4120,33 @@ app.post('/api/generate-video', async (req, res) => {
             const videoUrl = `${config.r2.publicUrl}/${videoKey}`;
             
             console.log('✅ R2 업로드 완료:', videoUrl);
+            
+            // 동화책 객체에 동영상 URL 저장 (YouTube용으로 가정)
+            try {
+                const storybook = await storybookManager.getStorybook(storybookId);
+                if (storybook) {
+                    if (!storybook.videos) {
+                        storybook.videos = {};
+                    }
+                    
+                    // YouTube용 동영상 URL 저장
+                    storybook.videos.youtube = {
+                        url: videoUrl,
+                        createdAt: new Date().toISOString(),
+                        resolution,
+                        transition,
+                        includeBackgroundMusic,
+                        pageRange: { start: startPage, end: endPage },
+                        includeCover
+                    };
+                    
+                    await storybookManager.saveToR2(storybook);
+                    console.log('💾 동영상 URL DB 저장 완료 (YouTube용)');
+                }
+            } catch (dbError) {
+                console.error('⚠️ 동영상 URL DB 저장 실패:', dbError);
+                // DB 저장 실패해도 동영상 URL은 반환
+            }
             
             // 7. 임시 파일 정리
             console.log('🧹 임시 파일 정리...');
