@@ -4121,35 +4121,43 @@ app.post('/api/generate-video', async (req, res) => {
             
             console.log('✅ R2 업로드 완료:', videoUrl);
             
-            // 동화책 객체에 동영상 URL 저장 (YouTube용으로 가정)
+            // 동화책 객체에 동영상 URL 저장 (YouTube용)
             try {
-                const storybook = await storybookManager.getStorybook(storybookId);
-                if (storybook) {
-                    if (!storybook.videos) {
-                        storybook.videos = {};
-                    }
-                    
-                    // YouTube용 동영상 URL 저장
-                    storybook.videos.youtube = {
-                        url: videoUrl,
-                        createdAt: new Date().toISOString(),
-                        resolution,
-                        transition,
-                        includeBackgroundMusic,
-                        pageRange: { start: startPage, end: endPage },
-                        includeCover
-                    };
-                    
-                    // R2에 직접 저장
-                    const updatedStorybookKey = `storybook-${storybookId}.json`;
-                    await r2Client.send(new PutObjectCommand({
-                        Bucket: config.r2.bucketName,
-                        Key: updatedStorybookKey,
-                        Body: JSON.stringify(storybook),
-                        ContentType: 'application/json'
-                    }));
-                    console.log('💾 동영상 URL DB 저장 완료 (YouTube용)');
+                // R2에서 스토리북 다시 가져오기
+                const storybookKey = `storybook-${storybookId}.json`;
+                const storybookObject = await r2Client.send(new GetObjectCommand({
+                    Bucket: config.r2.bucketName,
+                    Key: storybookKey
+                }));
+                const storybookText = await storybookObject.Body.transformToString();
+                const storybookData = JSON.parse(storybookText);
+                
+                if (!storybookData.videos) {
+                    storybookData.videos = {};
                 }
+                
+                // YouTube용 동영상 URL 저장
+                storybookData.videos.youtube = {
+                    url: videoUrl,
+                    createdAt: new Date().toISOString(),
+                    resolution,
+                    transition,
+                    includeBackgroundMusic,
+                    pageRange: { start: startPage, end: endPage },
+                    includeCover
+                };
+                
+                // R2에 다시 저장
+                const updatedStorybookKey = `storybook-${storybookId}.json`;
+                await r2Client.send(new PutObjectCommand({
+                    Bucket: config.r2.bucketName,
+                    Key: updatedStorybookKey,
+                    Body: JSON.stringify(storybookData),
+                    ContentType: 'application/json'
+                }));
+                console.log('💾 동영상 URL DB 저장 완료 (YouTube용)');
+            } catch (dbError) {
+                console.error('⚠️ 동영상 URL DB 저장 실패:', dbError);
             } catch (dbError) {
                 console.error('⚠️ 동영상 URL DB 저장 실패:', dbError);
                 // DB 저장 실패해도 동영상 URL은 반환
@@ -4238,9 +4246,27 @@ app.post('/api/generate-instagram-video', async (req, res) => {
         if (includeBackgroundMusic) {
             const musicIdToUse = backgroundMusicId || storybook.backgroundMusicId;
             if (musicIdToUse) {
-                const music = await R2Storage.getBackgroundMusic(musicIdToUse);
-                backgroundMusicUrl = music?.url;
-                console.log('✅ 배경음악 찾음:', music?.title, backgroundMusicUrl);
+                try {
+                    // R2에서 배경음악 목록 가져오기
+                    const musicListCommand = new GetObjectCommand({
+                        Bucket: config.r2.bucketName,
+                        Key: 'background-music.json'
+                    });
+                    const musicListResponse = await r2Client.send(musicListCommand);
+                    const musicListText = await musicListResponse.Body.transformToString();
+                    const musicList = JSON.parse(musicListText);
+                    
+                    // ID로 배경음악 찾기
+                    const music = musicList.find(m => m.id === musicIdToUse);
+                    if (music) {
+                        backgroundMusicUrl = music.url;
+                        console.log('✅ 배경음악 찾음:', music.title, backgroundMusicUrl);
+                    } else {
+                        console.warn('⚠️ 배경음악을 찾을 수 없습니다:', musicIdToUse);
+                    }
+                } catch (err) {
+                    console.warn('⚠️ 배경음악 목록을 가져올 수 없습니다:', err.message);
+                }
             }
         }
         
