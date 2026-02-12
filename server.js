@@ -4425,15 +4425,6 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 const title = storybook.title || '동화책';
                 const subtitle = page.text || '';
                 
-                // duration을 SRT 시간 형식으로 변환 (00:00:05,000)
-                const formatDuration = (seconds) => {
-                    const hrs = Math.floor(seconds / 3600);
-                    const mins = Math.floor((seconds % 3600) / 60);
-                    const secs = Math.floor(seconds % 60);
-                    const ms = Math.floor((seconds % 1) * 1000);
-                    return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
-                };
-                
                 // TTS 길이 계산
                 let duration = 5;
                 let hasAudio = false;
@@ -4447,91 +4438,26 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                     hasAudio = true;
                 }
                 
-                // Instagram 스타일 레이아웃 (SRT 자막 사용)
-                // 1. 검은 배경 + 이미지 + 제목
-                // 2. SRT 자막 파일로 자동 줄바꿈 처리
-                
-                const titleHeight = 150;
-                const maxImageHeight = 700;  // 이미지 높이
-                const titleY = 40;
-                const imageStartY = titleHeight;
-                
-                // 한글 폰트 경로
-                const fontPath = '/usr/share/fonts/truetype/nanum/NanumSquareRoundB.ttf';
-                
-                // 텍스트를 문장 단위로 줄바꿈 (마침표, 느낌표, 물음표 기준)
-                const splitBySentence = (text) => {
-                    if (!text) return '';
-                    // 마침표, 느낌표, 물음표 뒤에 줄바꿈 추가
-                    return text
-                        .replace(/\./g, '.\n')
-                        .replace(/\!/g, '!\n')
-                        .replace(/\?/g, '?\n')
-                        .replace(/。/g, '。\n')
-                        .trim();
+                // MoviePy를 사용한 클립 생성 (자동 줄바꿈)
+                // JSON 설정 파일 생성
+                const configPath = pathModule.join(workDir, `config_${pageNum}.json`);
+                const config = {
+                    image_path: imagePath,
+                    audio_path: hasAudio ? audioPath : null,
+                    title: title,
+                    subtitle: subtitle,
+                    duration: duration,
+                    width: width,
+                    height: height,
+                    output_path: clipPath
                 };
+                fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
                 
-                const formattedSubtitle = splitBySentence(subtitle);
-                
-                // SRT 자막 파일 생성
-                const srtPath = pathModule.join(workDir, `subtitle_${pageNum}.srt`);
-                const srtContent = `1
-00:00:00,000 --> ${formatDuration(duration)}
-${formattedSubtitle}
-`;
-                fs.writeFileSync(srtPath, srtContent, 'utf-8');
-                
-                // 제목만 drawtext로, 자막은 subtitles 필터 사용
-                const titleFilter = `drawtext=text='${title.replace(/'/g, "\\'")}':fontsize=60:fontcolor=white:x=(w-text_w)/2:y=${titleY}:fontfile=${fontPath}`;
-                
-                // SRT 자막 스타일 (최하단 중앙, 문장별 줄바꿈)
-                // FontSize: 14pt (매우 작게)
-                // MarginV: 50 (하단 여백 50px)
-                const subtitleStyle = `FontName=NanumSquareRoundB,FontSize=14,PrimaryColour=&HFFFFFF&,Alignment=2,MarginV=50`;
-                
-                let complexFilter = `color=black:s=${width}x${height}:d=${duration}[bg];`;
-                // 이미지 스케일 및 오버레이
-                complexFilter += `[0:v]scale=${width}:${maxImageHeight}:force_original_aspect_ratio=decrease,setsar=1[img];`;
-                complexFilter += `[bg][img]overlay=(W-w)/2:${imageStartY}+(${maxImageHeight}-h)/2[with_img];`;
-                // 제목 추가
-                complexFilter += `[with_img]${titleFilter}[with_title];`;
-                // SRT 자막 추가
-                complexFilter += `[with_title]subtitles=${srtPath}:force_style='${subtitleStyle}'[out]`;
-                
-                // FFmpeg 명령어 구성
-                const ffmpegArgs = [
-                    '-y',
-                    '-loop', '1',
-                    '-i', imagePath
-                ];
-                
-                if (hasAudio) {
-                    ffmpegArgs.push('-i', audioPath);
-                }
-                
-                ffmpegArgs.push(
-                    '-filter_complex', complexFilter,
-                    '-map', '[out]'
+                // Python MoviePy 스크립트 실행
+                execSync(
+                    `python3 /home/user/webapp/create_instagram_video.py "${configPath}"`,
+                    { cwd: workDir, stdio: 'inherit' }
                 );
-                
-                if (hasAudio) {
-                    ffmpegArgs.push('-map', '1:a');
-                }
-                
-                ffmpegArgs.push(
-                    '-c:v', 'libx264',
-                    '-c:a', 'aac',
-                    '-b:a', '192k',
-                    '-t', duration.toString(),
-                    '-pix_fmt', 'yuv420p',
-                    '-preset', 'fast',
-                    clipPath
-                );
-                
-                execFileSync('ffmpeg', ffmpegArgs, { 
-                    cwd: workDir,
-                    stdio: ['pipe', 'pipe', 'pipe']
-                });
                 
                 clips.push(clipPath);
             }
