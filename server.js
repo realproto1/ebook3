@@ -4338,11 +4338,17 @@ app.post('/api/generate-instagram-video', async (req, res) => {
             for (let i = 0; i < pages.length; i++) {
                 const page = pages[i];
                 const pageNum = i + 1;
-                const imagePath = pathModule.join(workDir, `page${pageNum}.jpg`);
+                
+                // 이미지 파일 확인 (png 또는 jpg)
+                let imagePath = pathModule.join(workDir, `page${pageNum}.jpg`);
+                if (!fs.existsSync(imagePath)) {
+                    imagePath = pathModule.join(workDir, `page${pageNum}.png`);
+                }
+                
                 const audioPath = pathModule.join(workDir, `page${pageNum}.wav`);
                 
                 if (!fs.existsSync(imagePath)) {
-                    console.warn(`⚠️ 페이지 ${pageNum} 이미지 없음`);
+                    console.warn(`⚠️ 페이지 ${pageNum} 이미지 없음 (jpg/png)`);
                     continue;
                 }
                 
@@ -4385,15 +4391,27 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 
                 // Instagram 스타일 레이아웃
                 // 1. 검은 배경
-                // 2. 중앙에 이미지
-                // 3. 상단 제목
-                // 4. 하단 자막
+                // 2. 상단 제목
+                // 3. 중앙에 이미지 (비율 유지하며 최대 900px 높이)
+                // 4. 이미지 바로 아래 자막
+                
+                const titleHeight = 180;
+                const maxImageHeight = 900;
+                const titleY = 50;
+                const imageStartY = titleHeight;
+                
+                // 한글 폰트 경로
+                const fontPath = '/usr/share/fonts/truetype/nanum/NanumSquareRoundB.ttf';
                 
                 let complexFilter = `color=black:s=${width}x${height}:d=${duration}[bg];`;
-                complexFilter += `[0:v]scale=${width}:${contentHeight}:force_original_aspect_ratio=decrease,setsar=1[img];`;
-                complexFilter += `[bg][img]overlay=(W-w)/2:${contentY}[with_img];`;
-                complexFilter += `[with_img]drawtext=text='${title}':fontsize=80:fontcolor=white:x=(w-text_w)/2:y=50:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf[with_title];`;
-                complexFilter += `[with_title]drawtext=text='${subtitle}':fontsize=50:fontcolor=white:x=(w-text_w)/2:y=${height - 120}:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf[out]`;
+                // 이미지를 최대 900px 높이로 스케일하고 중앙 배치
+                complexFilter += `[0:v]scale=${width}:${maxImageHeight}:force_original_aspect_ratio=decrease,setsar=1[img];`;
+                // 이미지를 배경에 오버레이 (중앙 정렬, 제목 아래 시작)
+                complexFilter += `[bg][img]overlay=(W-w)/2:${imageStartY}+(${maxImageHeight}-h)/2[with_img];`;
+                // 제목 추가 (상단 중앙)
+                complexFilter += `[with_img]drawtext=text='${title}':fontsize=70:fontcolor=white:x=(w-text_w)/2:y=${titleY}:fontfile=${fontPath}[with_title];`;
+                // 자막 추가 (이미지 바로 아래, 이미지 높이는 동적으로 계산됨, 대략 이미지 끝 + 30px)
+                complexFilter += `[with_title]drawtext=text='${subtitle}':fontsize=45:fontcolor=white:x=(w-text_w)/2:y=${imageStartY + maxImageHeight + 30}:fontfile=${fontPath}[out]`;
                 
                 // FFmpeg 명령어 구성 (배열 형태로 안전하게)
                 const ffmpegArgs = [
