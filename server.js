@@ -4374,7 +4374,8 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 
                 const title = escapeText(storybook.title || '동화책');
                 const pageText = escapeText(page.text || '');
-                const subtitle = pageText.substring(0, 100);
+                // 자막은 최대 150자로 제한 (더 길면 잘림)
+                const subtitle = pageText.substring(0, 150);
                 
                 // TTS 길이 계산
                 let duration = 5;
@@ -4392,26 +4393,30 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 // Instagram 스타일 레이아웃
                 // 1. 검은 배경
                 // 2. 상단 제목
-                // 3. 중앙에 이미지 (비율 유지하며 최대 900px 높이)
-                // 4. 이미지 바로 아래 자막
+                // 3. 중앙에 이미지 (비율 유지하며 최대 700px 높이)
+                // 4. 이미지 바로 아래 자막 (여러 줄 지원, 자막 영역 확보)
                 
-                const titleHeight = 180;
-                const maxImageHeight = 900;
-                const titleY = 50;
+                const titleHeight = 150;
+                const maxImageHeight = 700;  // 이미지 높이를 더 줄여서 자막 공간 확보
+                const subtitleMaxHeight = 300; // 자막 영역 최대 높이
+                const titleY = 40;
                 const imageStartY = titleHeight;
+                const subtitleStartY = imageStartY + maxImageHeight + 20;  // 이미지 끝 + 20px
+                const subtitleBoxWidth = width - 80;  // 양쪽 40px 여백
                 
                 // 한글 폰트 경로
                 const fontPath = '/usr/share/fonts/truetype/nanum/NanumSquareRoundB.ttf';
                 
                 let complexFilter = `color=black:s=${width}x${height}:d=${duration}[bg];`;
-                // 이미지를 최대 900px 높이로 스케일하고 중앙 배치
+                // 이미지를 최대 700px 높이로 스케일하고 중앙 배치
                 complexFilter += `[0:v]scale=${width}:${maxImageHeight}:force_original_aspect_ratio=decrease,setsar=1[img];`;
                 // 이미지를 배경에 오버레이 (중앙 정렬, 제목 아래 시작)
                 complexFilter += `[bg][img]overlay=(W-w)/2:${imageStartY}+(${maxImageHeight}-h)/2[with_img];`;
                 // 제목 추가 (상단 중앙)
-                complexFilter += `[with_img]drawtext=text='${title}':fontsize=70:fontcolor=white:x=(w-text_w)/2:y=${titleY}:fontfile=${fontPath}[with_title];`;
-                // 자막 추가 (이미지 바로 아래, 이미지 높이는 동적으로 계산됨, 대략 이미지 끝 + 30px)
-                complexFilter += `[with_title]drawtext=text='${subtitle}':fontsize=45:fontcolor=white:x=(w-text_w)/2:y=${imageStartY + maxImageHeight + 30}:fontfile=${fontPath}[out]`;
+                complexFilter += `[with_img]drawtext=text='${title}':fontsize=55:fontcolor=white:x=(w-text_w)/2:y=${titleY}:fontfile=${fontPath}[with_title];`;
+                // 자막 추가 (이미지 바로 아래, 여러 줄 지원)
+                // text_w로 최대 너비 지정, line_spacing으로 줄 간격 조정
+                complexFilter += `[with_title]drawtext=text='${subtitle}':fontsize=34:fontcolor=white:x=(w-text_w)/2:y=${subtitleStartY}:fontfile=${fontPath}:text_w=${subtitleBoxWidth}:line_spacing=8[out]`;
                 
                 // FFmpeg 명령어 구성 (배열 형태로 안전하게)
                 const ffmpegArgs = [
