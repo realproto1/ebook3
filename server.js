@@ -4140,7 +4140,14 @@ app.post('/api/generate-video', async (req, res) => {
                         includeCover
                     };
                     
-                    await storybookManager.saveToR2(storybook);
+                    // R2에 직접 저장
+                    const updatedStorybookKey = `storybook-${storybookId}.json`;
+                    await r2Client.send(new PutObjectCommand({
+                        Bucket: config.r2.bucketName,
+                        Key: updatedStorybookKey,
+                        Body: JSON.stringify(storybook),
+                        ContentType: 'application/json'
+                    }));
                     console.log('💾 동영상 URL DB 저장 완료 (YouTube용)');
                 }
             } catch (dbError) {
@@ -4208,10 +4215,18 @@ app.post('/api/generate-instagram-video', async (req, res) => {
         });
         
         // 스토리북 가져오기
-        const storybook = await storybookManager.getStorybook(storybookId);
-        if (!storybook) {
+        const storybookKey = `storybook-${storybookId}.json`;
+        const storybookObject = await r2Client.send(new GetObjectCommand({
+            Bucket: config.r2.bucketName,
+            Key: storybookKey
+        }));
+        
+        if (!storybookObject) {
             return res.status(404).json({ success: false, message: '동화책을 찾을 수 없습니다.' });
         }
+        
+        const storybookText = await storybookObject.Body.transformToString();
+        const storybook = JSON.parse(storybookText);
         
         const pages = storybook.pages.slice(startPage - 1, endPage);
         if (pages.length === 0) {
@@ -4433,7 +4448,14 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                     pageRange: { start: startPage, end: endPage }
                 };
                 
-                await storybookManager.saveToR2(storybook);
+                // R2에 직접 저장
+                const updatedStorybookKey = `storybook-${storybookId}.json`;
+                await r2Client.send(new PutObjectCommand({
+                    Bucket: config.r2.bucketName,
+                    Key: updatedStorybookKey,
+                    Body: JSON.stringify(storybook),
+                    ContentType: 'application/json'
+                }));
                 console.log('💾 동영상 URL DB 저장 완료 (Instagram용)');
             } catch (dbError) {
                 console.error('⚠️ 동영상 URL DB 저장 실패:', dbError);
