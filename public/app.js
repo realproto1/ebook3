@@ -5711,25 +5711,35 @@ async function loadVideoBackgroundMusicList() {
         const response = await axios.get('/api/background-music');
         const musicList = response.data.music || [];
         
-        const select = document.getElementById('videoBackgroundMusicId');
-        if (!select) return;
+        // YouTube용 select 업데이트
+        const youtubeSelect = document.getElementById('videoBackgroundMusicId');
+        if (youtubeSelect) {
+            youtubeSelect.innerHTML = '<option value="">동화책 설정 음악 사용</option>';
+            musicList.forEach(music => {
+                const option = document.createElement('option');
+                option.value = music.id;
+                option.textContent = music.title;
+                if (currentStorybook && currentStorybook.backgroundMusicId === music.id) {
+                    option.selected = true;
+                }
+                youtubeSelect.appendChild(option);
+            });
+        }
         
-        // 기존 옵션 유지 (동화책 설정 음악 사용)
-        select.innerHTML = '<option value="">동화책 설정 음악 사용</option>';
-        
-        // 배경음악 리스트 추가
-        musicList.forEach(music => {
-            const option = document.createElement('option');
-            option.value = music.id;
-            option.textContent = music.title;
-            
-            // 현재 동화책에 설정된 배경음악이면 선택
-            if (currentStorybook && currentStorybook.backgroundMusicId === music.id) {
-                option.selected = true;
-            }
-            
-            select.appendChild(option);
-        });
+        // Instagram용 select 업데이트
+        const instaSelect = document.getElementById('instaBackgroundMusicId');
+        if (instaSelect) {
+            instaSelect.innerHTML = '<option value="">동화책 설정 음악 사용</option>';
+            musicList.forEach(music => {
+                const option = document.createElement('option');
+                option.value = music.id;
+                option.textContent = music.title;
+                if (currentStorybook && currentStorybook.backgroundMusicId === music.id) {
+                    option.selected = true;
+                }
+                instaSelect.appendChild(option);
+            });
+        }
         
         console.log('✅ 동영상 배경음악 리스트 로드 완료:', musicList.length, '개');
     } catch (error) {
@@ -5754,6 +5764,8 @@ function switchVideoTab(tab) {
     const instagramSettings = document.getElementById('instagramSettings');
     const youtubeTab = document.getElementById('youtubeTabBtn');
     const instagramTab = document.getElementById('instagramTabBtn');
+    const youtubeBtn = document.getElementById('generateVideoBtn');
+    const instagramBtn = document.getElementById('generateInstagramVideoBtn');
     
     if (tab === 'youtube') {
         youtubeSettings.classList.remove('hidden');
@@ -5762,6 +5774,8 @@ function switchVideoTab(tab) {
         youtubeTab.classList.remove('border-transparent', 'text-gray-500');
         instagramTab.classList.remove('border-pink-500', 'text-pink-600');
         instagramTab.classList.add('border-transparent', 'text-gray-500');
+        youtubeBtn.classList.remove('hidden');
+        instagramBtn.classList.add('hidden');
     } else {
         instagramSettings.classList.remove('hidden');
         youtubeSettings.classList.add('hidden');
@@ -5769,6 +5783,8 @@ function switchVideoTab(tab) {
         instagramTab.classList.remove('border-transparent', 'text-gray-500');
         youtubeTab.classList.remove('border-red-500', 'text-red-600');
         youtubeTab.classList.add('border-transparent', 'text-gray-500');
+        instagramBtn.classList.remove('hidden');
+        youtubeBtn.classList.add('hidden');
     }
 }
 
@@ -5893,6 +5909,87 @@ async function generateVideo() {
     } catch (error) {
         console.error('❌ 동영상 생성 오류:', error);
         alert('❌ 동영상 생성 실패: ' + error.message);
+    } finally {
+        // 버튼 복원
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+/**
+ * Instagram 동영상 생성
+ */
+async function generateInstagramVideo() {
+    if (!currentStorybook) {
+        alert('동화책을 먼저 선택해주세요.');
+        return;
+    }
+    
+    // 설정값 가져오기
+    const startPage = parseInt(document.getElementById('instaVideoStartPage').value);
+    const endPage = parseInt(document.getElementById('instaVideoEndPage').value);
+    const aspectRatio = document.getElementById('instaAspectRatio').value;
+    const maxDuration = parseInt(document.getElementById('instaMaxDuration').value);
+    const includeBackgroundMusic = document.getElementById('instaIncludeBackgroundMusic').checked;
+    const backgroundMusicId = document.getElementById('instaBackgroundMusicId').value;
+    const transition = document.getElementById('instaTransition').value;
+    const pageGap = 1; // Instagram은 기본 1초
+    
+    // 페이지 범위 검증
+    if (startPage < 1 || endPage > currentStorybook.pages.length || startPage > endPage) {
+        alert('페이지 범위가 올바르지 않습니다.');
+        return;
+    }
+    
+    // 버튼 비활성화
+    const btn = document.getElementById('generateInstagramVideoBtn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Instagram 동영상 생성 중...';
+    
+    try {
+        console.log('📸 Instagram 동영상 생성 시작:', {
+            storybookId: currentStorybook.id,
+            startPage,
+            endPage,
+            aspectRatio,
+            maxDuration,
+            includeBackgroundMusic,
+            backgroundMusicId: backgroundMusicId || '동화책 설정 음악',
+            transition,
+            pageGap
+        });
+        
+        // API 호출
+        const response = await api.post('/api/generate-instagram-video', {
+            storybookId: currentStorybook.id,
+            startPage,
+            endPage,
+            aspectRatio,
+            maxDuration,
+            includeBackgroundMusic,
+            backgroundMusicId: backgroundMusicId || undefined,
+            transition,
+            pageGap
+        });
+        
+        if (response.success) {
+            console.log('✅ Instagram 동영상 생성 완료:', response.videoUrl);
+            
+            // 생성 모달 닫기
+            closeVideoGenerationModal();
+            
+            // 결과 모달 열기
+            openVideoResultModal(response.videoUrl);
+            
+            // 동화책 데이터 다시 불러오기 (동영상 링크 업데이트)
+            await loadStorybook(currentStorybook.id);
+        } else {
+            throw new Error(response.message || 'Instagram 동영상 생성 실패');
+        }
+    } catch (error) {
+        console.error('❌ Instagram 동영상 생성 오류:', error);
+        alert('❌ Instagram 동영상 생성 실패: ' + error.message);
     } finally {
         // 버튼 복원
         btn.disabled = false;
@@ -6318,6 +6415,7 @@ function downloadPageTTS(pageIndex) {
     window.openVideoGenerationModal = openVideoGenerationModal;
     window.closeVideoGenerationModal = closeVideoGenerationModal;
     window.generateVideo = generateVideo;
+    window.generateInstagramVideo = generateInstagramVideo;
     window.switchVideoTab = switchVideoTab;
     window.displayExistingVideos = displayExistingVideos;
     window.openVideoResultModal = openVideoResultModal;

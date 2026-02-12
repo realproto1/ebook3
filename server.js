@@ -4180,6 +4180,297 @@ app.post('/api/generate-video', async (req, res) => {
     }
 });
 
+// ===== Instagram용 동영상 생성 API =====
+app.post('/api/generate-instagram-video', async (req, res) => {
+    try {
+        const { 
+            storybookId, 
+            startPage, 
+            endPage, 
+            aspectRatio,  // 9:16, 1:1, 4:5
+            maxDuration,  // 60 or 90
+            includeBackgroundMusic,
+            backgroundMusicId,
+            transition,
+            pageGap
+        } = req.body;
+        
+        console.log('📸 Instagram 동영상 생성 요청:', {
+            storybookId,
+            startPage,
+            endPage,
+            aspectRatio,
+            maxDuration,
+            includeBackgroundMusic,
+            backgroundMusicId: backgroundMusicId || '동화책 설정 음악',
+            transition,
+            pageGap
+        });
+        
+        // 스토리북 가져오기
+        const storybook = await storybookManager.getStorybook(storybookId);
+        if (!storybook) {
+            return res.status(404).json({ success: false, message: '동화책을 찾을 수 없습니다.' });
+        }
+        
+        const pages = storybook.pages.slice(startPage - 1, endPage);
+        if (pages.length === 0) {
+            return res.status(400).json({ success: false, message: '선택한 페이지가 없습니다.' });
+        }
+        
+        // 배경음악 URL 가져오기
+        let backgroundMusicUrl = null;
+        if (includeBackgroundMusic) {
+            const musicIdToUse = backgroundMusicId || storybook.backgroundMusicId;
+            if (musicIdToUse) {
+                const music = await R2Storage.getBackgroundMusic(musicIdToUse);
+                backgroundMusicUrl = music?.url;
+                console.log('✅ 배경음악 찾음:', music?.title, backgroundMusicUrl);
+            }
+        }
+        
+        // 임시 디렉토리 생성
+        const workDir = pathModule.join('/tmp', `video-${storybookId}-${Date.now()}`);
+        fs.mkdirSync(workDir, { recursive: true });
+        
+        try {
+            console.log('📋 작업 디렉토리:', workDir);
+            
+            // 파일 다운로드 함수
+            const downloadFile = async (url, filename) => {
+                const filePath = pathModule.join(workDir, filename);
+                const response = await axios.get(url, { responseType: 'arraybuffer' });
+                fs.writeFileSync(filePath, response.data);
+                return filePath;
+            };
+            
+            // 1. 에셋 다운로드
+            console.log('📥 에셋 다운로드 시작...');
+            
+            for (let i = 0; i < pages.length; i++) {
+                const page = pages[i];
+                const pageNum = i + 1;
+                
+                console.log(`  → 페이지 ${pageNum} 다운로드...`);
+                
+                if (page.illustrationImage) {
+                    const ext = page.illustrationImage.includes('.png') ? 'png' : 'jpg';
+                    await downloadFile(page.illustrationImage, `page${pageNum}.${ext}`);
+                }
+                
+                const ttsUrl = page.ttsAudio?.ko?.url || page.audioUrl;
+                if (ttsUrl) {
+                    await downloadFile(ttsUrl, `page${pageNum}.wav`);
+                }
+            }
+            
+            if (backgroundMusicUrl) {
+                console.log('  → 배경음악 다운로드...');
+                await downloadFile(backgroundMusicUrl, 'bgm.mp3');
+            }
+            
+            console.log('✅ 에셋 다운로드 완료');
+            
+            // 2. 해상도 설정
+            const resolutionMap = {
+                '9:16': '1080:1920',
+                '1:1': '1080:1080',
+                '4:5': '1080:1350'
+            };
+            const videoSize = resolutionMap[aspectRatio] || '1080:1920';
+            const [width, height] = videoSize.split(':').map(Number);
+            
+            // 3. 클립 생성 (Instagram 스타일: 제목 + 콘텐츠 + 자막)
+            console.log('🎬 Instagram 클립 생성 시작...');
+            
+            const titleHeight = 200;
+            const subtitleHeight = 150;
+            const contentHeight = height - titleHeight - subtitleHeight;
+            const contentY = titleHeight;
+            
+            const clips = [];
+            
+            for (let i = 0; i < pages.length; i++) {
+                const page = pages[i];
+                const pageNum = i + 1;
+                const imagePath = pathModule.join(workDir, `page${pageNum}.jpg`);
+                const audioPath = pathModule.join(workDir, `page${pageNum}.wav`);
+                
+                if (!fs.existsSync(imagePath)) {
+                    console.warn(`⚠️ 페이지 ${pageNum} 이미지 없음`);
+                    continue;
+                }
+                
+                console.log(`  → 페이지 ${pageNum} 클립 생성...`);
+                const clipPath = pathModule.join(workDir, `clip_${pageNum}.mp4`);
+                
+                // 텍스트 이스케이프
+                const escapeText = (text) => {
+                    return text.replace(/\\/g, '\\\\\\\\').replace(/'/g, "\\'").replace(/:/g, '\\:').replace(/\n/g, ' ');
+                };
+                
+                const title = escapeText(storybook.title || '동화책');
+                const pageText = escapeText(page.text || '');
+                const subtitle = pageText.substring(0, 100);
+                
+                // TTS 길이 계산
+                let duration = 5;
+                let audioInput = '';
+                let audioMap = '';
+                
+                if (fs.existsSync(audioPath)) {
+                    const durationStr = execSync(
+                        `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioPath}"`,
+                        { cwd: workDir, encoding: 'utf8' }
+                    ).trim();
+                    duration = parseFloat(durationStr) + (parseFloat(pageGap) || 0);
+                    audioInput = `-i "${audioPath}"`;
+                    audioMap = '-map 1:a';
+                } else {
+                    audioInput = '';
+                    audioMap = '';
+                }
+                
+                // Instagram 스타일 레이아웃
+                // 1. 검은 배경
+                // 2. 중앙에 이미지
+                // 3. 상단 제목
+                // 4. 하단 자막
+                
+                let complexFilter = `color=black:s=${width}x${height}:d=${duration}[bg];`;
+                complexFilter += `movie='${imagePath}',scale=${width}:${contentHeight}:force_original_aspect_ratio=decrease,setsar=1[img];`;
+                complexFilter += `[bg][img]overlay=(W-w)/2:${contentY}[with_img];`;
+                complexFilter += `[with_img]drawtext=text='${title}':fontsize=80:fontcolor=white:x=(w-text_w)/2:y=50:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf[with_title];`;
+                complexFilter += `[with_title]drawtext=text='${subtitle}':fontsize=50:fontcolor=white:x=(w-text_w)/2:y=${height - 120}:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf[out]`;
+                
+                execSync(
+                    `ffmpeg -y ${audioInput} -filter_complex "${complexFilter}" -map "[out]" ${audioMap} -c:v libx264 -c:a aac -b:a 192k -t ${duration} -pix_fmt yuv420p -preset fast "${clipPath}"`,
+                    { cwd: workDir, stdio: ['pipe', 'pipe', 'pipe'] }
+                );
+                
+                clips.push(clipPath);
+            }
+            
+            console.log(`✅ Instagram 클립 생성 완료 (${clips.length}개)`);
+            
+            // 4. 클립 병합
+            console.log('🔗 클립 병합 시작...');
+            
+            const concatListPath = pathModule.join(workDir, 'concat.txt');
+            const concatContent = clips.map(clip => `file '${pathModule.basename(clip)}'`).join('\n');
+            fs.writeFileSync(concatListPath, concatContent);
+            
+            const mergedVideoPath = pathModule.join(workDir, 'merged.mp4');
+            
+            try {
+                execSync(
+                    `ffmpeg -y -f concat -safe 0 -i "${concatListPath}" -c copy "${mergedVideoPath}"`,
+                    { cwd: workDir }
+                );
+                console.log('✅ 클립 병합 완료');
+            } catch (err) {
+                console.warn('⚠️ 병합 실패, 재인코딩 시도...');
+                const reencoded = pathModule.join(workDir, 'merged_reencoded.mp4');
+                execSync(
+                    `ffmpeg -y -f concat -safe 0 -i "${concatListPath}" -c:v libx264 -c:a aac -b:a 192k -preset fast "${reencoded}"`,
+                    { cwd: workDir }
+                );
+                fs.unlinkSync(mergedVideoPath);
+                fs.renameSync(reencoded, mergedVideoPath);
+                console.log('✅ 재인코딩 완료');
+            }
+            
+            // 5. 배경음악 믹싱
+            let finalVideoPath = mergedVideoPath;
+            
+            if (includeBackgroundMusic && backgroundMusicUrl && fs.existsSync(pathModule.join(workDir, 'bgm.mp3'))) {
+                console.log('🎵 배경음악 믹싱 시작...');
+                
+                const withBGMPath = pathModule.join(workDir, 'final_with_bgm.mp4');
+                
+                execSync(
+                    `ffmpeg -y -i "${mergedVideoPath}" -stream_loop -1 -i "${pathModule.join(workDir, 'bgm.mp3')}" -filter_complex "[1:a]volume=0.15[bgm];[0:a][bgm]amix=inputs=2:duration=first:dropout_transition=0[aout]" -map 0:v -map "[aout]" -c:v copy -c:a aac -b:a 192k "${withBGMPath}"`,
+                    { cwd: workDir, stdio: ['pipe', 'pipe', 'pipe'] }
+                );
+                
+                finalVideoPath = withBGMPath;
+                console.log('✅ 배경음악 믹싱 완료');
+            }
+            
+            // 6. R2에 업로드
+            console.log('☁️ R2 업로드 시작...');
+            
+            const timestamp = Date.now();
+            const videoFilename = `${storybookId}-instagram-video-${timestamp}.mp4`;
+            const videoKey = `videos/${videoFilename}`;
+            
+            const videoBuffer = fs.readFileSync(finalVideoPath);
+            
+            await r2Client.send(new PutObjectCommand({
+                Bucket: config.r2.bucketName,
+                Key: videoKey,
+                Body: videoBuffer,
+                ContentType: 'video/mp4'
+            }));
+            
+            const videoUrl = `${config.r2.publicUrl}/${videoKey}`;
+            
+            console.log('✅ R2 업로드 완료:', videoUrl);
+            
+            // 동화책 객체에 동영상 URL 저장 (Instagram용)
+            try {
+                if (!storybook.videos) {
+                    storybook.videos = {};
+                }
+                
+                storybook.videos.instagram = {
+                    url: videoUrl,
+                    createdAt: new Date().toISOString(),
+                    aspectRatio,
+                    maxDuration,
+                    transition,
+                    includeBackgroundMusic,
+                    pageRange: { start: startPage, end: endPage }
+                };
+                
+                await storybookManager.saveToR2(storybook);
+                console.log('💾 동영상 URL DB 저장 완료 (Instagram용)');
+            } catch (dbError) {
+                console.error('⚠️ 동영상 URL DB 저장 실패:', dbError);
+            }
+            
+            // 7. 임시 파일 정리
+            console.log('🧹 임시 파일 정리...');
+            fs.rmSync(workDir, { recursive: true, force: true });
+            
+            console.log('✅ Instagram 동영상 생성 완료!');
+            
+            return res.json({
+                success: true,
+                videoUrl,
+                message: 'Instagram 동영상이 성공적으로 생성되었습니다.'
+            });
+            
+        } catch (error) {
+            console.error('❌ FFmpeg 실행 오류:', error);
+            
+            // 에러 발생 시 임시 파일 정리
+            try {
+                fs.rmSync(workDir, { recursive: true, force: true });
+            } catch {}
+            
+            throw error;
+        }
+        
+    } catch (error) {
+        console.error('❌ Instagram 동영상 생성 오류:', error);
+        return res.status(500).json({ 
+            success: false, 
+            message: error.message || 'Instagram 동영상 생성 중 오류가 발생했습니다.' 
+        });
+    }
+});
+
 // ===== 5️⃣ 댓글 API =====
 
 // 댓글 목록 조회 (인증 불필요)

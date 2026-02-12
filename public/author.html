@@ -1489,7 +1489,7 @@
                         <strong>Instagram용 동영상 설정:</strong><br>
                         - Reels는 9:16 비율, 60초 이하 권장<br>
                         - 피드 게시물은 1:1 또는 4:5 비율 추천<br>
-                        - 구현은 아직 준비 중입니다.
+                        - 제목, 콘텐츠, 자막이 포함된 세로 영상으로 생성됩니다.
                     </p>
                 </div>
             </div>
@@ -1507,6 +1507,13 @@
                     class="flex-1 bg-gradient-to-r from-red-500 to-pink-600 text-white py-3 rounded-lg font-bold hover:from-red-600 hover:to-pink-700 transition shadow-lg"
                 >
                     <i class="fas fa-video mr-2"></i>동영상 생성
+                </button>
+                <button 
+                    id="generateInstagramVideoBtn"
+                    onclick="generateInstagramVideo()"
+                    class="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 rounded-lg font-bold hover:from-pink-600 hover:to-purple-700 transition shadow-lg hidden"
+                >
+                    <i class="fab fa-instagram mr-2"></i>Instagram 동영상 생성
                 </button>
             </div>
         </div>
@@ -1917,6 +1924,6 @@
         console.log('✅ 모듈 로드 완료', window.__modules);
     </script>
     
-    <script defer src="/app.js?v=1770907799495"></script>
+    <script defer src="/app.js?v=1770909616373"></script>
 </body>
 </html>
