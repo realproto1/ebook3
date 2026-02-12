@@ -4244,6 +4244,11 @@ app.post('/api/generate-instagram-video', async (req, res) => {
             }
         }
         
+        // FFmpeg로 동영상 생성에 필요한 모듈 import
+        const { execSync } = await import('child_process');
+        const fs = await import('fs');
+        const pathModule = await import('path');
+        
         // 임시 디렉토리 생성
         const workDir = pathModule.join('/tmp', `video-${storybookId}-${Date.now()}`);
         fs.mkdirSync(workDir, { recursive: true });
