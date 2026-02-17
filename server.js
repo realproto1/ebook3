@@ -69,9 +69,10 @@ const videoGenerationJobs = new Map();  // jobId -> { status, videoUrl, error, p
 
 
 // Gemini 이미지 생성 함수 (Nano Banana Pro) - 멀티모달 지원 + 자동 재시도
-async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRetries = 3, modelName = 'gemini-3-pro-image-preview') {
+async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRetries = 3, modelName = 'gemini-3-pro-image-preview', aspectRatio = '16:9') {
   try {
     console.log(`🤖 Using Model: ${modelName}`);
+    console.log(`📐 Aspect Ratio: ${aspectRatio} (ENFORCED)`);
     console.log(`📞 Calling Gemini Image Generation API (Attempt ${retryCount + 1}/${maxRetries})...`);
     console.log('Prompt:', prompt);
     console.log('Reference Images:', referenceImages.length);
@@ -133,6 +134,24 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
     
     console.log(`📊 Total parts: 1 text + ${parts.length - 1} images`);
     
+    // 🎯 Aspect Ratio 변환 맵 (Gemini API 형식)
+    // Gemini는 특정 포맷만 지원: "1:1", "3:4", "4:3", "9:16", "16:9"
+    const aspectRatioMap = {
+      '1:1': '1:1',
+      '3:4': '3:4',
+      '4:3': '4:3',
+      '9:16': '9:16',
+      '16:9': '16:9',
+      // 다른 비율은 가장 가까운 값으로 매핑
+      '2:3': '3:4',
+      '3:2': '4:3',
+      '4:5': '3:4',
+      '5:4': '4:3'
+    };
+    
+    const geminiAspectRatio = aspectRatioMap[aspectRatio] || '16:9';
+    console.log(`📐 Gemini API Aspect Ratio: ${geminiAspectRatio}`);
+    
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
@@ -147,7 +166,8 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
           topK: 40,
           topP: 0.95,
           maxOutputTokens: 8192,
-          responseMimeType: 'text/plain'
+          responseMimeType: 'text/plain',
+          responseAspectRatio: geminiAspectRatio  // ✅ 강제 비율 적용
         }
       })
     });
@@ -161,7 +181,7 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
         const waitTime = 5000 * (retryCount + 1); // 5초, 10초, 15초로 증가
         console.log(`🔄 503 Error (Model Overloaded). Retrying in ${waitTime/1000} seconds... (Attempt ${retryCount + 2}/${maxRetries})`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
-        return generateImage(prompt, referenceImages, retryCount + 1, maxRetries, modelName);
+        return generateImage(prompt, referenceImages, retryCount + 1, maxRetries, modelName, aspectRatio);
       }
       
       // 503 에러가 최종적으로 실패한 경우
@@ -179,7 +199,7 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
         const waitTime = 2000 * (retryCount + 1); // 2초, 4초, 6초
         console.log(`🔄 500 Error detected. Retrying in ${waitTime/1000} seconds... (Attempt ${retryCount + 2}/${maxRetries})`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
-        return generateImage(prompt, referenceImages, retryCount + 1, maxRetries, modelName);
+        return generateImage(prompt, referenceImages, retryCount + 1, maxRetries, modelName, aspectRatio);
       }
       
       throw new Error(`Gemini API Error: ${response.status}`);
@@ -305,7 +325,7 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
     if (error.message && error.message.includes('GEMINI_OTHER_ERROR') && retryCount < maxRetries - 1) {
       console.log(`🔄 Retrying due to GEMINI_OTHER_ERROR (${retryCount + 1}/${maxRetries - 1})...`);
       await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // 지수 백오프
-      return generateImage(prompt, referenceImages, retryCount + 1, maxRetries, modelName);
+      return generateImage(prompt, referenceImages, retryCount + 1, maxRetries, modelName, aspectRatio);
     }
     
     throw error;
@@ -1067,7 +1087,7 @@ ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''
     
     console.log('🎨 Generating character image with settings:', { modelName, aspectRatio, enforceNoText, hasReference: referenceImages.length > 0 });
 
-    const imageUrl = await generateImage(prompt, referenceImages, 0, 3, modelName);
+    const imageUrl = await generateImage(prompt, referenceImages, 0, 3, modelName, aspectRatio);
     
     // R2에 업로드 - 통일된 파일명 규칙
     const timestamp = Date.now();
@@ -1393,7 +1413,18 @@ ${editNoteEn ? `\n\n**Important Modification Request:** ${editNoteEn}` : ''}
 
 **Image Aspect Ratio:** ${aspectRatio}
 
-**Composition:** Create a scene that captures the emotion and action of the story moment. Use a horizontal composition suitable for a storybook spread.
+⚠️ CRITICAL - ASPECT RATIO ENFORCEMENT:
+The image MUST be EXACTLY in ${aspectRatio} aspect ratio. This is NON-NEGOTIABLE.
+- ${aspectRatio === '16:9' ? 'Create a WIDE HORIZONTAL image (16 units wide, 9 units tall)' : 
+   aspectRatio === '9:16' ? 'Create a TALL VERTICAL image (9 units wide, 16 units tall)' :
+   aspectRatio === '4:3' ? 'Create a HORIZONTAL image (4 units wide, 3 units tall)' :
+   aspectRatio === '3:4' ? 'Create a VERTICAL image (3 units wide, 4 units tall)' :
+   aspectRatio === '1:1' ? 'Create a SQUARE image (1:1 ratio)' :
+   `Create an image in ${aspectRatio} ratio`}
+- DO NOT create any other aspect ratio
+- The composition must fit perfectly within ${aspectRatio} dimensions
+
+**Composition:** Create a scene that captures the emotion and action of the story moment. Use a ${aspectRatio === '16:9' || aspectRatio === '4:3' ? 'horizontal' : aspectRatio === '1:1' ? 'square' : 'vertical'} composition suitable for a storybook spread.
 
 **Lighting & Atmosphere:** ${page.scene_structure?.background?.includes('밤') || page.scene_structure?.background?.includes('night') || page.scene_structure?.background?.includes('달빛') || page.scene_structure?.background?.includes('moonlight') || page.scene_structure?.background?.includes('저녁') || page.scene_structure?.background?.includes('evening') ? 'NIGHT SCENE: Dark sky with stars or moonlight. Use cool blue/purple tones for nighttime atmosphere. Include visible moon or stars if outdoors. Indoor scenes should have candles, lanterns, or dim warm lighting.' : 'DAY SCENE: Bright, clear daylight with warm sunlight. Use bright yellows and warm colors for daytime atmosphere. Show clear blue sky if outdoors. Indoor scenes should have natural sunlight streaming through windows.'} The scene should feel magical yet safe and welcoming for young children.
 
@@ -1413,7 +1444,7 @@ This illustration is for a children's storybook. The image MUST:
     console.log('🎨 Generating illustration with', referenceImages.length, 'reference images');
     console.log('⚙️ Settings:', { modelName, aspectRatio, enforceNoText, enforceCharacterConsistency });
 
-    const imageUrl = await generateImage(prompt, referenceImages, 0, 3, modelName);
+    const imageUrl = await generateImage(prompt, referenceImages, 0, 3, modelName, aspectRatio);
     
     // R2에 업로드 - 통일된 파일명 규칙
     const timestamp = Date.now();
@@ -1603,7 +1634,7 @@ CRITICAL: This image must be visually consistent in style with the storybook's c
         }
 
         console.log(`Generating vocabulary image for: ${word}${korean ? ` (${korean})` : ''}`);
-        const imageUrl = await generateImage(prompt, referenceImages);
+        const imageUrl = await generateImage(prompt, referenceImages, 0, 3, 'gemini-3-pro-image-preview', aspectRatio);
         
         // R2에 업로드 - 통일된 파일명 규칙
         const timestamp = Date.now();
@@ -2834,7 +2865,7 @@ ${additionalPrompt ? '\n\n**Additional Requirements:** ' + additionalPrompt : ''
     });
     console.log('📋 Prompt (first 300 chars):', prompt.substring(0, 300));
 
-    const imageUrl = await generateImage(prompt, [], 0, 3, modelName);
+    const imageUrl = await generateImage(prompt, [], 0, 3, modelName, aspectRatio);
     
     // R2에 업로드 - 통일된 파일명 규칙
     const timestamp = Date.now();
@@ -3063,7 +3094,7 @@ app.post('/api/generate-cover', requireAPIKey, async (req, res) => {
     
     console.log('📋 Final prompt (first 300 chars):', prompt.substring(0, 300));
 
-    const imageUrl = await generateImage(prompt, characterReferences, 0, 3, modelName);
+    const imageUrl = await generateImage(prompt, characterReferences, 0, 3, modelName, aspectRatio);
     
     // R2에 업로드 - 통일된 파일명 규칙
     const timestamp = Date.now();
