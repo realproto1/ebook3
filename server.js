@@ -3943,7 +3943,7 @@ app.post('/api/generate-video', async (req, res) => {
                 
                 // 표지에도 무음 오디오 추가 (다른 클립과 호환성)
                 // -r 1 추가: 출력 프레임레이트를 1fps로 고정
-                execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${pathModule.join(workDir, 'cover.jpg')}" -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=24000 -c:v libx264 -c:a aac -b:a 192k -r 1 -t ${coverDuration} -pix_fmt yuv420p -vf "${coverFilter}" -preset fast -shortest "${coverClipPath}"`, {
+                execSync(`/usr/local/bin/ffmpeg -y -loop 1 -framerate 1 -i "${pathModule.join(workDir, 'cover.jpg')}" -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=24000 -c:v libx264 -c:a aac -b:a 192k -r 1 -t ${coverDuration} -pix_fmt yuv420p -vf "${coverFilter}" -preset fast -shortest "${coverClipPath}"`, {
                     cwd: workDir
                 });
                 
@@ -3973,7 +3973,7 @@ app.post('/api/generate-video', async (req, res) => {
                     // 오디오 길이 확인
                     let audioDuration = 5; // 기본값
                     try {
-                        const durationStr = execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioPath}"`, {
+                        const durationStr = execSync(`/usr/local/bin/ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioPath}"`, {
                             cwd: workDir,
                             encoding: 'utf8'
                         }).trim();
@@ -4008,7 +4008,7 @@ app.post('/api/generate-video', async (req, res) => {
                         }
                         
                         // 클립 생성
-                        const result = execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -r 1 -vf "${videoFilter}" ${audioFilter} -t ${totalDuration} -preset fast "${clipPath}"`, {
+                        const result = execSync(`/usr/local/bin/ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -i "${audioPath}" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -r 1 -vf "${videoFilter}" ${audioFilter} -t ${totalDuration} -preset fast "${clipPath}"`, {
                             cwd: workDir
                         });
                         
@@ -4018,7 +4018,7 @@ app.post('/api/generate-video', async (req, res) => {
                         
                         // 클립 길이 확인
                         try {
-                            const clipDuration = execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${clipPath}"`, {
+                            const clipDuration = execSync(`/usr/local/bin/ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${clipPath}"`, {
                                 cwd: workDir,
                                 encoding: 'utf8'
                             }).trim();
@@ -4032,7 +4032,7 @@ app.post('/api/generate-video', async (req, res) => {
                         } catch {}
                         
                         // 오디오 스트림 확인
-                        const probeResult = execSync(`ffprobe -v error -select_streams a -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "${clipPath}"`, {
+                        const probeResult = execSync(`/usr/local/bin/ffprobe -v error -select_streams a -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "${clipPath}"`, {
                             cwd: workDir,
                             encoding: 'utf8'
                         }).trim();
@@ -4055,7 +4055,7 @@ app.post('/api/generate-video', async (req, res) => {
                         noAudioFilter += `,fade=t=in:st=0:d=0.3,fade=t=out:st=4.7:d=0.3`;
                     }
                     
-                    execSync(`ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -c:v libx264 -r 1 -t 5 -pix_fmt yuv420p -vf "${noAudioFilter}" -preset fast "${clipPath}"`, {
+                    execSync(`/usr/local/bin/ffmpeg -y -loop 1 -framerate 1 -i "${imagePath}" -c:v libx264 -r 1 -t 5 -pix_fmt yuv420p -vf "${noAudioFilter}" -preset fast "${clipPath}"`, {
                         cwd: workDir
                     });
                 }
@@ -4079,7 +4079,7 @@ app.post('/api/generate-video', async (req, res) => {
             
             // concat demuxer로 병합 (오디오 보존)
             try {
-                execSync(`ffmpeg -y -f concat -safe 0 -i "${concatListPath}" -c copy "${mergedVideoPath}"`, {
+                execSync(`/usr/local/bin/ffmpeg -y -f concat -safe 0 -i "${concatListPath}" -c copy "${mergedVideoPath}"`, {
                     cwd: workDir
                 });
                 
@@ -4088,7 +4088,7 @@ app.post('/api/generate-video', async (req, res) => {
                 console.log(`✅ 병합 완료 (${(mergedStats.size / 1024 / 1024).toFixed(2)} MB)`);
                 
                 // 오디오 스트림 확인
-                const audioCheck = execSync(`ffprobe -v error -select_streams a -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "${mergedVideoPath}"`, {
+                const audioCheck = execSync(`/usr/local/bin/ffprobe -v error -select_streams a -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "${mergedVideoPath}"`, {
                     cwd: workDir,
                     encoding: 'utf8'
                 }).trim();
@@ -4100,7 +4100,7 @@ app.post('/api/generate-video', async (req, res) => {
                     
                     // 재인코딩으로 다시 시도
                     const reencoded = pathModule.join(workDir, 'merged_reencoded.mp4');
-                    execSync(`ffmpeg -y -f concat -safe 0 -i "${concatListPath}" -c:v libx264 -c:a aac -b:a 192k -preset fast "${reencoded}"`, {
+                    execSync(`/usr/local/bin/ffmpeg -y -f concat -safe 0 -i "${concatListPath}" -c:v libx264 -c:a aac -b:a 192k -preset fast "${reencoded}"`, {
                         cwd: workDir
                     });
                     
@@ -4126,7 +4126,7 @@ app.post('/api/generate-video', async (req, res) => {
                 
                 // 배경음악을 동영상 길이에 맞게 루프하고, TTS 음량 유지하면서 BGM 음량 낮춤
                 // duration=first로 비디오 길이만큼 출력 (-shortest 제거: 길이가 짤리는 문제 해결)
-                execSync(`ffmpeg -y -i "${mergedVideoPath}" -stream_loop -1 -i "${pathModule.join(workDir, 'bgm.mp3')}" -filter_complex "[1:a]volume=0.15[bgm];[0:a][bgm]amix=inputs=2:duration=first:dropout_transition=0[aout]" -map 0:v -map "[aout]" -c:v copy -c:a aac -b:a 192k "${withBGMPath}"`, {
+                execSync(`/usr/local/bin/ffmpeg -y -i "${mergedVideoPath}" -stream_loop -1 -i "${pathModule.join(workDir, 'bgm.mp3')}" -filter_complex "[1:a]volume=0.15[bgm];[0:a][bgm]amix=inputs=2:duration=first:dropout_transition=0[aout]" -map 0:v -map "[aout]" -c:v copy -c:a aac -b:a 192k "${withBGMPath}"`, {
                     cwd: workDir,
                     stdio: ['pipe', 'pipe', 'pipe']
                 });
@@ -4463,7 +4463,7 @@ app.post('/api/generate-instagram-video', async (req, res) => {
                 
                 if (fs.existsSync(audioPath)) {
                     const durationStr = execSync(
-                        `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioPath}"`,
+                        `/usr/local/bin/ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioPath}"`,
                         { cwd: workDir, encoding: 'utf8' }
                     ).trim();
                     ttsDuration = parseFloat(durationStr);
