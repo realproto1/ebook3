@@ -2,13 +2,71 @@
 """
 MoviePy를 사용한 Instagram 동영상 생성
 자동 줄바꿈 및 한글 지원
+자막 분할 및 타이밍 싱크
 """
 import sys
 import json
+import re
 from moviepy import *
 from moviepy.video.VideoClip import TextClip, ImageClip, ColorClip
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
+
+def split_sentences(text):
+    """
+    텍스트를 문장 단위로 분할
+    마침표(.), 느낌표(!), 물음표(?) 기준
+    """
+    # 문장 분리 (마침표, 느낌표, 물음표 뒤에 공백이나 끝)
+    sentences = re.split(r'([.!?])\s*', text)
+    
+    # 빈 문자열 제거 및 구두점 재결합
+    result = []
+    i = 0
+    while i < len(sentences):
+        if i + 1 < len(sentences) and sentences[i+1] in '.!?':
+            result.append(sentences[i] + sentences[i+1])
+            i += 2
+        elif sentences[i].strip():
+            result.append(sentences[i].strip())
+            i += 1
+        else:
+            i += 1
+    
+    return [s.strip() for s in result if s.strip()]
+
+def calculate_sentence_timings(sentences, total_duration):
+    """
+    문장별 길이(글자 수) 비율에 따라 시간 할당
+    
+    Args:
+        sentences: 문장 리스트
+        total_duration: 전체 TTS 길이 (초)
+    
+    Returns:
+        [(start_time, end_time, sentence), ...]
+    """
+    if not sentences:
+        return []
+    
+    # 각 문장의 글자 수 계산
+    char_counts = [len(s) for s in sentences]
+    total_chars = sum(char_counts)
+    
+    # 문장별 시간 할당
+    timings = []
+    current_time = 0
+    
+    for i, sentence in enumerate(sentences):
+        # 이 문장이 차지할 시간 = (문장 글자 수 / 전체 글자 수) * 전체 시간
+        duration = (char_counts[i] / total_chars) * total_duration
+        start_time = current_time
+        end_time = current_time + duration
+        
+        timings.append((start_time, end_time, sentence))
+        current_time = end_time
+    
+    return timings
 
 def create_clip(image_path, audio_path, title, subtitle, tts_duration, page_gap, total_duration, width, height, output_path):
     """
@@ -56,24 +114,54 @@ def create_clip(image_path, audio_path, title, subtitle, tts_duration, page_gap,
         method='caption'
     ).with_position(('center', 40)).with_duration(total_duration)
     
-    # 4. 자막 텍스트 (하단, 자동 줄바꿈)
-    # 개선: 폰트 크기 증가 (38→42), 너비 증가 (1000→1020), 위치 상승 (870→820)
-    subtitle_clip = TextClip(
-        text=subtitle,
-        font=font_path,
-        font_size=42,             # 폰트 크기 증가
-        color='white',
-        size=(width - 60, None),  # 너비 1020px (좌우 30px 여백으로 확장), 높이 자동
-        method='caption',         # 자동 줄바꿈
-        interline=10              # 줄 간격 (양수로 변경: 10px)
-    ).with_position(('center', 820)).with_duration(total_duration)  # 위치 상승
+    # 4. 자막 텍스트 (하단, 자동 줄바꿈) - 순차 표시
+    # 문장 분할 및 타이밍 계산
+    sentences = split_sentences(subtitle)
+    
+    subtitle_clips = []
+    
+    if len(sentences) > 1:
+        # 여러 문장인 경우: 문장별 타이밍 계산
+        print(f"📝 자막 분할: {len(sentences)}개 문장")
+        timings = calculate_sentence_timings(sentences, tts_duration)
+        
+        for start_time, end_time, sentence in timings:
+            duration = end_time - start_time
+            print(f"   - {start_time:.2f}~{end_time:.2f}초 ({duration:.2f}초): {sentence[:30]}...")
+            
+            # 각 문장별 자막 클립 생성
+            sentence_clip = TextClip(
+                text=sentence,
+                font=font_path,
+                font_size=42,
+                color='white',
+                size=(width - 60, None),
+                method='caption',
+                interline=10
+            ).with_position(('center', 820)).with_start(start_time).with_duration(duration)
+            
+            subtitle_clips.append(sentence_clip)
+    else:
+        # 단일 문장인 경우: 전체 표시
+        print(f"📝 자막: 단일 문장 (전체 표시)")
+        subtitle_clip = TextClip(
+            text=subtitle,
+            font=font_path,
+            font_size=42,
+            color='white',
+            size=(width - 60, None),
+            method='caption',
+            interline=10
+        ).with_position(('center', 820)).with_duration(total_duration)
+        
+        subtitle_clips.append(subtitle_clip)
     
     # 5. 모든 클립 합성
     video = CompositeVideoClip([
         background,
         image,
         title_clip,
-        subtitle_clip
+        *subtitle_clips  # 여러 자막 클립을 모두 추가
     ], size=(width, height))
     
     # 6. 오디오 추가 (있는 경우)
