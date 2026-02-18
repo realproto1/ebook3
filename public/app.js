@@ -5795,42 +5795,79 @@ function displayExistingVideos() {
     if (!currentStorybook || !currentStorybook.videos) return;
     
     const videos = currentStorybook.videos;
-    let html = '<div class="bg-indigo-50 p-4 rounded-lg border-2 border-indigo-200 mb-6"><h3 class="font-bold text-gray-800 mb-3"><i class="fas fa-film mr-2"></i>생성된 동영상</h3>';
     
-    if (videos.youtube) {
-        html += `
-            <div class="mb-2">
-                <span class="font-semibold text-gray-700"><i class="fab fa-youtube mr-2 text-red-600"></i>YouTube용:</span>
-                <a href="${videos.youtube.url}" target="_blank" class="text-blue-600 hover:underline ml-2">${videos.youtube.url}</a>
-                <span class="text-xs text-gray-500 ml-2">(생성: ${new Date(videos.youtube.createdAt).toLocaleString('ko-KR')})</span>
-            </div>
-        `;
-    }
-    
-    if (videos.instagram) {
-        html += `
-            <div>
-                <span class="font-semibold text-gray-700"><i class="fab fa-instagram mr-2 text-pink-600"></i>Instagram용:</span>
-                <a href="${videos.instagram.url}" target="_blank" class="text-blue-600 hover:underline ml-2">${videos.instagram.url}</a>
-                <span class="text-xs text-gray-500 ml-2">(생성: ${new Date(videos.instagram.createdAt).toLocaleString('ko-KR')})</span>
-            </div>
-        `;
-    }
-    
-    if (!videos.youtube && !videos.instagram) {
-        html += '<p class="text-gray-500 text-sm">아직 생성된 동영상이 없습니다.</p>';
-    }
-    
-    html += '</div>';
-    
-    // 탭 메뉴 다음에 삽입
-    const modal = document.querySelector('#videoGenerationModal .space-y-6');
-    if (modal) {
-        const existingDiv = modal.querySelector('.bg-indigo-50');
-        if (existingDiv) {
-            existingDiv.remove();
+    // YouTube용 동영상 표시 (YouTube 탭 내부)
+    const youtubeContainer = document.getElementById('youtubeVideoList');
+    if (youtubeContainer) {
+        if (videos.youtube) {
+            youtubeContainer.innerHTML = `
+                <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-4">
+                    <h3 class="font-bold text-gray-800 mb-2">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>생성된 YouTube 동영상
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="flex items-center text-sm">
+                            <i class="fab fa-youtube text-red-600 mr-2"></i>
+                            <a href="${videos.youtube.url}" target="_blank" class="text-blue-600 hover:underline break-all">${videos.youtube.url}</a>
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            <i class="fas fa-clock mr-1"></i>생성 시간: ${new Date(videos.youtube.createdAt).toLocaleString('ko-KR')}
+                        </div>
+                        <div class="text-xs text-gray-600">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            해상도: ${videos.youtube.resolution || 'N/A'} | 
+                            전환효과: ${videos.youtube.transition || 'N/A'} | 
+                            배경음악: ${videos.youtube.includeBackgroundMusic ? '포함' : '없음'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            youtubeContainer.innerHTML = `
+                <div class="bg-gray-50 border-2 border-gray-200 rounded-lg p-4 mb-4">
+                    <p class="text-gray-500 text-sm text-center">
+                        <i class="fas fa-info-circle mr-2"></i>아직 생성된 YouTube 동영상이 없습니다.
+                    </p>
+                </div>
+            `;
         }
-        modal.insertAdjacentHTML('afterbegin', html);
+    }
+    
+    // Instagram용 동영상 표시 (Instagram 탭 내부)
+    const instagramContainer = document.getElementById('instagramVideoList');
+    if (instagramContainer) {
+        if (videos.instagram) {
+            instagramContainer.innerHTML = `
+                <div class="bg-pink-50 border-2 border-pink-200 rounded-lg p-4 mb-4">
+                    <h3 class="font-bold text-gray-800 mb-2">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>생성된 Instagram 동영상
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="flex items-center text-sm">
+                            <i class="fab fa-instagram text-pink-600 mr-2"></i>
+                            <a href="${videos.instagram.url}" target="_blank" class="text-blue-600 hover:underline break-all">${videos.instagram.url}</a>
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            <i class="fas fa-clock mr-1"></i>생성 시간: ${new Date(videos.instagram.createdAt).toLocaleString('ko-KR')}
+                        </div>
+                        <div class="text-xs text-gray-600">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            비율: ${videos.instagram.aspectRatio || 'N/A'} | 
+                            길이: ${videos.instagram.maxDuration || 'N/A'}초 | 
+                            배경음악: ${videos.instagram.includeBackgroundMusic ? '포함' : '없음'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            instagramContainer.innerHTML = `
+                <div class="bg-gray-50 border-2 border-gray-200 rounded-lg p-4 mb-4">
+                    <p class="text-gray-500 text-sm text-center">
+                        <i class="fas fa-info-circle mr-2"></i>아직 생성된 Instagram 동영상이 없습니다.
+                    </p>
+                </div>
+            `;
+        }
     }
 }
 
