@@ -134,24 +134,6 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
     
     console.log(`📊 Total parts: 1 text + ${parts.length - 1} images`);
     
-    // 🎯 Aspect Ratio 변환 맵 (Gemini API 형식)
-    // Gemini는 특정 포맷만 지원: "1:1", "3:4", "4:3", "9:16", "16:9"
-    const aspectRatioMap = {
-      '1:1': '1:1',
-      '3:4': '3:4',
-      '4:3': '4:3',
-      '9:16': '9:16',
-      '16:9': '16:9',
-      // 다른 비율은 가장 가까운 값으로 매핑
-      '2:3': '3:4',
-      '3:2': '4:3',
-      '4:5': '3:4',
-      '5:4': '4:3'
-    };
-    
-    const geminiAspectRatio = aspectRatioMap[aspectRatio] || '16:9';
-    console.log(`📐 Gemini API Aspect Ratio: ${geminiAspectRatio}`);
-    
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
@@ -166,8 +148,7 @@ async function generateImage(prompt, referenceImages = [], retryCount = 0, maxRe
           topK: 40,
           topP: 0.95,
           maxOutputTokens: 8192,
-          responseMimeType: 'text/plain',
-          responseAspectRatio: geminiAspectRatio  // ✅ 강제 비율 적용
+          responseMimeType: 'text/plain'
         }
       })
     });
